@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Database", "EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9D470563-2A48-4385-96F0-203C8B373A6A}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8AA1EE06-9D3C-447F-90D6-3148CFED065F}
+	EndGlobalSection
+EndGlobal
