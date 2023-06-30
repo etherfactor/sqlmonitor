@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Api.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EtherGizmos.SqlMonitor.Models.Extensions;
 

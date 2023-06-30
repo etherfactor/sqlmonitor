@@ -3,29 +3,28 @@ using EtherGizmos.SqlMonitor.Models.Api.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
+[Display(Name = "Securable", GroupName = "securables")]
 public class SecurableDTO : AuditableDTO
 {
     [Required]
+    [Display(Name = "id")]
     public string? Id { get; set; }
 
     [Required]
+    [Display(Name = "name")]
     public string? Name { get; set; }
 
+    [Display(Name = "description")]
     public string? Description { get; set; }
 }
 
 public static class ForSecurableDTO
 {
-    public static IProfileExpression AddSecurableDTO(this IProfileExpression @this)
+    public static IProfileExpression AddSecurable(this IProfileExpression @this)
     {
         var toDto = @this.CreateMap<Securable, SecurableDTO>();
         toDto.IgnoreAllMembers();
@@ -44,11 +43,11 @@ public static class ForSecurableDTO
         return @this;
     }
 
-    public static ODataModelBuilder Test(this ODataModelBuilder @this)
+    public static ODataModelBuilder AddSecurable(this ODataModelBuilder @this)
     {
-        ODataModelBuilder builder = new ODataModelBuilder();
-        
-        var entity = builder.EntityTypeWithAnnotations<SecurableDTO>();
+        var entitySet = @this.EntitySetWithAnnotations<SecurableDTO>();
+
+        var entity = @this.EntityTypeWithAnnotations<SecurableDTO>();
         entity.HasKey(e => e.Id);
         entity.PropertyWithAnnotations(e => e.Id);
         entity.AuditPropertiesWithAnnotations();

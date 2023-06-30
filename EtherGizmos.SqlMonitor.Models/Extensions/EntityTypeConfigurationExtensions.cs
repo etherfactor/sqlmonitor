@@ -1,14 +1,9 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Api.Abstractions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EtherGizmos.SqlMonitor.Models.Extensions;
 
@@ -58,14 +53,11 @@ internal static class EntityTypeConfigurationExtensions
         var property = expression.GetPropertyInfo();
         var attribute = property.GetCustomAttribute<DisplayAttribute>();
 
-        if (attribute != null)
-        {
-            @this.Name = attribute.Name;
-        }
-        else
-        {
-            throw new InvalidOperationException(string.Format("Property {0} on type {1} must be annotated with a {2}", property.Name, property.DeclaringType?.Name, nameof(DisplayAttribute)));
-        }
+        string name = attribute?.Name
+            ?? throw new InvalidOperationException(string.Format("Property '{0}' on type '{1}' must be annotated with a '{2}' and specify the '{3}' property",
+                property.Name, property.DeclaringType?.Name, nameof(DisplayAttribute), nameof(attribute.Name)));
+
+        @this.Name = name;
     }
 
     private static void LoadRequiredConfiguration<TEntity, TMember>(this PrimitivePropertyConfiguration @this, Expression<Func<TEntity, TMember>> expression)

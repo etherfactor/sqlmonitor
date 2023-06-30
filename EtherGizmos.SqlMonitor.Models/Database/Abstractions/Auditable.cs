@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 
 public class Auditable : IAuditable
 {
