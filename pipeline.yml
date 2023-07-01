@@ -5,17 +5,45 @@ pool:
   vmImage: windows-latest
 
 jobs:
-- job:
+- job: prepare
+  displayName: 'Pre-Build Tasks'
+
   steps:
+  - task: gitversion/execute@0
+    name: 'version'
+    displayName: 'Get Semantic Version'
+    inputs:
+      useConfigFile: true
+      configFilePath: 'gitversion.yml'
+
+- job: build
+  dependsOn: prepare
+  displayName: 'Build Tasks'
+  variables:
+    Build.Version: $[ dependencies.prepare.outputs['version.GitVersion.SemVer'] ]
+    Build.Counter: $[ counter( dependencies.prepare.outputs['version.GitVersion.SemVer'], 1 ) ]
+
+  steps:
+  - script: 'echo %Action%%BuildVersion%'
+    displayName: 'Set Build Number'
+    env:
+      Action: '##vso[build.updatebuildnumber]'
+      BuildVersion: '$(Build.Version).$(Build.Counter)'
+
   - task: NuGetToolInstaller@1
+    displayName: 'Install NuGet 6.x.x'
     inputs:
       versionSpec: '6.x.x'
+
   - task: DotNetCoreCLI@2
+    displayName: 'Restore Projects'
     inputs:
       command: 'restore'
       projects: '**/*.csproj'
       feedsToUse: 'select'
+
   - task: DotNetCoreCLI@2
+    displayName: 'Build Projects'
     inputs:
       command: 'build'
       projects: '**/*.csproj'
