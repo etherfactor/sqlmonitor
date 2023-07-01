@@ -52,7 +52,6 @@ builder.Services
         opt.UseLazyLoadingProxies(true);
     });
 
-builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISecurableService, SecurableService>();
 
 builder.Services
