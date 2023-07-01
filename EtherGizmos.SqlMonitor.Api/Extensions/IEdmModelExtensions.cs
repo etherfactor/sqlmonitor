@@ -6,8 +6,19 @@ using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
+/// <summary>
+/// Provides extension methods for <see cref="IEdmModel"/>.
+/// </summary>
 internal static class IEdmModelExtensions
 {
+    /// <summary>
+    /// Intended to work around https://github.com/OData/AspNetCoreOData/issues/887, but has some caveats with interfaces.
+    /// Ignore for the time being.
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <param name="this"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     internal static IEdmModel ApplyClrAnnotationFixForAudit<TEntity>(this IEdmModel @this)
         where TEntity : IAuditableDTO
     {
@@ -23,6 +34,14 @@ internal static class IEdmModelExtensions
         return @this;
     }
 
+    /// <summary>
+    /// Intended to work around https://github.com/OData/AspNetCoreOData/issues/887, but has some caveats with interfaces.
+    /// Ignore for the time being.
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <param name="model"></param>
+    /// <param name="edmType"></param>
+    /// <param name="propertyName"></param>
     private static void ApplyClrAnnotationFix<TEntity>(IEdmModel model, IEdmStructuredType edmType, string propertyName)
     {
         var property = typeof(TEntity).GetProperty(propertyName)!;

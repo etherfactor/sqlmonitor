@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Models.Api.v1;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -13,6 +13,9 @@ public static class ODataModel
         builder.AddSecurable();
 
         var model = builder.GetEdmModel();
+
+        //TODO: Once https://github.com/OData/AspNetCoreOData/issues/887 is resolved, tables should have IAuditableDTO added
+
         return model;
     }
 }

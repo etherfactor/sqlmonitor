@@ -3,8 +3,19 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
+/// <summary>
+/// Provides extension methods for <see cref="ModelBuilder"/>.
+/// </summary>
 internal static class ModelBuilderExtensions
 {
+    /// <summary>
+    /// Adds a value converter to all properties of a given type.
+    /// </summary>
+    /// <typeparam name="TProvider">The database type.</typeparam>
+    /// <typeparam name="TModel">The model type.</typeparam>
+    /// <param name="this">Itself.</param>
+    /// <param name="converter">The converter to use.</param>
+    /// <returns>Itself.</returns>
     internal static ModelBuilder AddGlobalValueConverter<TProvider, TModel>(this ModelBuilder @this, ValueConverter<TModel, TProvider> converter)
     {
         foreach (var entityType in @this.Model.GetEntityTypes())

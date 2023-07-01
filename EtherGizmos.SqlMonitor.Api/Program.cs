@@ -8,18 +8,36 @@ using EtherGizmos.SqlMonitor.Models.Api.v1;
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//**********************************************************
+// Add Services
+
+builder.Services
+    .AddSerilog(opt =>
+    {
+        opt.ReadFrom.Configuration(builder.Configuration);
+    });
+
+builder.Services.AddFluentMigratorCore()
+    .ConfigureRunner(opt =>
+    {
+        opt.AddSqlServer2016()
+            .WithGlobalConnectionString(builder.Configuration.GetConnectionString("Primary"))
+            .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
+            .WithVersionTable(new CustomVersionTableMetadata());
+    });
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
 builder.Services.AddControllers()
     .AddOData(opt =>
     {
         opt.AddRouteComponents("/api/v1", ODataModel.GetEdmModel(1.0m));
     });
-
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen();
 
@@ -34,14 +52,8 @@ builder.Services
         opt.UseLazyLoadingProxies(true);
     });
 
-builder.Services.AddFluentMigratorCore()
-    .ConfigureRunner(opt =>
-    {
-        opt.AddSqlServer2016()
-            .WithGlobalConnectionString(builder.Configuration.GetConnectionString("Primary"))
-            .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
-            .WithVersionTable(new CustomVersionTableMetadata());
-    });
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<ISecurableService, SecurableService>();
 
 builder.Services
     .AddSingleton<IMapper>((provider) =>
@@ -54,18 +66,20 @@ builder.Services
         return configuration.CreateMapper();
     });
 
-builder.Services.AddScoped<ISecurableService, SecurableService>();
+//**********************************************************
+// Add Middleware
 
 var app = builder.Build();
 
+//Perform the database migration
 var serviceProvider = app.Services.CreateScope().ServiceProvider;
 IMigrationRunner runner = serviceProvider.GetRequiredService<IMigrationRunner>();
 runner.MigrateUp();
 
-// Configure the HTTP request pipeline.
+//Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    //The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -77,9 +91,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseODataRouteDebug();
 }
-
-app.UseODataRouteDebug();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -88,5 +101,8 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
+
+//**********************************************************
+// Run Application
 
 app.Run();
