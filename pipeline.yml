@@ -1,0 +1,21 @@
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+jobs:
+- job:
+  steps:
+  - task: NuGetToolInstaller@1
+    inputs:
+      versionSpec: '6.x.x'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+      feedsToUse: 'select'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: '**/*.csproj'
