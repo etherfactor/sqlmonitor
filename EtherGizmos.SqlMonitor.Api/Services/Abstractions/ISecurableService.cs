@@ -2,9 +2,6 @@
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 
-public interface ISecurableService
+public interface ISecurableService : IQueryableService<Securable>
 {
-    IQueryable<Securable> GetQueryable();
-
-    Task AddOrUpdate(Securable securable);
 }

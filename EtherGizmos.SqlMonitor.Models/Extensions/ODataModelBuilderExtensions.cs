@@ -22,7 +22,7 @@ internal static class ODataModelBuilderExtensions
         where TEntityType : class
     {
         DisplayAttribute? attribute = typeof(TEntityType).GetCustomAttribute<DisplayAttribute>();
-        string typeName = attribute?.GroupName
+        string typeName = attribute?.Name
             ?? throw new InvalidOperationException(string.Format("Type '{0}' must be annotated with a '{1}' and specify the '{2}' property",
                 typeof(TEntityType).Name, nameof(DisplayAttribute), nameof(attribute.Name)));
 

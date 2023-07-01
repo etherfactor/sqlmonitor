@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
@@ -30,14 +31,7 @@ public class SecurablesController : ODataController
     [Route(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<SecurableDTO> queryOptions)
     {
-        IQueryable<SecurableDTO> queryable = Mapper.ProjectTo<SecurableDTO>(Securables);
-        AllowedQueryOptions noSelectExpand = AllowedQueryOptions.All & ~(AllowedQueryOptions.Select | AllowedQueryOptions.Expand);
-        IQueryable<SecurableDTO> noSelectExpandQueryable = (IQueryable<SecurableDTO>)queryOptions.ApplyTo(queryable, noSelectExpand);
-
-        List<SecurableDTO> noSelectExpandList = await noSelectExpandQueryable.ToListAsync();
-        AllowedQueryOptions selectExpand = AllowedQueryOptions.Select | AllowedQueryOptions.Expand;
-        IQueryable finished = queryOptions.ApplyTo(noSelectExpandList.AsQueryable(), selectExpand);
-
+        var finished = await Securables.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -49,9 +43,7 @@ public class SecurablesController : ODataController
         if (record == null)
             return NotFound();
 
-        Mapper.Map<SecurableDTO>(record);
-        object finished = queryOptions.ApplyTo(record, new ODataQuerySettings());
-
+        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
         return Ok(finished);
     }
 }

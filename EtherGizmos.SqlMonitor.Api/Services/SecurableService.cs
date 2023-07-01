@@ -13,10 +13,10 @@ public class SecurableService : ISecurableService
         Context = context;
     }
 
-    public async Task AddOrUpdate(Securable securable)
+    public async Task AddOrUpdate(Securable record)
     {
-        if (!Context.Securables.Contains(securable))
-            Context.Securables.Add(securable);
+        if (!Context.Securables.Contains(record))
+            Context.Securables.Add(record);
 
         await Context.SaveChangesAsync();
     }
