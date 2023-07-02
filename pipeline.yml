@@ -32,11 +32,20 @@ jobs:
     Build.Counter: $[ counter( dependencies.prepare.outputs['version.GitVersion.SemVer'], 1 ) ]
   steps:
 
-  - script: 'echo %Action%%BuildVersion%'
-    displayName: 'Set Build Number'
-    env:
-      Action: '##vso[build.updatebuildnumber]'
-      BuildVersion: '$(Build.Version).$(Build.Counter)'
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        $BuildVersion = $env:Build_Version
+        $BuildCounter = $env:Build_Counter
+
+        Write-Host "Found version: $($BuildVersion)"
+        Write-Host "Using counter: $($BuildCounter)"
+
+        $BuildNumber = "$($BuildVersion).$($BuildCounter)"
+
+        Write-Host "Setting build number to $($BuildNumber)..."
+        Write-Host "##vso[build.updatebuildnumber]$($BuildNumber)"
 
   - task: NuGetToolInstaller@1
     displayName: 'Install NuGet 6.x.x'
