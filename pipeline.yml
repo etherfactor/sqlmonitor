@@ -28,8 +28,8 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Get-ChildItem Env:* | Select-Object -Property Name, Value
-        Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GitVersion_SemVer"
+        Write-Host "Received version: $($env:GITVERSION_SEMVER)"
+        Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GITVERSION_SEMVER"
 
 - job: build
   dependsOn: prepare
