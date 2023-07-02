@@ -28,7 +28,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GitVersion_SemVer
+        Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GitVersion_SemVer"
 
 - job: build
   dependsOn: prepare
