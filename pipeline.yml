@@ -25,6 +25,7 @@ jobs:
 
   - task: PowerShell@2
     name: version
+    displayName: 'Output GitVersion'
     inputs:
       targetType: 'inline'
       script: |
@@ -44,6 +45,7 @@ jobs:
     displayName: 'Debug Dependencies'
 
   - task: PowerShell@2
+    displayName: 'Set Build Number'
     inputs:
       targetType: 'inline'
       script: |
