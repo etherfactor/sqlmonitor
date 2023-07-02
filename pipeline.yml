@@ -7,8 +7,11 @@ pool:
 jobs:
 - job: prepare
   displayName: 'Pre-Build Tasks'
-
   steps:
+  - checkout: self
+    fetchDepth: 0
+    clean: true
+
   - task: gitversion/setup@0
     displayName: 'Install GitVersion'
     inputs:
@@ -27,8 +30,8 @@ jobs:
   variables:
     Build.Version: $[ dependencies.prepare.outputs['version.GitVersion.SemVer'] ]
     Build.Counter: $[ counter( dependencies.prepare.outputs['version.GitVersion.SemVer'], 1 ) ]
-
   steps:
+
   - script: 'echo %Action%%BuildVersion%'
     displayName: 'Set Build Number'
     env:
