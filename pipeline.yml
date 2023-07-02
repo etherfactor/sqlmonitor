@@ -28,6 +28,7 @@ jobs:
   dependsOn: prepare
   displayName: 'Build Tasks'
   variables:
+    Dependencies: $[ dependencies ]
     Build.Version: $[ dependencies.prepare.outputs['version.GitVersion.SemVer'] ]
     Build.Counter: $[ counter( dependencies.prepare.outputs['version.GitVersion.SemVer'], 1 ) ]
   steps:
@@ -36,6 +37,8 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        Write-Host $env:Dependencies
+
         $BuildVersion = $env:Build_Version
         $BuildCounter = $env:Build_Counter
 
