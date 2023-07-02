@@ -18,19 +18,24 @@ jobs:
       versionSpec: '5.x.x'
 
   - task: gitversion/execute@0
-    name: 'version'
     displayName: 'Run GitVersion'
     inputs:
       useConfigFile: true
       configFilePath: 'gitversion.yml'
 
+  - task: PowerShell@2
+    name: version
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GitVersion_SemVer
+
 - job: build
   dependsOn: prepare
   displayName: 'Build Tasks'
   variables:
-    Dependencies: $[ dependencies ]
-    Build.Version: $[ dependencies.prepare.outputs['version.GitVersion.SemVer'] ]
-    Build.Counter: $[ counter( dependencies.prepare.outputs['version.GitVersion.SemVer'], 1 ) ]
+    Build.Version: $[ dependencies.prepare.outputs['version.Build.Version'] ]
+    Build.Counter: $[ counter( dependencies.prepare.outputs['version.Build.Version'], 1 ) ]
   steps:
 
   - task: PowerShell@2
