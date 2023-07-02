@@ -4,6 +4,12 @@ trigger:
 pool:
   name: Default
 
+variables:
+  GitVersion.Version: '5.x.x'
+  GitVersion.Config: 'gitversion.yml'
+  NuGet.Version: '6.x.x'
+  Build.Projects: '**/*.csproj'
+
 jobs:
 - job: prepare
   displayName: 'Pre-Build Tasks'
@@ -15,65 +21,38 @@ jobs:
   - task: gitversion/setup@0
     displayName: 'Install GitVersion'
     inputs:
-      versionSpec: '5.x.x'
+      versionSpec: '$(GitVersion.Version)'
 
   - task: gitversion/execute@0
     displayName: 'Run GitVersion'
     inputs:
       useConfigFile: true
-      configFilePath: 'gitversion.yml'
-
-  - task: PowerShell@2
-    name: version
-    displayName: 'Output GitVersion'
-    inputs:
-      targetType: 'inline'
-      script: |
-        Write-Host "Received version: $($env:GITVERSION_SEMVER)"
-        Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GITVERSION_SEMVER"
+      configFilePath: '$(GitVersion.Config)'
 
 - job: build
   dependsOn: prepare
   displayName: 'Build Tasks'
   variables:
     CheckDependencies: $[ convertToJson( dependencies ) ]
-    Build.Version: $[ dependencies.prepare.outputs['version.Build.Version'] ]
-    Build.Counter: $[ counter( dependencies.prepare.outputs['version.Build.Version'], 1 ) ]
   steps:
 
   - script: echo '$(CheckDependencies)'
     displayName: 'Debug Dependencies'
 
-  - task: PowerShell@2
-    displayName: 'Set Build Number'
-    inputs:
-      targetType: 'inline'
-      script: |
-        $BuildVersion = $env:BUILD_VERSION
-        $BuildCounter = $env:BUILD_COUNTER
-
-        Write-Host "Found version: $($BuildVersion)"
-        Write-Host "Using counter: $($BuildCounter)"
-
-        $BuildNumber = "$($BuildVersion).$($BuildCounter)"
-
-        Write-Host "Setting build number to $($BuildNumber)..."
-        Write-Host "##vso[build.updatebuildnumber]$($BuildNumber)"
-
   - task: NuGetToolInstaller@1
-    displayName: 'Install NuGet 6.x.x'
+    displayName: 'Install NuGet'
     inputs:
-      versionSpec: '6.x.x'
+      versionSpec: '$(NuGet.Version)'
 
   - task: DotNetCoreCLI@2
     displayName: 'Restore Projects'
     inputs:
       command: 'restore'
-      projects: '**/*.csproj'
+      projects: '$(Build.Projects)'
       feedsToUse: 'select'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build Projects'
     inputs:
       command: 'build'
-      projects: '**/*.csproj'
+      projects: '$(Build.Projects)'
