@@ -1,0 +1,58 @@
+trigger:
+- main
+
+pool:
+  name: Default
+
+variables:
+  GitVersion.Version: '5.x.x'
+  GitVersion.Config: 'gitversion.yml'
+  NuGet.Version: '6.x.x'
+  Build.Projects: '**/*.csproj'
+
+jobs:
+- job: prepare
+  displayName: 'Pre-Build Tasks'
+  steps:
+  - checkout: self
+    fetchDepth: 0
+    clean: true
+
+  - task: gitversion/setup@0
+    displayName: 'Install GitVersion'
+    inputs:
+      versionSpec: '$(GitVersion.Version)'
+
+  - task: gitversion/execute@0
+    displayName: 'Run GitVersion'
+    inputs:
+      useConfigFile: true
+      configFilePath: '$(GitVersion.Config)'
+
+- job: build
+  dependsOn: prepare
+  displayName: 'Build Tasks'
+  variables:
+    CheckDependencies: $[ convertToJson( dependencies ) ]
+  steps:
+
+  - script: echo '$(CheckDependencies)'
+    displayName: 'Debug Dependencies'
+
+  - task: NuGetToolInstaller@1
+    displayName: 'Install NuGet'
+    inputs:
+      versionSpec: '$(NuGet.Version)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore Projects'
+    inputs:
+      command: 'restore'
+      projects: '$(Build.Projects)'
+      feedsToUse: 'select'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build Projects'
+    inputs:
+      command: 'build'
+      projects: '$(Build.Projects)'
