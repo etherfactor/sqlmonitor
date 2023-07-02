@@ -9,9 +9,14 @@ jobs:
   displayName: 'Pre-Build Tasks'
 
   steps:
+  - task: gitversion/setup@0
+    displayName: 'Install GitVersion'
+    inputs:
+      versionSpec: '5.x.x'
+
   - task: gitversion/execute@0
     name: 'version'
-    displayName: 'Get Semantic Version'
+    displayName: 'Run GitVersion'
     inputs:
       useConfigFile: true
       configFilePath: 'gitversion.yml'
