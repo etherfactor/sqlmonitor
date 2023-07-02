@@ -1,9 +1,6 @@
 trigger:
 - main
 
-pool:
-  vmImage: windows-latest
-
 jobs:
 - job: prepare
   displayName: 'Pre-Build Tasks'
