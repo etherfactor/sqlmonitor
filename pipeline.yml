@@ -28,15 +28,20 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        Get-ChildItem Env:* | Select-Object -Property Name, Value
         Write-Host "##vso[task.setvariable variable=Build.Version;isoutput=true;]$env:GitVersion_SemVer"
 
 - job: build
   dependsOn: prepare
   displayName: 'Build Tasks'
   variables:
+    CheckDependencies: $[ convertToJson( dependencies ) ]
     Build.Version: $[ dependencies.prepare.outputs['version.Build.Version'] ]
     Build.Counter: $[ counter( dependencies.prepare.outputs['version.Build.Version'], 1 ) ]
   steps:
+
+  - script: echo '$(CheckDependencies)'
+    displayName: 'Debug Dependencies'
 
   - task: PowerShell@2
     inputs:
