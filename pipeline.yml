@@ -47,10 +47,8 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host $env:Dependencies
-
-        $BuildVersion = $env:Build_Version
-        $BuildCounter = $env:Build_Counter
+        $BuildVersion = $env:BUILD_VERSION
+        $BuildCounter = $env:BUILD_COUNTER
 
         Write-Host "Found version: $($BuildVersion)"
         Write-Host "Using counter: $($BuildCounter)"
