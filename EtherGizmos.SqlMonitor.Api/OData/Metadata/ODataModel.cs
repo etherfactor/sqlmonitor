@@ -1,4 +1,4 @@
-using EtherGizmos.SqlMonitor.Models.Api.v1;
+﻿using EtherGizmos.SqlMonitor.Models.Api.v1;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -10,6 +10,7 @@ public static class ODataModel
     {
         var builder = new ODataModelBuilder();
 
+        builder.AddPermission();
         builder.AddSecurable();
 
         var model = builder.GetEdmModel();

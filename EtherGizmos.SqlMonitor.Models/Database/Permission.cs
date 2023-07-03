@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
-[Table("securables")]
-public class Securable : Auditable
+[Table("permissions")]
+public class Permission : Auditable
 {
-    [Column("securable_id")]
+    [Column("permission_id")]
     public virtual string Id { get; set; }
 
     [Column("name")]
@@ -15,12 +15,12 @@ public class Securable : Auditable
     [Column("description")]
     public virtual string? Description { get; set; }
 
-    public virtual List<Permission> Permissions { get; set; } = new List<Permission>();
+    public virtual List<Securable> Securables { get; set; } = new List<Securable>();
 
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
-    public Securable()
+    public Permission()
     {
         Id = null!;
         Name = null!;

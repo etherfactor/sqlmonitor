@@ -6,8 +6,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "Securable", GroupName = "securables")]
-public class SecurableDTO
+[Display(Name = "Permission", GroupName = "permissions")]
+public class PermissionDTO
 {
     [Required]
     [Display(Name = "id")]
@@ -32,15 +32,15 @@ public class SecurableDTO
     [Display(Name = "description")]
     public string? Description { get; set; }
 
-    [Display(Name = "permissions")]
-    public List<PermissionDTO> Permissions { get; set; } = new List<PermissionDTO>();
+    [Display(Name = "securables")]
+    public List<SecurableDTO> Securables { get; set; } = new List<SecurableDTO>();
 }
 
-public static class ForSecurableDTO
+public static class ForPermissionDTO
 {
-    public static IProfileExpression AddSecurable(this IProfileExpression @this)
+    public static IProfileExpression AddPermission(this IProfileExpression @this)
     {
-        var toDto = @this.CreateMap<Securable, SecurableDTO>();
+        var toDto = @this.CreateMap<Permission, PermissionDTO>();
         toDto.IgnoreAllMembers();
         toDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */
@@ -51,9 +51,9 @@ public static class ForSecurableDTO
         /*  End Audit  */
         toDto.MapMember(dest => dest.Name, src => src.Name);
         toDto.MapMember(dest => dest.Description, src => src.Description);
-        toDto.MapMember(dest => dest.Permissions, src => src.Permissions, opt => opt.ExplicitExpansion());
+        toDto.MapMember(dest => dest.Securables, src => src.Securables, opt => opt.ExplicitExpansion());
 
-        var fromDto = @this.CreateMap<SecurableDTO, Securable>();
+        var fromDto = @this.CreateMap<PermissionDTO, Permission>();
         fromDto.IgnoreAllMembers();
         fromDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */
@@ -68,11 +68,11 @@ public static class ForSecurableDTO
         return @this;
     }
 
-    public static ODataModelBuilder AddSecurable(this ODataModelBuilder @this)
+    public static ODataModelBuilder AddPermission(this ODataModelBuilder @this)
     {
-        var entitySet = @this.EntitySetWithAnnotations<SecurableDTO>();
+        var entitySet = @this.EntitySetWithAnnotations<PermissionDTO>();
 
-        var entity = @this.EntityTypeWithAnnotations<SecurableDTO>();
+        var entity = @this.EntityTypeWithAnnotations<PermissionDTO>();
         entity.HasKey(e => e.Id);
         entity.PropertyWithAnnotations(e => e.Id);
         /* Begin Audit */
@@ -84,7 +84,7 @@ public static class ForSecurableDTO
         entity.PropertyWithAnnotations(e => e.Name);
         entity.PropertyWithAnnotations(e => e.Description);
 
-        entity.HasManyWithAnnotations(e => e.Permissions);
+        entity.HasManyWithAnnotations(e => e.Securables);
 
         return @this;
     }
