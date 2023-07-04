@@ -1,4 +1,4 @@
-using EtherGizmos.SqlMonitor.Api.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -10,6 +10,11 @@ namespace EtherGizmos.SqlMonitor.Api.Data.Access;
 /// </summary>
 public class DatabaseContext : DbContext
 {
+    /// <summary>
+    /// Provides access to <see cref="Permission"/> records, in 'dbo.permissions'.
+    /// </summary>
+    public virtual DbSet<Permission> Permissions { get; set; }
+
     /// <summary>
     /// Provides access to <see cref="Securable"/> records, in 'dbo.securables'.
     /// </summary>
@@ -37,6 +42,25 @@ public class DatabaseContext : DbContext
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        //**********************************************************
+        // Add Entities
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+
+            entity.HasMany(e => e.Securables)
+                .WithMany(e => e.Permissions)
+                .UsingEntity<SecurablePermission>();
+        });
+
         modelBuilder.Entity<Securable>(entity =>
         {
             entity.ToTableWithAnnotations();
@@ -47,6 +71,21 @@ public class DatabaseContext : DbContext
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
+
+            entity.HasMany(e => e.Permissions)
+                .WithMany(e => e.Securables)
+                .UsingEntity<SecurablePermission>();
+        });
+
+        modelBuilder.Entity<SecurablePermission>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.SecurableId, e.PermissionId });
+
+            entity.PropertyWithAnnotations(e => e.SecurableId);
+            entity.PropertyWithAnnotations(e => e.PermissionId);
+            entity.AuditPropertiesWithAnnotations();
         });
 
         //**********************************************************

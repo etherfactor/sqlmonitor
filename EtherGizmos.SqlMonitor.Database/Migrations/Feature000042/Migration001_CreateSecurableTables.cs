@@ -11,6 +11,7 @@ public class Migration001_CreateSecurableTables : AutoReversingMigration
     {
         /*
          * Create [dbo].[securables]
+         *  - entity types available for securing
          */
         Create.Table("securables")
             .WithColumn("securable_id").AsAnsiString(20).PrimaryKey()
