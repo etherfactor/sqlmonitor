@@ -1,16 +1,17 @@
-using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Data.Access;
+using EtherGizmos.SqlMonitor.Api.Data.Migrations;
+using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
-using EtherGizmos.SqlMonitor.Database;
-using EtherGizmos.SqlMonitor.Models.Api.v1;
-using FluentMigrator.Runner;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//**********************************************************
+// Configuration
 
 //**********************************************************
 // Add Services
@@ -19,15 +20,6 @@ builder.Services
     .AddSerilog(opt =>
     {
         opt.ReadFrom.Configuration(builder.Configuration);
-    });
-
-builder.Services.AddFluentMigratorCore()
-    .ConfigureRunner(opt =>
-    {
-        opt.AddSqlServer2016()
-            .WithGlobalConnectionString(builder.Configuration.GetConnectionString("Primary"))
-            .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
-            .WithVersionTable(new CustomVersionTableMetadata());
     });
 
 builder.Services.AddAuthentication();
@@ -42,9 +34,11 @@ builder.Services.AddControllers()
 builder.Services.AddSwaggerGen();
 
 builder.Services
-    .AddDbContext<DatabaseContext>(opt =>
+    .AddDbContext<DatabaseContext>((services, opt) =>
     {
-        opt.UseSqlServer(builder.Configuration.GetConnectionString("Primary"), conf =>
+        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+
+        opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
         {
             conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
         });
@@ -52,30 +46,28 @@ builder.Services
         opt.UseLazyLoadingProxies(true);
     });
 
+builder.Services.AddScoped<IDatabaseConnectionProvider, DatabaseConnectionProvider>();
+
+builder.Services.AddScoped<ISaveService, SaveService>();
+
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISecurableService, SecurableService>();
 
-builder.Services
-    .AddSingleton<IMapper>((provider) =>
-    {
-        MapperConfiguration configuration = new MapperConfiguration(opt =>
-        {
-            opt.AddPermission();
-            opt.AddSecurable();
-        });
-
-        return configuration.CreateMapper();
-    });
+builder.Services.AddMapper();
 
 //**********************************************************
 // Add Middleware
 
 var app = builder.Build();
 
+var serviceProvider = app.Services
+    .CreateScope()
+    .ServiceProvider;
+
+var connectionProvider = serviceProvider.GetRequiredService<IDatabaseConnectionProvider>();
+
 //Perform the database migration
-var serviceProvider = app.Services.CreateScope().ServiceProvider;
-IMigrationRunner runner = serviceProvider.GetRequiredService<IMigrationRunner>();
-runner.MigrateUp();
+DatabaseMigrationRunner.PerformMigration(connectionProvider);
 
 //Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

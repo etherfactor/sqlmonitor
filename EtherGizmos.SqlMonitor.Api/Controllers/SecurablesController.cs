@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
+using EtherGizmos.SqlMonitor.Api.Controllers.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.OData.Errors;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
 namespace EtherGizmos.SqlMonitor.Api.Controllers;
@@ -14,9 +15,14 @@ namespace EtherGizmos.SqlMonitor.Api.Controllers;
 /// Provides endpoints for <see cref="Securable"/> records.
 /// </summary>
 [Route(BasePath)]
-public class SecurablesController : ODataController
+public class SecurablesController : ExtendedODataController
 {
     private const string BasePath = "/api/v1/securables";
+
+    /// <summary>
+    /// The logger to utilize.
+    /// </summary>
+    private ILogger Logger { get; }
 
     /// <summary>
     /// Allows conversion between database and DTO models.
@@ -36,10 +42,12 @@ public class SecurablesController : ODataController
     /// <summary>
     /// Constructs the controller.
     /// </summary>
+    /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="securableService">Provides access to the storage of records.</param>
-    public SecurablesController(IMapper mapper, ISecurableService securableService)
+    public SecurablesController(ILogger<SecurablesController> logger, IMapper mapper, ISecurableService securableService)
     {
+        Logger = logger;
         Mapper = mapper;
         SecurableService = securableService;
     }
@@ -69,7 +77,7 @@ public class SecurablesController : ODataController
     {
         Securable? record = await Securables.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return NotFound();
+            return new ODataRecordNotFoundError<SecurableDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
         return Ok(finished);

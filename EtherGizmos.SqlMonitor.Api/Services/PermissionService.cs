@@ -21,12 +21,10 @@ public class PermissionService : IPermissionService
     }
 
     /// <inheritdoc/>
-    public async Task AddOrUpdate(Permission record)
+    public void AddOrUpdate(Permission record)
     {
         if (!Context.Permissions.Contains(record))
             Context.Permissions.Add(record);
-
-        await Context.SaveChangesAsync();
     }
 
     /// <inheritdoc/>

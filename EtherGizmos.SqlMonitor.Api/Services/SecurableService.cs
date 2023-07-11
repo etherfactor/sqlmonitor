@@ -21,12 +21,10 @@ public class SecurableService : ISecurableService
     }
 
     /// <inheritdoc/>
-    public async Task AddOrUpdate(Securable record)
+    public void AddOrUpdate(Securable record)
     {
         if (!Context.Securables.Contains(record))
             Context.Securables.Add(record);
-
-        await Context.SaveChangesAsync();
     }
 
     /// <inheritdoc/>
