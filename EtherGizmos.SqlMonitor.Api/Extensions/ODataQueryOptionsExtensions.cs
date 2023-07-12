@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.OData.Query;
+﻿using EtherGizmos.SqlMonitor.Api.OData.Errors;
+using EtherGizmos.SqlMonitor.Api.Services.Middleware;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder.Annotations;
 using Microsoft.OData.UriParser;
@@ -10,6 +12,27 @@ namespace EtherGizmos.SqlMonitor.Api.Extensions;
 /// </summary>
 internal static class ODataQueryOptionsExtensions
 {
+    internal static void EnsureValidForSingle<T>(this ODataQueryOptions<T> @this)
+    {
+        if (@this == null)
+            throw new ArgumentNullException(nameof(@this));
+
+        if (@this.Filter != null)
+            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$filter"));
+
+        if (@this.OrderBy != null)
+            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$orderby"));
+
+        if (@this.Count != null)
+            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$count"));
+
+        if (@this.Skip != null)
+            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$skip"));
+
+        if (@this.Top != null)
+            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$top"));
+    }
+
     /// <summary>
     /// Gets a set of properties requested to be expanded.
     /// </summary>

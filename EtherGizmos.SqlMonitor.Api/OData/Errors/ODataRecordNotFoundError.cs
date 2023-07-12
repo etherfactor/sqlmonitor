@@ -11,7 +11,7 @@ namespace EtherGizmos.SqlMonitor.Api.OData.Errors;
 /// <typeparam name="T">The externally-facing type of record.</typeparam>
 public class ODataRecordNotFoundError<T> : ODataErrorBase
 {
-    private const string Code = "test-0001";
+    private const string Code = "test-0000";
 
     /// <summary>
     /// Construct the error.

@@ -4,6 +4,7 @@ using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Middleware;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -25,7 +26,11 @@ builder.Services
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers()
+builder.Services
+    .AddControllers(opt =>
+    {
+        opt.Filters.Add<ReturnODataErrorFilter>();
+    })
     .AddOData(opt =>
     {
         opt.AddRouteComponents("/api/v1", ODataModel.GetEdmModel(1.0m));

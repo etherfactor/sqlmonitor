@@ -75,6 +75,8 @@ public class PermissionsController : ExtendedODataController
     [Route(BasePath + "({id})")]
     public async Task<IActionResult> Get(string id, ODataQueryOptions<PermissionDTO> queryOptions)
     {
+        queryOptions.EnsureValidForSingle();
+
         Permission? record = await Permissions.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
             return new ODataRecordNotFoundError<PermissionDTO>((e => e.Id, id)).GetResponse();
