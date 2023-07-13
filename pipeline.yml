@@ -36,7 +36,7 @@ jobs:
     CheckDependencies: $[ convertToJson( dependencies ) ]
   steps:
 
-  - script: echo '$(CheckDependencies)'
+  - script: echo $(CheckDependencies)
     displayName: 'Debug Dependencies'
 
   - task: NuGetToolInstaller@1
