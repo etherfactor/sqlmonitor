@@ -75,6 +75,8 @@ public class SecurablesController : ExtendedODataController
     [Route(BasePath + "({id})")]
     public async Task<IActionResult> Get(string id, ODataQueryOptions<SecurableDTO> queryOptions)
     {
+        queryOptions.EnsureValidForSingle();
+
         Securable? record = await Securables.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
             return new ODataRecordNotFoundError<SecurableDTO>((e => e.Id, id)).GetResponse();

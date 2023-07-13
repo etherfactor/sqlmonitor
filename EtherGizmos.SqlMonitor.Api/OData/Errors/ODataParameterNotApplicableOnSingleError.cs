@@ -2,9 +2,9 @@
 
 namespace EtherGizmos.SqlMonitor.Api.OData.Errors;
 
-public class ODataParameterDisallowedOnSingleError : ODataErrorBase
+public class ODataParameterNotApplicableOnSingleError : ODataErrorBase
 {
-    public ODataParameterDisallowedOnSingleError(string parameter)
+    public ODataParameterNotApplicableOnSingleError(string parameter)
         : base(codeProvider: () => "test-0000",
             targetProvider: () => parameter,
             messageProvider: () => "The provided query parameter is not applicable for single records.")

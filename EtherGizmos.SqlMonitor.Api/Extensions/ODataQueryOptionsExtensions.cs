@@ -1,5 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Api.OData.Errors;
-using EtherGizmos.SqlMonitor.Api.Services.Middleware;
+﻿using EtherGizmos.SqlMonitor.Api.Exceptions;
+using EtherGizmos.SqlMonitor.Api.OData.Errors;
+using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder.Annotations;
@@ -12,25 +13,34 @@ namespace EtherGizmos.SqlMonitor.Api.Extensions;
 /// </summary>
 internal static class ODataQueryOptionsExtensions
 {
+    /// <summary>
+    /// Ensures that the query options object can be applied to a single entity. Throws exceptions for any parameters that
+    /// are not applicable. The exceptions take the form of <see cref="ReturnODataErrorException"/>, which should be caught
+    /// by <see cref="ReturnODataErrorFilter"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="this"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ReturnODataErrorException"></exception>
     internal static void EnsureValidForSingle<T>(this ODataQueryOptions<T> @this)
     {
         if (@this == null)
             throw new ArgumentNullException(nameof(@this));
 
         if (@this.Filter != null)
-            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$filter"));
+            throw new ReturnODataErrorException(new ODataParameterNotApplicableOnSingleError("$filter"));
 
         if (@this.OrderBy != null)
-            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$orderby"));
-
-        if (@this.Count != null)
-            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$count"));
-
-        if (@this.Skip != null)
-            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$skip"));
+            throw new ReturnODataErrorException(new ODataParameterNotApplicableOnSingleError("$orderby"));
 
         if (@this.Top != null)
-            throw new ReturnODataErrorException(new ODataParameterDisallowedOnSingleError("$top"));
+            throw new ReturnODataErrorException(new ODataParameterNotApplicableOnSingleError("$top"));
+
+        if (@this.Skip != null)
+            throw new ReturnODataErrorException(new ODataParameterNotApplicableOnSingleError("$skip"));
+
+        if (@this.Count != null)
+            throw new ReturnODataErrorException(new ODataParameterNotApplicableOnSingleError("$count"));
     }
 
     /// <summary>

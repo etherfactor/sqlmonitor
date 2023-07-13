@@ -1,15 +1,12 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Middleware;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
-using Microsoft.OData.Edm;
 using MockQueryable.Moq;
 using Moq;
 using System.Net;
@@ -84,7 +81,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<PermissionDTO>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -116,7 +113,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<PermissionDTO>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -148,8 +145,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery>());
-            Assert.That(content, Is.Not.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -181,8 +177,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery>());
-            Assert.That(content, Is.Not.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -214,7 +209,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<PermissionDTO>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -246,7 +241,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<PermissionDTO>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -278,7 +273,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<PermissionDTO>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
@@ -310,7 +305,7 @@ internal class PermissionsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<EnumerableQuery<PermissionDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<PermissionDTO>>());
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();

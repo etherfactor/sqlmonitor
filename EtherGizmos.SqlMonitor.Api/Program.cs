@@ -4,7 +4,7 @@ using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Middleware;
+using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
