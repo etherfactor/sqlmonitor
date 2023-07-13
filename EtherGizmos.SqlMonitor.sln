@@ -5,11 +5,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9D470563-2A48-4385-96F0-203C8B373A6A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.runsettings = .runsettings
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api", "EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj", "{2F466962-D42B-434D-B854-745E3DE16F6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests", "EtherGizmos.SqlMonitor.Api.IntegrationTests\EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj", "{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests", "EtherGizmos.SqlMonitor.Api.IntegrationTests\EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj", "{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.UnitTests", "EtherGizmos.SqlMonitor.Api.UnitTests\EtherGizmos.SqlMonitor.Api.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
 EndProject
