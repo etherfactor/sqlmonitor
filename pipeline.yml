@@ -69,6 +69,12 @@ jobs:
       projects: '**/EtherGizmos.SqlMonitor.Api.UnitTests.csproj'
       arguments: '--collect "Code coverage"'
 
+  - task: PowerShell@2
+    displayName: 'Start MSSQLLocalDB'
+    inputs:
+      targetType: 'inline'
+      script: 'sqllocaldb start mssqllocaldb'
+
   - task: DotNetCoreCLI@2
     displayName: 'Perform Integration Tests'
     inputs:
