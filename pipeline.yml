@@ -36,8 +36,13 @@ jobs:
     CheckDependencies: $[ convertToJson( dependencies ) ]
   steps:
 
-  - script: echo $(CheckDependencies)
+  - task: PowerShell@2
     displayName: 'Debug Dependencies'
+    inputs:
+      targetType: 'inline'
+      script: 'Write-Host $env:CHECK_DEPENDENCIES'
+    env:
+      CHECK_DEPENDENCIES: $(CheckDependencies)
 
   - task: NuGetToolInstaller@1
     displayName: 'Install NuGet'
