@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  name: Default
+  vmImage: 'windows-latest'
 
 variables:
   GitVersion.Version: '5.x.x'
