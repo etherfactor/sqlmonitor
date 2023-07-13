@@ -56,3 +56,16 @@ jobs:
     inputs:
       command: 'build'
       projects: '$(Build.Projects)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Perform Unit Tests'
+    inputs:
+      command: 'test'
+      projects: '**/EtherGizmos.SqlMonitor.Api.UnitTests.csproj'
+      arguments: '--collect "Code coverage"'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Perform Integration Tests'
+    inputs:
+      command: 'test'
+      projects: '**/EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj'
