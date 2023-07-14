@@ -82,7 +82,15 @@ jobs:
       projects: '**/EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj'
       arguments: '--collect "XPlat Code Coverage"'
 
-  - task: PublishCodeCoverageResults@2
+  - task: reportgenerator@5
+    displayName: 'Combine Code Coverage'
+    inputs:
+      reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+      targetdir: '$(Build.SourcesDirectory)/CoverageResults'
+
+  - task: PublishCodeCoverageResults@1
     displayName: 'Publish Code Coverage'
     inputs:
-      summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: '$(Build.SourcesDirectory)/CoverageResults/Cobertura.xml'
+      reportDirectory: '$(Build.SourcesDirectory)/CoverageResults'
