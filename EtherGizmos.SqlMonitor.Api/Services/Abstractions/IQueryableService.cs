@@ -18,5 +18,5 @@ public interface IQueryableService<T>
     /// </summary>
     /// <param name="record">The record to add or update.</param>
     /// <returns>An awaitable task.</returns>
-    Task AddOrUpdate(T record);
+    void AddOrUpdate(T record);
 }

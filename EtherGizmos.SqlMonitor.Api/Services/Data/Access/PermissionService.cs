@@ -2,7 +2,7 @@
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 
-namespace EtherGizmos.SqlMonitor.Api.Services;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 
 /// <summary>
 /// Provides access to <see cref="Permission"/> records.
@@ -21,12 +21,10 @@ public class PermissionService : IPermissionService
     }
 
     /// <inheritdoc/>
-    public async Task AddOrUpdate(Permission record)
+    public void AddOrUpdate(Permission record)
     {
         if (!Context.Permissions.Contains(record))
             Context.Permissions.Add(record);
-
-        await Context.SaveChangesAsync();
     }
 
     /// <inheritdoc/>

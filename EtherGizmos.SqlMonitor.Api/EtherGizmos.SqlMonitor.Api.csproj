@@ -25,4 +25,13 @@
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

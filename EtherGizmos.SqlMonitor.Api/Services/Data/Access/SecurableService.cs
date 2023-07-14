@@ -2,7 +2,7 @@
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 
-namespace EtherGizmos.SqlMonitor.Api.Services;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 
 /// <summary>
 /// Provides access to <see cref="Securable"/> records.
@@ -21,12 +21,10 @@ public class SecurableService : ISecurableService
     }
 
     /// <inheritdoc/>
-    public async Task AddOrUpdate(Securable record)
+    public void AddOrUpdate(Securable record)
     {
         if (!Context.Securables.Contains(record))
             Context.Securables.Add(record);
-
-        await Context.SaveChangesAsync();
     }
 
     /// <inheritdoc/>

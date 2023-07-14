@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  name: Default
+  vmImage: 'windows-latest'
 
 variables:
   GitVersion.Version: '5.x.x'
@@ -36,8 +36,13 @@ jobs:
     CheckDependencies: $[ convertToJson( dependencies ) ]
   steps:
 
-  - script: echo '$(CheckDependencies)'
+  - task: PowerShell@2
     displayName: 'Debug Dependencies'
+    inputs:
+      targetType: 'inline'
+      script: 'Write-Host $env:CHECK_DEPENDENCIES'
+    env:
+      CHECK_DEPENDENCIES: $(CheckDependencies)
 
   - task: NuGetToolInstaller@1
     displayName: 'Install NuGet'
@@ -56,3 +61,36 @@ jobs:
     inputs:
       command: 'build'
       projects: '$(Build.Projects)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Perform Unit Tests'
+    inputs:
+      command: 'test'
+      projects: '**/EtherGizmos.SqlMonitor.Api.UnitTests.csproj'
+      arguments: '--collect "XPlat Code Coverage"'
+
+  - task: PowerShell@2
+    displayName: 'Start MSSQLLocalDB'
+    inputs:
+      targetType: 'inline'
+      script: 'sqllocaldb start mssqllocaldb'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Perform Integration Tests'
+    inputs:
+      command: 'test'
+      projects: '**/EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj'
+      arguments: '--collect "XPlat Code Coverage"'
+
+  - task: reportgenerator@5
+    displayName: 'Combine Code Coverage'
+    inputs:
+      reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+      targetdir: '$(Build.SourcesDirectory)/CoverageResults'
+
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish Code Coverage'
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: '$(Build.SourcesDirectory)/CoverageResults/Cobertura.xml'
+      reportDirectory: '$(Build.SourcesDirectory)/CoverageResults'

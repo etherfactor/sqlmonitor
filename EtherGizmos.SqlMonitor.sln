@@ -2,18 +2,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api", "EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj", "{2F466962-D42B-434D-B854-745E3DE16F6E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Database", "EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
-EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EtherGizmos.SqlMonitor.Web", "EtherGizmos.SqlMonitor.Web\EtherGizmos.SqlMonitor.Web.esproj", "{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9D470563-2A48-4385-96F0-203C8B373A6A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.runsettings = .runsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Models", "EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj", "{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api", "EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj", "{2F466962-D42B-434D-B854-745E3DE16F6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests", "EtherGizmos.SqlMonitor.Api.IntegrationTests\EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj", "{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.UnitTests", "EtherGizmos.SqlMonitor.Api.UnitTests\EtherGizmos.SqlMonitor.Api.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Database", "EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Models", "EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj", "{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EtherGizmos.SqlMonitor.Web", "EtherGizmos.SqlMonitor.Web\EtherGizmos.SqlMonitor.Web.esproj", "{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,20 +30,28 @@ Global
 		{2F466962-D42B-434D-B854-745E3DE16F6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F466962-D42B-434D-B854-745E3DE16F6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F466962-D42B-434D-B854-745E3DE16F6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F4599EE0-E75A-42E5-A45F-2719B8A6FA8B}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
