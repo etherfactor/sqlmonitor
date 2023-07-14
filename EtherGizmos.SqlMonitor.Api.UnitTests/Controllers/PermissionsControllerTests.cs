@@ -25,7 +25,7 @@ internal class PermissionsControllerTests
     [SetUp]
     public void SetUp()
     {
-        Provider = Services.CreateScope();
+        Provider = Global.CreateScope();
         Controller = Provider.GetRequiredService<PermissionsController>();
         Data = new List<Permission>()
         {

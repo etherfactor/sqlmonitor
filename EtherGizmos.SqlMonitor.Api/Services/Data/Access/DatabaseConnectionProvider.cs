@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using Microsoft.Data.SqlClient;
 
-namespace EtherGizmos.SqlMonitor.Api.Services;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 
 /// <summary>
 /// Provides a database connection string.

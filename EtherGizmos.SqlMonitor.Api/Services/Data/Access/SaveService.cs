@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Data.Access;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 
-namespace EtherGizmos.SqlMonitor.Api.Services;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 
 /// <summary>
 /// Saves changes made by any/all <see cref="IQueryableService{T}"/>.

@@ -1,8 +1,11 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services;
-using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests;
 

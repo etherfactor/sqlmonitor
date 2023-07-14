@@ -4,10 +4,13 @@ using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests;
 
-internal class Services
+internal class Global
 {
     internal static IServiceProvider CreateScope()
     {

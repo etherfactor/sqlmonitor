@@ -20,7 +20,8 @@ public class ODataRecordNotFoundErrorDetail<T> : ODataErrorDetailBase
     /// <param name="value">The value of that key that failed to find a record.</param>
     public ODataRecordNotFoundErrorDetail(string code, Expression<Func<T, object?>> selector, object? value)
         : base(codeProvider: () => code,
-            targetProvider: () => selector.GetPropertyInfo().GetCustomAttribute<DisplayAttribute>()?.Name,
+            targetProvider: () => selector.GetPropertyInfo().GetCustomAttribute<DisplayAttribute>()?.Name
+                ?? throw new InvalidOperationException(string.Format("The type {0} must be annotated with a {1}.", typeof(T), nameof(DisplayAttribute))),
             messageProvider: () => string.Format("Non-existent key value: {0}", value))
     {
     }

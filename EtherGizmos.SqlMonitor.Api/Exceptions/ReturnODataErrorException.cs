@@ -20,18 +20,4 @@ public class ReturnODataErrorException : Exception
     {
         Error = error;
     }
-
-    /// <inheritdoc/>
-    /// <param name="error">The OData error to return.</param>
-    public ReturnODataErrorException(ODataErrorBase error, string? message) : base(message)
-    {
-        Error = error;
-    }
-
-    /// <inheritdoc/>
-    /// <param name="error">The OData error to return.</param>
-    public ReturnODataErrorException(ODataErrorBase error, string? message, Exception? innerException) : base(message, innerException)
-    {
-        Error = error;
-    }
 }

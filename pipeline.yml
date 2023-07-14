@@ -67,7 +67,7 @@ jobs:
     inputs:
       command: 'test'
       projects: '**/EtherGizmos.SqlMonitor.Api.UnitTests.csproj'
-      arguments: '--collect "Code coverage"'
+      arguments: '--collect "XPlat Code Coverage"'
 
   - task: PowerShell@2
     displayName: 'Start MSSQLLocalDB'
@@ -80,3 +80,9 @@ jobs:
     inputs:
       command: 'test'
       projects: '**/EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj'
+      arguments: '--collect "XPlat Code Coverage"'
+
+  - task: PublishCodeCoverageResults@2
+    displayName: 'Publish Code Coverage'
+    inputs:
+      summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'

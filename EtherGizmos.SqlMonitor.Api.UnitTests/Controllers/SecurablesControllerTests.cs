@@ -25,7 +25,7 @@ internal class SecurablesControllerTests
     [SetUp]
     public void SetUp()
     {
-        Provider = Services.CreateScope();
+        Provider = Global.CreateScope();
         Controller = Provider.GetRequiredService<SecurablesController>();
         Data = new List<Securable>()
         {

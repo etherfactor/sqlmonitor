@@ -2,12 +2,14 @@
 using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EtherGizmos.SqlMonitor.Api.Data.Access;
 
 /// <summary>
 /// Provides access to database tables.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class DatabaseContext : DbContext
 {
     /// <summary>

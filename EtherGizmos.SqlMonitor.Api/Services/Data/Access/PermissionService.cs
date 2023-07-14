@@ -2,12 +2,12 @@
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 
-namespace EtherGizmos.SqlMonitor.Api.Services;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 
 /// <summary>
-/// Provides access to <see cref="Securable"/> records.
+/// Provides access to <see cref="Permission"/> records.
 /// </summary>
-public class SecurableService : ISecurableService
+public class PermissionService : IPermissionService
 {
     private DatabaseContext Context { get; }
 
@@ -15,21 +15,21 @@ public class SecurableService : ISecurableService
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public SecurableService(DatabaseContext context)
+    public PermissionService(DatabaseContext context)
     {
         Context = context;
     }
 
     /// <inheritdoc/>
-    public void AddOrUpdate(Securable record)
+    public void AddOrUpdate(Permission record)
     {
-        if (!Context.Securables.Contains(record))
-            Context.Securables.Add(record);
+        if (!Context.Permissions.Contains(record))
+            Context.Permissions.Add(record);
     }
 
     /// <inheritdoc/>
-    public IQueryable<Securable> GetQueryable()
+    public IQueryable<Permission> GetQueryable()
     {
-        return Context.Securables;
+        return Context.Permissions;
     }
 }
