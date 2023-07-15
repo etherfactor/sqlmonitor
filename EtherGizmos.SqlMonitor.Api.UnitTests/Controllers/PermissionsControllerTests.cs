@@ -55,7 +55,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Setup(service => service.GetQueryable()).Returns(mockData);
-        mockServ.Setup(service => service.AddOrUpdate(It.IsAny<Permission>()));
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Setup(service => service.SaveChangesAsync()).Returns(Task.CompletedTask);
@@ -87,7 +86,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -119,7 +117,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -151,7 +148,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -183,7 +179,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -215,7 +210,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -247,7 +241,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -279,7 +272,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -311,7 +303,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -345,7 +336,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -379,7 +369,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -434,7 +423,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -468,7 +456,6 @@ internal class PermissionsControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Permission>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());

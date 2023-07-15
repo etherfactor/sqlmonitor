@@ -16,7 +16,32 @@ public static class DatabaseMigrationRunner
     /// Perform the migration, given a specific database connection.
     /// </summary>
     /// <param name="connectionProvider">The database connection to utilize.</param>
-    public static void PerformMigration(IDatabaseConnectionProvider connectionProvider)
+    /// <param name="version">The target version.</param>
+    public static void PerformMigration(IDatabaseConnectionProvider connectionProvider, long version = long.MaxValue)
+    {
+        //Perform the database migration
+        var runner = GetRunner(connectionProvider);
+        runner.MigrateUp(version);
+    }
+
+    /// <summary>
+    /// Revert the migration, given a specific database connection.
+    /// </summary>
+    /// <param name="connectionProvider"></param>
+    /// <param name="version">The target version.</param>
+    public static void RevertMigration(IDatabaseConnectionProvider connectionProvider, long version = 0)
+    {
+        //Perform the database migration
+        var runner = GetRunner(connectionProvider);
+        runner.MigrateDown(version);
+    }
+
+    /// <summary>
+    /// Constructs a database migration runner for the provided connection.
+    /// </summary>
+    /// <param name="connectionProvider">The database connection to utilize.</param>
+    /// <returns>The constructed runner.</returns>
+    private static IMigrationRunner GetRunner(IDatabaseConnectionProvider connectionProvider)
     {
         var migrationCollection = new ServiceCollection()
             .AddFluentMigratorCore()
@@ -33,8 +58,8 @@ public static class DatabaseMigrationRunner
             .CreateScope()
             .ServiceProvider;
 
-        //Perform the database migration
+        //Create the runner
         var runner = migrationProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateUp();
+        return runner;
     }
 }

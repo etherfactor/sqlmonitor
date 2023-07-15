@@ -14,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 //**********************************************************
 // Configuration
 
+builder.Configuration.AddJsonFile("appsettings.Local.json", true);
+
 //**********************************************************
 // Add Services
 

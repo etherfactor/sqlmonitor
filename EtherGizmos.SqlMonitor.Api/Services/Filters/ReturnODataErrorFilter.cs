@@ -9,6 +9,11 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Filters;
 public class ReturnODataErrorFilter : IActionFilter
 {
     /// <inheritdoc/>
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+    }
+
+    /// <inheritdoc/>
     public void OnActionExecuted(ActionExecutedContext context)
     {
         if (context.Exception != null && typeof(ReturnODataErrorException).IsAssignableFrom(context.Exception.GetType()))
@@ -19,10 +24,5 @@ public class ReturnODataErrorFilter : IActionFilter
             //Mark the exception as handled so it's no longer considered an exception
             context.ExceptionHandled = true;
         }
-    }
-
-    /// <inheritdoc/>
-    public void OnActionExecuting(ActionExecutingContext context)
-    {
     }
 }

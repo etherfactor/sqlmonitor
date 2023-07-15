@@ -21,13 +21,6 @@ public class SecurableService : ISecurableService
     }
 
     /// <inheritdoc/>
-    public void AddOrUpdate(Securable record)
-    {
-        if (!Context.Securables.Contains(record))
-            Context.Securables.Add(record);
-    }
-
-    /// <inheritdoc/>
     public IQueryable<Securable> GetQueryable()
     {
         return Context.Securables;
