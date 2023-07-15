@@ -21,13 +21,6 @@ public class PermissionService : IPermissionService
     }
 
     /// <inheritdoc/>
-    public void AddOrUpdate(Permission record)
-    {
-        if (!Context.Permissions.Contains(record))
-            Context.Permissions.Add(record);
-    }
-
-    /// <inheritdoc/>
     public IQueryable<Permission> GetQueryable()
     {
         return Context.Permissions;

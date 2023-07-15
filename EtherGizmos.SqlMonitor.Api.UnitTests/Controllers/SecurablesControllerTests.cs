@@ -45,7 +45,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Setup(service => service.GetQueryable()).Returns(mockData);
-        mockServ.Setup(service => service.AddOrUpdate(It.IsAny<Securable>()));
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Setup(service => service.SaveChangesAsync()).Returns(Task.CompletedTask);
@@ -77,7 +76,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -109,7 +107,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -141,7 +138,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -173,7 +169,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -205,7 +200,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -237,7 +231,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -269,7 +262,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -301,7 +293,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -335,7 +326,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -369,7 +359,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -424,7 +413,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -458,7 +446,6 @@ internal class SecurablesControllerTests
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.Once());
-        mockServ.Verify(service => service.AddOrUpdate(It.IsAny<Securable>()), Times.Never());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());

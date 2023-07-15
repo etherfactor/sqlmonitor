@@ -4,7 +4,7 @@ using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 namespace EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 
 /// <summary>
-/// Saves changes made by any/all <see cref="IQueryableService{T}"/>.
+/// Saves changes made by any/all <see cref="IEditableQueryableService{T}"/>.
 /// </summary>
 public class SaveService : ISaveService
 {

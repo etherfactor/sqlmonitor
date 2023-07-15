@@ -92,7 +92,7 @@ internal static class Global
         return factory;
     }
 
-    private static string GetConnectionStringForMaster(this IDatabaseConnectionProvider @this)
+    internal static string GetConnectionStringForMaster(this IDatabaseConnectionProvider @this)
     {
         string connectionString = @this.GetConnectionString();
 
@@ -102,7 +102,7 @@ internal static class Global
         return builder.ConnectionString;
     }
 
-    private static string GetDatabaseName(this IDatabaseConnectionProvider @this)
+    internal static string GetDatabaseName(this IDatabaseConnectionProvider @this)
     {
         string connectionString = @this.GetConnectionString();
 

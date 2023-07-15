@@ -71,7 +71,7 @@ public abstract class ODataErrorBase
             ErrorCode = code,
             Target = target,
             Message = message,
-            Details = DetailsList.Select(e => e.GetDetail()).ToList()
+            Details = Details.Select(e => e.GetDetail()).ToList()
         };
     }
 

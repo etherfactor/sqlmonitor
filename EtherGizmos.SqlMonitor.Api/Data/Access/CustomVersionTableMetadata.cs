@@ -1,4 +1,5 @@
 ﻿using FluentMigrator.Runner.VersionTableInfo;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EtherGizmos.SqlMonitor.Api.Data.Access;
 
@@ -8,9 +9,11 @@ namespace EtherGizmos.SqlMonitor.Api.Data.Access;
 public class CustomVersionTableMetadata : IVersionTableMetaData
 {
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage]
     public object? ApplicationContext { get; set; }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage]
     public bool OwnsSchema => true;
 
     /// <inheritdoc/>
