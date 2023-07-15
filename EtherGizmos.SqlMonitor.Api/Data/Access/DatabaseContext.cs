@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Diagnostics.CodeAnalysis;
@@ -63,6 +64,17 @@ public class DatabaseContext : DbContext
                 .UsingEntity<SecurablePermission>();
         });
 
+        modelBuilder.Entity<Principal>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Type);
+        });
+
         modelBuilder.Entity<Securable>(entity =>
         {
             entity.ToTableWithAnnotations();
@@ -90,6 +102,26 @@ public class DatabaseContext : DbContext
             entity.AuditPropertiesWithAnnotations();
         });
 
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Username);
+            entity.PropertyWithAnnotations(e => e.PasswordHash);
+            entity.PropertyWithAnnotations(e => e.EmailAddress);
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsAdministrator);
+            entity.PropertyWithAnnotations(e => e.LastLoginAtUtc);
+            entity.PropertyWithAnnotations(e => e.PrincipalId);
+
+            entity.HasOne(e => e.Principal);
+        });
+
         //**********************************************************
         // Add Value Converters
 
@@ -100,5 +132,13 @@ public class DatabaseContext : DbContext
         modelBuilder.AddGlobalValueConverter(new ValueConverter<DateTimeOffset?, DateTime?>(
             app => app != null ? app.Value.UtcDateTime : null,
             db => db != null ? new DateTimeOffset((DateTime)db) : null));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<PrincipalType, string>(
+            app => PrincipalTypeConverter.ToString(app),
+            db => PrincipalTypeConverter.FromString(db)));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<PrincipalType?, string?>(
+            app => PrincipalTypeConverter.ToStringOrDefault(app),
+            db => PrincipalTypeConverter.FromStringOrDefault(db)));
     }
 }
