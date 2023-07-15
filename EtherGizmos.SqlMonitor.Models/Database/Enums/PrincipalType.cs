@@ -23,7 +23,7 @@ public static class PrincipalTypeConverter
 
     public static PrincipalType? FromStringOrDefault(string? value)
     {
-        if (!Mappings.ContainsValue(value))
+        if (value == null || !Mappings.ContainsValue(value))
             return null;
 
         return Mappings.Single(e => e.Value == value).Key;
@@ -39,7 +39,7 @@ public static class PrincipalTypeConverter
 
     public static string? ToStringOrDefault(PrincipalType? value)
     {
-        if (!Mappings.ContainsKey(value))
+        if (value == null || !Mappings.ContainsKey((PrincipalType)value))
             return null;
 
         return Mappings.Single(e => e.Key == value).Value;
