@@ -11,7 +11,7 @@ public class UserDTO
 {
     [Required]
     [Display(Name = "id")]
-    public Guid? Id { get; set; }
+    public Guid Id { get; set; }
 
     [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
@@ -36,19 +36,28 @@ public class UserDTO
     [Display(Name = "email_address")]
     public string? EmailAddress { get; set; }
 
+    [Required]
     [Display(Name = "name")]
     public string? Name { get; set; }
 
     [Required]
     [Display(Name = "is_active")]
-    public bool? IsActive { get; set; }
+    public bool? IsActive { get; set; } = true;
 
     [Required]
     [Display(Name = "is_administrator")]
-    public bool? IsAdministrator { get; }
+    public bool? IsAdministrator { get; set; } = false;
 
     [Display(Name = "last_login_at_utc")]
     public DateTimeOffset? LastLoginAtUtc { get; set; }
+
+    public void EnsureValid(IQueryable<User> records)
+    {
+        records.EnsureUnique((e => e.Username, Username));
+
+        if (EmailAddress != null)
+            records.EnsureUnique((e => e.EmailAddress, EmailAddress));
+    }
 }
 
 public static class ForUserDTO

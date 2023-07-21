@@ -4,6 +4,7 @@ using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Validation;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -32,10 +33,15 @@ builder.Services
     .AddControllers(opt =>
     {
         opt.Filters.Add<ReturnODataErrorFilter>();
+        opt.Filters.Add<ModelStateFilter>();
     })
     .AddOData(opt =>
     {
         opt.AddRouteComponents("/api/v1", ODataModel.GetEdmModel(1.0m));
+    })
+    .AddMvcOptions(opt =>
+    {
+        opt.ModelMetadataDetailsProviders.Add(new AttributeDisplayMetadataProvider());
     });
 
 builder.Services.AddSwaggerGen();
@@ -59,6 +65,7 @@ builder.Services.AddScoped<ISaveService, SaveService>();
 
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISecurableService, SecurableService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddMapper();
 

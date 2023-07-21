@@ -24,6 +24,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<Securable> Securables { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="User"/> records, in 'dbo.users'.
+    /// </summary>
+    public virtual DbSet<User> Users { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseContext"/> class using the specified options. The
     /// <see cref="DbContext.OnConfiguring(DbContextOptionsBuilder)"/> will still be called to allow further configuration
     /// of the options.

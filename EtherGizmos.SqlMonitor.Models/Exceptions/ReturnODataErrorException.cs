@@ -1,7 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Api.OData.Errors.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Filters;
+﻿using EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
 
-namespace EtherGizmos.SqlMonitor.Api.Exceptions;
+namespace EtherGizmos.SqlMonitor.Models.Exceptions;
 
 /// <summary>
 /// Throw when an OData error needs to be returned to the user, as long as the <see cref="ReturnODataErrorFilter"/> is

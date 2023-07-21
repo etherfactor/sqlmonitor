@@ -1,4 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
@@ -7,6 +9,7 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class User : Auditable
 {
     [Column("user_id")]
+    [SqlDefaultValue]
     public virtual Guid Id { get; set; }
 
     [Column("username")]
@@ -33,7 +36,7 @@ public class User : Auditable
     [Column("principal_id")]
     public virtual Guid PrincipalId { get; set; }
 
-    public virtual Principal Principal { get; set; }
+    public virtual Principal Principal { get; set; } = new Principal() { Type = PrincipalType.User };
 
     /// <summary>
     /// Not intended for direct use.
@@ -42,6 +45,9 @@ public class User : Auditable
     {
         Username = null!;
         PasswordHash = null!;
-        Principal = null!;
+    }
+
+    public void EnsureValid(IQueryable<User> records)
+    {
     }
 }

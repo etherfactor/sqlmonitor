@@ -1,15 +1,15 @@
-﻿using EtherGizmos.SqlMonitor.Api.OData.Errors.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Results;
 using System.Linq.Expressions;
 
-namespace EtherGizmos.SqlMonitor.Api.OData.Errors;
+namespace EtherGizmos.SqlMonitor.Models.OData.Errors;
 
 /// <summary>
 /// Utilize when a record was expected but could not be found.
 /// </summary>
-/// <typeparam name="T">The externally-facing type of record.</typeparam>
-public class ODataRecordNotFoundError<T> : ODataErrorBase
+/// <typeparam name="TEntity">The externally-facing type of record.</typeparam>
+public class ODataRecordNotFoundError<TEntity> : ODataErrorBase
 {
     private const string Code = "test-0000";
 
@@ -17,7 +17,7 @@ public class ODataRecordNotFoundError<T> : ODataErrorBase
     /// Construct the error.
     /// </summary>
     /// <param name="keys">A set of key properties and their values that failed to find a record.</param>
-    public ODataRecordNotFoundError(params (Expression<Func<T, object?>>, object)[] keys)
+    public ODataRecordNotFoundError(params (Expression<Func<TEntity, object?>>, object)[] keys)
         : base(codeProvider: () => Code,
             targetProvider: null,
             messageProvider: () => "A record with the specified key(s)/value(s) was not found.")
@@ -27,7 +27,7 @@ public class ODataRecordNotFoundError<T> : ODataErrorBase
             var property = key.Item1;
             var value = key.Item2;
 
-            var detail = new ODataRecordNotFoundErrorDetail<T>(Code, property, value);
+            var detail = new ODataRecordNotFoundErrorDetail<TEntity>(Code, property, value);
             AddDetail(detail);
         }
     }

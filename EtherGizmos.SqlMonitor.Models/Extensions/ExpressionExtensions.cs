@@ -18,8 +18,25 @@ public static class ExpressionExtensions
     /// <exception cref="ArgumentException"></exception>
     public static PropertyInfo GetPropertyInfo<TSource, TMember>(this Expression<Func<TSource, TMember>> @this)
     {
+        //Cover each possible case of expression body
+        MemberExpression? member = null;
+        switch (@this.Body)
+        {
+            case UnaryExpression expression:
+                //Handle convert (happens with GUID)
+                if (expression.NodeType == ExpressionType.Convert)
+                    if (expression.Operand is MemberExpression unaryMember)
+                        member = unaryMember;
+                break;
+
+            case MemberExpression expression:
+                //Handle basic member
+                member = expression;
+                break;
+        }
+
         //Ensure there is a member being selected
-        if (@this.Body is not MemberExpression member)
+        if (member is null)
         {
             throw new ArgumentException(string.Format(
                 "Expression '{0}' refers to a method, not a property.",

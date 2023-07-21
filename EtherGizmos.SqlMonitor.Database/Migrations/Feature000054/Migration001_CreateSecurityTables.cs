@@ -46,7 +46,7 @@ public class Migration001_CreateSecurityTables : AutoReversingMigration
          *  - security entities associated with other entities
          */
         Create.Table("principals")
-            .WithColumn("principal_id").AsGuid().PrimaryKey()
+            .WithColumn("principal_id").AsGuid().PrimaryKey().WithDefault(SystemMethods.NewGuid)
             .WithAuditColumns()
             .WithColumn("principal_type_id").AsAnsiString(20).NotNullable()
             .WithColumn("system_id").AsGuid().Nullable();

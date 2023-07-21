@@ -21,6 +21,7 @@ public static class IServiceCollectionExtensions
             {
                 opt.AddPermission();
                 opt.AddSecurable();
+                opt.AddUser();
             });
 
             return configuration.CreateMapper();
