@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.OData;
 
-namespace EtherGizmos.SqlMonitor.Api.OData.Errors.Abstractions;
+namespace EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
 
 /// <summary>
 /// A base class upon which to construct OData errors.

@@ -68,7 +68,7 @@ internal static class Global
         await command.ExecuteNonQueryAsync();
 
         command.CommandText = $"drop database [{TestDatabaseName.Replace("]", "]]")}];";
-        await connection.CloseAsync();
+        await command.ExecuteNonQueryAsync();
     }
 
     private static WebApplicationFactory<Program> GetFactory()

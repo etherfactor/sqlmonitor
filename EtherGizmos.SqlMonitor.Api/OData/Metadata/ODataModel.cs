@@ -9,9 +9,11 @@ public static class ODataModel
     public static IEdmModel GetEdmModel(decimal apiVersion)
     {
         var builder = new ODataModelBuilder();
+        builder.Namespace = "SqlMonitor.v1";
 
         builder.AddPermission();
         builder.AddSecurable();
+        builder.AddUser();
 
         var model = builder.GetEdmModel();
 

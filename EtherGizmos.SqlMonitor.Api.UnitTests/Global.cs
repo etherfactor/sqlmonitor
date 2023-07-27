@@ -26,11 +26,13 @@ internal static class Global
 
         services.AddScoped<PermissionsController>();
         services.AddScoped<SecurablesController>();
+        services.AddScoped<UsersController>();
 
         services.AddScoped<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
         services.AddScoped<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
         services.AddScoped<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
+        services.AddScoped<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
 
         return services.BuildServiceProvider().CreateScope().ServiceProvider;
     }

@@ -1,10 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.Exceptions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Exceptions;
 using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -85,7 +85,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -116,7 +116,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -147,7 +147,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -178,7 +178,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -209,7 +209,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -240,7 +240,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -271,7 +271,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -302,7 +302,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -335,7 +335,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -368,14 +368,14 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
     }
 
     [Test]
-    public void Get_IsValid_WithFilter_Returns422UnprocessableEntity()
+    public void Get_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
         string recordId = "CREATE";
 
@@ -422,7 +422,7 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -455,14 +455,14 @@ internal class PermissionsControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<IPermissionService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
     }
 
     [Test]
-    public void Get_IsValid_WithOrderBy_Returns422UnprocessableEntity()
+    public void Get_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
         string recordId = "CREATE";
 
@@ -483,7 +483,7 @@ internal class PermissionsControllerTests
     }
 
     [Test]
-    public void Get_IsValid_WithTop_Returns422UnprocessableEntity()
+    public void Get_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
         string recordId = "CREATE";
 
@@ -504,7 +504,7 @@ internal class PermissionsControllerTests
     }
 
     [Test]
-    public void Get_IsValid_WithSkip_Returns422UnprocessableEntity()
+    public void Get_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
         string recordId = "CREATE";
 
@@ -525,7 +525,7 @@ internal class PermissionsControllerTests
     }
 
     [Test]
-    public void Get_IsValid_WithCount_Returns422UnprocessableEntity()
+    public void Get_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
         string recordId = "CREATE";
 

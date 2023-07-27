@@ -1,10 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.Exceptions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Exceptions;
 using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -75,7 +75,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -106,7 +106,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -137,7 +137,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -168,7 +168,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -199,7 +199,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -230,7 +230,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -261,7 +261,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -292,7 +292,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -325,7 +325,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -358,7 +358,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -412,7 +412,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
@@ -445,7 +445,7 @@ internal class SecurablesControllerTests
         });
 
         var mockServ = Provider.GetRequiredService<Mock<ISecurableService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.Once());
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());

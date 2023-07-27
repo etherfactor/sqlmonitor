@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,7 +23,7 @@ internal static class EntityTypeBuilderExtensions
     internal static EntityTypeBuilder<TEntity> AuditPropertiesWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this)
         where TEntity : class, IAuditable
     {
-        @this.PropertyWithAnnotations(e => e.CreatedAt);
+        @this.PropertyWithAnnotations(e => e.CreatedAt).HasDefaultValueSql();
         @this.PropertyWithAnnotations(e => e.CreatedByUserId);
         @this.PropertyWithAnnotations(e => e.ModifiedAt);
         @this.PropertyWithAnnotations(e => e.ModifiedByUserId);
@@ -67,15 +68,21 @@ internal static class EntityTypeBuilderExtensions
         //Extract the property info from the expression
         var property = propertyExpression.GetPropertyInfo();
 
+        //Create the property builder
+        var builder = @this.Property(propertyExpression);
+
         //Extract the column name from a ColumnAttribute, and ensure it exists
-        var attribute = property.GetCustomAttribute<ColumnAttribute>();
-        string columnName = attribute?.Name
+        var columnAttribute = property.GetCustomAttribute<ColumnAttribute>();
+        string columnName = columnAttribute?.Name
             ?? throw new InvalidOperationException(string.Format("Property '{0}' on type '{1}' must be annotated with a '{2}' and specify the '{3}' property",
                  property.Name, typeof(TEntity).Name, nameof(ColumnAttribute), nameof(ColumnAttribute.Name)));
 
-        //Add the property and name the column
-        var builder = @this.Property(propertyExpression);
         builder.HasColumnName(columnName);
+
+        //Test for a SqlDefaultValueAttribute to determine if a default value is generated
+        var sqlDefaultValueAttribute = property.GetCustomAttributes<SqlDefaultValueAttribute>();
+        if (sqlDefaultValueAttribute != null)
+            builder.HasDefaultValueSql();
 
         return builder;
     }
