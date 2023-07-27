@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -13,9 +13,19 @@ namespace EtherGizmos.SqlMonitor.Api.Data.Access;
 public class DatabaseContext : DbContext
 {
     /// <summary>
+    /// Provides access to <see cref="Instance"/> records, in 'dbo.instances'.
+    /// </summary>
+    public virtual DbSet<Instance> Instances { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Permission"/> records, in 'dbo.permissions'.
     /// </summary>
     public virtual DbSet<Permission> Permissions { get; set; }
+
+    /// <summary>
+    /// Provides access to <see cref="Query"/> records, in 'dbo.queries'.
+    /// </summary>
+    public virtual DbSet<Query> Queries { get; set; }
 
     /// <summary>
     /// Provides access to <see cref="Securable"/> records, in 'dbo.securables'.
@@ -47,6 +57,20 @@ public class DatabaseContext : DbContext
         //**********************************************************
         // Add Entities
 
+        modelBuilder.Entity<Instance>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.Address);
+            entity.PropertyWithAnnotations(e => e.Port);
+        });
+
         modelBuilder.Entity<Permission>(entity =>
         {
             entity.ToTableWithAnnotations();
@@ -61,6 +85,23 @@ public class DatabaseContext : DbContext
             entity.HasMany(e => e.Securables)
                 .WithMany(e => e.Permissions)
                 .UsingEntity<SecurablePermission>();
+        });
+
+        modelBuilder.Entity<Query>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.SystemId);
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.SqlText);
+            entity.PropertyWithAnnotations(e => e.RunFrequency);
+            entity.PropertyWithAnnotations(e => e.TimestampUtcExpression);
+            entity.PropertyWithAnnotations(e => e.BucketExpression);
         });
 
         modelBuilder.Entity<Securable>(entity =>

@@ -2,6 +2,7 @@
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Database;
 using FluentMigrator.Runner;
+using Serilog;
 
 namespace EtherGizmos.SqlMonitor.Api.Data.Migrations;
 
@@ -45,6 +46,10 @@ public static class DatabaseMigrationRunner
     {
         var migrationCollection = new ServiceCollection()
             .AddFluentMigratorCore()
+            .AddLogging(opt =>
+            {
+                opt.AddSerilog(Log.Logger);
+            })
             .ConfigureRunner(opt =>
             {
                 opt.AddSqlServer2016()

@@ -3,6 +3,7 @@ using EtherGizmos.SqlMonitor.Api.Data.Migrations;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using Microsoft.AspNetCore.OData;
@@ -59,6 +60,8 @@ builder.Services.AddScoped<ISaveService, SaveService>();
 
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISecurableService, SecurableService>();
+
+builder.Services.AddHostedService<QueryRunner>();
 
 builder.Services.AddMapper();
 
