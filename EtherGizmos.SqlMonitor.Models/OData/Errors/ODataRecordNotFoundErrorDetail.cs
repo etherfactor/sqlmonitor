@@ -1,10 +1,10 @@
-﻿using EtherGizmos.SqlMonitor.Api.OData.Errors.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Extensions;
+﻿using EtherGizmos.SqlMonitor.Models.Extensions;
+using EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EtherGizmos.SqlMonitor.Api.OData.Errors;
+namespace EtherGizmos.SqlMonitor.Models.OData.Errors;
 
 /// <summary>
 /// Utilize when a record was expected but none could be found.
