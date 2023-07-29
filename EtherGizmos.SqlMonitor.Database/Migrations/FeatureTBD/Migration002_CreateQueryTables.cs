@@ -21,7 +21,13 @@ public class Migration002_CreateQueryTables : AutoReversingMigration
             .WithColumn("description").AsString(int.MaxValue).Nullable()
             .WithColumn("sql_text").AsString(int.MaxValue).NotNullable()
             .WithColumn("run_frequency").AsTime().NotNullable()
+            .WithColumn("last_run_at_utc").AsDateTime2().Nullable()
             .WithColumn("timestamp_utc_expression").AsString(500).Nullable()
             .WithColumn("bucket_expression").AsString(500).Nullable();
+
+        Create.Index("IX_queries_last_run_at_utc")
+            .OnTable("queries")
+            .OnColumn("last_run_at_utc")
+            .Ascending();
     }
 }

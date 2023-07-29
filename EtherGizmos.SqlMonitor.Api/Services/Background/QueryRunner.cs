@@ -1,135 +1,188 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Data.Access;
+using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Background;
 
+/// <summary>
+/// Runs queries against instances on a periodic timer.
+/// </summary>
 public class QueryRunner : PeriodicBackgroundService
 {
-    protected override TimeSpan Period => TimeSpan.FromSeconds(15);
+    /// <inheritdoc/>
+    protected override TimeSpan Period => TimeSpan.FromSeconds(1);
 
+    /// <summary>
+    /// The logger to use.
+    /// </summary>
     private ILogger Logger { get; }
 
+    /// <summary>
+    /// Provides access to services.
+    /// </summary>
     private IServiceProvider ServiceProvider { get; }
 
+    /// <summary>
+    /// Construct the service.
+    /// </summary>
+    /// <param name="logger">The logger to use.</param>
+    /// <param name="serviceProvider">Provides access to services.</param>
     public QueryRunner(ILogger<QueryRunner> logger, IServiceProvider serviceProvider) : base(logger)
     {
         Logger = logger;
         ServiceProvider = serviceProvider;
-
-        Logger.Log(LogLevel.Information, "Instantiated");
     }
 
+    /// <inheritdoc/>
     protected override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
-        Logger.Log(LogLevel.Information, "Running");
-
+        //Create a scope for services, so scoped services can be fetched
         using var serviceScope = ServiceProvider.CreateScope();
         var serviceProvider = serviceScope.ServiceProvider;
 
+        //Get a connection to the database
         using var context = serviceProvider.GetRequiredService<DatabaseContext>();
 
+        //Get all instances and all queries ready to run
+        //Queries are ready if their last runtime plus their frequency is less than the current time
         var instances = await context.Instances.ToListAsync();
-        var queries = await context.Queries.ToListAsync();
-        foreach (var instance in instances)
+        var queries = await context.Queries
+            .Where(e => e.LastRunAtUtc!.Value.AddMilliseconds(EF.Functions.DateDiffMillisecond(TimeSpan.Zero, e.RunFrequency)) <= DateTimeOffset.UtcNow)
+            .ToListAsync();
+
+        var instanceQueries = instances.CrossJoin(queries);
+
+        var parallelOptions = new ParallelOptions()
         {
-            Logger.Log(LogLevel.Information, "Running queries on instance {InstanceName}", instance.Name);
+            CancellationToken = stoppingToken,
+            MaxDegreeOfParallelism = 8
+        };
 
-            var builder = new SqlConnectionStringBuilder();
-            builder.DataSource = instance.Address;
-            if ((instance.Port ?? 1433) != 1433)
+        await Parallel.ForEachAsync(instanceQueries, parallelOptions, async (instanceQuery, cancellationToken) =>
+        {
+            await RunInstanceQuery(instanceQuery.Item1, instanceQuery.Item2, cancellationToken);
+        });
+
+        await context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Opens a connection to an instance and runs a query on it.
+    /// </summary>
+    /// <param name="instance">The instance on which to run the query.</param>
+    /// <param name="query">The query to run.</param>
+    /// <param name="cancellationToken">The cancellation instruction.</param>
+    /// <returns>An awaitable task.</returns>
+    private async Task RunInstanceQuery(Instance instance, Query query, CancellationToken cancellationToken)
+    {
+        Logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
+
+        using var connection = await ConnectToInstanceAsync(instance);
+        using var command = new SqlCommand(null, connection);
+
+        command.CommandText = GenerateLoadForQuery(query);
+        await command.ExecuteLoggedNonQueryAsync(Logger, cancellationToken);
+
+        command.CommandText = GenerateReadForQuery(query);
+        using (var reader = await command.ExecuteLoggedReaderAsync(Logger, cancellationToken))
+        {
+            while (await reader.ReadAsync())
             {
-                builder.DataSource += $",{instance.Port}";
+                var values = new object[reader.FieldCount];
+                int fieldCount = reader.GetValues(values);
+
+                var logContent = string.Join(", ", values.Select(e => e?.ToString()));
+                Logger.Log(LogLevel.Information, logContent);
             }
-            builder.InitialCatalog = instance.Database ?? "master";
-            builder.ApplicationName = "SQL Monitor";
+        }
 
-            var connectionString = builder.ToString();
+        command.CommandText = GenerateDropForQuery(query);
+        await command.ExecuteLoggedNonQueryAsync(Logger, cancellationToken);
 
-            using var connection = new SqlConnection(connectionString);
-            await connection.OpenAsync();
-            foreach (var query in queries)
-            {
-                Logger.Log(LogLevel.Information, "Running query {QueryName}", query.Name);
+        query.LastRunAtUtc = DateTimeOffset.UtcNow;
+    }
 
-                var queryBase = query.SqlText;
+    /// <summary>
+    /// Creates a connection for a given instance.
+    /// </summary>
+    /// <param name="instance">The instance to which to connect.</param>
+    /// <returns>The connection.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    private async Task<SqlConnection> ConnectToInstanceAsync(Instance instance)
+    {
+        if (instance is null)
+            throw new ArgumentNullException(nameof(instance));
 
-                var bucketExpression = query.BucketExpression ?? "null";
-                var timestampExpression = query.TimestampUtcExpression ?? "getutcdate()";
+        var builder = new SqlConnectionStringBuilder();
+        builder.DataSource = instance.Address;
+        if ((instance.Port ?? 1433) != 1433)
+        {
+            builder.DataSource += $",{instance.Port}";
+        }
+        builder.InitialCatalog = instance.Database ?? "master";
+        builder.ApplicationName = "SQL Monitor";
 
-                var fromRegex = new Regex(@"(?'SPACE'[\r\n \t]*)from[\s\[]");
-                var finalFrom = fromRegex.Matches(queryBase).Last();
+        var connectionString = builder.ToString();
 
-                var newLineSpace = finalFrom.Groups["SPACE"].Value;
+        var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
 
-                string queryText;
-                Stopwatch queryWatch;
-                long queryDuration;
+        return connection;
+    }
 
-                using var command = new SqlCommand(null, connection);
+    /// <summary>
+    /// Creates the load step for a given query.
+    /// </summary>
+    /// <param name="query">The query.</param>
+    /// <returns>The load SQL.</returns>
+    private string GenerateLoadForQuery(Query query)
+    {
+        var queryBase = query.SqlText;
 
-                //Run user-specified query and load into table
-                queryText = queryBase.Substring(0, finalFrom.Index) +
-                    newLineSpace +
-                    "into #metric_result" +
-                    queryBase.Substring(finalFrom.Index);
-                command.CommandText = queryText;
+        var fromRegex = new Regex(@"(?'SPACE'[\r\n \t]*)from[\s\[]");
+        var finalFrom = fromRegex.Matches(queryBase).Last();
 
-                Logger.Log(LogLevel.Information, @"Executing query
-{QueryText}", queryText);
+        var newLineSpace = finalFrom.Groups["SPACE"].Value;
 
-                queryWatch = Stopwatch.StartNew();
-                await command.ExecuteNonQueryAsync();
-                queryDuration = queryWatch.ElapsedMilliseconds;
+        var queryText = queryBase.Substring(0, finalFrom.Index) +
+            newLineSpace +
+            "into #metric_result" +
+            queryBase.Substring(finalFrom.Index);
 
-                Logger.Log(LogLevel.Information, @"Executed query ({QueryDuration}ms)
-{QueryText}", queryDuration, queryText);
+        return queryText;
+    }
 
-                //Select results out of result table
-                queryText = $@"select {timestampExpression} as [timestamp_utc],
+    /// <summary>
+    /// Creates the read step for a given query.
+    /// </summary>
+    /// <param name="query">The query.</param>
+    /// <returns>The read SQL.</returns>
+    private string GenerateReadForQuery(Query query)
+    {
+        var bucketExpression = query.BucketExpression ?? "null";
+        var timestampExpression = query.TimestampUtcExpression ?? "getutcdate()";
+
+        var queryText = $@"select {timestampExpression} as [timestamp_utc],
   {bucketExpression} as [bucket_name],
   [m].*
   from #metric_result [m];";
-                command.CommandText = queryText;
 
-                Logger.Log(LogLevel.Information, @"Executing query
-{QueryText}", queryText);
+        return queryText;
+    }
 
-                queryWatch = Stopwatch.StartNew();
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    queryDuration = queryWatch.ElapsedMilliseconds;
+    /// <summary>
+    /// Creates the drop step for a given query.
+    /// </summary>
+    /// <param name="query">The query.</param>
+    /// <returns>The drop SQL.</returns>
+    private string GenerateDropForQuery(Query query)
+    {
+        var queryText = "drop table #metric_result;";
 
-                    Logger.Log(LogLevel.Information, @"Executed query ({QueryDuration}ms)
-{QueryText}", queryDuration, queryText);
-
-                    while (await reader.ReadAsync())
-                    {
-                        var values = new object[reader.FieldCount];
-                        int fieldCount = reader.GetValues(values);
-
-                        var logContent = string.Join(", ", values.Select(e => e?.ToString()));
-                        Logger.Log(LogLevel.Information, logContent);
-                    }
-                }
-
-                //Drop result table
-                queryText = "drop table #metric_result;";
-                command.CommandText = queryText;
-
-                Logger.Log(LogLevel.Information, @"Executing query
-{QueryText}", queryText);
-
-                queryWatch = Stopwatch.StartNew();
-                await command.ExecuteNonQueryAsync();
-                queryDuration = queryWatch.ElapsedMilliseconds;
-
-                Logger.Log(LogLevel.Information, @"Executed query ({QueryDuration}ms)
-{QueryText}", queryDuration, queryText);
-            }
-        }
+        return queryText;
     }
 }

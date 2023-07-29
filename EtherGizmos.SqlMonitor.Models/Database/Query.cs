@@ -24,6 +24,9 @@ public class Query : Auditable
     [Column("run_frequency")]
     public TimeSpan RunFrequency { get; set; }
 
+    [Column("last_run_at_utc")]
+    public DateTimeOffset? LastRunAtUtc { get; set; }
+
     [Column("timestamp_utc_expression")]
     public string? TimestampUtcExpression { get; set; }
 
