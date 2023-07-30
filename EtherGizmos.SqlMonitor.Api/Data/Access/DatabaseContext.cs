@@ -178,7 +178,7 @@ public class DatabaseContext : DbContext
 
         modelBuilder.AddGlobalValueConverter(new ValueConverter<DateTimeOffset?, DateTime?>(
             app => app != null ? app.Value.UtcDateTime : null,
-            db => db != null ? new DateTimeOffset((DateTime)db) : null));
+            db => db != null ? new DateTimeOffset((DateTime)db, TimeSpan.Zero) : null));
 
         modelBuilder.AddGlobalValueConverter(new ValueConverter<PrincipalType, string>(
             app => PrincipalTypeConverter.ToString(app),

@@ -1,9 +1,9 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Data.Access;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Helpers;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Background;
@@ -44,17 +44,27 @@ public class QueryRunner : PeriodicBackgroundService
         using var serviceScope = ServiceProvider.CreateScope();
         var serviceProvider = serviceScope.ServiceProvider;
 
-        //Get a connection to the database
+        //Get means for fetching records
         using var context = serviceProvider.GetRequiredService<DatabaseContext>();
+        var instanceService = serviceProvider.GetRequiredService<IInstanceService>();
+        var queryService = serviceProvider.GetRequiredService<IQueryService>();
+        var saveService = serviceProvider.GetRequiredService<ISaveService>();
 
         //Get all instances and all queries ready to run
         //Queries are ready if their last runtime plus their frequency is less than the current time
-        var instances = await context.Instances.ToListAsync();
-        var queries = await context.Queries
-            .Where(e => e.LastRunAtUtc!.Value.AddMilliseconds(EF.Functions.DateDiffMillisecond(TimeSpan.Zero, e.RunFrequency)) <= DateTimeOffset.UtcNow)
-            .ToListAsync();
+        var allInstances = await instanceService.GetOrLoadCacheAsync();
+        var allQueries = await queryService.GetOrLoadCacheAsync();
 
-        var instanceQueries = instances.CrossJoin(queries);
+        var now = DateTimeOffset.UtcNow;
+        var queries = allQueries
+            //Convert the runtime to an age based on the current time
+            .Where(e => now - (e.LastRunAtUtc ?? DateTimeOffset.MinValue)
+                //Compare to the run frequency, but shave off a small portion to avoid waiting a whole extra run cycle if
+                //the cycle is off by a few milliseconds
+                >= e.RunFrequency - DateAndTimeHelper.Min(0.05 * e.RunFrequency, TimeSpan.FromMilliseconds(100)))
+            .ToList();
+
+        var instanceQueries = allInstances.CrossJoin(queries);
 
         var parallelOptions = new ParallelOptions()
         {
@@ -64,10 +74,17 @@ public class QueryRunner : PeriodicBackgroundService
 
         await Parallel.ForEachAsync(instanceQueries, parallelOptions, async (instanceQuery, cancellationToken) =>
         {
+            var instance = instanceQuery.Item1;
+            context.Attach(instance);
+
+            var query = instanceQuery.Item2;
+            context.Attach(query);
+
             await RunInstanceQuery(instanceQuery.Item1, instanceQuery.Item2, cancellationToken);
         });
 
-        await context.SaveChangesAsync();
+        //Save changes to the modified records
+        await saveService.SaveChangesAsync();
     }
 
     /// <summary>

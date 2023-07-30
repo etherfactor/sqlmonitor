@@ -5,6 +5,7 @@ using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Storage;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Validation;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using Microsoft.AspNetCore.OData;
@@ -16,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 //**********************************************************
 // Configuration
 
-builder.Configuration.AddJsonFile("appsettings.Local.json", true);
+builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
 
 //**********************************************************
 // Add Services
@@ -62,9 +63,12 @@ builder.Services
 
 builder.Services.AddScoped<IDatabaseConnectionProvider, DatabaseConnectionProvider>();
 
+builder.Services.AddSingleton<IRecordCacheService, RecordCacheService>();
 builder.Services.AddScoped<ISaveService, SaveService>();
 
+builder.Services.AddScoped<IInstanceService, InstanceService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IQueryService, QueryService>();
 builder.Services.AddScoped<ISecurableService, SecurableService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
