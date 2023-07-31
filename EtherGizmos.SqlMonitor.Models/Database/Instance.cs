@@ -1,4 +1,4 @@
-using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
@@ -27,6 +27,8 @@ public class Instance : Auditable
     public virtual List<InstanceQueryBlacklist> QueryBlacklist { get; set; } = new List<InstanceQueryBlacklist>();
 
     public virtual List<InstanceQueryWhitelist> QueryWhitelist { get; set; } = new List<InstanceQueryWhitelist>();
+
+    public virtual List<InstanceQueryDatabase> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabase>();
 
     /// <summary>
     /// Not intended for direct use.

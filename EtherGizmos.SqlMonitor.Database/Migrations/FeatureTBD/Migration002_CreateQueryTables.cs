@@ -1,4 +1,4 @@
-using EtherGizmos.SqlMonitor.Database.Core;
+﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
 
@@ -47,5 +47,15 @@ public class Migration002_CreateQueryTables : AutoReversingMigration
             .WithColumn("instance_id").AsGuid().PrimaryKey()
             .WithColumn("query_id").AsGuid().PrimaryKey()
             .WithAuditColumns();
+
+        /*
+         * Create [dbo].[instance_query_databases]
+         *  - overridden databases for queries on given instances
+         */
+        Create.Table("instance_query_databases")
+            .WithColumn("instance_id").AsGuid().PrimaryKey()
+            .WithColumn("query_id").AsGuid().PrimaryKey()
+            .WithAuditColumns()
+            .WithColumn("override_database").AsString(128).Nullable();
     }
 }

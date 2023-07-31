@@ -81,6 +81,11 @@ public class DatabaseContext : DbContext
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);
 
+            entity.HasMany(e => e.QueryDatabaseOverrides)
+                .WithOne(e => e.Instance)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.InstanceId);
+
             entity.HasMany(e => e.QueryWhitelist)
                 .WithOne(e => e.Instance)
                 .HasPrincipalKey(e => e.Id)
@@ -95,6 +100,17 @@ public class DatabaseContext : DbContext
 
             entity.PropertyWithAnnotations(e => e.InstanceId);
             entity.PropertyWithAnnotations(e => e.QueryId);
+        });
+
+        modelBuilder.Entity<InstanceQueryDatabase>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.DatabaseOverride);
         });
 
         modelBuilder.Entity<InstanceQueryWhitelist>(entity =>
