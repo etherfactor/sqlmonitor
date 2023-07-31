@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Database.Core;
+using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
 
@@ -29,5 +29,23 @@ public class Migration002_CreateQueryTables : AutoReversingMigration
             .OnTable("queries")
             .OnColumn("last_run_at_utc")
             .Ascending();
+
+        /*
+         * Create [dbo].[instance_query_blacklists]
+         *  - these queries will not run on the instance
+         */
+        Create.Table("instance_query_blacklists")
+            .WithColumn("instance_id").AsGuid().PrimaryKey()
+            .WithColumn("query_id").AsGuid().PrimaryKey()
+            .WithAuditColumns();
+
+        /*
+         * Create [dbo].[instance_query_whitelists]
+         *  - if specified, only these queries will run on the instance
+         */
+        Create.Table("instance_query_whitelists")
+            .WithColumn("instance_id").AsGuid().PrimaryKey()
+            .WithColumn("query_id").AsGuid().PrimaryKey()
+            .WithAuditColumns();
     }
 }

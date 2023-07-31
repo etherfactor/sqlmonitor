@@ -75,6 +75,36 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.Address);
             entity.PropertyWithAnnotations(e => e.Port);
+
+            entity.HasMany(e => e.QueryBlacklist)
+                .WithOne(e => e.Instance)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.InstanceId);
+
+            entity.HasMany(e => e.QueryWhitelist)
+                .WithOne(e => e.Instance)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.InstanceId);
+        });
+
+        modelBuilder.Entity<InstanceQueryBlacklist>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.QueryId);
+        });
+
+        modelBuilder.Entity<InstanceQueryWhitelist>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.QueryId);
         });
 
         modelBuilder.Entity<Permission>(entity =>
