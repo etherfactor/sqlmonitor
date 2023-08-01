@@ -21,6 +21,7 @@ public static class IServiceCollectionExtensions
             {
                 opt.AddPermission();
                 opt.AddSecurable();
+                opt.AddQuery();
                 opt.AddUser();
             });
 

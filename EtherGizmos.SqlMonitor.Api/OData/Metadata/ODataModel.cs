@@ -13,6 +13,7 @@ public static class ODataModel
 
         builder.AddPermission();
         builder.AddSecurable();
+        builder.AddQuery();
         builder.AddUser();
 
         var model = builder.GetEdmModel();
