@@ -8,9 +8,14 @@ public interface IEditableQueryableService<T> : IQueryableService<T>
     where T : class
 {
     /// <summary>
-    /// Adds or updates a record.
+    /// Adds a record, if it does not already exist.
     /// </summary>
-    /// <param name="record">The record to add or update.</param>
-    /// <returns>An awaitable task.</returns>
-    void AddOrUpdate(T record);
+    /// <param name="record">The record to add.</param>
+    void Add(T record);
+
+    /// <summary>
+    /// Removes a record, if it exists.
+    /// </summary>
+    /// <param name="record">The record to remove.</param>
+    void Remove(T record);
 }

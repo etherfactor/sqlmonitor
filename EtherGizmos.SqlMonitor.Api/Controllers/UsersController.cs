@@ -100,7 +100,7 @@ public class UsersController : ODataController
         User newRecord = Mapper.Map<User>(record);
 
         newRecord.EnsureValid(Users);
-        UserService.AddOrUpdate(newRecord);
+        UserService.Add(newRecord);
 
         await SaveService.SaveChangesAsync();
 

@@ -44,7 +44,7 @@ public class InstanceService : IInstanceService
     }
 
     /// <inheritdoc/>
-    public void AddOrUpdate(Instance record)
+    public void Add(Instance record)
     {
         if (!Context.Instances.Contains(record))
             Context.Instances.Add(record);
@@ -63,5 +63,12 @@ public class InstanceService : IInstanceService
     public IQueryable<Instance> GetQueryable()
     {
         return Context.Instances;
+    }
+
+    /// <inheritdoc/>
+    public void Remove(Instance record)
+    {
+        if (Context.Instances.Contains(record))
+            Context.Instances.Remove(record);
     }
 }

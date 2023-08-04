@@ -161,6 +161,8 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.SystemId);
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.SqlText);
             entity.PropertyWithAnnotations(e => e.RunFrequency);
             entity.PropertyWithAnnotations(e => e.LastRunAtUtc);

@@ -18,6 +18,12 @@ public class Query : Auditable
     [Column("description")]
     public string? Description { get; set; }
 
+    [Column("is_active")]
+    public bool IsActive { get; set; }
+
+    [Column("is_soft_deleted")]
+    public bool IsSoftDeleted { get; set; }
+
     [Column("sql_text")]
     public string SqlText { get; set; }
 

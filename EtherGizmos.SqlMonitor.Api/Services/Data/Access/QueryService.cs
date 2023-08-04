@@ -44,7 +44,7 @@ public class QueryService : IQueryService
     }
 
     /// <inheritdoc/>
-    public void AddOrUpdate(Query record)
+    public void Add(Query record)
     {
         if (!Context.Queries.Contains(record))
             Context.Queries.Add(record);
@@ -62,6 +62,13 @@ public class QueryService : IQueryService
     /// <inheritdoc/>
     public IQueryable<Query> GetQueryable()
     {
-        return Context.Queries;
+        return Context.Queries.Where(e => !e.IsSoftDeleted);
+    }
+
+    /// <inheritdoc/>
+    public void Remove(Query record)
+    {
+        if (Context.Queries.Contains(record))
+            Context.Queries.Remove(record);
     }
 }

@@ -25,12 +25,14 @@ internal static class Global
         services.AddScoped(typeof(ILogger<>), typeof(ProxyLogger<>));
 
         services.AddScoped<PermissionsController>();
+        services.AddScoped<QueriesController>();
         services.AddScoped<SecurablesController>();
         services.AddScoped<UsersController>();
 
         services.AddScoped<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
         services.AddScoped<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
+        services.AddScoped<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
         services.AddScoped<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
         services.AddScoped<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
 

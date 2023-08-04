@@ -35,6 +35,9 @@ public class QueryDTO
     [Display(Name = "description")]
     public string? Description { get; set; }
 
+    [Display(Name = "is_active")]
+    public bool? IsActive { get; set; }
+
     [Required]
     [Display(Name = "sql_text")]
     public string? SqlText { get; set; }
@@ -51,6 +54,11 @@ public class QueryDTO
 
     [Display(Name = "bucket_expression")]
     public string? BucketExpression { get; set; }
+
+    public Task EnsureValid(IQueryable<Query> records)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 public static class ForQueryDTO
@@ -69,6 +77,7 @@ public static class ForQueryDTO
         toDto.MapMember(dest => dest.SystemId, src => src.SystemId);
         toDto.MapMember(dest => dest.Name, src => src.Name);
         toDto.MapMember(dest => dest.Description, src => src.Description);
+        toDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         toDto.MapMember(dest => dest.SqlText, src => src.SqlText);
         toDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
         toDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);
@@ -87,6 +96,7 @@ public static class ForQueryDTO
         fromDto.MapMember(dest => dest.SystemId, src => src.SystemId);
         fromDto.MapMember(dest => dest.Name, src => src.Name);
         fromDto.MapMember(dest => dest.Description, src => src.Description);
+        fromDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         fromDto.MapMember(dest => dest.SqlText, src => src.SqlText);
         fromDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
         fromDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);

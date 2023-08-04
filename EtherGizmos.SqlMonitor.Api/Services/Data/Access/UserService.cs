@@ -21,7 +21,7 @@ public class UserService : IUserService
     }
 
     /// <inheritdoc/>
-    public void AddOrUpdate(User record)
+    public void Add(User record)
     {
         if (!Context.Users.Contains(record))
             Context.Users.Add(record);
@@ -31,5 +31,12 @@ public class UserService : IUserService
     public IQueryable<User> GetQueryable()
     {
         return Context.Users;
+    }
+
+    /// <inheritdoc/>
+    public void Remove(User record)
+    {
+        if (Context.Users.Contains(record))
+            Context.Users.Remove(record);
     }
 }
