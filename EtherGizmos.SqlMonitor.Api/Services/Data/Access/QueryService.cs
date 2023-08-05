@@ -68,7 +68,6 @@ public class QueryService : IQueryService
     /// <inheritdoc/>
     public void Remove(Query record)
     {
-        if (Context.Queries.Contains(record))
-            Context.Queries.Remove(record);
+        record.IsSoftDeleted = true;
     }
 }

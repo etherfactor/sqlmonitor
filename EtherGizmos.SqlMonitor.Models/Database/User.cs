@@ -27,6 +27,9 @@ public class User : Auditable
     [Column("is_active")]
     public virtual bool IsActive { get; set; }
 
+    [Column("is_soft_deleted")]
+    public virtual bool IsSoftDeleted { get; set; }
+
     [Column("is_administrator")]
     public virtual bool IsAdministrator { get; set; }
 
@@ -47,7 +50,8 @@ public class User : Auditable
         PasswordHash = null!;
     }
 
-    public void EnsureValid(IQueryable<User> records)
+    public Task EnsureValid(IQueryable<User> records)
     {
+        return Task.CompletedTask;
     }
 }

@@ -27,7 +27,7 @@ internal class UsersControllerTests : IntegrationTestBase
     }
 
     [Test]
-    public async Task Create_Returns200Ok()
+    public async Task Create_Returns201Created()
     {
         var body = new
         {
@@ -41,7 +41,7 @@ internal class UsersControllerTests : IntegrationTestBase
         Assert.Multiple(async () =>
         {
             Assert.That(response, Is.Not.Null);
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
             var contentRead = await response.Content.ReadAsStringAsync();
             Assert.That(response.Content, Is.Not.Null);
         });

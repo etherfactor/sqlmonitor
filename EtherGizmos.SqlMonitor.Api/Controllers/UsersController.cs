@@ -5,6 +5,7 @@ using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
@@ -95,16 +96,64 @@ public class UsersController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        record.EnsureValid(Users);
+        await record.EnsureValid(Users);
 
         User newRecord = Mapper.Map<User>(record);
 
-        newRecord.EnsureValid(Users);
+        await newRecord.EnsureValid(Users);
         UserService.Add(newRecord);
 
         await SaveService.SaveChangesAsync();
 
         var finished = newRecord.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        return Created(finished);
+    }
+
+    [HttpPatch]
+    [Route(BasePath + "({id})")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<UserDTO> patchRecord, ODataQueryOptions<UserDTO> queryOptions)
+    {
+        queryOptions.EnsureValidForSingle();
+
+        var testRecord = new UserDTO();
+        patchRecord.Patch(testRecord);
+
+        await testRecord.EnsureValid(Users);
+
+        User? record = await Users.SingleOrDefaultAsync(e => e.Id == id);
+        if (record == null)
+            return new ODataRecordNotFoundError<UserDTO>((e => e.Id, id)).GetResponse();
+
+        var recordAsDto = Mapper.MapExplicitly(record).To<UserDTO>();
+        patchRecord.Patch(recordAsDto);
+
+        Mapper.MergeInto(record).Using(recordAsDto);
+
+        await record.EnsureValid(Users);
+
+        await SaveService.SaveChangesAsync();
+
+        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
         return Ok(finished);
+    }
+
+    /// <summary>
+    /// Soft-deletes a record.
+    /// </summary>
+    /// <param name="id">The id of the record to delete.</param>
+    /// <returns>An awaitable task.</returns>
+    [HttpDelete]
+    [Route(BasePath + "({id})")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        User? record = await Users.SingleOrDefaultAsync(e => e.Id == id);
+        if (record == null)
+            return new ODataRecordNotFoundError<UserDTO>((e => e.Id, id)).GetResponse();
+
+        UserService.Remove(record);
+
+        await SaveService.SaveChangesAsync();
+
+        return NoContent();
     }
 }

@@ -6,7 +6,6 @@ using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
@@ -116,7 +115,7 @@ public class QueriesController : ODataController
         await SaveService.SaveChangesAsync();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
-        return Ok(finished);
+        return Created(finished);
     }
 
     /// <summary>
@@ -128,7 +127,7 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpPatch]
     [Route(BasePath + "({id})")]
-    public async Task<IActionResult> Update(Guid id, [FromODataBody] Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
@@ -144,7 +143,7 @@ public class QueriesController : ODataController
         var recordAsDto = Mapper.MapExplicitly(record).To<QueryDTO>();
         patchRecord.Patch(recordAsDto);
 
-        Mapper.MergeInto(record).Using(patchRecord);
+        Mapper.MergeInto(record).Using(recordAsDto);
 
         await record.EnsureValid(Queries);
 
@@ -165,10 +164,9 @@ public class QueriesController : ODataController
     {
         Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<PermissionDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
-        //Only soft-delete the record, since deleting a query would break foreign key constraints
-        record.IsSoftDeleted = true;
+        QueryService.Remove(record);
 
         await SaveService.SaveChangesAsync();
 

@@ -18,8 +18,8 @@ public class Migration001_CreateInstanceTables : AutoReversingMigration
             .WithAuditColumns()
             .WithColumn("name").AsString(100).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable()
-            .WithColumn("is_active").AsBoolean().NotNullable()
-            .WithColumn("is_soft_deleted").AsBoolean().NotNullable()
+            .WithColumn("is_active").AsBoolean().NotNullable().WithDefaultValue(true)
+            .WithColumn("is_soft_deleted").AsBoolean().NotNullable().WithDefaultValue(false)
             .WithColumn("address").AsString(255).NotNullable()
             .WithColumn("port").AsInt16().Nullable()
             .WithColumn("database").AsString(128).Nullable();

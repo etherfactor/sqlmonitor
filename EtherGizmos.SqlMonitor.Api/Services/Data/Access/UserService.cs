@@ -30,13 +30,12 @@ public class UserService : IUserService
     /// <inheritdoc/>
     public IQueryable<User> GetQueryable()
     {
-        return Context.Users;
+        return Context.Users.Where(e => !e.IsSoftDeleted);
     }
 
     /// <inheritdoc/>
     public void Remove(User record)
     {
-        if (Context.Users.Contains(record))
-            Context.Users.Remove(record);
+        record.IsSoftDeleted = true;
     }
 }

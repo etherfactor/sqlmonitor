@@ -210,6 +210,7 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.EmailAddress);
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.IsAdministrator);
             entity.PropertyWithAnnotations(e => e.LastLoginAtUtc);
             entity.PropertyWithAnnotations(e => e.PrincipalId);

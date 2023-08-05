@@ -8,7 +8,7 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Data.Migrations;
 internal class DatabaseMigrationRunnerTests
 {
     [Test]
-    public async Task Test()
+    public async Task DatabaseMigratesAndReverts()
     {
         var databaseName = "sqlmonitor_migration";
         var options = new Dictionary<string, string?>()

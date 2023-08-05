@@ -27,7 +27,7 @@ internal class QueriesControllerTests : IntegrationTestBase
     }
 
     [Test]
-    public async Task Create_Returns200Ok()
+    public async Task Create_Returns201Created()
     {
         var body = new
         {
@@ -41,9 +41,54 @@ internal class QueriesControllerTests : IntegrationTestBase
         Assert.Multiple(async () =>
         {
             Assert.That(response, Is.Not.Null);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            var contentRead = await response.Content.ReadAsStringAsync();
+            Assert.That(response.Content, Is.Not.Null);
+        });
+    }
+
+    [Test]
+    public async Task Update_Returns200Ok()
+    {
+        var recordId = await CreateTest();
+
+        var body = new
+        {
+            name = "New Test"
+        };
+
+        var response = await Client.PatchAsync($"https://localhost:7200/api/v1/queries({recordId})", body.AsJsonContent());
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             var contentRead = await response.Content.ReadAsStringAsync();
             Assert.That(response.Content, Is.Not.Null);
         });
+    }
+
+    private async Task<Guid> CreateTest()
+    {
+        var body = new
+        {
+            name = "Test",
+            sql_text = "select 1",
+            run_frequency = "PT5M"
+        };
+
+        var response = await Client.PostAsync("https://localhost:7200/api/v1/queries", body.AsJsonContent());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(response.Content, Is.Not.Null);
+        });
+
+        var data = await response.Content.ReadFromJsonModelAsync(new { id = default(Guid) });
+
+        Assert.That(data, Is.Not.Null);
+
+        return data.id;
     }
 }
