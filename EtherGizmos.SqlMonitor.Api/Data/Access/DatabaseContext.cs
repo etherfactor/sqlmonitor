@@ -76,7 +76,7 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Address);
             entity.PropertyWithAnnotations(e => e.Port);
 
-            entity.HasMany(e => e.QueryBlacklist)
+            entity.HasMany(e => e.QueryBlacklists)
                 .WithOne(e => e.Instance)
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);
@@ -86,7 +86,7 @@ public class DatabaseContext : DbContext
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);
 
-            entity.HasMany(e => e.QueryWhitelist)
+            entity.HasMany(e => e.QueryWhitelists)
                 .WithOne(e => e.Instance)
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);

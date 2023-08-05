@@ -19,6 +19,9 @@ public static class IServiceCollectionExtensions
         {
             MapperConfiguration configuration = new MapperConfiguration(opt =>
             {
+                opt.AddInstance();
+                opt.AddInstanceQuery();
+                opt.AddInstanceQueryDatabase();
                 opt.AddPermission();
                 opt.AddSecurable();
                 opt.AddQuery();

@@ -15,6 +15,12 @@ public class Instance : Auditable
     [Column("description")]
     public virtual string? Description { get; set; }
 
+    [Column("is_active")]
+    public virtual bool IsActive { get; set; } = true;
+
+    [Column("is_soft_deleted")]
+    public virtual bool IsSoftDeleted { get; set; } = false;
+
     [Column("address")]
     public virtual string Address { get; set; }
 
@@ -24,9 +30,9 @@ public class Instance : Auditable
     [Column("database")]
     public virtual string? Database { get; set; }
 
-    public virtual List<InstanceQueryBlacklist> QueryBlacklist { get; set; } = new List<InstanceQueryBlacklist>();
+    public virtual List<InstanceQueryBlacklist> QueryBlacklists { get; set; } = new List<InstanceQueryBlacklist>();
 
-    public virtual List<InstanceQueryWhitelist> QueryWhitelist { get; set; } = new List<InstanceQueryWhitelist>();
+    public virtual List<InstanceQueryWhitelist> QueryWhitelists { get; set; } = new List<InstanceQueryWhitelist>();
 
     public virtual List<InstanceQueryDatabase> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabase>();
 

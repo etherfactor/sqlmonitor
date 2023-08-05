@@ -15,13 +15,13 @@ using System.Net;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Controllers;
 
-internal class QueriesControllerTests
+internal class InstancesControllerTests
 {
     private IServiceProvider Provider { get; set; }
 
-    private QueriesController Controller { get; set; }
+    private InstancesController Controller { get; set; }
 
-    private List<Query> Data { get; set; }
+    private List<Instance> Data { get; set; }
 
     private Guid RecordId { get; } = Guid.NewGuid();
 
@@ -29,62 +29,50 @@ internal class QueriesControllerTests
     public void SetUp()
     {
         Provider = Global.CreateScope();
-        Controller = Provider.GetRequiredService<QueriesController>();
-        Data = new List<Query>()
+        Controller = Provider.GetRequiredService<InstancesController>();
+        Data = new List<Instance>()
         {
-            new Query()
+            new Instance()
             {
                 Id = RecordId,
                 Name = "Test 1",
                 Description = null,
                 IsActive = true,
                 IsSoftDeleted = false,
-                SqlText = "select 1",
-                RunFrequency = TimeSpan.FromSeconds(5),
-                TimestampUtcExpression = null,
-                BucketExpression = null
+                Address = "localhost"
             },
-            new Query()
+            new Instance()
             {
                 Id = Guid.NewGuid(),
                 Name = "Test 2",
                 Description = null,
                 IsActive = true,
                 IsSoftDeleted = false,
-                SqlText = "select 1",
-                RunFrequency = TimeSpan.FromSeconds(5),
-                TimestampUtcExpression = null,
-                BucketExpression = null
+                Address = "localhost"
             },
-            new Query()
+            new Instance()
             {
                 Id = Guid.NewGuid(),
                 Name = "Test 3",
                 Description = null,
                 IsActive = false,
                 IsSoftDeleted = false,
-                SqlText = "select 1",
-                RunFrequency = TimeSpan.FromSeconds(5),
-                TimestampUtcExpression = null,
-                BucketExpression = null
+                Address = "localhost"
             },
-            new Query()
+            new Instance()
             {
                 Id = Guid.NewGuid(),
                 Name = "Test 4",
                 Description = null,
                 IsActive = false,
                 IsSoftDeleted = true,
-                SqlText = "select 1",
-                RunFrequency = TimeSpan.FromSeconds(5),
-                TimestampUtcExpression = null,
-                BucketExpression = null
+                Address = "localhost"
             }
         };
 
         var mockData = Data.AsQueryable().BuildMock();
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Setup(service => service.GetQueryable()).Returns(mockData);
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -95,12 +83,12 @@ internal class QueriesControllerTests
     public async Task Search_IsValid_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "");
 
@@ -112,10 +100,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<QueryDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<InstanceDTO>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -126,12 +114,12 @@ internal class QueriesControllerTests
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             $"$filter=id eq {RecordId}");
 
@@ -143,57 +131,57 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<QueryDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<InstanceDTO>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
     }
 
-    //[Test]
-    //public async Task Search_IsValid_WithExpand_Returns200Ok()
-    //{
-    //    var model = ODataModel.GetEdmModel(1.0m);
-    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
-    //        model,
-    //        "GET",
-    //        "https://localhost:7200",
-    //        "api/v1",
-    //        "queries",
-    //        "",
-    //        "$expand=...");
+    [Test]
+    public async Task Search_IsValid_WithExpand_Returns200Ok()
+    {
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "instances",
+            "",
+            "$expand=query_whitelists/query");
 
-    //    var result = await Controller.Search(queryOptions);
-    //    var status = result.GetStatusCode();
-    //    var content = result.GetContent();
+        var result = await Controller.Search(queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
 
-    //    Assert.Multiple(() =>
-    //    {
-    //        Assert.That(result, Is.Not.Null);
-    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-    //        Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
-    //    });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
+        });
 
-    //    var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
-    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
-    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
-    //}
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
+    }
 
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$select=id");
 
@@ -208,7 +196,7 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -219,12 +207,12 @@ internal class QueriesControllerTests
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$orderby=name");
 
@@ -236,10 +224,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<QueryDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<InstanceDTO>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -250,12 +238,12 @@ internal class QueriesControllerTests
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$top=1");
 
@@ -267,10 +255,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<QueryDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<InstanceDTO>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -281,12 +269,12 @@ internal class QueriesControllerTests
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$skip=1");
 
@@ -298,10 +286,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<QueryDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<InstanceDTO>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -312,12 +300,12 @@ internal class QueriesControllerTests
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$count=true");
 
@@ -329,10 +317,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<QueryDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<InstanceDTO>>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -345,12 +333,12 @@ internal class QueriesControllerTests
         Guid recordId = new Guid();
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "");
 
@@ -365,7 +353,7 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<ODataError>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -378,12 +366,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "");
 
@@ -395,10 +383,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<QueryDTO>());
+            Assert.That(content, Is.AssignableTo<InstanceDTO>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -411,12 +399,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "$filter=id eq 'CREATE'");
 
@@ -426,38 +414,38 @@ internal class QueriesControllerTests
         });
     }
 
-    //[Test]
-    //public async Task Get_IsValid_WithExpand_Returns200Ok()
-    //{
-    //    Guid recordId = RecordId;
+    [Test]
+    public async Task Get_IsValid_WithExpand_Returns200Ok()
+    {
+        Guid recordId = RecordId;
 
-    //    var model = ODataModel.GetEdmModel(1.0m);
-    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
-    //        model,
-    //        "GET",
-    //        "https://localhost:7200",
-    //        "api/v1",
-    //        "queries",
-    //        $"('{recordId}')",
-    //        "$expand=...");
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "instances",
+            $"('{recordId}')",
+            "$expand=query_whitelists/query");
 
-    //    var result = await Controller.Get(recordId, queryOptions);
-    //    var status = result.GetStatusCode();
-    //    var content = result.GetContent();
+        var result = await Controller.Get(recordId, queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
 
-    //    Assert.Multiple(() =>
-    //    {
-    //        Assert.That(result, Is.Not.Null);
-    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
-    //    });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+        });
 
-    //    var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
-    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
-    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
-    //}
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
+    }
 
     [Test]
     public async Task Get_IsValid_WithSelect_Returns200Ok()
@@ -465,12 +453,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "$select=id");
 
@@ -485,7 +473,7 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -498,12 +486,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "$orderby=id");
 
@@ -519,12 +507,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "$top=1");
 
@@ -540,12 +528,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "$skip=1");
 
@@ -561,12 +549,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "$count=true");
 
@@ -580,20 +568,19 @@ internal class QueriesControllerTests
     public async Task Create_IsValid_Returns201Created()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "POST",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         var result = await Controller.Create(record, queryOptions);
@@ -604,10 +591,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(content, Is.AssignableTo<QueryDTO>());
+            Assert.That(content, Is.AssignableTo<InstanceDTO>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -618,20 +605,19 @@ internal class QueriesControllerTests
     public void Create_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             $"$filter=id eq {RecordId}");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
@@ -640,62 +626,23 @@ internal class QueriesControllerTests
         });
     }
 
-    //[Test]
-    //public async Task Create_IsValid_WithExpand_Returns200Ok()
-    //{
-    //    var model = ODataModel.GetEdmModel(1.0m);
-    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
-    //        model,
-    //        "GET",
-    //        "https://localhost:7200",
-    //        "api/v1",
-    //        "queries",
-    //        "",
-    //        "$expand=...");
-
-    //    var record = new QueryDTO()
-    //    {
-    //        Name = "Test",
-    //        SqlText = "select 1;",
-    //        RunFrequency = TimeSpan.FromSeconds(5)
-    //    };
-
-    //    var result = await Controller.Create(record, queryOptions);
-    //    var status = result.GetStatusCode();
-    //    var content = result.GetContent();
-
-    //    Assert.Multiple(() =>
-    //    {
-    //        Assert.That(result, Is.Not.Null);
-    //        Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
-    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
-    //    });
-
-    //    var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
-    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
-
-    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
-    //}
-
     [Test]
-    public async Task Create_IsValid_WithSelect_Returns201Created()
+    public async Task Create_IsValid_WithExpand_Returns200Ok()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
-            "$select=id");
+            "$expand=query_whitelists/query");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         var result = await Controller.Create(record, queryOptions);
@@ -709,7 +656,44 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    }
+
+    [Test]
+    public async Task Create_IsValid_WithSelect_Returns201Created()
+    {
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "instances",
+            "",
+            "$select=id");
+
+        var record = new InstanceDTO()
+        {
+            Name = "Test",
+            Address = "localhost"
+        };
+
+        var result = await Controller.Create(record, queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+        });
+
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -720,20 +704,19 @@ internal class QueriesControllerTests
     public void Create_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$orderby=id");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
@@ -746,20 +729,19 @@ internal class QueriesControllerTests
     public void Create_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$top=1");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
@@ -772,20 +754,19 @@ internal class QueriesControllerTests
     public void Create_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$skip=1");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
@@ -798,20 +779,19 @@ internal class QueriesControllerTests
     public void Create_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             "",
             "$count=true");
 
-        var record = new QueryDTO()
+        var record = new InstanceDTO()
         {
             Name = "Test",
-            SqlText = "select 1;",
-            RunFrequency = TimeSpan.FromSeconds(5)
+            Address = "localhost"
         };
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
@@ -826,17 +806,17 @@ internal class QueriesControllerTests
         var recordId = Guid.NewGuid();
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "PATCH",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
             "");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         var result = await Controller.Update(recordId, record, queryOptions);
         var status = result.GetStatusCode();
@@ -849,7 +829,7 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<ODataError>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -862,17 +842,17 @@ internal class QueriesControllerTests
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "POST",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
             "");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         var result = await Controller.Update(recordId, record, queryOptions);
         var status = result.GetStatusCode();
@@ -882,10 +862,10 @@ internal class QueriesControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<QueryDTO>());
+            Assert.That(content, Is.AssignableTo<InstanceDTO>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -898,17 +878,17 @@ internal class QueriesControllerTests
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
             $"$filter=id eq {RecordId}");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -916,59 +896,23 @@ internal class QueriesControllerTests
         });
     }
 
-    //[Test]
-    //public async Task Update_IsValid_WithExpand_Returns200Ok()
-    //{
-    //    var recordId = RecordId;
-
-    //    var model = ODataModel.GetEdmModel(1.0m);
-    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
-    //        model,
-    //        "GET",
-    //        "https://localhost:7200",
-    //        "api/v1",
-    //        "queries",
-    //        $"({recordId})",
-    //        "$expand=...");
-
-    //    var record = new Delta<QueryDTO>();
-    //    record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
-
-    //    var result = await Controller.Update(recordId, record, queryOptions);
-    //    var status = result.GetStatusCode();
-    //    var content = result.GetContent();
-
-    //    Assert.Multiple(() =>
-    //    {
-    //        Assert.That(result, Is.Not.Null);
-    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
-    //    });
-
-    //    var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
-    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
-
-    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
-    //}
-
     [Test]
-    public async Task Update_IsValid_WithSelect_Returns200Ok()
+    public async Task Update_IsValid_WithExpand_Returns200Ok()
     {
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
-            "$select=id");
+            "$expand=query_whitelists/query");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         var result = await Controller.Update(recordId, record, queryOptions);
         var status = result.GetStatusCode();
@@ -981,7 +925,43 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    }
+
+    [Test]
+    public async Task Update_IsValid_WithSelect_Returns200Ok()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "instances",
+            $"({recordId})",
+            "$select=id");
+
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
+
+        var result = await Controller.Update(recordId, record, queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+        });
+
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -994,17 +974,17 @@ internal class QueriesControllerTests
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({RecordId})",
             "$orderby=id");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -1018,17 +998,17 @@ internal class QueriesControllerTests
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
             "$top=1");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -1042,17 +1022,17 @@ internal class QueriesControllerTests
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
             "$skip=1");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -1066,17 +1046,17 @@ internal class QueriesControllerTests
         var recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"({recordId})",
             "$count=true");
 
-        var record = new Delta<QueryDTO>();
-        record.TrySetPropertyValue(nameof(QueryDTO.Name), "New Name");
+        var record = new Delta<InstanceDTO>();
+        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -1090,12 +1070,12 @@ internal class QueriesControllerTests
         Guid recordId = new Guid();
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "DELETE",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "");
 
@@ -1110,7 +1090,7 @@ internal class QueriesControllerTests
             Assert.That(content, Is.AssignableTo<ODataError>());
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
@@ -1123,12 +1103,12 @@ internal class QueriesControllerTests
         Guid recordId = RecordId;
 
         var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
             model,
             "DELETE",
             "https://localhost:7200",
             "api/v1",
-            "queries",
+            "instances",
             $"('{recordId}')",
             "");
 
@@ -1143,7 +1123,7 @@ internal class QueriesControllerTests
             Assert.That(content, Is.Null);
         });
 
-        var mockServ = Provider.GetRequiredService<Mock<IQueryService>>();
+        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();

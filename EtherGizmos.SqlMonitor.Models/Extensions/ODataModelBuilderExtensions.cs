@@ -10,6 +10,30 @@ namespace EtherGizmos.SqlMonitor.Models.Extensions;
 internal static class ODataModelBuilderExtensions
 {
     /// <summary>
+    /// Adds a complex type to an OData model, reading from annotations.
+    /// </summary>
+    /// <typeparam name="TComplexType">The type of complex object.</typeparam>
+    /// <param name="this">Itself.</param>
+    /// <returns>The complex type builder.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    internal static ComplexTypeConfiguration<TComplexType> ComplexTypeWithAnnotations<TComplexType>(this ODataModelBuilder @this)
+        where TComplexType : class
+    {
+        //Get the DisplayAttribute
+        DisplayAttribute? attribute = typeof(TComplexType).GetCustomAttribute<DisplayAttribute>();
+
+        //Load the entity type name, and ensure it exists
+        string typeName = attribute?.Name
+            ?? throw new InvalidOperationException(string.Format("Type '{0}' must be annotated with a '{1}' and specify the '{2}' property",
+                typeof(TComplexType).Name, nameof(DisplayAttribute), nameof(attribute.Name)));
+
+        //Create an entity type and name it
+        var configuration = @this.ComplexType<TComplexType>();
+        configuration.Name = typeName;
+        return configuration;
+    }
+
+    /// <summary>
     /// Adds an entity set to an OData model, reading from annotations.
     /// </summary>
     /// <typeparam name="TEntityType">The type of entity.</typeparam>

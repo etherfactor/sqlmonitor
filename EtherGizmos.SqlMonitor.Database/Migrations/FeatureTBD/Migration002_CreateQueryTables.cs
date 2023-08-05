@@ -101,7 +101,7 @@ public class Migration002_CreateQueryTables : AutoReversingMigration
             .WithColumn("instance_id").AsGuid().PrimaryKey()
             .WithColumn("query_id").AsGuid().PrimaryKey()
             .WithAuditColumns()
-            .WithColumn("override_database").AsString(128).Nullable();
+            .WithColumn("database_override").AsString(128).Nullable();
 
         Create.ForeignKey("FK_instance_query_databases_instance_id")
             .FromTable("instance_query_databases").ForeignColumn("instance_id")

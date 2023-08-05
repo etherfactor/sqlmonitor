@@ -110,6 +110,7 @@ public static class ForUserDTO
 
         var entity = @this.EntityTypeWithAnnotations<UserDTO>();
         entity.HasKey(e => e.Id);
+        entity.PropertyWithAnnotations(e => e.Id);
         /* Begin Audit */
         entity.PropertyWithAnnotations(e => e.CreatedAt);
         entity.PropertyWithAnnotations(e => e.CreatedByUserId);

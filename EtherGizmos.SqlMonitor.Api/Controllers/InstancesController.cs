@@ -13,12 +13,12 @@ using Microsoft.EntityFrameworkCore;
 namespace EtherGizmos.SqlMonitor.Api.Controllers;
 
 /// <summary>
-/// Provides endpoints for <see cref="Query"/> records.
+/// Provides endpoints for <see cref="Instance"/> records.
 /// </summary>
 [Route(BasePath)]
-public class QueriesController : ODataController
+public class InstancesController : ODataController
 {
-    private const string BasePath = "/api/v1/queries";
+    private const string BasePath = "/api/v1/instances";
 
     /// <summary>
     /// The logger to utilize.
@@ -33,7 +33,7 @@ public class QueriesController : ODataController
     /// <summary>
     /// Provides access to the storage of records.
     /// </summary>
-    private IQueryService QueryService { get; }
+    private IInstanceService InstanceService { get; }
 
     /// <summary>
     /// Provides access to saving records.
@@ -43,20 +43,20 @@ public class QueriesController : ODataController
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Query> Queries => QueryService.GetQueryable();
+    private IQueryable<Instance> Instances => InstanceService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="queryService">Provides access to the storage of records.</param>
+    /// <param name="instanceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public QueriesController(ILogger<QueriesController> logger, IMapper mapper, IQueryService queryService, ISaveService saveService)
+    public InstancesController(ILogger<QueriesController> logger, IMapper mapper, IInstanceService instanceService, ISaveService saveService)
     {
         Logger = logger;
         Mapper = mapper;
-        QueryService = queryService;
+        InstanceService = instanceService;
         SaveService = saveService;
     }
 
@@ -67,9 +67,9 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpGet]
     [Route(BasePath)]
-    public async Task<IActionResult> Search(ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Search(ODataQueryOptions<InstanceDTO> queryOptions)
     {
-        var finished = await Queries.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = await Instances.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -81,13 +81,13 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpGet]
     [Route(BasePath + "({id})")]
-    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<InstanceDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
+        Instance? record = await Instances.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<InstanceDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
         return Ok(finished);
@@ -101,16 +101,16 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpPost]
     [Route(BasePath)]
-    public async Task<IActionResult> Create([FromBody] QueryDTO newRecord, ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] InstanceDTO newRecord, ODataQueryOptions<InstanceDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Queries);
+        await newRecord.EnsureValid(Instances);
 
-        Query record = Mapper.Map<Query>(newRecord);
+        Instance record = Mapper.Map<Instance>(newRecord);
 
-        await record.EnsureValid(Queries);
-        QueryService.Add(record);
+        await record.EnsureValid(Instances);
+        InstanceService.Add(record);
 
         await SaveService.SaveChangesAsync();
 
@@ -127,25 +127,25 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpPatch]
     [Route(BasePath + "({id})")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<InstanceDTO> patchRecord, ODataQueryOptions<InstanceDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        var testRecord = new QueryDTO();
+        var testRecord = new InstanceDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Queries);
+        await testRecord.EnsureValid(Instances);
 
-        Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
+        Instance? record = await Instances.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<InstanceDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = Mapper.MapExplicitly(record).To<QueryDTO>();
+        var recordAsDto = Mapper.MapExplicitly(record).To<InstanceDTO>();
         patchRecord.Patch(recordAsDto);
 
         Mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Queries);
+        await record.EnsureValid(Instances);
 
         await SaveService.SaveChangesAsync();
 
@@ -162,11 +162,11 @@ public class QueriesController : ODataController
     [Route(BasePath + "({id})")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
+        Instance? record = await Instances.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<InstanceDTO>((e => e.Id, id)).GetResponse();
 
-        QueryService.Remove(record);
+        InstanceService.Remove(record);
 
         await SaveService.SaveChangesAsync();
 

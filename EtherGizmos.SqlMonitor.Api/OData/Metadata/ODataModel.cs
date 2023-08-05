@@ -11,6 +11,9 @@ public static class ODataModel
         var builder = new ODataModelBuilder();
         builder.Namespace = "SqlMonitor.v1";
 
+        builder.AddInstance();
+        builder.AddInstanceQuery();
+        builder.AddInstanceQueryDatabase();
         builder.AddPermission();
         builder.AddSecurable();
         builder.AddQuery();

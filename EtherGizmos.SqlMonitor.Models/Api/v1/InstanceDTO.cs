@@ -6,10 +6,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "Query", GroupName = "queries")]
-public class QueryDTO
+[Display(Name = "Instance", GroupName = "instances")]
+public class InstanceDTO
 {
-    [Required]
     [Display(Name = "id")]
     public Guid Id { get; set; }
 
@@ -25,9 +24,6 @@ public class QueryDTO
     [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
-    [Display(Name = "system_id")]
-    public Guid SystemId { get; set; }
-
     [Required]
     [Display(Name = "name")]
     public string? Name { get; set; }
@@ -39,33 +35,35 @@ public class QueryDTO
     public bool? IsActive { get; set; }
 
     [Required]
-    [Display(Name = "sql_text")]
-    public string? SqlText { get; set; }
+    [Display(Name = "address")]
+    public string? Address { get; set; }
 
-    [Required]
-    [Display(Name = "run_frequency")]
-    public TimeSpan? RunFrequency { get; set; }
+    [Display(Name = "port")]
+    public short? Port { get; set; }
 
-    [Display(Name = "last_run_at_utc")]
-    public DateTimeOffset? LastRunAtUtc { get; set; }
+    [Display(Name = "database")]
+    public string? Database { get; set; }
 
-    [Display(Name = "timestamp_utc_expression")]
-    public string? TimestampUtcExpression { get; set; }
+    [Display(Name = "query_blacklists")]
+    public List<InstanceQueryDTO> QueryBlacklists { get; set; } = new List<InstanceQueryDTO>();
 
-    [Display(Name = "bucket_expression")]
-    public string? BucketExpression { get; set; }
+    [Display(Name = "query_whitelists")]
+    public List<InstanceQueryDTO> QueryWhitelists { get; set; } = new List<InstanceQueryDTO>();
 
-    public Task EnsureValid(IQueryable<Query> records)
+    [Display(Name = "query_database_overrides")]
+    public List<InstanceQueryDatabaseDTO> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabaseDTO>();
+
+    public Task EnsureValid(IQueryable<Instance> records)
     {
         return Task.CompletedTask;
     }
 }
 
-public static class ForQueryDTO
+public static class ForInstanceDTO
 {
-    public static IProfileExpression AddQuery(this IProfileExpression @this)
+    public static IProfileExpression AddInstance(this IProfileExpression @this)
     {
-        var toDto = @this.CreateMap<Query, QueryDTO>();
+        var toDto = @this.CreateMap<Instance, InstanceDTO>();
         toDto.IgnoreAllMembers();
         toDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */
@@ -74,17 +72,17 @@ public static class ForQueryDTO
         toDto.MapMember(dest => dest.ModifiedAt, src => src.ModifiedAt);
         toDto.MapMember(dest => dest.ModifiedByUserId, src => src.ModifiedByUserId);
         /*  End Audit  */
-        toDto.MapMember(dest => dest.SystemId, src => src.SystemId);
         toDto.MapMember(dest => dest.Name, src => src.Name);
         toDto.MapMember(dest => dest.Description, src => src.Description);
         toDto.MapMember(dest => dest.IsActive, src => src.IsActive);
-        toDto.MapMember(dest => dest.SqlText, src => src.SqlText);
-        toDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
-        toDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);
-        toDto.MapMember(dest => dest.TimestampUtcExpression, src => src.TimestampUtcExpression);
-        toDto.MapMember(dest => dest.BucketExpression, src => src.BucketExpression);
+        toDto.MapMember(dest => dest.Address, src => src.Address);
+        toDto.MapMember(dest => dest.Port, src => src.Port);
+        toDto.MapMember(dest => dest.Database, src => src.Database);
+        toDto.MapMember(dest => dest.QueryBlacklists, src => src.QueryBlacklists);
+        toDto.MapMember(dest => dest.QueryWhitelists, src => src.QueryWhitelists);
+        toDto.MapMember(dest => dest.QueryDatabaseOverrides, src => src.QueryDatabaseOverrides);
 
-        var fromDto = @this.CreateMap<QueryDTO, Query>();
+        var fromDto = @this.CreateMap<InstanceDTO, Instance>();
         fromDto.IgnoreAllMembers();
         fromDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */
@@ -93,24 +91,24 @@ public static class ForQueryDTO
         fromDto.MapMember(dest => dest.ModifiedAt, src => src.ModifiedAt);
         fromDto.MapMember(dest => dest.ModifiedByUserId, src => src.ModifiedByUserId);
         /*  End Audit  */
-        fromDto.MapMember(dest => dest.SystemId, src => src.SystemId);
         fromDto.MapMember(dest => dest.Name, src => src.Name);
         fromDto.MapMember(dest => dest.Description, src => src.Description);
         fromDto.MapMember(dest => dest.IsActive, src => src.IsActive);
-        fromDto.MapMember(dest => dest.SqlText, src => src.SqlText);
-        fromDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
-        fromDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);
-        fromDto.MapMember(dest => dest.TimestampUtcExpression, src => src.TimestampUtcExpression);
-        fromDto.MapMember(dest => dest.BucketExpression, src => src.BucketExpression);
+        fromDto.MapMember(dest => dest.Address, src => src.Address);
+        fromDto.MapMember(dest => dest.Port, src => src.Port);
+        fromDto.MapMember(dest => dest.Database, src => src.Database);
+        fromDto.MapMember(dest => dest.QueryBlacklists, src => src.QueryBlacklists);
+        fromDto.MapMember(dest => dest.QueryWhitelists, src => src.QueryWhitelists);
+        fromDto.MapMember(dest => dest.QueryDatabaseOverrides, src => src.QueryDatabaseOverrides);
 
         return @this;
     }
 
-    public static ODataModelBuilder AddQuery(this ODataModelBuilder @this)
+    public static ODataModelBuilder AddInstance(this ODataModelBuilder @this)
     {
-        var entitySet = @this.EntitySetWithAnnotations<QueryDTO>();
+        var entitySet = @this.EntitySetWithAnnotations<InstanceDTO>();
 
-        var entity = @this.EntityTypeWithAnnotations<QueryDTO>();
+        var entity = @this.EntityTypeWithAnnotations<InstanceDTO>();
         entity.HasKey(e => e.Id);
         entity.PropertyWithAnnotations(e => e.Id);
         /* Begin Audit */
@@ -119,15 +117,15 @@ public static class ForQueryDTO
         entity.PropertyWithAnnotations(e => e.ModifiedAt);
         entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
         /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.SystemId);
         entity.PropertyWithAnnotations(e => e.Name);
         entity.PropertyWithAnnotations(e => e.Description);
         entity.PropertyWithAnnotations(e => e.IsActive);
-        entity.PropertyWithAnnotations(e => e.SqlText);
-        entity.PropertyWithAnnotations(e => e.RunFrequency);
-        entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
-        entity.PropertyWithAnnotations(e => e.TimestampUtcExpression);
-        entity.PropertyWithAnnotations(e => e.BucketExpression);
+        entity.PropertyWithAnnotations(e => e.Address);
+        entity.PropertyWithAnnotations(e => e.Port);
+        entity.PropertyWithAnnotations(e => e.Database);
+        entity.CollectionPropertyWithAnnotations(e => e.QueryBlacklists);
+        entity.CollectionPropertyWithAnnotations(e => e.QueryWhitelists);
+        entity.CollectionPropertyWithAnnotations(e => e.QueryDatabaseOverrides);
 
         return @this;
     }
