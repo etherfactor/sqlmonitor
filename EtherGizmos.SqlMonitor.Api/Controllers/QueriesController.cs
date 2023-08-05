@@ -6,6 +6,7 @@ using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
@@ -101,7 +102,7 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpPost]
     [Route(BasePath)]
-    public async Task<IActionResult> Create(QueryDTO newRecord, ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] QueryDTO newRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
@@ -127,7 +128,7 @@ public class QueriesController : ODataController
     /// <returns>An awaitable task.</returns>
     [HttpPatch]
     [Route(BasePath + "({id})")]
-    public async Task<IActionResult> Update(Guid id, Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
+    public async Task<IActionResult> Update(Guid id, [FromODataBody] Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
@@ -143,11 +144,9 @@ public class QueriesController : ODataController
         var recordAsDto = Mapper.MapExplicitly(record).To<QueryDTO>();
         patchRecord.Patch(recordAsDto);
 
-        await recordAsDto.EnsureValid(Queries);
         Mapper.MergeInto(record).Using(patchRecord);
 
         await record.EnsureValid(Queries);
-        QueryService.Add(record);
 
         await SaveService.SaveChangesAsync();
 
@@ -168,7 +167,8 @@ public class QueriesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<PermissionDTO>((e => e.Id, id)).GetResponse();
 
-        QueryService.Remove(record);
+        //Only soft-delete the record, since deleting a query would break foreign key constraints
+        record.IsSoftDeleted = true;
 
         await SaveService.SaveChangesAsync();
 

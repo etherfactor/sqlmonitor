@@ -7,37 +7,37 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class Query : Auditable
 {
     [Column("query_id")]
-    public Guid Id { get; set; }
+    public virtual Guid Id { get; set; }
 
     [Column("system_id")]
-    public Guid SystemId { get; set; }
+    public virtual Guid SystemId { get; set; }
 
     [Column("name")]
-    public string Name { get; set; }
+    public virtual string Name { get; set; }
 
     [Column("description")]
-    public string? Description { get; set; }
+    public virtual string? Description { get; set; }
 
     [Column("is_active")]
-    public bool IsActive { get; set; }
+    public virtual bool IsActive { get; set; } = true;
 
     [Column("is_soft_deleted")]
-    public bool IsSoftDeleted { get; set; }
+    public virtual bool IsSoftDeleted { get; set; } = false;
 
     [Column("sql_text")]
-    public string SqlText { get; set; }
+    public virtual string SqlText { get; set; }
 
     [Column("run_frequency")]
-    public TimeSpan RunFrequency { get; set; }
+    public virtual TimeSpan RunFrequency { get; set; }
 
     [Column("last_run_at_utc")]
-    public DateTimeOffset? LastRunAtUtc { get; set; }
+    public virtual DateTimeOffset? LastRunAtUtc { get; set; }
 
     [Column("timestamp_utc_expression")]
-    public string? TimestampUtcExpression { get; set; }
+    public virtual string? TimestampUtcExpression { get; set; }
 
     [Column("bucket_expression")]
-    public string? BucketExpression { get; set; }
+    public virtual string? BucketExpression { get; set; }
 
     /// <summary>
     /// Not intended for direct use.

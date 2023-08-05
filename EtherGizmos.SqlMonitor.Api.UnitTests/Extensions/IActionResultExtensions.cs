@@ -31,6 +31,10 @@ internal static class IActionResultExtensions
                 statusCode = result.StatusCode;
                 break;
 
+            case NoContentResult result:
+                statusCode = result.StatusCode;
+                break;
+
             case NotFoundODataResult result:
                 statusCode = result.StatusCode;
                 break;
@@ -88,6 +92,10 @@ internal static class IActionResultExtensions
                 break;
 
             case ConflictResult result:
+                content = null;
+                break;
+
+            case NoContentResult result:
                 content = null;
                 break;
 

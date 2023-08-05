@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+using System.Net;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Controllers;
 
@@ -21,6 +22,27 @@ internal class QueriesControllerTests : IntegrationTestBase
         {
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content, Is.Not.Null);
+        });
+    }
+
+    [Test]
+    public async Task Create_Returns200Ok()
+    {
+        var body = new
+        {
+            name = "Test",
+            sql_text = "select 1",
+            run_frequency = "PT5M"
+        };
+
+        var response = await Client.PostAsync("https://localhost:7200/api/v1/queries", body.AsJsonContent());
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            var contentRead = await response.Content.ReadAsStringAsync();
             Assert.That(response.Content, Is.Not.Null);
         });
     }
