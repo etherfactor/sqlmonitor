@@ -10,4 +10,10 @@ public interface ISaveService
     /// </summary>
     /// <returns>An awaitable task.</returns>
     Task SaveChangesAsync();
+
+    /// <summary>
+    /// Associates a record in such a way as to allow <see cref="SaveChangesAsync"/> to apply.
+    /// </summary>
+    /// <param name="record"></param>
+    void Attach(object record);
 }

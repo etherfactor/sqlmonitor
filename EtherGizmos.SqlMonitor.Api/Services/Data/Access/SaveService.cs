@@ -27,4 +27,10 @@ public class SaveService : ISaveService
     {
         await Context.SaveChangesAsync();
     }
+
+    /// <inheritdoc/>
+    public void Attach(object record)
+    {
+        Context.Attach(record);
+    }
 }

@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Data.Access;
-using EtherGizmos.SqlMonitor.Api.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Helpers;
 using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
@@ -45,7 +44,6 @@ public class QueryRunner : PeriodicBackgroundService
         var serviceProvider = serviceScope.ServiceProvider;
 
         //Get means for fetching records
-        using var context = serviceProvider.GetRequiredService<DatabaseContext>();
         var instanceService = serviceProvider.GetRequiredService<IInstanceService>();
         var queryService = serviceProvider.GetRequiredService<IQueryService>();
         var saveService = serviceProvider.GetRequiredService<ISaveService>();
@@ -75,10 +73,10 @@ public class QueryRunner : PeriodicBackgroundService
         await Parallel.ForEachAsync(instanceQueries, parallelOptions, async (instanceQuery, cancellationToken) =>
         {
             var instance = instanceQuery.Item1;
-            context.Attach(instance);
+            saveService.Attach(instance);
 
             var query = instanceQuery.Item2;
-            context.Attach(query);
+            saveService.Attach(query);
 
             await RunInstanceQuery(instanceQuery.Item1, instanceQuery.Item2, cancellationToken);
         });
