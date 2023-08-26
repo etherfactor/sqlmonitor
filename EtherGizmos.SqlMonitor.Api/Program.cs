@@ -14,9 +14,10 @@ using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using Hangfire;
 using Hangfire.SqlServer;
 using MassTransit;
+using Medallion.Threading;
+using Medallion.Threading.Redis;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Serilog;
 using StackExchange.Redis;
 
@@ -29,14 +30,22 @@ builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
 
 Shared.Initialize(builder.Configuration);
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
 //**********************************************************
 // Add Services
 
 builder.Services
-    .AddSerilog(opt =>
-    {
-        opt.ReadFrom.Configuration(builder.Configuration);
-    });
+    .AddOptions();
+
+builder.Services
+    .AddSerilog(Log.Logger);
+//.AddSerilog(opt =>
+//{
+//    opt.ReadFrom.Configuration(builder.Configuration);
+//});
 
 builder.Services
     .AddHangfire((services, opt) =>
@@ -138,21 +147,60 @@ builder.Services
         }
     });
 
+//builder.Services
+//    .Configure<ConfigurationOptions>(opt =>
+//    {
+//        builder.Configuration.GetSection("Connections:Redis").Bind(opt);
+//    })
+//    .AddSingleton<IConnectionMultiplexer>(e =>
+//    {
+//        var options = e.CreateScope().ServiceProvider.GetRequiredService<IOptionsSnapshot<ConfigurationOptions>>();
+//        var config = options.Value;
+//        config.EndPoints.Add("192.168.1.5", 6379);
+//        return ConnectionMultiplexer.Connect(config);
+//    })
+//    .AddTransient<IDatabase>(e => e.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+
 builder.Services
-    .Configure<ConfigurationOptions>(opt =>
+    //.Configure<ConfigurationOptions>(opt =>
+    //{
+    //    var section = builder.Configuration.GetSection("Connections:Redis");
+    //    section.Bind(opt);
+
+    //    var endpoints = section.GetSection("EndPoints").Get<RedisHost[]>()
+    //        ?? Array.Empty<RedisHost>();
+    //    foreach (var endpoint in endpoints)
+    //    {
+    //        opt.EndPoints.Add(endpoint.Host, endpoint.Port);
+    //    }
+    //})
+    //.AddStackExchangeRedisCache(opt =>
+    //{
+    //    opt.conn
+    //    opt.ConfigurationOptions
+    //        ??= new ConfigurationOptions();
+
+    //    var section = builder.Configuration.GetSection("Connections:Redis");
+    //    section.Bind(opt.ConfigurationOptions);
+
+    //    var endpoints = section.GetSection("EndPoints").Get<RedisHost[]>()
+    //        ?? Array.Empty<RedisHost>();
+    //    foreach (var endpoint in endpoints)
+    //    {
+    //        opt.ConfigurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
+    //    }
+    //})
+    .AddRedisCache(builder.Configuration.GetSection("Connections:Redis"))
+    .AddSingleton<IDistributedLockProvider>(services =>
     {
-        builder.Configuration.GetSection("Connections:Redis").Bind(opt);
-    })
-    .AddSingleton<IConnectionMultiplexer>(e =>
-    {
-        var options = e.GetRequiredService<IOptionsSnapshot<ConfigurationOptions>>();
-        return ConnectionMultiplexer.Connect(options.Value);
-    })
-    .AddScoped<IDatabase>(e => e.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+        var multiplexer = services.GetRequiredService<IConnectionMultiplexer>();
+        return new RedisDistributedSynchronizationProvider(multiplexer.GetDatabase());
+    });
 
 builder.Services.AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>();
 
 builder.Services.AddSingleton<IRecordCacheService, RecordCacheService>();
+builder.Services.AddScoped<ILockedDistributedCache, LockedDistributedCache>();
 builder.Services.AddScoped<ISaveService, SaveService>();
 
 builder.Services.AddScoped<IInstanceService, InstanceService>();
@@ -171,6 +219,24 @@ var app = builder.Build();
 var serviceProvider = app.Services
     .CreateScope()
     .ServiceProvider;
+
+//var testKey1 = CacheKey.Create<string>("Key1", true);
+//var testKey2 = CacheKey.Create<Query>("Key2", true);
+
+//var test = serviceProvider.GetRequiredService<IDistributedCache>();
+//var test2 = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+//var test3 = serviceProvider.GetRequiredService<IDistributedLockProvider>();
+//var test4 = serviceProvider.GetRequiredService<ILockedDistributedCache>();
+
+//CacheLock<Query> testLock2 = null!;
+//await test4.TryAcquireLockAsync(testKey2, TimeSpan.FromDays(1), @out => testLock2 = @out);
+//await test4.TrySetWithLockAsync(testKey2, testLock2, new Query() { Id = Guid.NewGuid() });
+
+//Query? value = null;
+//await test4.TryGetAsync(testKey2, @out => value = @out);
+
+//var testKey1_2 = CacheKey.Create<string>("Key1", true);
+//var testKey1_3 = CacheKey.Create<string>("Key1", false);
 
 var connectionProvider = serviceProvider.GetRequiredService<IDatabaseConnectionProvider>();
 

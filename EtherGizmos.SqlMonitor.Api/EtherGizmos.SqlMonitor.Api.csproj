@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DistributedLock.Redis" Version="1.*" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.*" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.*" />
@@ -39,6 +40,10 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>EtherGizmos.SqlMonitor.Api.UnitTests</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Data\Storage\Redis\" />
   </ItemGroup>
 
 </Project>

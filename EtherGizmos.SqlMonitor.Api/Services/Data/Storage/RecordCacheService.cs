@@ -33,6 +33,8 @@ public class RecordCacheService : IRecordCacheService
     /// </summary>
     private ConcurrentDictionary<string, DateTimeOffset> CachedAt { get; } = new ConcurrentDictionary<string, DateTimeOffset>();
 
+    //private IDatabase RedisDatabase { get; }
+
     /// <summary>
     /// Construct the service.
     /// </summary>
@@ -43,6 +45,15 @@ public class RecordCacheService : IRecordCacheService
         Logger = logger;
         Configuration = configuration;
     }
+
+    //public async Task SetRecordAsync<TEntity>(RedisCacheKey<TEntity> key, TEntity record)
+    //{
+    //    var cacheLifetime = Configuration.GetValue<TimeSpan>($"Caching:{key.Name}:Lifetime");
+    //    var cacheRecord = new CachedRecord<TEntity>(record, DateTimeOffset.Now.Add(cacheLifetime));
+    //    var cacheRecordData = JsonSerializer.Serialize(cacheRecord);
+
+    //    await RedisDatabase.StringSetAsync(key.Name, cacheRecordData);
+    //}
 
     /// <inheritdoc/>
     public async Task<TEntity> GetOrLoadCacheAsync<TEntity>(string cacheName, Func<Task<TEntity>> loadCache)
@@ -121,6 +132,29 @@ public class RecordCacheService : IRecordCacheService
         if (CachedAt.ContainsKey(cacheName))
         {
             CachedAt.TryRemove(cacheName, out _);
+        }
+    }
+
+    public readonly struct RedisCacheKey<TRecord>
+    {
+        public string Name { get; }
+
+        public RedisCacheKey(string keyName)
+        {
+            Name = keyName;
+        }
+    }
+
+    public class CachedRecord<TRecord>
+    {
+        public TRecord Data { get; set; }
+
+        public DateTime ExpiryUtc { get; set; }
+
+        public CachedRecord(TRecord data, DateTimeOffset expiry)
+        {
+            Data = data;
+            ExpiryUtc = expiry.UtcDateTime;
         }
     }
 }
