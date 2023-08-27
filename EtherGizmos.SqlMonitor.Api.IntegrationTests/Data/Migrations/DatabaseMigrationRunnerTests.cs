@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Data.Migrations;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 

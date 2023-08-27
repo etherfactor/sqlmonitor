@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
 using Microsoft.Extensions.Configuration;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Data.Access;

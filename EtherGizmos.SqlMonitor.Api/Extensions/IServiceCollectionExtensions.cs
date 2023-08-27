@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Data.Access;
-using EtherGizmos.SqlMonitor.Api.Jobs;
-using EtherGizmos.SqlMonitor.Api.Jobs.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Configuration;
 
@@ -14,17 +11,6 @@ namespace EtherGizmos.SqlMonitor.Api.Extensions;
 /// </summary>
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddHangfireJob<TInterface, TImplementation>(this IServiceCollection @this)
-        where TInterface : class, IJob
-        where TImplementation : class, TInterface
-    {
-        @this.TryAddScoped(typeof(IHangfireRepeatedJob<>), typeof(HangfireRepeatedJob<>));
-
-        @this.AddScoped<TInterface, TImplementation>();
-
-        return @this;
-    }
-
     /// <summary>
     /// Adds AutoMapper to the service collection.
     /// </summary>

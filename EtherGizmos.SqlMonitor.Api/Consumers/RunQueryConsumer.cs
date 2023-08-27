@@ -4,6 +4,8 @@ namespace EtherGizmos.SqlMonitor.Api.Consumers;
 
 public class RunQueryConsumer : IConsumer<RunQuery>
 {
+    public const string Queue = "run-query";
+
     private ILogger Logger { get; }
 
     public RunQueryConsumer(ILogger<RunQueryConsumer> logger)

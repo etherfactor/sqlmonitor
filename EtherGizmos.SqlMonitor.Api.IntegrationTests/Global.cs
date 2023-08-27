@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;

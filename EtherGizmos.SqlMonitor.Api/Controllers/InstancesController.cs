@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.OData.Errors;

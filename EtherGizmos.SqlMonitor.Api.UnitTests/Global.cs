@@ -1,6 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

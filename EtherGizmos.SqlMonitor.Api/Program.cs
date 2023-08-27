@@ -1,18 +1,17 @@
 using EtherGizmos.SqlMonitor.Api;
+using EtherGizmos.SqlMonitor.Api.Configuration;
 using EtherGizmos.SqlMonitor.Api.Consumers;
 using EtherGizmos.SqlMonitor.Api.Data.Access;
 using EtherGizmos.SqlMonitor.Api.Data.Migrations;
 using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Jobs;
-using EtherGizmos.SqlMonitor.Api.Jobs.Abstractions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
-using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Storage;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Validation;
+using EtherGizmos.SqlMonitor.Api.Services.Background;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
-using Hangfire;
-using Hangfire.SqlServer;
+using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using MassTransit;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
@@ -42,38 +41,6 @@ builder.Services
 
 builder.Services
     .AddSerilog(Log.Logger);
-//.AddSerilog(opt =>
-//{
-//    opt.ReadFrom.Configuration(builder.Configuration);
-//});
-
-builder.Services
-    .AddHangfire((services, opt) =>
-    {
-        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
-
-        opt.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
-        opt.UseSimpleAssemblyNameTypeSerializer();
-        opt.UseRecommendedSerializerSettings();
-        opt.UseSqlServerStorage(connectionProvider.GetConnectionString(), new SqlServerStorageOptions()
-        {
-            SchemaName = "hangfire",
-            JobExpirationCheckInterval = TimeSpan.FromSeconds(30)
-        });
-    })
-    .AddHangfireServer((services, opt) =>
-    {
-        builder.Configuration.GetSection("Hangfire")
-            .Bind(opt);
-    })
-    .AddHangfireJob<IEnqueueMonitorQueries, EnqueueMonitorQueries>();
-
-builder.Services
-    .AddStackExchangeRedisCache(opt =>
-    {
-        builder.Configuration.GetSection("Connections:Redis")
-            .Bind(opt.ConfigurationOptions);
-    });
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
@@ -123,7 +90,7 @@ builder.Services
                 conf.ConfigureEndpoints(context);
                 conf.Host();
 
-                conf.ReceiveEndpoint("run-query", opt =>
+                conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
                 {
                     opt.Consumer<RunQueryConsumer>(context);
                 });
@@ -197,10 +164,18 @@ builder.Services
         return new RedisDistributedSynchronizationProvider(multiplexer.GetDatabase());
     });
 
+builder.Services
+    .AddOptions<CachingOptions>()
+    .Configure(options =>
+    {
+        builder.Configuration.GetSection("Caching")
+            .Bind(options);
+    });
+
 builder.Services.AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>();
 
-builder.Services.AddSingleton<IRecordCacheService, RecordCacheService>();
-builder.Services.AddScoped<ILockedDistributedCache, LockedDistributedCache>();
+builder.Services.AddSingleton<ILockedDistributedCache, LockedDistributedCache>();
+
 builder.Services.AddScoped<ISaveService, SaveService>();
 
 builder.Services.AddScoped<IInstanceService, InstanceService>();
@@ -210,6 +185,8 @@ builder.Services.AddScoped<ISecurableService, SecurableService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddMapper();
+
+builder.Services.AddHostedService<EnqueueMonitorQueries>();
 
 //**********************************************************
 // Add Middleware
@@ -260,9 +237,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseODataRouteDebug();
 }
-
-app.UseHangfireDashboard();
-app.UseHangfireJob<IEnqueueMonitorQueries>("EnqueueMonitorQueries", "0/1 * * * * *");
 
 app.UseAuthentication();
 app.UseAuthorization();
