@@ -2,6 +2,8 @@
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Helpers;
 using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
@@ -86,6 +88,7 @@ public class EnqueueMonitorQueries : GlobalBackgroundService
 
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
         var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{RunQueryConsumer.Queue}"));
+        var saveService = scope.GetRequiredService<ISaveService>();
         await Parallel.ForEachAsync(
             instanceQueries,
             new ParallelOptions()
@@ -100,7 +103,21 @@ public class EnqueueMonitorQueries : GlobalBackgroundService
                     InstanceId = instanceQuery.Item1.Id,
                     QueryId = instanceQuery.Item2.Id,
                 });
+
+                instanceQuery.Item2.LastRunAtUtc = DateTimeOffset.UtcNow;
+                await saveService.SaveChangesAsync();
             });
+
+        var distributedCache = scope.GetRequiredService<ILockedDistributedCache>();
+        using var @lock = await distributedCache.AcquireLockAsync(CacheKeys.AllQueries, TimeSpan.FromSeconds(1), cancellationToken);
+        if (@lock is not null)
+        {
+            await distributedCache.SetWithLockAsync(CacheKeys.AllQueries, @lock, allQueries.ToList(), cancellationToken);
+        }
+        else
+        {
+            _logger.Log(LogLevel.Warning, "Expected to receive a lock for {CacheKey}, but the request timed out.", nameof(CacheKeys.AllQueries));
+        }
     }
 
     //  /// <inheritdoc/>
