@@ -7,29 +7,30 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// </summary>
 public class SaveService : ISaveService
 {
-    /// <summary>
-    /// The EF context.
-    /// </summary>
-    private DatabaseContext Context { get; }
+    private readonly ILogger _logger;
+    internal readonly DatabaseContext _context;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="context">The EF context.</param>
-    public SaveService(DatabaseContext context)
+    public SaveService(ILogger<SaveService> logger, DatabaseContext context)
     {
-        Context = context;
+        _logger = logger;
+        _context = context;
+
+        _logger.Log(LogLevel.Information, "Created save service with context {Context}", context);
     }
 
     /// <inheritdoc/>
     public async Task SaveChangesAsync()
     {
-        await Context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
     }
 
     /// <inheritdoc/>
     public void Attach(object record)
     {
-        Context.Attach(record);
+        _context.Attach(record);
     }
 }

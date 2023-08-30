@@ -88,7 +88,7 @@ public class EnqueueMonitorQueries : GlobalBackgroundService
 
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
         var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{RunQueryConsumer.Queue}"));
-        var saveService = scope.GetRequiredService<ISaveService>();
+
         await Parallel.ForEachAsync(
             instanceQueries,
             new ParallelOptions()
@@ -98,13 +98,21 @@ public class EnqueueMonitorQueries : GlobalBackgroundService
             },
             async (instanceQuery, cancellationToken) =>
             {
+                var instance = instanceQuery.Item1;
+                var query = instanceQuery.Item2;
+
                 await endpoint.Send(new RunQuery()
                 {
-                    InstanceId = instanceQuery.Item1.Id,
-                    QueryId = instanceQuery.Item2.Id,
-                });
+                    Instance = instance,
+                    Query = query,
+                }, cancellationToken);
 
-                instanceQuery.Item2.LastRunAtUtc = DateTimeOffset.UtcNow;
+                query.LastRunAtUtc = DateTimeOffset.UtcNow;
+
+                var updateScope = _serviceProvider.CreateScope().ServiceProvider;
+                var saveService = updateScope.GetRequiredService<ISaveService>();
+                saveService.Attach(query);
+
                 await saveService.SaveChangesAsync();
             });
 

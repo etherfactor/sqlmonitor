@@ -15,7 +15,7 @@ public static class SqlCommandExtensions
     /// <param name="logger">The logger to use.</param>
     /// <param name="cancellationToken">The cancellation instruction.</param>
     /// <returns>The query results.</returns>
-    public static async Task<SqlDataReader> ExecuteLoggedReaderAsync(this SqlCommand @this, ILogger logger, CancellationToken cancellationToken)
+    public static async Task<SqlDataReader> ExecuteLoggedReaderAsync(this SqlCommand @this, ILogger logger, CancellationToken cancellationToken = default)
     {
         logger.Log(LogLevel.Debug, @"Executing query
 {QueryText}", @this.CommandText);
@@ -38,7 +38,7 @@ public static class SqlCommandExtensions
     /// <param name="logger">The logger to use.</param>
     /// <param name="cancellationToken">The cancellation instruction.</param>
     /// <returns>The number of affected records.</returns>
-    public static async Task<int> ExecuteLoggedNonQueryAsync(this SqlCommand @this, ILogger logger, CancellationToken cancellationToken)
+    public static async Task<int> ExecuteLoggedNonQueryAsync(this SqlCommand @this, ILogger logger, CancellationToken cancellationToken = default)
     {
         logger.Log(LogLevel.Debug, @"Executing query
 {QueryText}", @this.CommandText);
