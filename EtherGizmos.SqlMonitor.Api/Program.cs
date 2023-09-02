@@ -1,4 +1,3 @@
-using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Configuration;
 using EtherGizmos.SqlMonitor.Api.Consumers;
 using EtherGizmos.SqlMonitor.Api.Data.Access;
@@ -26,8 +25,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuration
 
 builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
-
-Shared.Initialize(builder.Configuration);
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -157,7 +154,7 @@ builder.Services
     //        opt.ConfigurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
     //    }
     //})
-    .AddRedisCache(builder.Configuration.GetSection("Connections:Redis"))
+    .AddRedisCache(builder.Configuration.GetSection("Connections:Caching:Redis"))
     .AddSingleton<IDistributedLockProvider>(services =>
     {
         var multiplexer = services.GetRequiredService<IConnectionMultiplexer>();

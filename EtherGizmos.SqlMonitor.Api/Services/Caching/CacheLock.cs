@@ -2,18 +2,32 @@
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
-public class CacheLock<TEntity> : IDisposable
+/// <summary>
+/// Holds a lock on a key.
+/// </summary>
+/// <typeparam name="TKey">The key that is locked.</typeparam>
+public class CacheLock<TKey> : IDisposable
+    where TKey : ICacheKey
 {
     private bool _disposedValue;
     private IDistributedSynchronizationHandle _distributedLock;
 
-    public CacheKey<TEntity> Key { get; }
+    /// <summary>
+    /// The key that is locked.
+    /// </summary>
+    public TKey Key { get; }
 
-    public CancellationToken HandleLostToken => _distributedLock.HandleLostToken;
+    /// <summary>
+    /// A token that is cancelled when the lock prematurely expires.
+    /// </summary>
+    public CancellationToken LostLockCancellationToken => _distributedLock.HandleLostToken;
 
-    public bool IsValid => !HandleLostToken.IsCancellationRequested;
+    /// <summary>
+    /// Indicates if the lock is still valid. May incur additional costs to verify the validity of the lock.
+    /// </summary>
+    public bool IsValid => !LostLockCancellationToken.IsCancellationRequested;
 
-    internal CacheLock(CacheKey<TEntity> key, IDistributedSynchronizationHandle distributedLock)
+    internal CacheLock(TKey key, IDistributedSynchronizationHandle distributedLock)
     {
         Key = key;
         _distributedLock = distributedLock;
@@ -34,8 +48,11 @@ public class CacheLock<TEntity> : IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
+        Console.Out.WriteLine("Disposing lock " + Key.KeyName);
+
         //Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);

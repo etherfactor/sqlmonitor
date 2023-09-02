@@ -7,7 +7,6 @@ using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
-using Medallion.Threading;
 using NCrontab;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Background;
@@ -33,7 +32,7 @@ public class EnqueueMonitorQueries : GlobalBackgroundService
     public EnqueueMonitorQueries(
         ILogger<EnqueueMonitorQueries> logger,
         IServiceProvider serviceProvider,
-        IDistributedLockProvider lockProvider)
+        ILockedDistributedCache lockProvider)
         : base(logger, lockProvider, CronExpression)
     {
         _logger = logger;

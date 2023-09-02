@@ -2,9 +2,16 @@
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
+/// <summary>
+/// Pre-constructed cache keys for easy access.
+/// </summary>
 public static class CacheKeys
 {
-    public static CacheKey<List<Query>> AllQueries { get; } = CacheKey.Create<List<Query>>("AllQueries", true);
+    //Job Keys
+    public static JobCacheKey EnqueueMonitorQueries { get; } = CacheKey.CreateJob("EnqueueMonitorQueries");
 
-    public static CacheKey<List<Instance>> AllInstances { get; } = CacheKey.Create<List<Instance>>("AllInstances", true);
+    //Entity Keys
+    public static EntityCacheKey<List<Query>> AllQueries { get; } = CacheKey.CreateEntity<List<Query>>("AllQueries", true);
+
+    public static EntityCacheKey<List<Instance>> AllInstances { get; } = CacheKey.CreateEntity<List<Instance>>("AllInstances", true);
 }

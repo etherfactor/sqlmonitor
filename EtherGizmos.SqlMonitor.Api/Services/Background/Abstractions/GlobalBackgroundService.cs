@@ -1,4 +1,5 @@
-﻿using Medallion.Threading;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
 
@@ -8,11 +9,11 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
 public abstract class GlobalBackgroundService : PeriodicBackgroundService
 {
     private readonly ILogger _logger;
-    private readonly IDistributedLockProvider _lockProvider;
+    private readonly ILockedDistributedCache _lockProvider;
 
     public GlobalBackgroundService(
         ILogger logger,
-        IDistributedLockProvider lockProvider,
+        ILockedDistributedCache lockProvider,
         string cronExpression)
         : base(logger, cronExpression)
     {
@@ -23,7 +24,11 @@ public abstract class GlobalBackgroundService : PeriodicBackgroundService
     /// <inheritdoc/>
     protected sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
-        using var @lock = await _lockProvider.TryAcquireLockAsync(GetType().Name, cancellationToken: stoppingToken);
+        using var @lock = await _lockProvider.AcquireLockAsync(
+            CacheKeys.EnqueueMonitorQueries,
+            timeout: TimeSpan.Zero,
+            cancellationToken: stoppingToken);
+
         if (@lock is not null)
         {
             _logger.Log(LogLevel.Debug, "{ServiceName} - Successfully acquired lock. Job will run on this instance.", GetType().Name);

@@ -1,49 +1,64 @@
 ﻿namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
+/// <summary>
+/// Provides methods for constructing keys. Ensures no key conflicts by tracking existing keys.
+/// </summary>
 public static class CacheKey
 {
-    private static Dictionary<string, object> Keys { get; } = new Dictionary<string, object>();
-    private static Dictionary<string, Type> KeyTypes { get; } = new Dictionary<string, Type>();
-    private static Dictionary<string, int> KeyHashes { get; } = new Dictionary<string, int>();
+    private readonly static Dictionary<string, object> _keys = new Dictionary<string, object>();
+    private readonly static Dictionary<string, int> _keyHashes = new Dictionary<string, int>();
 
-    public static CacheKey<TEntity> Create<TEntity>(string key, bool requiresLock)
+    /// <summary>
+    /// Creates an entity key.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of entity.</typeparam>
+    /// <param name="key">The name of the key.</param>
+    /// <param name="requiresLock">Whether or not setting the key requires a lock.</param>
+    /// <returns>The entity key.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static EntityCacheKey<TEntity> CreateEntity<TEntity>(string key, bool requiresLock)
     {
-        var newCacheKey = new CacheKey<TEntity>(key, requiresLock);
-        if (Keys.ContainsKey(key))
+        var newCacheKey = new EntityCacheKey<TEntity>(key, requiresLock);
+        var useKey = newCacheKey.KeyName;
+        if (_keys.ContainsKey(useKey))
         {
-            if (KeyTypes[key] != typeof(TEntity) || KeyHashes[key] != newCacheKey.GetHashCode())
-                throw new InvalidOperationException($"The cache key {key} already exists.");
+            if (_keyHashes[useKey] != newCacheKey.GetHashCode())
+                throw new InvalidOperationException($"The cache key {useKey} already exists.");
         }
         else
         {
-            Keys.Add(key, newCacheKey);
-            KeyTypes.Add(key, typeof(TEntity));
-            KeyHashes.Add(key, newCacheKey.GetHashCode());
+            _keys.Add(useKey, newCacheKey);
+            _keyHashes.Add(useKey, newCacheKey.GetHashCode());
         }
 
-        var cacheKey = (CacheKey<TEntity>)Keys[key];
+        var cacheKey = (EntityCacheKey<TEntity>)_keys[useKey];
 
         return cacheKey;
     }
-}
 
-public struct CacheKey<TEntity>
-{
-    public readonly string Name { get; }
-
-    public readonly string KeyName { get; }
-
-    public readonly bool RequiresLock { get; }
-
-    internal CacheKey(string name, bool requiresLock)
+    /// <summary>
+    /// Creates a job key.
+    /// </summary>
+    /// <param name="key">The name of the key.</param>
+    /// <returns>The job key.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static JobCacheKey CreateJob(string key)
     {
-        Name = name;
-        KeyName = name; //TODO: convert title case to snake case
-        RequiresLock = requiresLock;
-    }
+        var newCacheKey = new JobCacheKey(key);
+        var useKey = newCacheKey.KeyName;
+        if (_keys.ContainsKey(useKey))
+        {
+            if (_keyHashes[useKey] != newCacheKey.GetHashCode())
+                throw new InvalidOperationException($"The cache key {useKey} already exists.");
+        }
+        else
+        {
+            _keys.Add(useKey, newCacheKey);
+            _keyHashes.Add(useKey, newCacheKey.GetHashCode());
+        }
 
-    public override int GetHashCode()
-    {
-        return (Name, RequiresLock).GetHashCode();
+        var cacheKey = (JobCacheKey)_keys[useKey];
+
+        return cacheKey;
     }
 }

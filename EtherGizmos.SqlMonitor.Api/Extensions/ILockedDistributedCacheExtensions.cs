@@ -7,7 +7,7 @@ public static class ILockedDistributedCacheExtensions
 {
     public static async Task<TEntity> GetOrCalculateAsync<TEntity>(
         this ILockedDistributedCache @this,
-        CacheKey<TEntity> key,
+        EntityCacheKey<TEntity> key,
         Func<Task<TEntity>> calculateAsync,
         TimeSpan timeout = default,
         CancellationToken cancellationToken = default)
