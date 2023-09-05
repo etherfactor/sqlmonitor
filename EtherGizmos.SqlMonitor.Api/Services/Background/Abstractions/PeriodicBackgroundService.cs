@@ -26,10 +26,7 @@ public abstract class PeriodicBackgroundService : BackgroundService
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //Wait to run until the next scheduled occurrence. Remove 100ms to add a bit of lenience, if the previous run
-        //extended slightly past its scheduled duration.
-        var firstOccurrence = Schedule.GetNextOccurrence(DateTime.UtcNow.AddMilliseconds(-100));
-        var firstDelay = (int)Math.Max(0, (firstOccurrence - DateTime.UtcNow).TotalMilliseconds);
+        var firstDelay = GetNextDelay();
         await Task.Delay(firstDelay, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
@@ -47,8 +44,7 @@ public abstract class PeriodicBackgroundService : BackgroundService
                 _logger.Log(LogLevel.Error, ex, "{ServiceName} - Encountered an unexpected error while performing work", GetType().Name);
             }
 
-            var nextOccurrence = Schedule.GetNextOccurrence(DateTime.UtcNow.AddMilliseconds(-100));
-            var nextDelay = (int)Math.Max(0, (nextOccurrence - DateTime.UtcNow).TotalMilliseconds);
+            var nextDelay = GetNextDelay();
             await Task.Delay(nextDelay, stoppingToken);
         }
     }
@@ -59,4 +55,18 @@ public abstract class PeriodicBackgroundService : BackgroundService
     /// <param name="stoppingToken">The cancellation instruction.</param>
     /// <returns>An awaitable task.</returns>
     protected abstract Task DoWorkAsync(CancellationToken stoppingToken);
+
+    /// <summary>
+    /// Gets the next delay to run the job.
+    /// </summary>
+    /// <returns>The next delay.</returns>
+    private int GetNextDelay()
+    {
+        //Wait to run until the next scheduled occurrence. Remove 100ms to add a bit of lenience, if the previous run
+        //extended slightly past its scheduled duration.
+        var occurrence = Schedule.GetNextOccurrence(DateTime.UtcNow.AddSeconds(-5)); //TODO: read from config and update comment
+        var delay = (int)Math.Max(0, (occurrence - DateTime.UtcNow).TotalMilliseconds);
+
+        return delay;
+    }
 }

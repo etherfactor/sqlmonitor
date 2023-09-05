@@ -12,13 +12,13 @@ public static class ILockedDistributedCacheExtensions
         TimeSpan timeout = default,
         CancellationToken cancellationToken = default)
     {
-        using var @lock = await @this.AcquireLockAsync(key, timeout, cancellationToken);
-        if (@lock is null)
-            throw new ApplicationException("Failed to acquire a lock for 60+ seconds.");
-
         TEntity? entity = await @this.GetAsync(key, cancellationToken);
         if (entity is null)
         {
+            using var @lock = await @this.AcquireLockAsync(key, timeout, cancellationToken);
+            if (@lock is null)
+                throw new ApplicationException("Failed to acquire a lock for 60+ seconds.");
+
             entity = await calculateAsync();
             await @this.SetWithLockAsync(key, @lock, entity, cancellationToken);
         }

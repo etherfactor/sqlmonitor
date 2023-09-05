@@ -1,12 +1,15 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+using Redis.OM.Modeling;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("instances")]
+[Document(StorageType = StorageType.Hash, Prefixes = new[] { "instances" })]
 public class Instance : Auditable
 {
     [Column("instance_id")]
+    [RedisIdField]
     public virtual Guid Id { get; set; }
 
     [Column("name")]

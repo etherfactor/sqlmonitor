@@ -51,8 +51,6 @@ public class CacheLock<TKey> : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        Console.Out.WriteLine("Disposing lock " + Key.KeyName);
-
         //Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);

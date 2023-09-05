@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Data.Access;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
+using Redis.OM;
+using Redis.OM.Contracts;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Configuration;
 
@@ -58,6 +60,8 @@ public static class IServiceCollectionExtensions
             opt.ConfigurationOptions = options;
             opt.ConnectionMultiplexerFactory = () => Task.FromResult(multiplexer);
         });
+
+        @this.AddSingleton<IRedisConnectionProvider>(e => new RedisConnectionProvider(multiplexer));
 
         return @this;
     }

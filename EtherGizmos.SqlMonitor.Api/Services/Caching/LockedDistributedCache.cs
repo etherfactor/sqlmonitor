@@ -35,7 +35,7 @@ public class LockedDistributedCache : ILockedDistributedCache
         where TKey : ICacheKey
     {
         var lockName = $"{key.KeyName}:$lock";
-        _logger.Log(LogLevel.Information, "Attempting to acquire lock on {CacheKey}", lockName);
+        _logger.Log(LogLevel.Debug, "Attempting to acquire lock on {CacheKey}", lockName);
 
         var result = await _distributedLockProvider.TryAcquireLockAsync(lockName, timeout, cancellationToken);
         if (result is not null)
@@ -94,10 +94,10 @@ public class LockedDistributedCache : ILockedDistributedCache
 
         var options = _optionsMonitor.CurrentValue.Keys.ContainsKey(key.Name)
             ? _optionsMonitor.CurrentValue.Keys[key.Name]
-            : new DistributedCacheEntryOptions()
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            };
+            : new DistributedCacheEntryOptions();
+
+        options.AbsoluteExpirationRelativeToNow ??= TimeSpan.FromMinutes(5);
+        options.AbsoluteExpirationRelativeToNow = (TimeSpan)options.AbsoluteExpirationRelativeToNow - TimeSpan.FromMilliseconds(500);
 
         var data = JsonSerializer.Serialize(record);
         var bytes = Encoding.UTF8.GetBytes(data);

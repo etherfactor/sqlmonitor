@@ -1,4 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
@@ -7,6 +9,7 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class Query : Auditable
 {
     [Column("query_id")]
+    [Key]
     public virtual Guid Id { get; set; }
 
     [Column("system_id")]
@@ -19,6 +22,7 @@ public class Query : Auditable
     public virtual string? Description { get; set; }
 
     [Column("is_active")]
+    [Indexed("is_active")]
     public virtual bool IsActive { get; set; } = true;
 
     [Column("is_soft_deleted")]
@@ -38,6 +42,8 @@ public class Query : Auditable
 
     [Column("bucket_expression")]
     public virtual string? BucketExpression { get; set; }
+
+    public int _A { get; set; }
 
     /// <summary>
     /// Not intended for direct use.

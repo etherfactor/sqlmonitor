@@ -21,7 +21,16 @@ public static class SqlCommandExtensions
 {QueryText}", @this.CommandText);
 
         var queryWatch = Stopwatch.StartNew();
-        var reader = await @this.ExecuteReaderAsync(cancellationToken);
+        SqlDataReader reader;
+        try
+        {
+            reader = await @this.ExecuteReaderAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Error, ex, "Encountered an unexpected error while running query {QueryText}", @this.CommandText);
+            throw;
+        }
 
         var queryDuration = queryWatch.ElapsedMilliseconds;
 
@@ -44,7 +53,17 @@ public static class SqlCommandExtensions
 {QueryText}", @this.CommandText);
 
         var queryWatch = Stopwatch.StartNew();
-        var count = await @this.ExecuteNonQueryAsync(cancellationToken);
+
+        int count;
+        try
+        {
+            count = await @this.ExecuteNonQueryAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Error, ex, "Encountered an unexpected error while running query {QueryText}", @this.CommandText);
+            throw;
+        }
 
         var queryDuration = queryWatch.ElapsedMilliseconds;
 

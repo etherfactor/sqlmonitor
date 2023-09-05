@@ -11,6 +11,7 @@ using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
+using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
@@ -75,7 +76,7 @@ builder.Services
 builder.Services
     .AddMassTransit(opt =>
     {
-        var options = builder.Configuration.GetSection("Connections:MassTransit")
+        var options = builder.Configuration.GetSection("Connections:Messaging")
             .Get<MassTransitOptions>() ?? new MassTransitOptions();
 
         opt.AddConsumer<RunQueryConsumer>();
@@ -171,6 +172,7 @@ builder.Services
 
 builder.Services.AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>();
 
+builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 builder.Services.AddSingleton<ILockedDistributedCache, LockedDistributedCache>();
 
 builder.Services.AddScoped<ISaveService, SaveService>();
@@ -185,6 +187,8 @@ builder.Services.AddMapper();
 
 builder.Services.AddHostedService<EnqueueMonitorQueries>();
 
+builder.Services.AddSingleton<RedisRecordCache>();
+
 //**********************************************************
 // Add Middleware
 
@@ -193,6 +197,22 @@ var app = builder.Build();
 var serviceProvider = app.Services
     .CreateScope()
     .ServiceProvider;
+
+var _test = serviceProvider.GetRequiredService<RedisRecordCache>();
+
+var key = new RecordCacheKey<Query>("sqlpulse:queries");
+var entitySet = _test.EntitySet(key);
+
+var record = new Query()
+{
+    Id = Guid.NewGuid(),
+    Name = "Test",
+    LastRunAtUtc = DateTimeOffset.UtcNow,
+    _A = 5
+};
+
+await entitySet.AddAsync(record);
+var data = await entitySet.ToListAsync();
 
 //var testKey1 = CacheKey.Create<string>("Key1", true);
 //var testKey2 = CacheKey.Create<Query>("Key2", true);
