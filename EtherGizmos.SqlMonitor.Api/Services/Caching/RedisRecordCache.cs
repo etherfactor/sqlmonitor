@@ -1,5 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
-using MassTransit.Internals;
+using EtherGizmos.SqlMonitor.Models.Extensions;
 using StackExchange.Redis;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
@@ -35,104 +35,12 @@ public struct RecordCacheKey<TEntity>
     }
 }
 
-public interface ICacheEntitySet<TEntity> : ICanAlterSet<TEntity>, ICanFilter<TEntity>, ICanList<TEntity>
+public interface ICacheEntitySet<TEntity> : ICanAlterSet<TEntity>, ICacheFiltered<TEntity>
 {
 }
 
-public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
-    where TEntity : new()
+public interface ICacheFiltered<TEntity> : ICanFilter<TEntity>, ICanList<TEntity>
 {
-    private readonly RecordCacheKey<TEntity> _key;
-    private readonly IDatabase _database;
-
-    public CacheEntitySet(RecordCacheKey<TEntity> key, IDatabase database)
-    {
-        _key = key;
-        _database = database;
-    }
-
-    public async Task AddAsync(TEntity entity)
-    {
-        if (entity is null)
-            throw new ArgumentNullException(nameof(entity));
-
-        var serializer = RedisSerializerCache.For<TEntity>();
-        var action = serializer.GetAddAction(_key, entity);
-        await action(_database);
-    }
-
-    public async Task RemoveAsync(TEntity entity)
-    {
-        if (entity is null)
-            throw new ArgumentNullException(nameof(entity));
-
-        var serializer = RedisSerializerCache.For<TEntity>();
-        var action = serializer.GetRemoveAction(_key, entity);
-        await action(_database);
-    }
-
-    public async Task<List<TEntity>> ToListAsync()
-    {
-        var serializer = RedisSerializerCache.For<TEntity>();
-        var action = serializer.GetListAction(_key);
-        return await action(_database);
-    }
-
-    public ICanCompare<TEntity, TProperty> Where<TProperty>(Expression<Func<TEntity, TProperty>> indexedProperty)
-    {
-        var memberName = indexedProperty.GetMemberName();
-
-        throw new NotImplementedException();
-    }
-}
-
-public static class CacheObjectExtensions
-{
-    public static HashEntry[] ToCacheProperties(this object @this)
-    {
-        var entries = new List<HashEntry>();
-
-        foreach (var property in @this.GetType().GetProperties())
-        {
-            if (property.CanRead)
-            {
-                var valueData = property.GetValue(@this);
-                var valueString = (string?)Convert.ChangeType(valueData, typeof(string));
-
-                entries.Add(new HashEntry(property.Name.ToSnakeCase(), valueString));
-            }
-        }
-
-        return entries.ToArray();
-    }
-
-    public static RedisValue[] ToCacheKeys(this Type @this)
-    {
-        var entries = new List<RedisValue>() { "#" };
-
-        foreach (var property in @this.GetProperties())
-        {
-            if (property.CanRead)
-            {
-                entries.Add(property.Name.ToSnakeCase());
-            }
-        }
-
-        return entries.ToArray();
-    }
-
-    public static string ToCacheId(this object @this)
-    {
-        var keyProperties = @this.GetType().GetProperties()
-            .Where(e => e.GetCustomAttribute<KeyAttribute>() is not null)
-            .OrderBy(e => e.Name);
-
-        var keyId = string.Join(
-            "|",
-            keyProperties.Select(e => Convert.ChangeType(e.GetValue(@this), typeof(string))));
-
-        return keyId;
-    }
 }
 
 public interface ICanList<TEntity>
@@ -154,17 +62,17 @@ public interface ICanFilter<TEntity>
 
 public interface ICanCompare<TEntity, TProperty>
 {
-    ICanFilter<TEntity> IsEqualTo(TProperty value);
+    ICacheFiltered<TEntity> IsEqualTo(TProperty value);
 
-    ICanFilter<TEntity> IsGreaterThan(TProperty value);
+    ICacheFiltered<TEntity> IsGreaterThan(TProperty value);
 
-    ICanFilter<TEntity> IsGreaterThanOrEqualTo(TProperty value);
+    ICacheFiltered<TEntity> IsGreaterThanOrEqualTo(TProperty value);
 
-    ICanFilter<TEntity> IsLessThan(TProperty value);
+    ICacheFiltered<TEntity> IsLessThan(TProperty value);
 
-    ICanFilter<TEntity> IsLessThanOrEqualTo(TProperty value);
+    ICacheFiltered<TEntity> IsLessThanOrEqualTo(TProperty value);
 
-    ICanFilter<TEntity> IsBetween(TProperty valueStart, TProperty valueEnd);
+    ICacheFiltered<TEntity> IsBetween(TProperty valueStart, TProperty valueEnd);
 }
 
 public static class ICanCompareExtensions
@@ -175,31 +83,31 @@ public static class ICanCompareExtensions
     }
 }
 
-public static class RedisSerializerCache
+public static class RedisHelperCache
 {
     private static readonly IDictionary<Type, object> _serializers = new Dictionary<Type, object>();
 
-    public static RedisSerializer<TEntity> For<TEntity>()
+    public static RedisHelper<TEntity> For<TEntity>()
         where TEntity : new()
     {
         if (!_serializers.ContainsKey(typeof(TEntity)))
         {
-            var serializer = new RedisSerializer<TEntity>();
+            var serializer = new RedisHelper<TEntity>();
             _serializers.Add(typeof(TEntity), serializer);
         }
 
-        return (RedisSerializer<TEntity>)_serializers[typeof(TEntity)];
+        return (RedisHelper<TEntity>)_serializers[typeof(TEntity)];
     }
 }
 
-public class RedisSerializer<TEntity>
+public class RedisHelper<TEntity>
     where TEntity : new()
 {
     private readonly IEnumerable<PropertyInfo> _keys;
     private readonly IEnumerable<PropertyInfo> _indexes;
     private readonly IEnumerable<PropertyInfo> _properties;
 
-    public RedisSerializer()
+    public RedisHelper()
     {
         var allProperties = typeof(TEntity)
             .GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -220,7 +128,7 @@ public class RedisSerializer<TEntity>
             .Where(e => e.GetCustomAttribute<IndexedAttribute>() is not null);
     }
 
-    public Tuple<RedisKey, HashEntry[]> Serialize(RecordCacheKey<TEntity> key, TEntity entity)
+    private Tuple<RedisKey, HashEntry[]> Serialize(RecordCacheKey<TEntity> key, TEntity entity)
     {
         var keyData = GetRecordKey(key, entity);
 
@@ -232,7 +140,7 @@ public class RedisSerializer<TEntity>
         return Tuple.Create(keyData, propertyValues);
     }
 
-    public List<TEntity> Deserialize(RedisValue[] data)
+    private List<TEntity> Deserialize(RedisValue[] data)
     {
         var entities = new List<TEntity>();
         var chunks = data.Chunk(_properties.Count() + 1);
@@ -269,13 +177,13 @@ public class RedisSerializer<TEntity>
         return entities;
     }
 
-    public RedisKey GetPrimaryKey(RecordCacheKey<TEntity> key)
+    private RedisKey GetPrimaryKey(RecordCacheKey<TEntity> key)
     {
         var keyData = new RedisKey($"{key.Name}:$$primary");
         return keyData;
     }
 
-    public RedisValue GetRecordId(RecordCacheKey<TEntity> key, TEntity entity)
+    private RedisValue GetRecordId(RecordCacheKey<TEntity> key, TEntity entity)
     {
         var keyValues = _keys.Select(e => JsonSerializer.Serialize(e.GetValue(entity)))
             .Select(e => e.First() == '"' && e.Last() == '"' ? e.Substring(1, e.Length - 2) : e);
@@ -284,7 +192,7 @@ public class RedisSerializer<TEntity>
         return keyData;
     }
 
-    public RedisKey GetRecordKey(RecordCacheKey<TEntity> key, TEntity entity)
+    private RedisKey GetRecordKey(RecordCacheKey<TEntity> key, TEntity entity)
     {
         var keyValues = GetRecordId(key, entity);
         var keyData = new RedisKey($"{key.Name}:{keyValues}");
@@ -292,7 +200,7 @@ public class RedisSerializer<TEntity>
         return keyData;
     }
 
-    public RedisValue[] GetProperties(RecordCacheKey<TEntity> key)
+    private RedisValue[] GetProperties(RecordCacheKey<TEntity> key)
     {
         var propertyNames = "#".Yield()
             .Concat(_properties.Select(e => $"{key.Name}:*->{e.Name.ToSnakeCase()}"))
@@ -318,7 +226,7 @@ public class RedisSerializer<TEntity>
             {
                 var indexKey = GetIndexKey(key, index);
                 var indexValue = index.GetValue(entity);
-                var indexScore = GetScore(indexValue);
+                var indexScore = indexValue!.TryGetScore();
                 _ = transaction.SortedSetAddAsync(indexKey, idKey, indexScore);
             }
 
@@ -352,24 +260,71 @@ public class RedisSerializer<TEntity>
         return action;
     }
 
-    public Func<IDatabase, Task<List<TEntity>>> GetListAction(RecordCacheKey<TEntity> key)
+    public Func<IDatabase, Task<List<TEntity>>> GetListAction(RecordCacheKey<TEntity> key, IEnumerable<CacheEntitySetFilter<TEntity>> filters)
     {
         var primaryKey = GetPrimaryKey(key);
         var properties = GetProperties(key);
 
-        var action = async (IDatabase database) =>
+        if (filters.Any())
         {
-            var values = await database.SortAsync(
-                primaryKey,
-                sortType: SortType.Numeric,
-                by: "nosort",
-            get: properties);
+            var action = async (IDatabase database) =>
+            {
+                var transaction = database.CreateTransaction();
 
-            var entities = Deserialize(values);
-            return entities;
-        };
+                var allTempKeys = new List<RedisKey>();
+                foreach (var filter in filters)
+                {
+                    var indexProperty = filter.GetProperty();
+                    var indexKey = GetIndexKey(key, indexProperty);
 
-        return action;
+                    var startScore = filter.GetStartScore();
+                    var endScore = filter.GetEndScore();
+                    var exclusivity = filter.GetExclusivity();
+
+                    var tempKey = GetTempKey();
+                    allTempKeys.Add(tempKey);
+
+                    _ = transaction.SortedSetRangeAndStoreAsync(
+                        indexKey,
+                        tempKey,
+                        startScore,
+                        endScore,
+                        sortedSetOrder: SortedSetOrder.ByScore);
+                }
+
+                var finalTempKey = GetTempKey();
+                _ = transaction.SortedSetCombineAndStoreAsync(SetOperation.Intersect, finalTempKey, allTempKeys.ToArray());
+                var valuesTask = transaction.SortAsync(
+                    finalTempKey,
+                    sortType: SortType.Numeric,
+                    by: "nosort",
+                    get: properties);
+
+                await transaction.ExecuteAsync();
+                var values = await valuesTask;
+
+                var entities = Deserialize(values);
+                return entities;
+            };
+
+            return action;
+        }
+        else
+        {
+            var action = async (IDatabase database) =>
+            {
+                var values = await database.SortAsync(
+                    primaryKey,
+                    sortType: SortType.Numeric,
+                    by: "nosort",
+                    get: properties);
+
+                var entities = Deserialize(values);
+                return entities;
+            };
+
+            return action;
+        }
     }
 
     private RedisKey GetIndexKey(RecordCacheKey<TEntity> key, PropertyInfo index)
@@ -381,12 +336,171 @@ public class RedisSerializer<TEntity>
         return keyData;
     }
 
-    private double GetScore(object? rawValue)
+    private RedisKey GetTempKey()
     {
-        if (rawValue is null)
+        var guid = Guid.NewGuid();
+        var tempKey = new RedisKey($"sqlpulse:$$temp:{guid}");
+        return tempKey;
+    }
+}
+
+public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
+    where TEntity : new()
+{
+    private readonly RecordCacheKey<TEntity> _key;
+    private readonly IDatabase _database;
+    private readonly IEnumerable<CacheEntitySetFilter<TEntity>> _filters;
+
+    public CacheEntitySet(RecordCacheKey<TEntity> key, IDatabase database)
+    {
+        _key = key;
+        _database = database;
+        _filters = Enumerable.Empty<CacheEntitySetFilter<TEntity>>();
+    }
+
+    internal CacheEntitySet(CacheEntitySet<TEntity> cache, CacheEntitySetFilter<TEntity> newFilter)
+    {
+        _key = cache._key;
+        _database = cache._database;
+        _filters = cache._filters.Append(newFilter);
+    }
+
+    public async Task AddAsync(TEntity entity)
+    {
+        if (entity is null)
+            throw new ArgumentNullException(nameof(entity));
+
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetAddAction(_key, entity);
+        await action(_database);
+    }
+
+    public async Task RemoveAsync(TEntity entity)
+    {
+        if (entity is null)
+            throw new ArgumentNullException(nameof(entity));
+
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetRemoveAction(_key, entity);
+        await action(_database);
+    }
+
+    public async Task<List<TEntity>> ToListAsync()
+    {
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetListAction(_key, _filters);
+        return await action(_database);
+    }
+
+    public ICanCompare<TEntity, TProperty> Where<TProperty>(Expression<Func<TEntity, TProperty>> indexedProperty)
+    {
+        var propertyInfo = indexedProperty.GetPropertyInfo();
+        if (propertyInfo.GetCustomAttribute<IndexedAttribute>() is null)
+            throw new InvalidOperationException("Can only filter on an indexed property.");
+
+        return new CacheEntitySetFilter<TEntity, TProperty>(this, propertyInfo);
+    }
+
+    public IEnumerable<CacheEntitySetFilter<TEntity>> GetFilters() => _filters;
+}
+
+public class CacheEntitySetFilter<TEntity>
+    where TEntity : new()
+{
+    private readonly CacheEntitySet<TEntity> _cache;
+    private readonly PropertyInfo _indexedProperty;
+    private bool _startInclusive;
+    private double _startScore;
+    private bool _endInclusive;
+    private double _endScore;
+
+    protected CacheEntitySet<TEntity> Cache => _cache;
+
+    public CacheEntitySetFilter(CacheEntitySet<TEntity> cache, PropertyInfo indexedProperty)
+    {
+        _cache = cache;
+        _indexedProperty = indexedProperty;
+    }
+
+    protected void SetScore(bool startInclusive, double startScore, bool endInclusive, double endScore)
+    {
+        _startInclusive = startInclusive;
+        _startScore = startScore;
+        _endInclusive = endInclusive;
+        _endScore = endScore;
+    }
+
+    public PropertyInfo GetProperty() => _indexedProperty;
+
+    public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
+
+    public RedisValue GetEndScore() => new RedisValue($"{_endScore}");
+
+    public Exclude GetExclusivity() =>
+        _startInclusive && _endInclusive ? Exclude.None
+        : _startInclusive ? Exclude.Stop
+        : _endInclusive ? Exclude.Start
+        : Exclude.Both;
+}
+
+public class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<TEntity>, ICanCompare<TEntity, TProperty>
+    where TEntity : new()
+{
+    public CacheEntitySetFilter(CacheEntitySet<TEntity> cache, PropertyInfo indexedProperty) : base(cache, indexedProperty)
+    {
+    }
+
+    public ICacheFiltered<TEntity> IsBetween(TProperty valueStart, TProperty valueEnd)
+    {
+        SetScore(true, valueStart!.TryGetScore(), true, valueEnd!.TryGetScore());
+
+        return new CacheEntitySet<TEntity>(Cache, this);
+    }
+
+    public ICacheFiltered<TEntity> IsEqualTo(TProperty value)
+    {
+        SetScore(true, value!.TryGetScore(), true, value!.TryGetScore());
+
+        return new CacheEntitySet<TEntity>(Cache, this);
+    }
+
+    public ICacheFiltered<TEntity> IsGreaterThan(TProperty value)
+    {
+        SetScore(false, value!.TryGetScore(), true, double.MaxValue);
+
+        return new CacheEntitySet<TEntity>(Cache, this);
+    }
+
+    public ICacheFiltered<TEntity> IsGreaterThanOrEqualTo(TProperty value)
+    {
+        SetScore(true, value!.TryGetScore(), true, double.MaxValue);
+
+        return new CacheEntitySet<TEntity>(Cache, this);
+    }
+
+    public ICacheFiltered<TEntity> IsLessThan(TProperty value)
+    {
+        SetScore(true, double.MinValue, false, value!.TryGetScore());
+
+        return new CacheEntitySet<TEntity>(Cache, this);
+    }
+
+    public ICacheFiltered<TEntity> IsLessThanOrEqualTo(TProperty value)
+    {
+        SetScore(true, double.MinValue, true, value!.TryGetScore());
+
+        return new CacheEntitySet<TEntity>(Cache, this);
+    }
+}
+
+public static class ScoreExtensions
+{
+    public static double TryGetScore(this object @this)
+    {
+        if (@this is null)
             return 0;
 
-        switch (rawValue)
+        switch (@this)
         {
             case bool value:
                 return value.GetScore();
@@ -407,13 +521,10 @@ public class RedisSerializer<TEntity>
                 return value.GetScore();
 
             default:
-                throw new InvalidOperationException($"Unrecognized type: {rawValue?.GetType()}.");
+                throw new InvalidOperationException($"Unrecognized type: {@this.GetType()}.");
         }
     }
-}
 
-public static class ScoreExtensions
-{
     public static double GetScore(this bool @this)
     {
         return @this ? 1 : 0;

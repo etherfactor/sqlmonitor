@@ -207,12 +207,12 @@ var record = new Query()
 {
     Id = Guid.NewGuid(),
     Name = "Test",
-    LastRunAtUtc = DateTimeOffset.UtcNow,
-    _A = 5
+    LastRunAtUtc = DateTimeOffset.UtcNow
 };
 
 await entitySet.AddAsync(record);
 var data = await entitySet.ToListAsync();
+var data2 = await entitySet.Where(e => e.IsActive).IsEqualTo(true).ToListAsync();
 
 //var testKey1 = CacheKey.Create<string>("Key1", true);
 //var testKey2 = CacheKey.Create<Query>("Key2", true);

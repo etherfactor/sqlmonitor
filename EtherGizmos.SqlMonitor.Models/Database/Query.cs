@@ -43,8 +43,6 @@ public class Query : Auditable
     [Column("bucket_expression")]
     public virtual string? BucketExpression { get; set; }
 
-    public int _A { get; set; }
-
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
