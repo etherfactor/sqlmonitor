@@ -2,10 +2,12 @@
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using StackExchange.Redis;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
@@ -33,6 +35,21 @@ public struct RecordCacheKey<TEntity>
     {
         Name = name;
     }
+}
+
+public interface ICacheEntity<TEntity> : ICanAlter<TEntity>, ICanGetAsync<TEntity>
+{
+}
+
+public interface ICanAlter<TEntity>
+{
+    Task SetAsync(TEntity entity);
+
+    Task DeleteAsync();
+}
+
+public interface ICanGetAsync<TEntity>
+{
 }
 
 public interface ICacheEntitySet<TEntity> : ICanAlterSet<TEntity>, ICacheFiltered<TEntity>
@@ -75,40 +92,37 @@ public interface ICanCompare<TEntity, TProperty>
     ICacheFiltered<TEntity> IsBetween(TProperty valueStart, TProperty valueEnd);
 }
 
-public static class ICanCompareExtensions
-{
-    public static ICanFilter<TEntity> StartsWith<TEntity>(this ICanCompare<TEntity, string> @this)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public static class RedisHelperCache
 {
-    private static readonly IDictionary<Type, object> _serializers = new Dictionary<Type, object>();
+    private static readonly IDictionary<Type, object> _helpers = new Dictionary<Type, object>();
 
     public static RedisHelper<TEntity> For<TEntity>()
         where TEntity : new()
     {
-        if (!_serializers.ContainsKey(typeof(TEntity)))
+        if (!_helpers.ContainsKey(typeof(TEntity)))
         {
-            var serializer = new RedisHelper<TEntity>();
-            _serializers.Add(typeof(TEntity), serializer);
+            var helper = new RedisHelper<TEntity>();
+            _helpers.Add(typeof(TEntity), helper);
         }
 
-        return (RedisHelper<TEntity>)_serializers[typeof(TEntity)];
+        return (RedisHelper<TEntity>)_helpers[typeof(TEntity)];
     }
 }
 
 public class RedisHelper<TEntity>
     where TEntity : new()
 {
-    private readonly IEnumerable<PropertyInfo> _keys;
-    private readonly IEnumerable<PropertyInfo> _indexes;
-    private readonly IEnumerable<PropertyInfo> _properties;
+    private readonly string _tableKey;
+    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _keys;
+    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _indexes;
+    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _properties;
 
     public RedisHelper()
     {
+        var tableAttribute = typeof(TEntity).GetCustomAttribute<TableAttribute>()
+            ?? throw new InvalidOperationException($"To cache {typeof(TEntity).Name}, it must be annotated with a {nameof(TableAttribute)}.");
+        _tableKey = tableAttribute.Name;
+
         var allProperties = typeof(TEntity)
             .GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
@@ -116,28 +130,33 @@ public class RedisHelper<TEntity>
             .Where(x => x.PropertyType.IsSerializable);
 
         var sortedProperties = clrProperties
-            .OrderBy(e => e.Name).ToList();
+            .Select(e =>
+            {
+                var Property = e;
+                var Attribute = e.GetCustomAttribute<ColumnAttribute>()!;
+                return (Property, Attribute);
+            })
+            .Where(e => e.Attribute is not null)
+            .OrderBy(e => e.Property.Name).ToList();
 
         _keys = sortedProperties
-            .Where(e => e.GetCustomAttribute<KeyAttribute>() is not null);
+            .Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is not null);
 
         _properties = sortedProperties
-            .Where(e => e.GetCustomAttribute<KeyAttribute>() is null);
+            .Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is null);
 
         _indexes = sortedProperties
-            .Where(e => e.GetCustomAttribute<IndexedAttribute>() is not null);
+            .Where(e => e.Property.GetCustomAttribute<IndexedAttribute>() is not null);
     }
 
-    private Tuple<RedisKey, HashEntry[]> Serialize(RecordCacheKey<TEntity> key, TEntity entity)
+    private HashEntry[] Serialize(TEntity entity)
     {
-        var keyData = GetRecordKey(key, entity);
-
         var propertyValues = _properties.Select(e => new HashEntry(
-            e.Name.ToSnakeCase(),
-            JsonSerializer.Serialize(e.GetValue(entity))))
+            e.Item1.Name.ToSnakeCase(),
+            JsonSerializer.Serialize(e.Item1.GetValue(entity))))
             .ToArray();
 
-        return Tuple.Create(keyData, propertyValues);
+        return propertyValues;
     }
 
     private List<TEntity> Deserialize(RedisValue[] data)
@@ -156,17 +175,19 @@ public class RedisHelper<TEntity>
             var keyRawValues = keyData.Split('|');
 
             int index = 0;
-            foreach (PropertyInfo key in _keys)
+            foreach (var tuple in _keys)
             {
-                var keyValue = JsonSerializer.Deserialize('"' + keyRawValues[index] + '"', key.PropertyType);
+                var key = tuple.Item1;
+                var keyValue = JsonSerializer.Deserialize(Decode(keyRawValues[index]), key.PropertyType);
                 key.SetValue(entity, keyValue);
 
                 index++;
             }
 
             index = 1;
-            foreach (PropertyInfo property in _properties)
+            foreach (var tuple in _properties)
             {
+                var property = tuple.Item1;
                 var propertyValue = JsonSerializer.Deserialize(materializedChunk[index].ToString(), property.PropertyType);
                 property.SetValue(entity, propertyValue);
 
@@ -177,57 +198,117 @@ public class RedisHelper<TEntity>
         return entities;
     }
 
-    private RedisKey GetPrimaryKey(RecordCacheKey<TEntity> key)
+    private RedisKey GetEntitySetKey(TEntity entity)
     {
-        var keyData = new RedisKey($"{key.Name}:$$primary");
+        var raw = _keys.Select(e => JsonSerializer.Serialize(e.Item1.GetValue(entity)))
+            .Select(e => Encode(e));
+        var value = new RedisKey($"{_tableKey}:{string.Join("|", raw)}");
+
+        return value;
+    }
+
+    private RedisKey GetEntitySetPrimaryKey()
+    {
+        var keyData = new RedisKey($"{_tableKey}:$$primary");
         return keyData;
     }
 
-    private RedisValue GetRecordId(RecordCacheKey<TEntity> key, TEntity entity)
+    private RedisValue GetRecordId(TEntity entity)
     {
-        var keyValues = _keys.Select(e => JsonSerializer.Serialize(e.GetValue(entity)))
-            .Select(e => e.First() == '"' && e.Last() == '"' ? e.Substring(1, e.Length - 2) : e);
-        var keyData = string.Join("|", keyValues);
+        var raw = _keys.Select(e => JsonSerializer.Serialize(e.Item1.GetValue(entity)))
+            .Select(e => Encode(e));
+        var value = new RedisValue(string.Join("|", raw));
 
+        return value;
+    }
+
+    private RedisKey GetRecordKey(TEntity entity)
+    {
+        var raw = GetRecordId(entity);
+        var value = new RedisKey($"{_tableKey}:{raw}");
+
+        return value;
+    }
+
+    private RedisKey GetEntityKey(RecordCacheKey<TEntity> key)
+    {
+        var keyData = new RedisKey($"{Constants.CacheSchemaName}:{key.Name}");
         return keyData;
     }
 
-    private RedisKey GetRecordKey(RecordCacheKey<TEntity> key, TEntity entity)
-    {
-        var keyValues = GetRecordId(key, entity);
-        var keyData = new RedisKey($"{key.Name}:{keyValues}");
-
-        return keyData;
-    }
-
-    private RedisValue[] GetProperties(RecordCacheKey<TEntity> key)
+    private RedisValue[] GetProperties()
     {
         var propertyNames = "#".Yield()
-            .Concat(_properties.Select(e => $"{key.Name}:*->{e.Name.ToSnakeCase()}"))
+            .Concat(_properties.Select(e => $"{_tableKey}:*->{e.Item1.Name.ToSnakeCase()}"))
             .Select(e => new RedisValue(e))
             .ToArray();
 
         return propertyNames;
     }
 
-    public Func<IDatabase, Task> GetAddAction(RecordCacheKey<TEntity> key, TEntity entity)
+    private string Encode(string input)
     {
-        var recordData = Serialize(key, entity);
-        var primaryKey = GetPrimaryKey(key);
-        var idKey = GetRecordId(key, entity);
+        var encoded = HttpUtility.UrlEncode(input);
+        return encoded;
+
+        //return input.First() == '"' && input.Last() == '"'
+        //    ? input.Substring(1, input.Length - 2)
+        //    : input;
+    }
+
+    private string Decode(string input)
+    {
+        var decoded = HttpUtility.UrlDecode(input);
+        return decoded;
+
+        //return '"' + input + '"';
+    }
+
+    public Func<IDatabase, Task> GetSetAction(RecordCacheKey<TEntity> key, TEntity entity)
+    {
+        var entityKey = GetEntityKey(key);
+        var recordData = Serialize(entity);
+
+        var action = async (IDatabase database) =>
+        {
+            await database.HashSetAsync(entityKey, recordData);
+        };
+
+        return action;
+    }
+
+    public Func<IDatabase, Task> GetDeleteAction(RecordCacheKey<TEntity> key)
+    {
+        var entityKey = GetEntityKey(key);
+
+        var action = async (IDatabase database) =>
+        {
+            await database.KeyDeleteAsync(entityKey);
+        };
+
+        return action;
+    }
+
+    public Func<IDatabase, Task> GetAddAction(TEntity entity)
+    {
+        var setKey = GetEntitySetKey(entity);
+        var recordData = Serialize(entity);
+
+        var primaryKey = GetEntitySetPrimaryKey();
+        var id = GetRecordId(entity);
 
         var action = async (IDatabase database) =>
         {
             var transaction = database.CreateTransaction();
-            _ = transaction.HashSetAsync(recordData.Item1, recordData.Item2);
-            _ = transaction.SortedSetAddAsync(primaryKey, idKey, 0);
+            _ = transaction.HashSetAsync(setKey, recordData);
+            _ = transaction.SortedSetAddAsync(primaryKey, id, 0);
 
             foreach (var index in _indexes)
             {
-                var indexKey = GetIndexKey(key, index);
-                var indexValue = index.GetValue(entity);
+                var indexKey = GetEntitySetIndexKey(index.Item1);
+                var indexValue = index.Item1.GetValue(entity);
                 var indexScore = indexValue!.TryGetScore();
-                _ = transaction.SortedSetAddAsync(indexKey, idKey, indexScore);
+                _ = transaction.SortedSetAddAsync(indexKey, id, indexScore);
             }
 
             await transaction.ExecuteAsync();
@@ -236,22 +317,24 @@ public class RedisHelper<TEntity>
         return action;
     }
 
-    public Func<IDatabase, Task> GetRemoveAction(RecordCacheKey<TEntity> key, TEntity entity)
+    public Func<IDatabase, Task> GetRemoveAction(TEntity entity)
     {
-        var recordKey = GetRecordKey(key, entity);
-        var primaryKey = GetPrimaryKey(key);
-        var idKey = GetRecordId(key, entity);
+        var setKey = GetEntitySetKey(entity);
+        var recordData = Serialize(entity);
+
+        var primaryKey = GetEntitySetPrimaryKey();
+        var id = GetRecordId(entity);
 
         var action = async (IDatabase database) =>
         {
             var transaction = database.CreateTransaction();
-            _ = transaction.KeyDeleteAsync(recordKey);
-            _ = transaction.SortedSetRemoveAsync(primaryKey, idKey);
+            _ = transaction.KeyDeleteAsync(setKey);
+            _ = transaction.SortedSetRemoveAsync(primaryKey, id);
 
             foreach (var index in _indexes)
             {
-                var indexKey = GetIndexKey(key, index);
-                _ = transaction.SortedSetRemoveAsync(indexKey, idKey);
+                var indexKey = GetEntitySetIndexKey(index.Item1);
+                _ = transaction.SortedSetRemoveAsync(indexKey, id);
             }
 
             await transaction.ExecuteAsync();
@@ -260,10 +343,10 @@ public class RedisHelper<TEntity>
         return action;
     }
 
-    public Func<IDatabase, Task<List<TEntity>>> GetListAction(RecordCacheKey<TEntity> key, IEnumerable<CacheEntitySetFilter<TEntity>> filters)
+    public Func<IDatabase, Task<List<TEntity>>> GetListAction(IEnumerable<CacheEntitySetFilter<TEntity>> filters)
     {
-        var primaryKey = GetPrimaryKey(key);
-        var properties = GetProperties(key);
+        var primaryKey = GetEntitySetPrimaryKey();
+        var properties = GetProperties();
 
         if (filters.Any())
         {
@@ -275,7 +358,7 @@ public class RedisHelper<TEntity>
                 foreach (var filter in filters)
                 {
                     var indexProperty = filter.GetProperty();
-                    var indexKey = GetIndexKey(key, indexProperty);
+                    var indexKey = GetEntitySetIndexKey(indexProperty);
 
                     var startScore = filter.GetStartScore();
                     var endScore = filter.GetEndScore();
@@ -327,12 +410,12 @@ public class RedisHelper<TEntity>
         }
     }
 
-    private RedisKey GetIndexKey(RecordCacheKey<TEntity> key, PropertyInfo index)
+    private RedisKey GetEntitySetIndexKey(PropertyInfo index)
     {
         var indexAttribute = index.GetCustomAttribute<IndexedAttribute>()
             ?? throw new InvalidOperationException($"Can only get an index for an indexed property, specifying an {nameof(IndexedAttribute)}.");
 
-        var keyData = new RedisKey($"{key.Name}:${indexAttribute.Name.ToSnakeCase()}");
+        var keyData = new RedisKey($"{_tableKey}:${indexAttribute.Name.ToSnakeCase()}");
         return keyData;
     }
 
@@ -341,6 +424,36 @@ public class RedisHelper<TEntity>
         var guid = Guid.NewGuid();
         var tempKey = new RedisKey($"sqlpulse:$$temp:{guid}");
         return tempKey;
+    }
+}
+
+public class CacheEntity<TEntity> : ICacheEntity<TEntity>
+    where TEntity : new()
+{
+    private readonly RecordCacheKey<TEntity> _key;
+    private readonly IDatabase _database;
+
+    public CacheEntity(RecordCacheKey<TEntity> key, IDatabase database)
+    {
+        _key = key;
+        _database = database;
+    }
+
+    public async Task DeleteAsync()
+    {
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetDeleteAction(_key);
+        await action(_database);
+    }
+
+    public async Task SetAsync(TEntity entity)
+    {
+        if (entity is null)
+            throw new ArgumentNullException(nameof(entity));
+
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetSetAction(_key, entity);
+        await action(_database);
     }
 }
 
@@ -371,7 +484,7 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
             throw new ArgumentNullException(nameof(entity));
 
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetAddAction(_key, entity);
+        var action = serializer.GetAddAction(entity);
         await action(_database);
     }
 
@@ -381,14 +494,14 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
             throw new ArgumentNullException(nameof(entity));
 
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetRemoveAction(_key, entity);
+        var action = serializer.GetRemoveAction(entity);
         await action(_database);
     }
 
     public async Task<List<TEntity>> ToListAsync()
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetListAction(_key, _filters);
+        var action = serializer.GetListAction(_filters);
         return await action(_database);
     }
 
