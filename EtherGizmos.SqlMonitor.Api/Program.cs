@@ -187,7 +187,7 @@ builder.Services.AddMapper();
 
 builder.Services.AddHostedService<EnqueueMonitorQueries>();
 
-builder.Services.AddSingleton<RedisRecordCache>();
+builder.Services.AddSingleton<RedisDistributedRecordCache>();
 
 //**********************************************************
 // Add Middleware
@@ -198,7 +198,7 @@ var serviceProvider = app.Services
     .CreateScope()
     .ServiceProvider;
 
-var _test = serviceProvider.GetRequiredService<RedisRecordCache>();
+var _test = serviceProvider.GetRequiredService<RedisDistributedRecordCache>();
 
 var entitySet = _test.EntitySet<Query>();
 

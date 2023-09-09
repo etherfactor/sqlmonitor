@@ -3,7 +3,7 @@
 /// <summary>
 /// Provides means to cache and retrieve records and record sets in Redis.
 /// </summary>
-public interface IRedisRecordCache
+public interface IDistributedRecordCache
 {
     /// <summary>
     /// Provides means to cache and retrieve records in Redis.

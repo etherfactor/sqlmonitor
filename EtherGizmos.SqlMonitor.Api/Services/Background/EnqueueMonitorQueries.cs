@@ -20,7 +20,7 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
 
     private readonly ILogger _logger;
 
-    private readonly RedisRecordCache _test;
+    private readonly RedisDistributedRecordCache _test;
 
     /// <summary>
     /// Construct the service.
@@ -31,7 +31,7 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
         ILogger<EnqueueMonitorQueries> logger,
         IServiceProvider serviceProvider,
         ILockedDistributedCache lockProvider,
-        RedisRecordCache test)
+        RedisDistributedRecordCache test)
         : base(logger, serviceProvider, lockProvider, CronExpression, ConstantCronExpression)
     {
         _logger = logger;

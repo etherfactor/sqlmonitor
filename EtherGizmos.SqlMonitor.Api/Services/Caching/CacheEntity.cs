@@ -3,7 +3,11 @@ using StackExchange.Redis;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
-public class CacheEntity<TEntity> : ICacheEntity<TEntity>
+/// <summary>
+/// Provides means for caching and retrieving a single entity.
+/// </summary>
+/// <typeparam name="TEntity">The type of entity being cached.</typeparam>
+internal class CacheEntity<TEntity> : ICacheEntity<TEntity>
     where TEntity : new()
 {
     private readonly IDatabase _database;
@@ -15,6 +19,7 @@ public class CacheEntity<TEntity> : ICacheEntity<TEntity>
         _key = key;
     }
 
+    /// <inheritdoc/>
     public async Task DeleteAsync()
     {
         var serializer = RedisHelperCache.For<TEntity>();
@@ -22,6 +27,15 @@ public class CacheEntity<TEntity> : ICacheEntity<TEntity>
         await action(_database);
     }
 
+    /// <inheritdoc/>
+    public async Task<TEntity?> GetAsync()
+    {
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetReadAction(_key);
+        return await action(_database);
+    }
+
+    /// <inheritdoc/>
     public async Task SetAsync(TEntity entity)
     {
         if (entity is null)

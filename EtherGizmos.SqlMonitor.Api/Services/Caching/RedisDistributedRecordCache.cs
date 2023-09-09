@@ -6,11 +6,11 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// <summary>
 /// Provides means to cache and retrieve records and record sets in Redis.
 /// </summary>
-public class RedisRecordCache : IRedisRecordCache
+public class RedisDistributedRecordCache : IDistributedRecordCache
 {
     private readonly IConnectionMultiplexer _multiplexer;
 
-    public RedisRecordCache(IConnectionMultiplexer multiplexer)
+    public RedisDistributedRecordCache(IConnectionMultiplexer multiplexer)
     {
         _multiplexer = multiplexer;
     }

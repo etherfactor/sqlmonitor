@@ -6,7 +6,11 @@ using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
-public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
+/// <summary>
+/// Provides means for caching and retrieving entities in a set.
+/// </summary>
+/// <typeparam name="TEntity">The type of entity being cached.</typeparam>
+internal class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     where TEntity : new()
 {
     private readonly IDatabase _database;
@@ -24,6 +28,7 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         _filters = cache._filters.Append(newFilter);
     }
 
+    /// <inheritdoc/>
     public async Task AddAsync(TEntity entity)
     {
         if (entity is null)
@@ -34,6 +39,7 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         await action(_database);
     }
 
+    /// <inheritdoc/>
     public async Task RemoveAsync(TEntity entity)
     {
         if (entity is null)
@@ -44,6 +50,7 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         await action(_database);
     }
 
+    /// <inheritdoc/>
     public async Task<List<TEntity>> ToListAsync()
     {
         var serializer = RedisHelperCache.For<TEntity>();
@@ -51,6 +58,7 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         return await action(_database);
     }
 
+    /// <inheritdoc/>
     public ICanCompare<TEntity, TProperty> Where<TProperty>(Expression<Func<TEntity, TProperty>> indexedProperty)
     {
         var propertyInfo = indexedProperty.GetPropertyInfo();
@@ -59,6 +67,4 @@ public class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
 
         return new CacheEntitySetFilter<TEntity, TProperty>(this, propertyInfo);
     }
-
-    public IEnumerable<CacheEntitySetFilter<TEntity>> GetFilters() => _filters;
 }

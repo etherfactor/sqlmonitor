@@ -2,4 +2,5 @@
 
 public interface ICanGetAsync<TEntity>
 {
+    Task<TEntity?> GetAsync();
 }

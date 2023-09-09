@@ -6,5 +6,4 @@
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
 public interface ICacheEntity<TEntity> : ICanAlter<TEntity>, ICanGetAsync<TEntity>
 {
-    public interface ITest { }
 }
