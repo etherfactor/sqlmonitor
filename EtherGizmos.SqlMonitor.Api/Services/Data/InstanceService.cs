@@ -15,22 +15,22 @@ public class InstanceService : IInstanceService
     private readonly ILogger _logger;
 
     private readonly DatabaseContext _context;
-    private readonly ILockedDistributedCache _distributedCache;
+    private readonly IDistributedRecordCache _distributedRecordCache;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="logger">The logger to use.</param>
     /// <param name="context">Provides access to internal records.</param>
-    /// <param name="distributedCache">Contains shared, cached records.</param>
+    /// <param name="distributedRecordCache">Contains shared, cached records.</param>
     public InstanceService(
         ILogger<QueryService> logger,
         DatabaseContext context,
-        ILockedDistributedCache distributedCache)
+        IDistributedRecordCache distributedRecordCache)
     {
         _logger = logger;
         _context = context;
-        _distributedCache = distributedCache;
+        _distributedRecordCache = distributedRecordCache;
     }
 
     /// <inheritdoc/>
@@ -43,7 +43,7 @@ public class InstanceService : IInstanceService
     /// <inheritdoc/>
     public async Task<IEnumerable<Instance>> GetOrLoadCacheAsync(CancellationToken cancellationToken = default)
     {
-        return await _distributedCache.GetOrCalculateAsync(CacheKeys.AllInstances, async () =>
+        return await _distributedRecordCache.GetOrCalculateAsync(CacheKeys.AllInstances, async () =>
         {
             return await _context.Instances.ToListAsync();
         }, timeout: TimeSpan.FromSeconds(15), cancellationToken: cancellationToken);

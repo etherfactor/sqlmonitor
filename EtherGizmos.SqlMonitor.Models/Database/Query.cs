@@ -22,7 +22,7 @@ public class Query : Auditable
     public virtual string? Description { get; set; }
 
     [Column("is_active")]
-    [Indexed("is_active")]
+    [Indexed]
     public virtual bool IsActive { get; set; } = true;
 
     [Column("is_soft_deleted")]
@@ -42,6 +42,10 @@ public class Query : Auditable
 
     [Column("bucket_expression")]
     public virtual string? BucketExpression { get; set; }
+
+    [Column("next_run_at_utc")]
+    [Indexed]
+    public DateTimeOffset NextRunAtUtc => (LastRunAtUtc ?? DateTimeOffset.MinValue).Add(RunFrequency);
 
     /// <summary>
     /// Not intended for direct use.

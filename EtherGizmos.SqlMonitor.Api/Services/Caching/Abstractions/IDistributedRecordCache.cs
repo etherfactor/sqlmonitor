@@ -6,6 +6,17 @@
 public interface IDistributedRecordCache
 {
     /// <summary>
+    /// Attempts to acquire a lock in a distributed cache.
+    /// </summary>
+    /// <typeparam name="TKey">The type of cache key being locked.</typeparam>
+    /// <param name="key">The cache key being locked.</param>
+    /// <param name="timeout">The maximum time to wait for the lock before failing.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The cache lock if successful, otherwise null.</returns>
+    Task<CacheLock<TKey>?> AcquireLockAsync<TKey>(TKey key, TimeSpan timeout, CancellationToken cancellationToken = default)
+        where TKey : ICacheKey;
+
+    /// <summary>
     /// Provides means to cache and retrieve records in Redis.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity being stored.</typeparam>

@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Api.Data.Access;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
-using Redis.OM;
-using Redis.OM.Contracts;
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Configuration;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
@@ -39,29 +36,18 @@ public static class IServiceCollectionExtensions
         return @this;
     }
 
-    public static IServiceCollection AddRedisCache(this IServiceCollection @this, IConfigurationSection section)
+    /// <summary>
+    /// Adds distributed caching to the service collection. Requires additional calls to <paramref name="configure"/>
+    /// to add the cache.
+    /// </summary>
+    /// <param name="this">Itself.</param>
+    /// <param name="configure">The action to configure the cache.</param>
+    /// <returns>Itself.</returns>
+    public static IServiceCollection AddCaching(this IServiceCollection @this, Action<ICachingConfigurator> configure)
     {
-        var options = new ConfigurationOptions();
-        section.Bind(options);
+        var configurator = new CachingConfigurator(@this);
 
-        var endpoints = section.GetSection("EndPoints").Get<RedisHost[]>()
-            ?? Array.Empty<RedisHost>();
-        foreach (var endpoint in endpoints)
-        {
-            options.EndPoints.Add(endpoint.Host, endpoint.Port);
-        }
-
-        RedisConnectionMultiplexer.Initialize(options);
-        var multiplexer = RedisConnectionMultiplexer.Instance;
-        @this.AddSingleton(e => multiplexer);
-
-        @this.AddStackExchangeRedisCache(opt =>
-        {
-            opt.ConfigurationOptions = options;
-            opt.ConnectionMultiplexerFactory = () => Task.FromResult(multiplexer);
-        });
-
-        @this.AddSingleton<IRedisConnectionProvider>(e => new RedisConnectionProvider(multiplexer));
+        configure(configurator);
 
         return @this;
     }

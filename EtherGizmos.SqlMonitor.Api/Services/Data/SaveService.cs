@@ -18,8 +18,6 @@ public class SaveService : ISaveService
     {
         _logger = logger;
         _context = context;
-
-        _logger.Log(LogLevel.Information, "Created save service with context {Context}", context);
     }
 
     /// <inheritdoc/>

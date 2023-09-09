@@ -25,9 +25,9 @@ public class DatabaseConnectionProvider : IDatabaseConnectionProvider
     /// <inheritdoc/>
     public string GetConnectionString()
     {
-        var properties = Configuration.GetSection("Connections:Database").Get<Dictionary<string, string>>();
+        var properties = Configuration.GetSection("Connections:SqlServer").Get<Dictionary<string, string>>();
         if (properties == null)
-            throw new InvalidOperationException("Must specify the Connections:Database portion of appsettings.json.");
+            throw new InvalidOperationException("Must specify the Connections:SqlServer portion of appsettings.json.");
 
         var builder = new SqlConnectionStringBuilder();
         foreach (string key in properties.Keys)

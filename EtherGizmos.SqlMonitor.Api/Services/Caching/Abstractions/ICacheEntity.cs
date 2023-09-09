@@ -4,6 +4,6 @@
 /// Provides means for caching and retrieving a single entity.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-public interface ICacheEntity<TEntity> : ICanAlter<TEntity>, ICanGetAsync<TEntity>
+public interface ICacheEntity<TEntity> : ICanAlter<TEntity>, ICanGet<TEntity>
 {
 }

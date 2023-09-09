@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using Medallion.Threading;
 using StackExchange.Redis;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
@@ -8,11 +9,35 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 public class RedisDistributedRecordCache : IDistributedRecordCache
 {
+    private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _multiplexer;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
-    public RedisDistributedRecordCache(IConnectionMultiplexer multiplexer)
+    public RedisDistributedRecordCache(
+        ILogger<RedisDistributedRecordCache> logger,
+        IConnectionMultiplexer multiplexer,
+        IDistributedLockProvider distributedLockProvider)
     {
+        _logger = logger;
         _multiplexer = multiplexer;
+        _distributedLockProvider = distributedLockProvider;
+    }
+
+    /// <inheritdoc/>
+    public async Task<CacheLock<TKey>?> AcquireLockAsync<TKey>(TKey key, TimeSpan timeout, CancellationToken cancellationToken = default)
+        where TKey : ICacheKey
+    {
+        var lockName = $"{Constants.CacheSchemaName}:{key.KeyName}:{Constants.CacheLockSuffix}";
+        _logger.Log(LogLevel.Debug, "Attempting to acquire lock on {CacheKey}", lockName);
+
+        var result = await _distributedLockProvider.TryAcquireLockAsync(lockName, timeout, cancellationToken);
+        if (result is not null)
+        {
+            var keyLock = new CacheLock<TKey>(key, result);
+            return keyLock;
+        }
+
+        return null;
     }
 
     /// <inheritdoc/>

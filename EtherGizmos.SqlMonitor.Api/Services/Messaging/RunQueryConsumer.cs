@@ -4,7 +4,7 @@ using MassTransit;
 using Microsoft.Data.SqlClient;
 using System.Text.RegularExpressions;
 
-namespace EtherGizmos.SqlMonitor.Api.Consumers;
+namespace EtherGizmos.SqlMonitor.Api.Services.Messaging;
 
 public class RunQueryConsumer : IConsumer<RunQuery>
 {

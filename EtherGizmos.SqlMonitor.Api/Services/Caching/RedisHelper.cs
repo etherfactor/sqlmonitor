@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Extensions;
 using StackExchange.Redis;
 using System.ComponentModel.DataAnnotations;
@@ -122,7 +123,7 @@ public class RedisHelper<TEntity>
         var indexAttribute = index.GetCustomAttribute<IndexedAttribute>()
             ?? throw new InvalidOperationException($"Can only get an index for an indexed property, specifying an {nameof(IndexedAttribute)}.");
 
-        var keyData = new RedisKey($"{Constants.CacheSchemaName}:$$table:{_tableKey}:${indexAttribute.Name.ToSnakeCase()}");
+        var keyData = new RedisKey($"{Constants.CacheSchemaName}:$$table:{_tableKey}:${index.GetCustomAttribute<ColumnAttribute>()!.Name!.ToSnakeCase()}");
         return keyData;
     }
 
@@ -184,7 +185,9 @@ public class RedisHelper<TEntity>
     /// <returns>The serialized entity.</returns>
     private HashEntry[] Serialize(TEntity entity)
     {
-        var propertyValues = _properties.Select(e => new HashEntry(
+        var propertyValues = _properties
+            .Where(e => e.Item1.CanRead)
+            .Select(e => new HashEntry(
             e.Item1.Name.ToSnakeCase(),
             JsonSerializer.Serialize(e.Item1.GetValue(entity))))
             .ToArray();
@@ -209,7 +212,8 @@ public class RedisHelper<TEntity>
         {
             var key = tuple.Item1;
             var keyValue = JsonSerializer.Deserialize(Decode(keyRawValues[index]), key.PropertyType);
-            key.SetValue(entity, keyValue);
+            if (key.CanWrite)
+                key.SetValue(entity, keyValue);
 
             index++;
         }
@@ -219,7 +223,8 @@ public class RedisHelper<TEntity>
         {
             var property = tuple.Item1;
             var propertyValue = JsonSerializer.Deserialize(data[index].ToString(), property.PropertyType);
-            property.SetValue(entity, propertyValue);
+            if (property.CanWrite)
+                property.SetValue(entity, propertyValue);
 
             index++;
         }
@@ -378,7 +383,7 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="filters">The filters to apply to the set.</param>
     /// <returns>The list action.</returns>
-    public Func<IDatabase, Task<List<TEntity>>> GetListAction(IEnumerable<CacheEntitySetFilter<TEntity>> filters)
+    public Func<IDatabase, Task<List<TEntity>>> GetListAction(IEnumerable<ICacheEntitySetFilter<TEntity>> filters)
     {
         var primaryKey = GetEntitySetPrimaryKey();
         var properties = GetProperties();
@@ -412,11 +417,14 @@ public class RedisHelper<TEntity>
 
                 var finalTempKey = GetTempKey();
                 _ = transaction.SortedSetCombineAndStoreAsync(SetOperation.Intersect, finalTempKey, allTempKeys.ToArray());
+                _ = transaction.KeyDeleteAsync(allTempKeys.ToArray());
+
                 var valuesTask = transaction.SortAsync(
                     finalTempKey,
                     sortType: SortType.Numeric,
                     by: "nosort",
                     get: properties);
+                _ = transaction.KeyDeleteAsync(finalTempKey);
 
                 await transaction.ExecuteAsync();
                 var values = await valuesTask;

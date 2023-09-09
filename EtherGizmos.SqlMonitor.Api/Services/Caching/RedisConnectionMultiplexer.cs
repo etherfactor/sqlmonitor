@@ -2,7 +2,7 @@
 using StackExchange.Redis;
 using System.Text;
 
-namespace EtherGizmos.SqlMonitor.Api.Data.Access;
+namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
 public static class RedisConnectionMultiplexer
 {
@@ -11,7 +11,7 @@ public static class RedisConnectionMultiplexer
     public static void Initialize(ConfigurationOptions options)
     {
         if (Instance is not null)
-            throw new InvalidOperationException("Can only initialize the connection multiplexer once.");
+            return;
 
         var writer = new TextWriterLogger();
         Instance = ConnectionMultiplexer.Connect(options, writer);

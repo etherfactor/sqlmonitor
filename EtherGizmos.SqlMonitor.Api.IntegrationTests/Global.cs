@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -83,7 +84,7 @@ internal static class Global
                 //Override the database name for the connection string
                 config.AddInMemoryCollection(new Dictionary<string, string>()
                 {
-                    { "Connections:Database:Initial Catalog", TestDatabaseName }
+                    { "Connections:SqlServer:Initial Catalog", TestDatabaseName }
                 });
             });
         });

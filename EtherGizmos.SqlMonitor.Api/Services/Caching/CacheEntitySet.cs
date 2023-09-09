@@ -29,7 +29,7 @@ internal class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task AddAsync(TEntity entity)
+    public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
@@ -40,7 +40,7 @@ internal class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task RemoveAsync(TEntity entity)
+    public async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
@@ -51,7 +51,7 @@ internal class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<List<TEntity>> ToListAsync()
+    public async Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
         var serializer = RedisHelperCache.For<TEntity>();
         var action = serializer.GetListAction(_filters);

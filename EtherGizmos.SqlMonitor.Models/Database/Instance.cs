@@ -1,15 +1,15 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
-using Redis.OM.Modeling;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("instances")]
-[Document(StorageType = StorageType.Hash, Prefixes = new[] { "instances" })]
 public class Instance : Auditable
 {
     [Column("instance_id")]
-    [RedisIdField]
+    [Key]
     public virtual Guid Id { get; set; }
 
     [Column("name")]
@@ -19,6 +19,7 @@ public class Instance : Auditable
     public virtual string? Description { get; set; }
 
     [Column("is_active")]
+    [Indexed]
     public virtual bool IsActive { get; set; } = true;
 
     [Column("is_soft_deleted")]

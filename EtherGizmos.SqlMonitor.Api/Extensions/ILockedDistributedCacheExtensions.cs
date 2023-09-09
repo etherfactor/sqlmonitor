@@ -6,21 +6,23 @@ namespace EtherGizmos.SqlMonitor.Api.Extensions;
 public static class ILockedDistributedCacheExtensions
 {
     public static async Task<TEntity> GetOrCalculateAsync<TEntity>(
-        this ILockedDistributedCache @this,
+        this IDistributedRecordCache @this,
         EntityCacheKey<TEntity> key,
         Func<Task<TEntity>> calculateAsync,
         TimeSpan timeout = default,
         CancellationToken cancellationToken = default)
+        where TEntity : new()
     {
-        TEntity? entity = await @this.GetAsync(key, cancellationToken);
+        var entitySet = @this.Entity(key);
+        TEntity? entity = await entitySet.GetAsync(cancellationToken);
         if (entity is null)
         {
             using var @lock = await @this.AcquireLockAsync(key, timeout, cancellationToken);
             if (@lock is null)
-                throw new ApplicationException("Failed to acquire a lock for 60+ seconds.");
+                throw new ApplicationException($"Failed to acquire a lock for {timeout.TotalSeconds} seconds.");
 
             entity = await calculateAsync();
-            await @this.SetWithLockAsync(key, @lock, entity, cancellationToken);
+            await entitySet.SetAsync(entity, cancellationToken);
         }
 
         return entity;

@@ -168,6 +168,8 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
             entity.PropertyWithAnnotations(e => e.TimestampUtcExpression);
             entity.PropertyWithAnnotations(e => e.BucketExpression);
+
+            entity.Ignore(e => e.NextRunAtUtc);
         });
 
         modelBuilder.Entity<Securable>(entity =>

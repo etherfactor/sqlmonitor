@@ -1,6 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Database;
 
-namespace EtherGizmos.SqlMonitor.Api.Consumers;
+namespace EtherGizmos.SqlMonitor.Api.Services.Messaging;
 
 public class RunQuery
 {

@@ -1,10 +1,9 @@
-﻿using EtherGizmos.SqlMonitor.Api.Consumers;
-using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Helpers;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
 
@@ -19,8 +18,7 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
     private const string ConstantCronExpression = "0/1 * * * * *";
 
     private readonly ILogger _logger;
-
-    private readonly RedisDistributedRecordCache _test;
+    private readonly IDistributedRecordCache _distributedRecordCache;
 
     /// <summary>
     /// Construct the service.
@@ -30,42 +28,26 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
     public EnqueueMonitorQueries(
         ILogger<EnqueueMonitorQueries> logger,
         IServiceProvider serviceProvider,
-        ILockedDistributedCache lockProvider,
-        RedisDistributedRecordCache test)
-        : base(logger, serviceProvider, lockProvider, CronExpression, ConstantCronExpression)
+        IDistributedRecordCache distributedRecordCache)
+        : base(logger, serviceProvider, distributedRecordCache, CacheKeys.EnqueueMonitorQueries, CronExpression, ConstantCronExpression)
     {
         _logger = logger;
-        _test = test;
+        _distributedRecordCache = distributedRecordCache;
     }
 
+    /// <inheritdoc/>
     protected override async Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
     {
-        var queryService = scope.GetRequiredService<IQueryService>();
-        var allQueries = await queryService.GetOrLoadCacheAsync(stoppingToken);
+        var queriesToRun = await _distributedRecordCache.EntitySet<Query>()
+            .Where(e => e.IsActive).IsEqualTo(true)
+            .Where(e => e.NextRunAtUtc).IsLessThanOrEqualTo(DateTimeOffset.UtcNow)
+            .ToListAsync();
 
-        var instanceService = scope.GetRequiredService<IInstanceService>();
-        var allInstances = await instanceService.GetOrLoadCacheAsync(stoppingToken);
+        var allInstances = await _distributedRecordCache.EntitySet<Instance>()
+            .Where(e => e.IsActive).IsEqualTo(true)
+            .ToListAsync();
 
-        await ScheduleQueriesAsync(scope, allInstances, allQueries, stoppingToken);
-    }
-
-    private async Task ScheduleQueriesAsync(
-        IServiceProvider scope,
-        IEnumerable<Instance> allInstances,
-        IEnumerable<Query> allQueries,
-        CancellationToken cancellationToken)
-    {
-        var now = DateTime.UtcNow;
-        var queries = allQueries
-            //Convert the runtime to an age based on the current time.
-            .Where(e => now - (e.LastRunAtUtc ?? DateTimeOffset.MinValue)
-                //Compare to the run frequency, but shave off a small portion to avoid waiting a whole extra run cycle if
-                //the cycle is off by a few milliseconds.
-                >= e.RunFrequency - DateAndTimeHelper.Min(0.05 * e.RunFrequency, TimeSpan.FromMilliseconds(100)));
-
-        //Prepare to run only the queries due to be run, on all instances.
-        //TODO: account for query whitelists/blacklists.
-        var instanceQueries = allInstances.CrossJoin(queries);
+        var instanceQueries = allInstances.CrossJoin(queriesToRun);
 
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
         var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{RunQueryConsumer.Queue}"));
@@ -74,7 +56,7 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
             instanceQueries,
             new ParallelOptions()
             {
-                CancellationToken = cancellationToken,
+                CancellationToken = stoppingToken,
                 MaxDegreeOfParallelism = 8
             },
             async (instanceQuery, cancellationToken) =>
@@ -85,27 +67,17 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
                 await endpoint.Send(new RunQuery()
                 {
                     Instance = instance,
-                    Query = query,
+                    Query = query
                 }, cancellationToken);
 
-                query.LastRunAtUtc = DateTimeOffset.UtcNow;
+                query.LastRunAtUtc = DateTimeOffset.UtcNow.Floor(TimeSpan.FromSeconds(1));
 
                 var updateScope = scope.CreateScope().ServiceProvider;
                 var saveService = updateScope.GetRequiredService<ISaveService>();
                 saveService.Attach(query);
 
                 await saveService.SaveChangesAsync();
+                await _distributedRecordCache.EntitySet<Query>().AddAsync(query, cancellationToken);
             });
-
-        var distributedCache = scope.GetRequiredService<ILockedDistributedCache>();
-        using var @lock = await distributedCache.AcquireLockAsync(CacheKeys.AllQueries, TimeSpan.FromSeconds(1), cancellationToken);
-        if (@lock is not null)
-        {
-            await distributedCache.SetWithLockAsync(CacheKeys.AllQueries, @lock, allQueries.ToList(), cancellationToken);
-        }
-        else
-        {
-            _logger.Log(LogLevel.Warning, "Expected to receive a lock for {CacheKey}, but the request timed out.", nameof(CacheKeys.AllQueries));
-        }
     }
 }

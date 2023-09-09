@@ -9,22 +9,22 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
 public abstract class GlobalBackgroundService : PeriodicBackgroundService
 {
     private readonly ILogger _logger;
-    private readonly ILockedDistributedCache _lockProvider;
+    private readonly IDistributedRecordCache _distributedRecordCache;
 
     public GlobalBackgroundService(
         ILogger logger,
-        ILockedDistributedCache lockProvider,
+        IDistributedRecordCache distributedRecordCache,
         string cronExpression)
         : base(logger, cronExpression)
     {
         _logger = logger;
-        _lockProvider = lockProvider;
+        _distributedRecordCache = distributedRecordCache;
     }
 
     /// <inheritdoc/>
     protected sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
-        using var @lock = await _lockProvider.AcquireLockAsync(
+        using var @lock = await _distributedRecordCache.AcquireLockAsync(
             CacheKeys.EnqueueMonitorQueries,
             timeout: TimeSpan.Zero,
             cancellationToken: stoppingToken);

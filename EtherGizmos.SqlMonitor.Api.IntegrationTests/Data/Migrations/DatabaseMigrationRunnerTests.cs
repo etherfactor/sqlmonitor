@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Data.Migrations;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -12,11 +12,11 @@ internal class DatabaseMigrationRunnerTests
         var databaseName = "sqlmonitor_migration";
         var options = new Dictionary<string, string?>()
         {
-            { "Connections:Database:Data Source", "(localdb)\\mssqllocaldb" },
-            { "Connections:Database:Initial Catalog", databaseName },
-            { "Connections:Database:TrustServerCertificate", "true" },
-            { "Connections:Database:Integrated Security", "true" },
-            { "Connections:Database:Application Name", "Migration Testing" }
+            { "Connections:SqlServer:Data Source", "(localdb)\\mssqllocaldb" },
+            { "Connections:SqlServer:Initial Catalog", databaseName },
+            { "Connections:SqlServer:TrustServerCertificate", "true" },
+            { "Connections:SqlServer:Integrated Security", "true" },
+            { "Connections:SqlServer:Application Name", "Migration Testing" }
         };
 
         var config = new ConfigurationBuilder()

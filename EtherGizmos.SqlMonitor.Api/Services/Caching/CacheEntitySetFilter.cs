@@ -9,7 +9,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// Applies a filter to a <see cref="CacheEntitySet{TEntity}"/>.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-internal class CacheEntitySetFilter<TEntity>
+internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
     where TEntity : new()
 {
     private readonly CacheEntitySet<TEntity> _cache;
@@ -45,28 +45,16 @@ internal class CacheEntitySetFilter<TEntity>
         _endScore = endScore;
     }
 
-    /// <summary>
-    /// Get the indexed property of the filter.
-    /// </summary>
-    /// <returns>The indexed property.</returns>
+    /// <inheritdoc/>
     public PropertyInfo GetProperty() => _indexedProperty;
 
-    /// <summary>
-    /// Get the start score of the filter.
-    /// </summary>
-    /// <returns>The start score.</returns>
+    /// <inheritdoc/>
     public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
-    
-    /// <summary>
-    /// Get the end score of the filter.
-    /// </summary>
-    /// <returns>The end score.</returns>
+
+    /// <inheritdoc/>
     public RedisValue GetEndScore() => new RedisValue($"{_endScore}");
 
-    /// <summary>
-    /// Gets which of the filter's scores are inclusive vs. exclusive.
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public Exclude GetExclusivity() =>
         _startInclusive && _endInclusive ? Exclude.None
         : _startInclusive ? Exclude.Stop

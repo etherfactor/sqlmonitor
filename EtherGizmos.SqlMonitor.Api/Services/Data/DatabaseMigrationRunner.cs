@@ -1,10 +1,10 @@
-﻿using EtherGizmos.SqlMonitor.Api.Data.Access;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using EtherGizmos.SqlMonitor.Database;
 using FluentMigrator.Runner;
 using Serilog;
 
-namespace EtherGizmos.SqlMonitor.Api.Data.Migrations;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 
 /// <summary>
 /// Provides means for performing migrations against the database. Note: creates a separate service collection for Fluent

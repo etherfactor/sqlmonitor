@@ -3,10 +3,7 @@
 [AttributeUsage(AttributeTargets.Property)]
 public class IndexedAttribute : Attribute
 {
-    public string Name { get; }
-
-    public IndexedAttribute(string name)
+    public IndexedAttribute()
     {
-        Name = name;
     }
 }

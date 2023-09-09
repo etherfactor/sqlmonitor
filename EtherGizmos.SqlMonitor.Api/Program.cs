@@ -1,24 +1,19 @@
-using EtherGizmos.SqlMonitor.Api.Configuration;
-using EtherGizmos.SqlMonitor.Api.Consumers;
-using EtherGizmos.SqlMonitor.Api.Data.Access;
-using EtherGizmos.SqlMonitor.Api.Data.Migrations;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
+using EtherGizmos.SqlMonitor.Api.Services.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
+using EtherGizmos.SqlMonitor.Api.Services.Messaging;
+using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
-using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
-using Medallion.Threading;
-using Medallion.Threading.Redis;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,25 +58,42 @@ builder.Services.AddSwaggerGen();
 builder.Services
     .AddDbContext<DatabaseContext>((services, opt) =>
     {
-        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+        var options = builder.Configuration.GetSection("Connections:Use")
+            .Get<UsageOptions>() ?? new UsageOptions();
 
-        opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
+        if (options.Database == DatabaseType.SqlServer)
         {
-            conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-        });
+            var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+
+            opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+        }
+        else
+        {
+            throw new InvalidOperationException(string.Format("Unknown database type: {0}", options.Database));
+        }
 
         opt.UseLazyLoadingProxies(true);
-    });
+    })
+    .AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>()
+    .AddScoped<ISaveService, SaveService>()
+    .AddScoped<IInstanceService, InstanceService>()
+    .AddScoped<IPermissionService, PermissionService>()
+    .AddScoped<IQueryService, QueryService>()
+    .AddScoped<ISecurableService, SecurableService>()
+    .AddScoped<IUserService, UserService>();
 
 builder.Services
     .AddMassTransit(opt =>
     {
-        var options = builder.Configuration.GetSection("Connections:Messaging")
-            .Get<MassTransitOptions>() ?? new MassTransitOptions();
+        var options = builder.Configuration.GetSection("Connections:Use")
+            .Get<UsageOptions>() ?? new UsageOptions();
 
         opt.AddConsumer<RunQueryConsumer>();
 
-        if (options.Use == MassTransitServiceBusType.InMemory)
+        if (options.MessageBroker == MessageBrokerType.InMemory)
         {
             opt.UsingInMemory((context, conf) =>
             {
@@ -92,102 +104,53 @@ builder.Services
                 {
                     opt.Consumer<RunQueryConsumer>(context);
                 });
+
+                //TODO: Configure in-memory retry and other options
             });
         }
-        else if (options.Use == MassTransitServiceBusType.RabbitMQ)
+        else if (options.MessageBroker == MessageBrokerType.RabbitMQ)
         {
+            var rabbitMQOptions = builder.Configuration.GetSection("Connections:RabbitMQ")
+                .Get<RabbitMQOptions>() ?? new RabbitMQOptions();
+
             opt.UsingRabbitMq((context, conf) =>
             {
                 conf.ConfigureEndpoints(context);
-                conf.Host(options.RabbitMQ.Host, opt =>
+                conf.Host(rabbitMQOptions.Host, opt =>
                 {
-                    opt.Username(options.RabbitMQ.Username);
-                    opt.Password(options.RabbitMQ.Password);
+                    opt.Username(rabbitMQOptions.Username);
+                    opt.Password(rabbitMQOptions.Password);
                 });
+
+                //TODO: Configure RabbitMQ entirely
             });
         }
         else
         {
-            throw new InvalidOperationException(string.Format("Unknown service bus type: {0}", options.Use));
+            throw new InvalidOperationException(string.Format("Unknown message broker type: {0}", options.MessageBroker));
         }
     });
 
-//builder.Services
-//    .Configure<ConfigurationOptions>(opt =>
-//    {
-//        builder.Configuration.GetSection("Connections:Redis").Bind(opt);
-//    })
-//    .AddSingleton<IConnectionMultiplexer>(e =>
-//    {
-//        var options = e.CreateScope().ServiceProvider.GetRequiredService<IOptionsSnapshot<ConfigurationOptions>>();
-//        var config = options.Value;
-//        config.EndPoints.Add("192.168.1.5", 6379);
-//        return ConnectionMultiplexer.Connect(config);
-//    })
-//    .AddTransient<IDatabase>(e => e.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-
 builder.Services
-    //.Configure<ConfigurationOptions>(opt =>
-    //{
-    //    var section = builder.Configuration.GetSection("Connections:Redis");
-    //    section.Bind(opt);
-
-    //    var endpoints = section.GetSection("EndPoints").Get<RedisHost[]>()
-    //        ?? Array.Empty<RedisHost>();
-    //    foreach (var endpoint in endpoints)
-    //    {
-    //        opt.EndPoints.Add(endpoint.Host, endpoint.Port);
-    //    }
-    //})
-    //.AddStackExchangeRedisCache(opt =>
-    //{
-    //    opt.conn
-    //    opt.ConfigurationOptions
-    //        ??= new ConfigurationOptions();
-
-    //    var section = builder.Configuration.GetSection("Connections:Redis");
-    //    section.Bind(opt.ConfigurationOptions);
-
-    //    var endpoints = section.GetSection("EndPoints").Get<RedisHost[]>()
-    //        ?? Array.Empty<RedisHost>();
-    //    foreach (var endpoint in endpoints)
-    //    {
-    //        opt.ConfigurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
-    //    }
-    //})
-    .AddRedisCache(builder.Configuration.GetSection("Connections:Caching:Redis"))
-    .AddSingleton<IDistributedLockProvider>(services =>
+    .AddCaching(opt =>
     {
-        var multiplexer = services.GetRequiredService<IConnectionMultiplexer>();
-        return new RedisDistributedSynchronizationProvider(multiplexer.GetDatabase());
+        var options = builder.Configuration.GetSection("Connections:Use")
+            .Get<UsageOptions>() ?? new UsageOptions();
+
+        if (options.Cache == CacheType.Redis)
+        {
+            opt.UsingRedis(builder.Configuration.GetSection("Connections:Redis"));
+        }
+        else
+        {
+            throw new InvalidOperationException(string.Format("Unknown cache type: {0}", options.Cache));
+        }
     });
-
-builder.Services
-    .AddOptions<CachingOptions>()
-    .Configure(options =>
-    {
-        builder.Configuration.GetSection("Caching")
-            .Bind(options);
-    });
-
-builder.Services.AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>();
-
-builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
-builder.Services.AddSingleton<ILockedDistributedCache, LockedDistributedCache>();
-
-builder.Services.AddScoped<ISaveService, SaveService>();
-
-builder.Services.AddScoped<IInstanceService, InstanceService>();
-builder.Services.AddScoped<IPermissionService, PermissionService>();
-builder.Services.AddScoped<IQueryService, QueryService>();
-builder.Services.AddScoped<ISecurableService, SecurableService>();
-builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddMapper();
 
+builder.Services.AddHostedService<CacheLoadService>();
 builder.Services.AddHostedService<EnqueueMonitorQueries>();
-
-builder.Services.AddSingleton<RedisDistributedRecordCache>();
 
 //**********************************************************
 // Add Middleware
@@ -197,39 +160,6 @@ var app = builder.Build();
 var serviceProvider = app.Services
     .CreateScope()
     .ServiceProvider;
-
-var _test = serviceProvider.GetRequiredService<RedisDistributedRecordCache>();
-
-var entitySet = _test.EntitySet<Query>();
-
-var record = new Query()
-{
-    Id = Guid.NewGuid(),
-    Name = "Test",
-    LastRunAtUtc = DateTimeOffset.UtcNow
-};
-
-await entitySet.AddAsync(record);
-var data = await entitySet.ToListAsync();
-var data2 = await entitySet.Where(e => e.IsActive).IsEqualTo(true).ToListAsync();
-
-//var testKey1 = CacheKey.Create<string>("Key1", true);
-//var testKey2 = CacheKey.Create<Query>("Key2", true);
-
-//var test = serviceProvider.GetRequiredService<IDistributedCache>();
-//var test2 = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
-//var test3 = serviceProvider.GetRequiredService<IDistributedLockProvider>();
-//var test4 = serviceProvider.GetRequiredService<ILockedDistributedCache>();
-
-//CacheLock<Query> testLock2 = null!;
-//await test4.TryAcquireLockAsync(testKey2, TimeSpan.FromDays(1), @out => testLock2 = @out);
-//await test4.TrySetWithLockAsync(testKey2, testLock2, new Query() { Id = Guid.NewGuid() });
-
-//Query? value = null;
-//await test4.TryGetAsync(testKey2, @out => value = @out);
-
-//var testKey1_2 = CacheKey.Create<string>("Key1", true);
-//var testKey1_3 = CacheKey.Create<string>("Key1", false);
 
 var connectionProvider = serviceProvider.GetRequiredService<IDatabaseConnectionProvider>();
 
