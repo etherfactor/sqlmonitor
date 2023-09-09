@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
@@ -7,25 +8,20 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 public readonly struct JobCacheKey : ICacheKey
 {
-    /// <summary>
-    /// The name of the job.
-    /// </summary>
-    public readonly string Name { get; }
-
     /// <inheritdoc/>
-    public readonly string KeyName => $"{Constants.CacheSchemaName}:$job:{Name.ToSnakeCase()}";
+    public readonly string KeyName { get; }
 
     /// <summary>
-    /// Use <see cref="CacheKey.CreateJob(string)"/> instead!
+    /// Use <see cref="CacheKey.ForJob(string)"/> instead!
     /// </summary>
     internal JobCacheKey(string name)
     {
-        Name = name;
+        KeyName = name.ToSnakeCase();
     }
 
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        return (Name).GetHashCode();
+        return (KeyName).GetHashCode();
     }
 }

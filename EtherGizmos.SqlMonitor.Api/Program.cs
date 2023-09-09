@@ -200,8 +200,7 @@ var serviceProvider = app.Services
 
 var _test = serviceProvider.GetRequiredService<RedisRecordCache>();
 
-var key = new RecordCacheKey<Query>("sqlpulse:queries");
-var entitySet = _test.EntitySet(key);
+var entitySet = _test.EntitySet<Query>();
 
 var record = new Query()
 {

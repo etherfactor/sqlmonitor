@@ -13,12 +13,11 @@ public static class CacheKey
     /// </summary>
     /// <typeparam name="TEntity">The type of entity.</typeparam>
     /// <param name="key">The name of the key.</param>
-    /// <param name="requiresLock">Whether or not setting the key requires a lock.</param>
     /// <returns>The entity key.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static EntityCacheKey<TEntity> CreateEntity<TEntity>(string key, bool requiresLock)
+    public static EntityCacheKey<TEntity> ForEntity<TEntity>(string key)
     {
-        var newCacheKey = new EntityCacheKey<TEntity>(key, requiresLock);
+        var newCacheKey = new EntityCacheKey<TEntity>(key);
         var useKey = newCacheKey.KeyName;
         if (_keys.ContainsKey(useKey))
         {
@@ -37,12 +36,24 @@ public static class CacheKey
     }
 
     /// <summary>
+    /// Creates a key for an entity in an entity set.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of entity/set.</typeparam>
+    /// <param name="entity">The entity.</param>
+    /// <returns>The record key.</returns>
+    public static EntitySetRecordCacheKey<TEntity> ForEntitySetRecord<TEntity>(TEntity entity)
+        where TEntity : new()
+    {
+        return new EntitySetRecordCacheKey<TEntity>(entity);
+    }
+
+    /// <summary>
     /// Creates a job key.
     /// </summary>
     /// <param name="key">The name of the key.</param>
     /// <returns>The job key.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static JobCacheKey CreateJob(string key)
+    public static JobCacheKey ForJob(string key)
     {
         var newCacheKey = new JobCacheKey(key);
         var useKey = newCacheKey.KeyName;

@@ -1,4 +1,5 @@
-﻿using Medallion.Threading;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using Medallion.Threading;
 using StackExchange.Redis;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
