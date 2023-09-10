@@ -141,6 +141,10 @@ builder.Services
         {
             opt.UsingRedis(builder.Configuration.GetSection("Connections:Redis"));
         }
+        else if (options.Cache == CacheType.InMemory)
+        {
+            opt.UsingInMemory();
+        }
         else
         {
             throw new InvalidOperationException(string.Format("Unknown cache type: {0}", options.Cache));

@@ -3,5 +3,6 @@
 public enum CacheType
 {
     Unknown,
+    InMemory,
     Redis,
 }

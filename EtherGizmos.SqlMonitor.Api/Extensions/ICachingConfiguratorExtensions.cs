@@ -9,6 +9,14 @@ namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
 public static class ICachingConfiguratorExtensions
 {
+    public static ICachingConfigurator UsingInMemory(
+        this ICachingConfigurator @this)
+    {
+        @this.UsingCache<InMemoryRecordCache>();
+
+        return @this;
+    }
+
     public static ICachingConfigurator UsingRedis(
         this ICachingConfigurator @this,
         IConfigurationSection section)

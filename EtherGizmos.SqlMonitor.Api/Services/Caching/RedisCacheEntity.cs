@@ -4,16 +4,16 @@ using StackExchange.Redis;
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
 /// <summary>
-/// Provides means for caching and retrieving a single entity.
+/// Provides means for caching and retrieving a single entity, in Redis.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-internal class CacheEntity<TEntity> : ICacheEntity<TEntity>
+internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     where TEntity : new()
 {
     private readonly IDatabase _database;
     private readonly EntityCacheKey<TEntity> _key;
 
-    public CacheEntity(IDatabase database, EntityCacheKey<TEntity> key)
+    public RedisCacheEntity(IDatabase database, EntityCacheKey<TEntity> key)
     {
         _database = database;
         _key = key;

@@ -32,7 +32,7 @@ public class InstanceDTO
     public string? Description { get; set; }
 
     [Display(Name = "is_active")]
-    public bool? IsActive { get; set; }
+    public bool? IsActive { get; set; } = true;
 
     [Required]
     [Display(Name = "address")]

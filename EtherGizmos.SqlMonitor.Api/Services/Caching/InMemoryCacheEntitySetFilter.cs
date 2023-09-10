@@ -5,14 +5,10 @@ using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
-/// <summary>
-/// Applies a filter to a <see cref="CacheEntitySet{TEntity}"/>.
-/// </summary>
-/// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
+internal class InMemoryCacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
     where TEntity : new()
 {
-    private readonly CacheEntitySet<TEntity> _cache;
+    private readonly InMemoryCacheEntitySet<TEntity> _cache;
     private readonly PropertyInfo _indexedProperty;
     private bool _startInclusive;
     private double _startScore;
@@ -22,9 +18,9 @@ internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
     /// <summary>
     /// The cached entity set being filtered.
     /// </summary>
-    protected CacheEntitySet<TEntity> Cache => _cache;
+    protected InMemoryCacheEntitySet<TEntity> Cache => _cache;
 
-    public CacheEntitySetFilter(CacheEntitySet<TEntity> cache, PropertyInfo indexedProperty)
+    public InMemoryCacheEntitySetFilter(InMemoryCacheEntitySet<TEntity> cache, PropertyInfo indexedProperty)
     {
         _cache = cache;
         _indexedProperty = indexedProperty;
@@ -46,12 +42,6 @@ internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
     }
 
     /// <inheritdoc/>
-    public PropertyInfo GetProperty() => _indexedProperty;
-
-    /// <inheritdoc/>
-    public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
-
-    /// <inheritdoc/>
     public RedisValue GetEndScore() => new RedisValue($"{_endScore}");
 
     /// <inheritdoc/>
@@ -60,17 +50,18 @@ internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
         : _startInclusive ? Exclude.Stop
         : _endInclusive ? Exclude.Start
         : Exclude.Both;
+
+    /// <inheritdoc/>
+    public PropertyInfo GetProperty() => _indexedProperty;
+
+    /// <inheritdoc/>
+    public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
 }
 
-/// <summary>
-/// Applies a filter to a <see cref="CacheEntitySet{TEntity}"/>.
-/// </summary>
-/// <typeparam name="TEntity"></typeparam>
-/// <typeparam name="TProperty"></typeparam>
-internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<TEntity>, ICanCompare<TEntity, TProperty>
+internal class InMemoryCacheEntitySetFilter<TEntity, TProperty> : InMemoryCacheEntitySetFilter<TEntity>, ICanCompare<TEntity, TProperty>
     where TEntity : new()
 {
-    public CacheEntitySetFilter(CacheEntitySet<TEntity> cache, PropertyInfo indexedProperty) : base(cache, indexedProperty)
+    public InMemoryCacheEntitySetFilter(InMemoryCacheEntitySet<TEntity> cache, PropertyInfo indexedProperty) : base(cache, indexedProperty)
     {
     }
 
@@ -79,7 +70,7 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     {
         SetScore(true, valueStart!.TryGetScore(), true, valueEnd!.TryGetScore());
 
-        return new CacheEntitySet<TEntity>(Cache, this);
+        return new InMemoryCacheEntitySet<TEntity>(Cache, this);
     }
 
     /// <inheritdoc/>
@@ -87,7 +78,7 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     {
         SetScore(true, value!.TryGetScore(), true, value!.TryGetScore());
 
-        return new CacheEntitySet<TEntity>(Cache, this);
+        return new InMemoryCacheEntitySet<TEntity>(Cache, this);
     }
 
     /// <inheritdoc/>
@@ -95,7 +86,7 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     {
         SetScore(false, value!.TryGetScore(), true, double.MaxValue);
 
-        return new CacheEntitySet<TEntity>(Cache, this);
+        return new InMemoryCacheEntitySet<TEntity>(Cache, this);
     }
 
     /// <inheritdoc/>
@@ -103,7 +94,7 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     {
         SetScore(true, value!.TryGetScore(), true, double.MaxValue);
 
-        return new CacheEntitySet<TEntity>(Cache, this);
+        return new InMemoryCacheEntitySet<TEntity>(Cache, this);
     }
 
     /// <inheritdoc/>
@@ -111,7 +102,7 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     {
         SetScore(true, double.MinValue, false, value!.TryGetScore());
 
-        return new CacheEntitySet<TEntity>(Cache, this);
+        return new InMemoryCacheEntitySet<TEntity>(Cache, this);
     }
 
     /// <inheritdoc/>
@@ -119,6 +110,6 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     {
         SetScore(true, double.MinValue, true, value!.TryGetScore());
 
-        return new CacheEntitySet<TEntity>(Cache, this);
+        return new InMemoryCacheEntitySet<TEntity>(Cache, this);
     }
 }

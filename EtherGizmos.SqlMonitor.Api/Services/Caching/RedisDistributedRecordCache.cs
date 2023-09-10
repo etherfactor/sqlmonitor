@@ -5,9 +5,9 @@ using StackExchange.Redis;
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
 /// <summary>
-/// Provides means to cache and retrieve records and record sets in Redis.
+/// Provides means to cache and retrieve records and record sets, in Redis.
 /// </summary>
-public class RedisDistributedRecordCache : IDistributedRecordCache
+internal class RedisDistributedRecordCache : IDistributedRecordCache
 {
     private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _multiplexer;
@@ -44,13 +44,13 @@ public class RedisDistributedRecordCache : IDistributedRecordCache
     public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
         where TEntity : new()
     {
-        return new CacheEntity<TEntity>(_multiplexer.GetDatabase(), key);
+        return new RedisCacheEntity<TEntity>(_multiplexer.GetDatabase(), key);
     }
 
     /// <inheritdoc/>
     public ICacheEntitySet<TEntity> EntitySet<TEntity>()
         where TEntity : new()
     {
-        return new CacheEntitySet<TEntity>(_multiplexer.GetDatabase());
+        return new RedisCacheEntitySet<TEntity>(_multiplexer.GetDatabase());
     }
 }

@@ -7,22 +7,22 @@ using System.Reflection;
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
 /// <summary>
-/// Provides means for caching and retrieving entities in a set.
+/// Provides means for caching and retrieving entities in a set, in Redis.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-internal class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
+internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     where TEntity : new()
 {
     private readonly IDatabase _database;
-    private readonly IEnumerable<CacheEntitySetFilter<TEntity>> _filters;
+    private readonly IEnumerable<RedisCacheEntitySetFilter<TEntity>> _filters;
 
-    public CacheEntitySet(IDatabase database)
+    public RedisCacheEntitySet(IDatabase database)
     {
         _database = database;
-        _filters = Enumerable.Empty<CacheEntitySetFilter<TEntity>>();
+        _filters = Enumerable.Empty<RedisCacheEntitySetFilter<TEntity>>();
     }
 
-    internal CacheEntitySet(CacheEntitySet<TEntity> cache, CacheEntitySetFilter<TEntity> newFilter)
+    internal RedisCacheEntitySet(RedisCacheEntitySet<TEntity> cache, RedisCacheEntitySetFilter<TEntity> newFilter)
     {
         _database = cache._database;
         _filters = cache._filters.Append(newFilter);
@@ -65,6 +65,6 @@ internal class CacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         if (propertyInfo.GetCustomAttribute<IndexedAttribute>() is null)
             throw new InvalidOperationException("Can only filter on an indexed property.");
 
-        return new CacheEntitySetFilter<TEntity, TProperty>(this, propertyInfo);
+        return new RedisCacheEntitySetFilter<TEntity, TProperty>(this, propertyInfo);
     }
 }

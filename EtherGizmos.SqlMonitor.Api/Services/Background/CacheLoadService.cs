@@ -27,28 +27,65 @@ public class CacheLoadService : OneTimeBackgroundService
         var scope = _serviceProvider.CreateScope()
             .ServiceProvider;
 
+        //**********************************************************
+        // Instances
+
+        //Load instances from the database and add them to the cache
         var instanceService = scope.GetRequiredService<IInstanceService>();
-        var instances = await instanceService
+        var databaseInstances = await instanceService
             .GetQueryable()
+            .AsNoTracking()
+            .Include(e => e.QueryBlacklists)
+            .Include(e => e.QueryWhitelists)
+            .Include(e => e.QueryDatabaseOverrides)
             .ToListAsync();
 
-        foreach (var instance in instances)
+        foreach (var instance in databaseInstances)
         {
             await _cache
                 .EntitySet<Instance>()
                 .AddAsync(instance);
         }
 
-        var queryService = scope.GetRequiredService<IQueryService>();
-        var queries = await queryService
-            .GetQueryable()
+        //Load instances from the cache and delete the ones that don't exist in the database
+        var cacheInstances = await _cache
+            .EntitySet<Instance>()
             .ToListAsync();
 
-        foreach (var query in queries)
+        foreach (var instance in cacheInstances.Where(c => !databaseInstances.Any(d => d.Id == c.Id)))
+        {
+            await _cache
+                .EntitySet<Instance>()
+                .RemoveAsync(instance);
+        }
+
+        //**********************************************************
+        // Queries
+
+        //Load queries from the database and add them to the cache
+        var queryService = scope.GetRequiredService<IQueryService>();
+        var databaseQueries = await queryService
+            .GetQueryable()
+            .AsNoTracking()
+            .ToListAsync();
+
+        foreach (var query in databaseQueries)
         {
             await _cache
                 .EntitySet<Query>()
                 .AddAsync(query);
+        }
+
+        //Load queries from the cache and delete the ones that don't exist in the database
+        var cacheQueries = await _cache
+            .EntitySet<Query>()
+            .ToListAsync();
+
+        foreach (var query in cacheQueries.Where(c => !databaseQueries.Any(d => d.Id == c.Id)))
+        {
+            await _cache
+                .EntitySet<Query>()
+                .RemoveAsync(query);
         }
     }
 }
