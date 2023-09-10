@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using System.Text.Json;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
@@ -10,6 +11,14 @@ internal class InMemoryCacheEntity<TEntity> : ICacheEntity<TEntity>
     where TEntity : new()
 {
     private static TEntity? _entity;
+
+    private readonly IServiceProvider _serviceProvider;
+
+    public InMemoryCacheEntity(
+        IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
 
     /// <inheritdoc/>
     public Task DeleteAsync(CancellationToken cancellationToken = default)
@@ -27,7 +36,9 @@ internal class InMemoryCacheEntity<TEntity> : ICacheEntity<TEntity>
     /// <inheritdoc/>
     public Task SetAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        _entity = entity;
+        //Forcefully detach the entity from any contexts
+        var addEntity = JsonSerializer.Deserialize<TEntity>(JsonSerializer.Serialize(entity))!;
+        _entity = addEntity;
         return Task.CompletedTask;
     }
 }

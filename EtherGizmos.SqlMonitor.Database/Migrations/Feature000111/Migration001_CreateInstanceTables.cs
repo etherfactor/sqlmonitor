@@ -2,9 +2,9 @@
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
 
-namespace EtherGizmos.SqlMonitor.Database.Migrations.FeatureTBD;
+namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000111;
 
-[CreatedAt(year: 2023, month: 07, day: 23, hour: 17, minute: 00, description: "Create instance tables", trackingId: -1)] //TODO: add tracking
+[CreatedAt(year: 2023, month: 07, day: 23, hour: 17, minute: 00, description: "Create instance tables", trackingId: 111)]
 public class Migration001_CreateInstanceTables : AutoReversingMigration
 {
     public override void Up()

@@ -69,7 +69,8 @@ public class DatabaseContext : DbContext
 
             entity.HasKey(e => e.Id);
 
-            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.Id)
+                .HasDefaultValueSql();
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
@@ -145,7 +146,8 @@ public class DatabaseContext : DbContext
 
             entity.HasKey(e => e.Id);
 
-            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.Id)
+                .HasDefaultValueSql();
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.Type);
         });
@@ -156,9 +158,11 @@ public class DatabaseContext : DbContext
 
             entity.HasKey(e => e.Id);
 
-            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.Id)
+                .HasDefaultValueSql();
             entity.AuditPropertiesWithAnnotations();
-            entity.PropertyWithAnnotations(e => e.SystemId);
+            entity.PropertyWithAnnotations(e => e.SystemId)
+                .HasDefaultValueSql();
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.IsActive);
@@ -205,7 +209,8 @@ public class DatabaseContext : DbContext
 
             entity.HasKey(e => e.Id);
 
-            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.Id)
+                .HasDefaultValueSql();
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.Username);
             entity.PropertyWithAnnotations(e => e.PasswordHash);

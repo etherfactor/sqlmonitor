@@ -4,6 +4,7 @@ using EtherGizmos.SqlMonitor.Models.Extensions;
 using StackExchange.Redis;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
@@ -15,16 +16,13 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     where TEntity : new()
 {
     private static readonly IDictionary<string, TEntity> _entities = new Dictionary<string, TEntity>();
-    private readonly IEnumerable<InMemoryCacheEntitySetFilter<TEntity>> _filters;
 
-    public InMemoryCacheEntitySet()
-    {
-        _filters = Enumerable.Empty<InMemoryCacheEntitySetFilter<TEntity>>();
-    }
+    private readonly IServiceProvider _serviceProvider;
 
-    internal InMemoryCacheEntitySet(InMemoryCacheEntitySet<TEntity> cache, InMemoryCacheEntitySetFilter<TEntity> newFilter)
+    public InMemoryCacheEntitySet(
+        IServiceProvider serviceProvider)
     {
-        _filters = cache._filters.Append(newFilter);
+        _serviceProvider = serviceProvider;
     }
 
     /// <inheritdoc/>
@@ -32,12 +30,15 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     {
         var helper = RedisHelperCache.For<TEntity>();
         var id = helper.GetSetEntityKey(entity).ToString();
+
+        //Forcefully detach the entity from any contexts
+        var addEntity = JsonSerializer.Deserialize<TEntity>(JsonSerializer.Serialize(entity))!;
         if (!_entities.ContainsKey(id))
         {
-            _entities.Add(id, entity);
+            _entities.Add(id, addEntity);
         }
 
-        _entities[id] = entity;
+        _entities[id] = addEntity;
         return Task.CompletedTask;
     }
 
@@ -57,11 +58,27 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     public Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
+        var entities = _entities.Values.ToList();
+        return Task.FromResult(entities);
+    }
+
+    /// <inheritdoc/>
+    public ICanCompare<TEntity, TProperty> Where<TProperty>(Expression<Func<TEntity, TProperty>> indexedProperty)
+    {
+        var propertyInfo = indexedProperty.GetPropertyInfo();
+        if (propertyInfo.GetCustomAttribute<IndexedAttribute>() is null)
+            throw new InvalidOperationException("Can only filter on an indexed property.");
+
+        return new CacheEntitySetFilter<TEntity, TProperty>(this, Enumerable.Empty<ICacheEntitySetFilter<TEntity>>(), propertyInfo);
+    }
+
+    Task<List<TEntity>> ICanList<TEntity>.ToListAsync(IEnumerable<ICacheEntitySetFilter<TEntity>> filters, CancellationToken cancellationToken)
+    {
         var entities = _entities.Values
             .Where(e =>
             {
                 var overall = true;
-                foreach (var filter in _filters)
+                foreach (var filter in filters)
                 {
                     var entityScore = filter.GetProperty()
                         .GetValue(e)
@@ -97,15 +114,5 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
             })
             .ToList();
         return Task.FromResult(entities);
-    }
-
-    /// <inheritdoc/>
-    public ICanCompare<TEntity, TProperty> Where<TProperty>(Expression<Func<TEntity, TProperty>> indexedProperty)
-    {
-        var propertyInfo = indexedProperty.GetPropertyInfo();
-        if (propertyInfo.GetCustomAttribute<IndexedAttribute>() is null)
-            throw new InvalidOperationException("Can only filter on an indexed property.");
-
-        return new InMemoryCacheEntitySetFilter<TEntity, TProperty>(this, propertyInfo);
     }
 }

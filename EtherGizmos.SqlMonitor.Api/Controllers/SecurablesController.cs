@@ -19,25 +19,14 @@ public class SecurablesController : ExtendedODataController
 {
     private const string BasePath = "/api/v1/securables";
 
-    /// <summary>
-    /// The logger to utilize.
-    /// </summary>
-    private ILogger Logger { get; }
-
-    /// <summary>
-    /// Allows conversion between database and DTO models.
-    /// </summary>
-    private IMapper Mapper { get; }
-
-    /// <summary>
-    /// Provides access to the storage of records.
-    /// </summary>
-    private ISecurableService SecurableService { get; }
+    private readonly ILogger _logger;
+    private readonly IMapper _mapper;
+    private readonly ISecurableService _securableService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Securable> Securables => SecurableService.GetQueryable();
+    private IQueryable<Securable> Securables => _securableService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -45,11 +34,14 @@ public class SecurablesController : ExtendedODataController
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="securableService">Provides access to the storage of records.</param>
-    public SecurablesController(ILogger<SecurablesController> logger, IMapper mapper, ISecurableService securableService)
+    public SecurablesController(
+        ILogger<SecurablesController> logger,
+        IMapper mapper,
+        ISecurableService securableService)
     {
-        Logger = logger;
-        Mapper = mapper;
-        SecurableService = securableService;
+        _logger = logger;
+        _mapper = mapper;
+        _securableService = securableService;
     }
 
     /// <summary>
@@ -61,7 +53,7 @@ public class SecurablesController : ExtendedODataController
     [Route(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<SecurableDTO> queryOptions)
     {
-        var finished = await Securables.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = await Securables.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -81,7 +73,7 @@ public class SecurablesController : ExtendedODataController
         if (record == null)
             return new ODataRecordNotFoundError<SecurableDTO>((e => e.Id, id)).GetResponse();
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 }

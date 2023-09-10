@@ -19,25 +19,14 @@ public class PermissionsController : ExtendedODataController
 {
     private const string BasePath = "/api/v1/permissions";
 
-    /// <summary>
-    /// The logger to utilize.
-    /// </summary>
-    private ILogger Logger { get; }
-
-    /// <summary>
-    /// Allows conversion between database and DTO models.
-    /// </summary>
-    private IMapper Mapper { get; }
-
-    /// <summary>
-    /// Provides access to the storage of records.
-    /// </summary>
-    private IPermissionService PermissionService { get; }
+    private readonly ILogger _logger;
+    private readonly IMapper _mapper;
+    private readonly IPermissionService _permissionService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Permission> Permissions => PermissionService.GetQueryable();
+    private IQueryable<Permission> Permissions => _permissionService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -45,11 +34,14 @@ public class PermissionsController : ExtendedODataController
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="permissionService">Provides access to the storage of records.</param>
-    public PermissionsController(ILogger<PermissionsController> logger, IMapper mapper, IPermissionService permissionService)
+    public PermissionsController(
+        ILogger<PermissionsController> logger,
+        IMapper mapper,
+        IPermissionService permissionService)
     {
-        Logger = logger;
-        Mapper = mapper;
-        PermissionService = permissionService;
+        _logger = logger;
+        _mapper = mapper;
+        _permissionService = permissionService;
     }
 
     /// <summary>
@@ -61,7 +53,7 @@ public class PermissionsController : ExtendedODataController
     [Route(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<PermissionDTO> queryOptions)
     {
-        var finished = await Permissions.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = await Permissions.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -81,7 +73,7 @@ public class PermissionsController : ExtendedODataController
         if (record == null)
             return new ODataRecordNotFoundError<PermissionDTO>((e => e.Id, id)).GetResponse();
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 }

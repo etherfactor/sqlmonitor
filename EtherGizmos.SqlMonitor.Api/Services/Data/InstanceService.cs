@@ -58,7 +58,7 @@ public class InstanceService : IInstanceService
     /// <inheritdoc/>
     public void Remove(Instance record)
     {
-        if (_context.Instances.Contains(record))
-            _context.Instances.Remove(record);
+        record.IsActive = false;
+        record.IsSoftDeleted = true;
     }
 }

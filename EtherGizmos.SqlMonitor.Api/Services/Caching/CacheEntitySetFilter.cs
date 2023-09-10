@@ -9,10 +9,11 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// Applies a filter to a <see cref="RedisCacheEntitySet{TEntity}"/>.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-internal class RedisCacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
+internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
     where TEntity : new()
 {
-    private readonly RedisCacheEntitySet<TEntity> _cache;
+    private readonly ICacheEntitySet<TEntity> _cache;
+    private readonly IEnumerable<ICacheEntitySetFilter<TEntity>> _currentFilters;
     private readonly PropertyInfo _indexedProperty;
     private bool _startInclusive;
     private double _startScore;
@@ -22,13 +23,35 @@ internal class RedisCacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntit
     /// <summary>
     /// The cached entity set being filtered.
     /// </summary>
-    protected RedisCacheEntitySet<TEntity> Cache => _cache;
+    protected ICacheEntitySet<TEntity> Cache => _cache;
 
-    public RedisCacheEntitySetFilter(RedisCacheEntitySet<TEntity> cache, PropertyInfo indexedProperty)
+    /// <summary>
+    /// The currently applied entity set filters.
+    /// </summary>
+    protected IEnumerable<ICacheEntitySetFilter<TEntity>> CurrentFilters => _currentFilters;
+
+    public CacheEntitySetFilter(ICacheEntitySet<TEntity> cache, IEnumerable<ICacheEntitySetFilter<TEntity>> currentFilters, PropertyInfo indexedProperty)
     {
         _cache = cache;
+        _currentFilters = currentFilters;
         _indexedProperty = indexedProperty;
     }
+
+    /// <inheritdoc/>
+    public RedisValue GetEndScore() => new RedisValue($"{_endScore}");
+
+    /// <inheritdoc/>
+    public Exclude GetExclusivity() =>
+        _startInclusive && _endInclusive ? Exclude.None
+        : _startInclusive ? Exclude.Stop
+        : _endInclusive ? Exclude.Start
+        : Exclude.Both;
+
+    /// <inheritdoc/>
+    public PropertyInfo GetProperty() => _indexedProperty;
+
+    /// <inheritdoc/>
+    public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
 
     /// <summary>
     /// Set the score for the filter.
@@ -44,22 +67,6 @@ internal class RedisCacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntit
         _endInclusive = endInclusive;
         _endScore = endScore;
     }
-
-    /// <inheritdoc/>
-    public PropertyInfo GetProperty() => _indexedProperty;
-
-    /// <inheritdoc/>
-    public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
-
-    /// <inheritdoc/>
-    public RedisValue GetEndScore() => new RedisValue($"{_endScore}");
-
-    /// <inheritdoc/>
-    public Exclude GetExclusivity() =>
-        _startInclusive && _endInclusive ? Exclude.None
-        : _startInclusive ? Exclude.Stop
-        : _endInclusive ? Exclude.Start
-        : Exclude.Both;
 }
 
 /// <summary>
@@ -67,10 +74,10 @@ internal class RedisCacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntit
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TProperty"></typeparam>
-internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntitySetFilter<TEntity>, ICanCompare<TEntity, TProperty>
+internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<TEntity>, ICanCompare<TEntity, TProperty>
     where TEntity : new()
 {
-    public RedisCacheEntitySetFilter(RedisCacheEntitySet<TEntity> cache, PropertyInfo indexedProperty) : base(cache, indexedProperty)
+    public CacheEntitySetFilter(ICacheEntitySet<TEntity> cache, IEnumerable<ICacheEntitySetFilter<TEntity>> currentFilters, PropertyInfo indexedProperty) : base(cache, currentFilters, indexedProperty)
     {
     }
 
@@ -79,7 +86,7 @@ internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntityS
     {
         SetScore(true, valueStart!.TryGetScore(), true, valueEnd!.TryGetScore());
 
-        return new RedisCacheEntitySet<TEntity>(Cache, this);
+        return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
 
     /// <inheritdoc/>
@@ -87,7 +94,7 @@ internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntityS
     {
         SetScore(true, value!.TryGetScore(), true, value!.TryGetScore());
 
-        return new RedisCacheEntitySet<TEntity>(Cache, this);
+        return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
 
     /// <inheritdoc/>
@@ -95,7 +102,7 @@ internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntityS
     {
         SetScore(false, value!.TryGetScore(), true, double.MaxValue);
 
-        return new RedisCacheEntitySet<TEntity>(Cache, this);
+        return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
 
     /// <inheritdoc/>
@@ -103,7 +110,7 @@ internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntityS
     {
         SetScore(true, value!.TryGetScore(), true, double.MaxValue);
 
-        return new RedisCacheEntitySet<TEntity>(Cache, this);
+        return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
 
     /// <inheritdoc/>
@@ -111,7 +118,7 @@ internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntityS
     {
         SetScore(true, double.MinValue, false, value!.TryGetScore());
 
-        return new RedisCacheEntitySet<TEntity>(Cache, this);
+        return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
 
     /// <inheritdoc/>
@@ -119,6 +126,6 @@ internal class RedisCacheEntitySetFilter<TEntity, TProperty> : RedisCacheEntityS
     {
         SetScore(true, double.MinValue, true, value!.TryGetScore());
 
-        return new RedisCacheEntitySet<TEntity>(Cache, this);
+        return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
 }

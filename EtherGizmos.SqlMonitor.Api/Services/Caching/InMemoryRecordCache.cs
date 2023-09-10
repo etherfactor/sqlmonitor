@@ -8,6 +8,14 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 internal class InMemoryRecordCache : IDistributedRecordCache
 {
+    private readonly IServiceProvider _serviceProvider;
+
+    public InMemoryRecordCache(
+        IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
     /// <inheritdoc/>
     public Task<CacheLock<TKey>?> AcquireLockAsync<TKey>(TKey key, TimeSpan timeout, CancellationToken cancellationToken = default) where TKey : ICacheKey
     {
@@ -18,13 +26,13 @@ internal class InMemoryRecordCache : IDistributedRecordCache
     /// <inheritdoc/>
     public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key) where TEntity : new()
     {
-        return new InMemoryCacheEntity<TEntity>();
+        return new InMemoryCacheEntity<TEntity>(_serviceProvider);
     }
 
     /// <inheritdoc/>
     public ICacheEntitySet<TEntity> EntitySet<TEntity>() where TEntity : new()
     {
-        return new InMemoryCacheEntitySet<TEntity>();
+        return new InMemoryCacheEntitySet<TEntity>(_serviceProvider);
     }
 
     private class InMemorySynchronizationHandle : IDistributedSynchronizationHandle

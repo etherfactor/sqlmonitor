@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
@@ -20,30 +21,16 @@ public class QueriesController : ODataController
 {
     private const string BasePath = "/api/v1/queries";
 
-    /// <summary>
-    /// The logger to utilize.
-    /// </summary>
-    private ILogger Logger { get; }
-
-    /// <summary>
-    /// Allows conversion between database and DTO models.
-    /// </summary>
-    private IMapper Mapper { get; }
-
-    /// <summary>
-    /// Provides access to the storage of records.
-    /// </summary>
-    private IQueryService QueryService { get; }
-
-    /// <summary>
-    /// Provides access to saving records.
-    /// </summary>
-    private ISaveService SaveService { get; }
+    private readonly ILogger _logger;
+    private readonly IDistributedRecordCache _cache;
+    private readonly IMapper _mapper;
+    private readonly IQueryService _queryService;
+    private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Query> Queries => QueryService.GetQueryable();
+    private IQueryable<Query> Queries => _queryService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -52,12 +39,18 @@ public class QueriesController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="queryService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public QueriesController(ILogger<QueriesController> logger, IMapper mapper, IQueryService queryService, ISaveService saveService)
+    public QueriesController(
+        ILogger<QueriesController> logger,
+        IDistributedRecordCache cache,
+        IMapper mapper,
+        IQueryService queryService,
+        ISaveService saveService)
     {
-        Logger = logger;
-        Mapper = mapper;
-        QueryService = queryService;
-        SaveService = saveService;
+        _logger = logger;
+        _cache = cache;
+        _mapper = mapper;
+        _queryService = queryService;
+        _saveService = saveService;
     }
 
     /// <summary>
@@ -69,7 +62,7 @@ public class QueriesController : ODataController
     [Route(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<QueryDTO> queryOptions)
     {
-        var finished = await Queries.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = await Queries.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -89,7 +82,7 @@ public class QueriesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -107,14 +100,15 @@ public class QueriesController : ODataController
 
         await newRecord.EnsureValid(Queries);
 
-        Query record = Mapper.Map<Query>(newRecord);
+        Query record = _mapper.Map<Query>(newRecord);
 
         await record.EnsureValid(Queries);
-        QueryService.Add(record);
+        _queryService.Add(record);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Query>().AddAsync(record);
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
     }
 
@@ -140,16 +134,17 @@ public class QueriesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = Mapper.MapExplicitly(record).To<QueryDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<QueryDTO>();
         patchRecord.Patch(recordAsDto);
 
-        Mapper.MergeInto(record).Using(recordAsDto);
+        _mapper.MergeInto(record).Using(recordAsDto);
 
         await record.EnsureValid(Queries);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Query>().AddAsync(record);
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -166,9 +161,11 @@ public class QueriesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
-        QueryService.Remove(record);
+        record.IsActive = false;
+        _queryService.Remove(record);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Query>().RemoveAsync(record);
 
         return NoContent();
     }

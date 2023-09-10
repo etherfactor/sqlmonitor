@@ -34,10 +34,6 @@ public class CacheLoadService : OneTimeBackgroundService
         var instanceService = scope.GetRequiredService<IInstanceService>();
         var databaseInstances = await instanceService
             .GetQueryable()
-            .AsNoTracking()
-            .Include(e => e.QueryBlacklists)
-            .Include(e => e.QueryWhitelists)
-            .Include(e => e.QueryDatabaseOverrides)
             .ToListAsync();
 
         foreach (var instance in databaseInstances)
@@ -66,7 +62,6 @@ public class CacheLoadService : OneTimeBackgroundService
         var queryService = scope.GetRequiredService<IQueryService>();
         var databaseQueries = await queryService
             .GetQueryable()
-            .AsNoTracking()
             .ToListAsync();
 
         foreach (var query in databaseQueries)

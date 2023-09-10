@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
@@ -20,30 +21,16 @@ public class InstancesController : ODataController
 {
     private const string BasePath = "/api/v1/instances";
 
-    /// <summary>
-    /// The logger to utilize.
-    /// </summary>
-    private ILogger Logger { get; }
-
-    /// <summary>
-    /// Allows conversion between database and DTO models.
-    /// </summary>
-    private IMapper Mapper { get; }
-
-    /// <summary>
-    /// Provides access to the storage of records.
-    /// </summary>
-    private IInstanceService InstanceService { get; }
-
-    /// <summary>
-    /// Provides access to saving records.
-    /// </summary>
-    private ISaveService SaveService { get; }
+    private readonly ILogger _logger;
+    private readonly IDistributedRecordCache _cache;
+    private readonly IMapper _mapper;
+    private readonly IInstanceService _instanceService;
+    private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Instance> Instances => InstanceService.GetQueryable();
+    private IQueryable<Instance> Instances => _instanceService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -52,12 +39,18 @@ public class InstancesController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="instanceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public InstancesController(ILogger<QueriesController> logger, IMapper mapper, IInstanceService instanceService, ISaveService saveService)
+    public InstancesController(
+        ILogger<QueriesController> logger,
+        IDistributedRecordCache cache,
+        IMapper mapper,
+        IInstanceService instanceService,
+        ISaveService saveService)
     {
-        Logger = logger;
-        Mapper = mapper;
-        InstanceService = instanceService;
-        SaveService = saveService;
+        _logger = logger;
+        _cache = cache;
+        _mapper = mapper;
+        _instanceService = instanceService;
+        _saveService = saveService;
     }
 
     /// <summary>
@@ -69,7 +62,7 @@ public class InstancesController : ODataController
     [Route(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<InstanceDTO> queryOptions)
     {
-        var finished = await Instances.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = await Instances.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -89,7 +82,7 @@ public class InstancesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<InstanceDTO>((e => e.Id, id)).GetResponse();
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -107,14 +100,15 @@ public class InstancesController : ODataController
 
         await newRecord.EnsureValid(Instances);
 
-        Instance record = Mapper.Map<Instance>(newRecord);
+        Instance record = _mapper.Map<Instance>(newRecord);
 
         await record.EnsureValid(Instances);
-        InstanceService.Add(record);
+        _instanceService.Add(record);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Instance>().AddAsync(record);
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
     }
 
@@ -140,16 +134,17 @@ public class InstancesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<InstanceDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = Mapper.MapExplicitly(record).To<InstanceDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<InstanceDTO>();
         patchRecord.Patch(recordAsDto);
 
-        Mapper.MergeInto(record).Using(recordAsDto);
+        _mapper.MergeInto(record).Using(recordAsDto);
 
         await record.EnsureValid(Instances);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Instance>().AddAsync(record);
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -166,9 +161,10 @@ public class InstancesController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<InstanceDTO>((e => e.Id, id)).GetResponse();
 
-        InstanceService.Remove(record);
+        _instanceService.Remove(record);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Instance>().RemoveAsync(record);
 
         return NoContent();
     }

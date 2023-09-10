@@ -70,11 +70,11 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
                     Query = query
                 }, cancellationToken);
 
-                query.LastRunAtUtc = DateTimeOffset.UtcNow.Floor(TimeSpan.FromSeconds(1));
-
                 var updateScope = scope.CreateScope().ServiceProvider;
                 var saveService = updateScope.GetRequiredService<ISaveService>();
                 saveService.Attach(query);
+
+                query.LastRunAtUtc = DateTimeOffset.UtcNow.Floor(TimeSpan.FromSeconds(1));
 
                 await saveService.SaveChangesAsync();
                 await _distributedRecordCache.EntitySet<Query>().AddAsync(query, cancellationToken);

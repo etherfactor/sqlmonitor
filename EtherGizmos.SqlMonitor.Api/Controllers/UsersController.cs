@@ -17,30 +17,15 @@ public class UsersController : ODataController
 {
     private const string BasePath = "/api/v1/users";
 
-    /// <summary>
-    /// The logger to utilize.
-    /// </summary>
-    private ILogger Logger { get; }
-
-    /// <summary>
-    /// Allows conversion between database and DTO models.
-    /// </summary>
-    private IMapper Mapper { get; }
-
-    /// <summary>
-    /// Provides access to the storage of records.
-    /// </summary>
-    private IUserService UserService { get; }
-
-    /// <summary>
-    /// Provides access to saving records.
-    /// </summary>
-    private ISaveService SaveService { get; }
+    private readonly ILogger _logger;
+    private readonly IMapper _mapper;
+    private readonly IUserService _userService;
+    private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<User> Users => UserService.GetQueryable();
+    private IQueryable<User> Users => _userService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -49,12 +34,16 @@ public class UsersController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="userService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public UsersController(ILogger<UsersController> logger, IMapper mapper, IUserService userService, ISaveService saveService)
+    public UsersController(
+        ILogger<UsersController> logger,
+        IMapper mapper,
+        IUserService userService,
+        ISaveService saveService)
     {
-        Logger = logger;
-        Mapper = mapper;
-        UserService = userService;
-        SaveService = saveService;
+        _logger = logger;
+        _mapper = mapper;
+        _userService = userService;
+        _saveService = saveService;
     }
 
     /// <summary>
@@ -66,7 +55,7 @@ public class UsersController : ODataController
     [Route(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<UserDTO> queryOptions)
     {
-        var finished = await Users.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = await Users.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -86,7 +75,7 @@ public class UsersController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<UserDTO>((e => e.Id, id)).GetResponse();
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -98,14 +87,14 @@ public class UsersController : ODataController
 
         await record.EnsureValid(Users);
 
-        User newRecord = Mapper.Map<User>(record);
+        User newRecord = _mapper.Map<User>(record);
 
         await newRecord.EnsureValid(Users);
-        UserService.Add(newRecord);
+        _userService.Add(newRecord);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
 
-        var finished = newRecord.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = newRecord.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
     }
 
@@ -124,16 +113,16 @@ public class UsersController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<UserDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = Mapper.MapExplicitly(record).To<UserDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<UserDTO>();
         patchRecord.Patch(recordAsDto);
 
-        Mapper.MergeInto(record).Using(recordAsDto);
+        _mapper.MergeInto(record).Using(recordAsDto);
 
         await record.EnsureValid(Users);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
 
-        var finished = record.MapExplicitlyAndApplyQueryOptions(Mapper, queryOptions);
+        var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -150,9 +139,9 @@ public class UsersController : ODataController
         if (record == null)
             return new ODataRecordNotFoundError<UserDTO>((e => e.Id, id)).GetResponse();
 
-        UserService.Remove(record);
+        _userService.Remove(record);
 
-        await SaveService.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
 
         return NoContent();
     }

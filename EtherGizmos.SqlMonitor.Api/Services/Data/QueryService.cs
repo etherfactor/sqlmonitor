@@ -57,6 +57,7 @@ public class QueryService : IQueryService
     /// <inheritdoc/>
     public void Remove(Query record)
     {
+        record.IsActive = false;
         record.IsSoftDeleted = true;
     }
 }

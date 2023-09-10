@@ -14,18 +14,10 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     where TEntity : new()
 {
     private readonly IDatabase _database;
-    private readonly IEnumerable<RedisCacheEntitySetFilter<TEntity>> _filters;
 
     public RedisCacheEntitySet(IDatabase database)
     {
         _database = database;
-        _filters = Enumerable.Empty<RedisCacheEntitySetFilter<TEntity>>();
-    }
-
-    internal RedisCacheEntitySet(RedisCacheEntitySet<TEntity> cache, RedisCacheEntitySetFilter<TEntity> newFilter)
-    {
-        _database = cache._database;
-        _filters = cache._filters.Append(newFilter);
     }
 
     /// <inheritdoc/>
@@ -54,7 +46,7 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     public async Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetListAction(_filters);
+        var action = serializer.GetListAction(Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
         return await action(_database);
     }
 
@@ -65,6 +57,14 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         if (propertyInfo.GetCustomAttribute<IndexedAttribute>() is null)
             throw new InvalidOperationException("Can only filter on an indexed property.");
 
-        return new RedisCacheEntitySetFilter<TEntity, TProperty>(this, propertyInfo);
+        return new CacheEntitySetFilter<TEntity, TProperty>(this, Enumerable.Empty<ICacheEntitySetFilter<TEntity>>(), propertyInfo);
+    }
+
+    /// <inheritdoc/>
+    async Task<List<TEntity>> ICanList<TEntity>.ToListAsync(IEnumerable<ICacheEntitySetFilter<TEntity>> filters, CancellationToken cancellationToken)
+    {
+        var serializer = RedisHelperCache.For<TEntity>();
+        var action = serializer.GetListAction(filters);
+        return await action(_database);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,7 @@ internal static class Global
         services.AddScoped<SecurablesController>();
         services.AddScoped<UsersController>();
 
+        services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
         services.AddScoped<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
         services.AddScoped<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);
@@ -38,7 +41,8 @@ internal static class Global
         services.AddScoped<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
         services.AddScoped<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
 
-        return services.BuildServiceProvider().CreateScope().ServiceProvider;
+        var provider = services.BuildServiceProvider().CreateScope().ServiceProvider;
+        return provider;
     }
 
     internal static string GetConnectionStringForMaster(this IDatabaseConnectionProvider @this)
