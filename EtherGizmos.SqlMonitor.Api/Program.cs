@@ -1,3 +1,4 @@
+using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
@@ -97,7 +98,6 @@ builder.Services
         {
             opt.UsingInMemory((context, conf) =>
             {
-                conf.ConfigureEndpoints(context);
                 conf.Host();
 
                 conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
@@ -115,14 +115,49 @@ builder.Services
 
             opt.UsingRabbitMq((context, conf) =>
             {
-                conf.ConfigureEndpoints(context);
-                conf.Host(rabbitMQOptions.Host, opt =>
+                string useHost;
+                if (rabbitMQOptions.EndPoints?.Length == 1)
+                {
+                    useHost = rabbitMQOptions.EndPoints.Single().Host;
+                    if (rabbitMQOptions.Port != Constants.RabbitMQ.Port)
+                        useHost = $"{useHost}:{rabbitMQOptions.Port}";
+                }
+                else if (rabbitMQOptions.EndPoints?.Length > 1)
+                {
+                    useHost = "cluster";
+                }
+                else
+                {
+                    throw new InvalidOperationException("Must specify at least one RabbitMQ endpoint.");
+                }
+
+                conf.Host(useHost, opt =>
                 {
                     opt.Username(rabbitMQOptions.Username);
                     opt.Password(rabbitMQOptions.Password);
+
+                    if (rabbitMQOptions.EndPoints?.Length > 1)
+                    {
+                        opt.UseCluster(conf =>
+                        {
+                            foreach (var node in rabbitMQOptions.EndPoints)
+                            {
+                                var useNode = node.Host;
+                                if (node.Port != Constants.RabbitMQ.Port)
+                                    useNode = $"{useNode}:{node.Port}";
+
+                                conf.Node(useNode);
+                            }
+                        });
+                    }
                 });
 
-                //TODO: Configure RabbitMQ entirely
+                conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
+                {
+                    opt.Consumer<RunQueryConsumer>(context);
+                });
+
+                //TODO: Configure retry
             });
         }
         else

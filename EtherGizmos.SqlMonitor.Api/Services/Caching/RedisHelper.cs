@@ -73,7 +73,7 @@ public class RedisHelper<TEntity>
     /// <returns>The Redis key for the entity.</returns>
     public RedisKey GetEntityKey(EntityCacheKey<TEntity> key)
     {
-        var keyData = new RedisKey($"{Constants.CacheSchemaName}:$$entity:{key.KeyName}");
+        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$entity:{key.KeyName}");
         return keyData;
     }
 
@@ -98,7 +98,7 @@ public class RedisHelper<TEntity>
     /// <returns>The Redis key for the entity.</returns>
     public RedisKey GetSetEntityKey(TEntity entity)
     {
-        var value = new RedisKey($"{Constants.CacheSchemaName}:$$table:{_tableKey}:{GetRecordId(entity)}");
+        var value = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(entity)}");
         return value;
     }
 
@@ -108,7 +108,7 @@ public class RedisHelper<TEntity>
     /// <returns>The set's primary key.</returns>
     private RedisKey GetEntitySetPrimaryKey()
     {
-        var keyData = new RedisKey($"{Constants.CacheSchemaName}:$$table:{_tableKey}:$$primary");
+        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:$$primary");
         return keyData;
     }
 
@@ -123,7 +123,7 @@ public class RedisHelper<TEntity>
         var indexAttribute = index.GetCustomAttribute<IndexedAttribute>()
             ?? throw new InvalidOperationException($"Can only get an index for an indexed property, specifying an {nameof(IndexedAttribute)}.");
 
-        var keyData = new RedisKey($"{Constants.CacheSchemaName}:$$table:{_tableKey}:${index.GetCustomAttribute<ColumnAttribute>()!.Name!.ToSnakeCase()}");
+        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:${index.GetCustomAttribute<ColumnAttribute>()!.Name!.ToSnakeCase()}");
         return keyData;
     }
 
@@ -134,7 +134,7 @@ public class RedisHelper<TEntity>
     private RedisKey GetTempKey()
     {
         var guid = Guid.NewGuid();
-        var tempKey = new RedisKey($"{Constants.CacheSchemaName}:$$temp:{guid}");
+        var tempKey = new RedisKey($"{Constants.Cache.SchemaName}:$$temp:{guid}");
         return tempKey;
     }
 
@@ -145,7 +145,7 @@ public class RedisHelper<TEntity>
     private RedisValue[] GetProperties()
     {
         var propertyNames = "#".Yield()
-            .Concat(_properties.Select(e => $"{Constants.CacheSchemaName}:$$table:{_tableKey}:*->{e.Item1.Name.ToSnakeCase()}"))
+            .Concat(_properties.Select(e => $"{Constants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.Item1.Name.ToSnakeCase()}"))
             .Select(e => new RedisValue(e))
             .ToArray();
 

@@ -3,15 +3,32 @@
 /// <summary>
 /// Constants used by the application.
 /// </summary>
-public class Constants
+public static class Constants
 {
     /// <summary>
-    /// The suffix to this application's cache lock names.
+    /// Constants shared by all caches.
     /// </summary>
-    public const string CacheLockSuffix = "$$lock";
+    public static class Cache
+    {
+        /// <summary>
+        /// The suffix to this application's cache lock names.
+        /// </summary>
+        public const string LockSuffix = "$$lock";
+
+        /// <summary>
+        /// The prefix to this application's cache key names.
+        /// </summary>
+        public const string SchemaName = "sqlpulse";
+    }
 
     /// <summary>
-    /// The prefix to this application's cache key names.
+    /// Constants used for RabbitMQ.
     /// </summary>
-    public const string CacheSchemaName = "sqlpulse";
+    public static class RabbitMQ
+    {
+        /// <summary>
+        /// The default RabbitMQ port.
+        /// </summary>
+        public const short Port = 5672;
+    }
 }

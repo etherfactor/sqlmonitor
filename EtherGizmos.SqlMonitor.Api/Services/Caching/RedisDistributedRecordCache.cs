@@ -27,7 +27,7 @@ internal class RedisDistributedRecordCache : IDistributedRecordCache
     public async Task<CacheLock<TKey>?> AcquireLockAsync<TKey>(TKey key, TimeSpan timeout, CancellationToken cancellationToken = default)
         where TKey : ICacheKey
     {
-        var lockName = $"{Constants.CacheSchemaName}:{key.KeyName}:{Constants.CacheLockSuffix}";
+        var lockName = $"{Constants.Cache.SchemaName}:{key.KeyName}:{Constants.Cache.LockSuffix}";
         _logger.Log(LogLevel.Debug, "Attempting to acquire lock on {CacheKey}", lockName);
 
         var result = await _distributedLockProvider.TryAcquireLockAsync(lockName, timeout, cancellationToken);
