@@ -21,10 +21,10 @@ internal static class Global
 
         services.AddMapper();
 
-        services.AddScoped(typeof(Mock<>));
+        services.AddSingleton(typeof(Mock<>));
 
-        services.AddScoped<ILogger>(o => o.GetRequiredService<Mock<ILogger>>().Object);
-        services.AddScoped(typeof(ILogger<>), typeof(ProxyLogger<>));
+        services.AddSingleton<ILogger>(o => o.GetRequiredService<Mock<ILogger>>().Object);
+        services.AddSingleton(typeof(ILogger<>), typeof(ProxyLogger<>));
 
         services.AddScoped<InstancesController>();
         services.AddScoped<PermissionsController>();
@@ -33,13 +33,13 @@ internal static class Global
         services.AddScoped<UsersController>();
 
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
-        services.AddScoped<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
+        services.AddSingleton<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
-        services.AddScoped<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);
-        services.AddScoped<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
-        services.AddScoped<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
-        services.AddScoped<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
-        services.AddScoped<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
+        services.AddSingleton<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);
+        services.AddSingleton<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
+        services.AddSingleton<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
+        services.AddSingleton<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
+        services.AddSingleton<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
 
         var provider = services.BuildServiceProvider().CreateScope().ServiceProvider;
         return provider;

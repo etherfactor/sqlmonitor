@@ -27,5 +27,5 @@ public abstract class OneTimeBackgroundService : BackgroundService
         }
     }
 
-    protected abstract Task DoWorkAsync(CancellationToken stoppingToken);
+    protected internal abstract Task DoWorkAsync(CancellationToken stoppingToken);
 }

@@ -22,7 +22,7 @@ public class CacheLoadService : OneTimeBackgroundService
     }
 
     /// <inheritdoc/>
-    protected override async Task DoWorkAsync(CancellationToken stoppingToken)
+    protected internal override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         var scope = _serviceProvider.CreateScope()
             .ServiceProvider;
