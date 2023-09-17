@@ -1,6 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Extensions;
 using StackExchange.Redis;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -402,7 +401,11 @@ public class RedisHelper<TEntity>
 
                     var startScore = filter.GetStartScore();
                     var endScore = filter.GetEndScore();
-                    var exclusivity = filter.GetExclusivity();
+                    var exclusivity =
+                        filter.GetStartInclusivity() && filter.GetEndInclusivity() ? Exclude.None
+                        : filter.GetStartInclusivity() ? Exclude.Stop
+                        : filter.GetEndInclusivity() ? Exclude.Start
+                        : Exclude.Both;
 
                     var tempKey = GetTempKey();
                     allTempKeys.Add(tempKey);

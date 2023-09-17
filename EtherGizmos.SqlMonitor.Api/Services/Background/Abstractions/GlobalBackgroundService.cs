@@ -22,7 +22,7 @@ public abstract class GlobalBackgroundService : PeriodicBackgroundService
     }
 
     /// <inheritdoc/>
-    protected sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
+    protected internal sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         using var @lock = await _distributedRecordCache.AcquireLockAsync(
             CacheKeys.EnqueueMonitorQueries,
@@ -46,5 +46,5 @@ public abstract class GlobalBackgroundService : PeriodicBackgroundService
     /// </summary>
     /// <param name="stoppingToken">The cancellation instruction.</param>
     /// <returns>An awaitable task.</returns>
-    protected abstract Task DoGlobalWorkAsync(CancellationToken stoppingToken);
+    protected internal abstract Task DoGlobalWorkAsync(CancellationToken stoppingToken);
 }

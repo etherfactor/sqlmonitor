@@ -12,7 +12,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Background;
 /// <summary>
 /// Runs queries against instances on a periodic timer.
 /// </summary>
-public class EnqueueMonitorQueries : GlobalConstantBackgroundService
+public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
 {
     private const string CronExpression = "0/15 * * * * *";
     private const string ConstantCronExpression = "0/1 * * * * *";
@@ -25,8 +25,8 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
     /// </summary>
     /// <param name="logger">The logger to use.</param>
     /// <param name="serviceProvider">Provides access to services.</param>
-    public EnqueueMonitorQueries(
-        ILogger<EnqueueMonitorQueries> logger,
+    public EnqueueMonitorQueriesService(
+        ILogger<EnqueueMonitorQueriesService> logger,
         IServiceProvider serviceProvider,
         IDistributedRecordCache distributedRecordCache)
         : base(logger, serviceProvider, distributedRecordCache, CacheKeys.EnqueueMonitorQueries, CronExpression, ConstantCronExpression)
@@ -36,7 +36,7 @@ public class EnqueueMonitorQueries : GlobalConstantBackgroundService
     }
 
     /// <inheritdoc/>
-    protected override async Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
+    protected internal override async Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
     {
         var queriesToRun = await _distributedRecordCache.EntitySet<Query>()
             .Where(e => e.IsActive).IsEqualTo(true)

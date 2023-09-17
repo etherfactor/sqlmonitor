@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Caching.Extensions;
+namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
 public static class ScoreExtensions
 {
@@ -19,6 +19,9 @@ public static class ScoreExtensions
 
             case DateTimeOffset value:
                 return value.GetScore();
+
+            case double value:
+                return value;
 
             case int value:
                 return value.GetScore();

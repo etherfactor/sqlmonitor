@@ -1,7 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Extensions;
-using StackExchange.Redis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
@@ -88,23 +87,23 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
                     var endScore = double.Parse(filter.GetEndScore().ToString());
 
                     bool left;
-                    if (filter.GetExclusivity() == Exclude.Start || filter.GetExclusivity() == Exclude.Both)
-                    {
-                        left = entityScore > startScore;
-                    }
-                    else
+                    if (filter.GetStartInclusivity())
                     {
                         left = entityScore >= startScore;
                     }
+                    else
+                    {
+                        left = entityScore > startScore;
+                    }
 
                     bool right;
-                    if (filter.GetExclusivity() == Exclude.Stop || filter.GetExclusivity() == Exclude.Both)
+                    if (filter.GetEndInclusivity())
                     {
-                        right = entityScore < endScore;
+                        right = entityScore <= endScore;
                     }
                     else
                     {
-                        right = entityScore <= endScore;
+                        right = entityScore < endScore;
                     }
 
                     overall &= left && right;

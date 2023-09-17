@@ -24,7 +24,7 @@ public abstract class PeriodicBackgroundService : BackgroundService
     }
 
     /// <inheritdoc/>
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected sealed override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var firstDelay = GetNextDelay();
         await Task.Delay(firstDelay, stoppingToken);
@@ -54,7 +54,7 @@ public abstract class PeriodicBackgroundService : BackgroundService
     /// </summary>
     /// <param name="stoppingToken">The cancellation instruction.</param>
     /// <returns>An awaitable task.</returns>
-    protected abstract Task DoWorkAsync(CancellationToken stoppingToken);
+    protected internal abstract Task DoWorkAsync(CancellationToken stoppingToken);
 
     /// <summary>
     /// Gets the next delay to run the job.

@@ -3,6 +3,7 @@ using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,6 +41,8 @@ internal static class Global
         services.AddSingleton<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
         services.AddSingleton<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
         services.AddSingleton<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
+
+        services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<Mock<ISendEndpointProvider>>().Object);
 
         var provider = services.BuildServiceProvider().CreateScope().ServiceProvider;
         return provider;

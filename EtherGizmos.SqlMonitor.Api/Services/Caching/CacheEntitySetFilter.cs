@@ -1,6 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Extensions;
-using StackExchange.Redis;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
@@ -38,20 +37,19 @@ internal class CacheEntitySetFilter<TEntity> : ICacheEntitySetFilter<TEntity>
     }
 
     /// <inheritdoc/>
-    public RedisValue GetEndScore() => new RedisValue($"{_endScore}");
+    public bool GetEndInclusivity() => _endInclusive;
 
     /// <inheritdoc/>
-    public Exclude GetExclusivity() =>
-        _startInclusive && _endInclusive ? Exclude.None
-        : _startInclusive ? Exclude.Stop
-        : _endInclusive ? Exclude.Start
-        : Exclude.Both;
+    public double GetEndScore() => _endScore;
 
     /// <inheritdoc/>
     public PropertyInfo GetProperty() => _indexedProperty;
 
     /// <inheritdoc/>
-    public RedisValue GetStartScore() => new RedisValue($"{_startScore}");
+    public bool GetStartInclusivity() => _startInclusive;
+
+    /// <inheritdoc/>
+    public double GetStartScore() => _startScore;
 
     /// <summary>
     /// Set the score for the filter.

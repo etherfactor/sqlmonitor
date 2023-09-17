@@ -189,7 +189,7 @@ builder.Services
 builder.Services.AddMapper();
 
 builder.Services.AddHostedService<CacheLoadService>();
-builder.Services.AddHostedService<EnqueueMonitorQueries>();
+builder.Services.AddHostedService<EnqueueMonitorQueriesService>();
 
 //**********************************************************
 // Add Middleware
