@@ -62,18 +62,18 @@ jobs:
       command: 'build'
       projects: '$(Build.Projects)'
 
+  - task: PowerShell@2
+    displayName: 'Start MSSQLLocalDB'
+    inputs:
+      targetType: 'inline'
+      script: 'sqllocaldb start mssqllocaldb'
+
   - task: DotNetCoreCLI@2
     displayName: 'Perform Unit Tests'
     inputs:
       command: 'test'
       projects: '**/EtherGizmos.SqlMonitor.Api.UnitTests.csproj'
       arguments: '--collect "XPlat Code Coverage"'
-
-  - task: PowerShell@2
-    displayName: 'Start MSSQLLocalDB'
-    inputs:
-      targetType: 'inline'
-      script: 'sqllocaldb start mssqllocaldb'
 
   - task: DotNetCoreCLI@2
     displayName: 'Perform Integration Tests'
