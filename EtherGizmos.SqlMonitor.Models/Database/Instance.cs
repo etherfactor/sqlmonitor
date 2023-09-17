@@ -40,6 +40,14 @@ public class Instance : Auditable
 
     public virtual List<InstanceQueryDatabase> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabase>();
 
+    public virtual List<InstanceMetricByDay> MetricsByDay { get; set; } = new List<InstanceMetricByDay>();
+
+    public virtual List<InstanceMetricByHour> MetricsByHour { get; set; } = new List<InstanceMetricByHour>();
+
+    public virtual List<InstanceMetricByMinute> MetricsByMinute { get; set; } = new List<InstanceMetricByMinute>();
+
+    public virtual List<InstanceMetricBySecond> MetricsBySecond { get; set; } = new List<InstanceMetricBySecond>();
+
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
