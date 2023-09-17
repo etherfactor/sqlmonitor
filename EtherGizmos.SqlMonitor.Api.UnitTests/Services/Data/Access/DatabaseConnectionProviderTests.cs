@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Access;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
 using Microsoft.Extensions.Configuration;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Data.Access;
@@ -37,10 +37,10 @@ internal class DatabaseConnectionProviderTests
     {
         var configData = new Dictionary<string, string?>()
         {
-            { "Connections:Database:Data Source", "(mssqllocaldb)\\localhost" },
-            { "Connections:Database:Initial Catalog", "database" },
-            { "Connections:Database:Integrated Security", "true" },
-            { "Connections:Database:Application Name", "Unit Test" }
+            { "Connections:SqlServer:Data Source", "(mssqllocaldb)\\localhost" },
+            { "Connections:SqlServer:Initial Catalog", "database" },
+            { "Connections:SqlServer:Integrated Security", "true" },
+            { "Connections:SqlServer:Application Name", "Unit Test" }
         };
 
         var config = new ConfigurationBuilder()

@@ -11,10 +11,6 @@ internal static class IActionResultExtensions
         int? statusCode;
         switch (@this)
         {
-            case ObjectResult result:
-                statusCode = result.StatusCode;
-                break;
-
             case BadRequestODataResult result:
                 statusCode = result.StatusCode;
                 break;
@@ -28,6 +24,10 @@ internal static class IActionResultExtensions
                 break;
 
             case ConflictResult result:
+                statusCode = result.StatusCode;
+                break;
+
+            case NoContentResult result:
                 statusCode = result.StatusCode;
                 break;
 
@@ -56,6 +56,14 @@ internal static class IActionResultExtensions
                 break;
 
             case UnprocessableEntityResult result:
+                statusCode = result.StatusCode;
+                break;
+
+            case ObjectResult result when @this.GetType().IsGenericType && @this.GetType().GetGenericTypeDefinition() == typeof(CreatedODataResult<>):
+                statusCode = (int)HttpStatusCode.Created;
+                break;
+
+            case ObjectResult result:
                 statusCode = result.StatusCode;
                 break;
 
@@ -71,10 +79,6 @@ internal static class IActionResultExtensions
         object? content;
         switch (@this)
         {
-            case ObjectResult result:
-                content = result.Value;
-                break;
-
             case BadRequestODataResult result:
                 content = result.Error;
                 break;
@@ -88,6 +92,10 @@ internal static class IActionResultExtensions
                 break;
 
             case ConflictResult result:
+                content = null;
+                break;
+
+            case NoContentResult result:
                 content = null;
                 break;
 
@@ -117,6 +125,14 @@ internal static class IActionResultExtensions
 
             case UnprocessableEntityResult result:
                 content = null;
+                break;
+
+            case ObjectResult result when @this.GetType().IsGenericType && @this.GetType().GetGenericTypeDefinition() == typeof(CreatedODataResult<>):
+                content = result.Value;
+                break;
+
+            case ObjectResult result:
+                content = result.Value;
                 break;
 
             default:

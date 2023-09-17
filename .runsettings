@@ -10,6 +10,7 @@
                 <!-- Include all modules by default -->
               </Include>
               <Exclude>
+                <ModulePath>*.Models\.dll</ModulePath>
                 <ModulePath>.*Tests\.dll</ModulePath>
                 <ModulePath>moq\.dll</ModulePath>
                 <ModulePath>nunit3\.testadapter\.dll</ModulePath>

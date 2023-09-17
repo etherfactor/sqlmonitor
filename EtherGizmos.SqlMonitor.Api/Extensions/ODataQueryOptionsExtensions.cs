@@ -74,8 +74,18 @@ internal static class ODataQueryOptionsExtensions
         foreach (ExpandedNavigationSelectItem item in selectExpand.SelectedItems.Where(e => typeof(ExpandedNavigationSelectItem).IsAssignableFrom(e.GetType())))
         {
             //Find the property on the current type and get the CLR name
-            var property = currentType.FindProperty(item.NavigationSource.Name);
-            string propertyName = model.GetClrPropertyName(property);
+            //If that property is contained in a complex object, follow the navigation path first
+            List<string> propertyNames = new List<string>();
+            foreach (var navigationPath in item.PathToNavigationProperty)
+            {
+                var currentProperty = currentType.FindProperty(navigationPath.Identifier);
+                currentType = currentProperty.Type.ToStructuredType();
+
+                var currentPropertyName = model.GetClrPropertyName(currentProperty);
+                propertyNames.Add(currentPropertyName);
+            }
+
+            var propertyName = string.Join(".", propertyNames);
 
             //Return that property name
             yield return propertyName;

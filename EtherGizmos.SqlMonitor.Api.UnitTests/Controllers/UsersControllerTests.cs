@@ -1,11 +1,12 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
-using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using EtherGizmos.SqlMonitor.Models.Exceptions;
+using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -23,6 +24,8 @@ internal class UsersControllerTests
 
     private List<User> Data { get; set; }
 
+    private Guid RecordId { get; } = new Guid("3447e2d1-0a19-4272-94d2-4911bd5d7b43");
+
     [SetUp]
     public void SetUp()
     {
@@ -32,7 +35,7 @@ internal class UsersControllerTests
         {
             new User()
             {
-                Id = new Guid("3447e2d1-0a19-4272-94d2-4911bd5d7b43"),
+                Id = RecordId,
                 Username = "admin",
                 PasswordHash = "$2a$12$tp9SfLVzKXxfr39Xy6nT7OZs1U5VLvsf84MN947mEHAVFGFTi6X.u",
                 Name = "Administrator",
@@ -46,7 +49,7 @@ internal class UsersControllerTests
             },
             new User()
             {
-                Id = new Guid("3bab5b36-0972-48cf-a96f-a5fec0844400"),
+                Id = Guid.NewGuid(),
                 Username = "test123",
                 PasswordHash = "$2a$12$tp9SfLVzKXxfr39Xy6nT7OZs1U5VLvsf84MN947mEHAVFGFTi6X.u",
                 Name = "Test User",
@@ -59,7 +62,7 @@ internal class UsersControllerTests
             },
             new User()
             {
-                Id = new Guid("7fa87c25-4df8-4d79-b3f4-0bc7e790b634"),
+                Id = Guid.NewGuid(),
                 Username = "test456",
                 PasswordHash = "$2a$12$tp9SfLVzKXxfr39Xy6nT7OZs1U5VLvsf84MN947mEHAVFGFTi6X.u",
                 Name = "Test User",
@@ -72,7 +75,7 @@ internal class UsersControllerTests
             },
             new User()
             {
-                Id = new Guid("61176fa5-0a9f-43ad-bbdd-37c6395dc18b"),
+                Id = Guid.NewGuid(),
                 Username = "test789",
                 PasswordHash = "$2a$12$tp9SfLVzKXxfr39Xy6nT7OZs1U5VLvsf84MN947mEHAVFGFTi6X.u",
                 Name = "Test User",
@@ -661,7 +664,7 @@ internal class UsersControllerTests
     }
 
     [Test]
-    public async Task Create_IsValid_Returns200Ok()
+    public async Task Create_IsValid_Returns201Created()
     {
         var model = ODataModel.GetEdmModel(1.0m);
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
@@ -688,7 +691,7 @@ internal class UsersControllerTests
         Assert.Multiple(() =>
         {
             Assert.That(result, Is.Not.Null);
-            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
             Assert.That(content, Is.AssignableTo<UserDTO>());
         });
 
@@ -766,7 +769,7 @@ internal class UsersControllerTests
     //}
 
     [Test]
-    public async Task Create_IsValid_WithSelect_Returns200Ok()
+    public async Task Create_IsValid_WithSelect_Returns201Created()
     {
         var model = ODataModel.GetEdmModel(1.0m);
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
@@ -793,7 +796,7 @@ internal class UsersControllerTests
         Assert.Multiple(() =>
         {
             Assert.That(result, Is.Not.Null);
-            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
@@ -909,6 +912,270 @@ internal class UsersControllerTests
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
             var result = await Controller.Create(record, queryOptions);
+        });
+    }
+
+    [Test]
+    public async Task Update_IsInvalid_Returns404NotFound()
+    {
+        var recordId = Guid.NewGuid();
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "PATCH",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            "");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        var result = await Controller.Update(recordId, record, queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(content, Is.AssignableTo<ODataError>());
+        });
+
+        var mockServ = Provider.GetRequiredService<Mock<IUserService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
+    }
+
+    [Test]
+    public async Task Update_IsValid_Returns200Ok()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "POST",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            "");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        var result = await Controller.Update(recordId, record, queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(content, Is.AssignableTo<UserDTO>());
+        });
+
+        var mockServ = Provider.GetRequiredService<Mock<IUserService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    }
+
+    [Test]
+    public void Update_IsValid_WithFilter_ThrowsReturnODataErrorException()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            $"$filter=id eq {RecordId}");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await Controller.Update(recordId, record, queryOptions);
+        });
+    }
+
+    //[Test]
+    //public async Task Update_IsValid_WithExpand_Returns200Ok()
+    //{
+    //    var recordId = RecordId;
+
+    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+    //        model,
+    //        "GET",
+    //        "https://localhost:7200",
+    //        "api/v1",
+    //        "users",
+    //        $"({recordId})",
+    //        "$expand=...");
+
+    //    var record = new Delta<UserDTO>();
+    //    record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+    //    var result = await Controller.Update(recordId, record, queryOptions);
+    //    var status = result.GetStatusCode();
+    //    var content = result.GetContent();
+
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.That(result, Is.Not.Null);
+    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+    //    });
+
+    //    var mockServ = Provider.GetRequiredService<Mock<IUserService>>();
+    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+
+    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    //}
+
+    [Test]
+    public async Task Update_IsValid_WithSelect_Returns200Ok()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            "$select=id");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        var result = await Controller.Update(recordId, record, queryOptions);
+        var status = result.GetStatusCode();
+        var content = result.GetContent();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+        });
+
+        var mockServ = Provider.GetRequiredService<Mock<IUserService>>();
+        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+
+        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+        mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    }
+
+    [Test]
+    public void Update_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({RecordId})",
+            "$orderby=id");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await Controller.Update(recordId, record, queryOptions);
+        });
+    }
+
+    [Test]
+    public void Update_IsValid_WithTop_ThrowsReturnODataErrorException()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            "$top=1");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await Controller.Update(recordId, record, queryOptions);
+        });
+    }
+
+    [Test]
+    public void Update_IsValid_WithSkip_ThrowsReturnODataErrorException()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            "$skip=1");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await Controller.Update(recordId, record, queryOptions);
+        });
+    }
+
+    [Test]
+    public void Update_IsValid_WithCount_ThrowsReturnODataErrorException()
+    {
+        var recordId = RecordId;
+
+        var model = ODataModel.GetEdmModel(1.0m);
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<UserDTO>(
+            model,
+            "GET",
+            "https://localhost:7200",
+            "api/v1",
+            "users",
+            $"({recordId})",
+            "$count=true");
+
+        var record = new Delta<UserDTO>();
+        record.TrySetPropertyValue(nameof(UserDTO.Name), "New Name");
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await Controller.Update(recordId, record, queryOptions);
         });
     }
 }

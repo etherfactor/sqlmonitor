@@ -51,12 +51,14 @@ public class UserDTO
     [Display(Name = "last_login_at_utc")]
     public DateTimeOffset? LastLoginAtUtc { get; set; }
 
-    public void EnsureValid(IQueryable<User> records)
+    public Task EnsureValid(IQueryable<User> records)
     {
         records.EnsureUnique((e => e.Username, Username));
 
         if (EmailAddress != null)
             records.EnsureUnique((e => e.EmailAddress, EmailAddress));
+
+        return Task.CompletedTask;
     }
 }
 
@@ -108,6 +110,7 @@ public static class ForUserDTO
 
         var entity = @this.EntityTypeWithAnnotations<UserDTO>();
         entity.HasKey(e => e.Id);
+        entity.PropertyWithAnnotations(e => e.Id);
         /* Begin Audit */
         entity.PropertyWithAnnotations(e => e.CreatedAt);
         entity.PropertyWithAnnotations(e => e.CreatedByUserId);

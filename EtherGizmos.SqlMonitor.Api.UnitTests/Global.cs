@@ -1,6 +1,9 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,22 +22,30 @@ internal static class Global
 
         services.AddMapper();
 
-        services.AddScoped(typeof(Mock<>));
+        services.AddSingleton(typeof(Mock<>));
 
-        services.AddScoped<ILogger>(o => o.GetRequiredService<Mock<ILogger>>().Object);
-        services.AddScoped(typeof(ILogger<>), typeof(ProxyLogger<>));
+        services.AddSingleton<ILogger>(o => o.GetRequiredService<Mock<ILogger>>().Object);
+        services.AddSingleton(typeof(ILogger<>), typeof(ProxyLogger<>));
 
+        services.AddScoped<InstancesController>();
         services.AddScoped<PermissionsController>();
+        services.AddScoped<QueriesController>();
         services.AddScoped<SecurablesController>();
         services.AddScoped<UsersController>();
 
-        services.AddScoped<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
+        services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
+        services.AddSingleton<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
-        services.AddScoped<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
-        services.AddScoped<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
-        services.AddScoped<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
+        services.AddSingleton<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);
+        services.AddSingleton<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
+        services.AddSingleton<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
+        services.AddSingleton<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);
+        services.AddSingleton<IUserService>(provider => provider.GetRequiredService<Mock<IUserService>>().Object);
 
-        return services.BuildServiceProvider().CreateScope().ServiceProvider;
+        services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<Mock<ISendEndpointProvider>>().Object);
+
+        var provider = services.BuildServiceProvider().CreateScope().ServiceProvider;
+        return provider;
     }
 
     internal static string GetConnectionStringForMaster(this IDatabaseConnectionProvider @this)

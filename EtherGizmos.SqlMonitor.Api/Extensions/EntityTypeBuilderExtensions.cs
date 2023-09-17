@@ -80,9 +80,14 @@ internal static class EntityTypeBuilderExtensions
         builder.HasColumnName(columnName);
 
         //Test for a SqlDefaultValueAttribute to determine if a default value is generated
-        var sqlDefaultValueAttribute = property.GetCustomAttributes<SqlDefaultValueAttribute>();
+        var sqlDefaultValueAttribute = property.GetCustomAttribute<SqlDefaultValueAttribute>();
         if (sqlDefaultValueAttribute != null)
             builder.HasDefaultValueSql();
+
+        ////Should mitigate the issue described in https://github.com/dotnet/efcore/issues/6054
+        ////Removed for now, but comment left in case the issue pops back up
+        //if (typeof(TMember) == typeof(bool))
+        //    builder.ValueGeneratedNever();
 
         return builder;
     }
