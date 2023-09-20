@@ -34,12 +34,6 @@ public class Instance : Auditable
     [Column("database")]
     public virtual string? Database { get; set; }
 
-    public virtual List<InstanceQueryBlacklist> QueryBlacklists { get; set; } = new List<InstanceQueryBlacklist>();
-
-    public virtual List<InstanceQueryWhitelist> QueryWhitelists { get; set; } = new List<InstanceQueryWhitelist>();
-
-    public virtual List<InstanceQueryDatabase> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabase>();
-
     public virtual List<InstanceMetricByDay> MetricsByDay { get; set; } = new List<InstanceMetricByDay>();
 
     public virtual List<InstanceMetricByHour> MetricsByHour { get; set; } = new List<InstanceMetricByHour>();

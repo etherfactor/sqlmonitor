@@ -25,13 +25,13 @@ public static class ForInstanceQueryDatabaseDTO
 {
     public static IProfileExpression AddInstanceQueryDatabase(this IProfileExpression @this)
     {
-        var toDto = @this.CreateMap<InstanceQueryDatabase, InstanceQueryDatabaseDTO>();
+        var toDto = @this.CreateMap<QueryInstanceDatabase, InstanceQueryDatabaseDTO>();
         toDto.IgnoreAllMembers();
         toDto.MapMember(dest => dest.QueryId, src => src.QueryId);
         toDto.MapMember(dest => dest.Query, src => src.Query);
         toDto.MapMember(dest => dest.Database, src => src.DatabaseOverride);
 
-        var fromDto = @this.CreateMap<InstanceQueryDatabaseDTO, InstanceQueryDatabase>();
+        var fromDto = @this.CreateMap<InstanceQueryDatabaseDTO, QueryInstanceDatabase>();
         fromDto.IgnoreAllMembers();
         fromDto.MapMember(dest => dest.QueryId, src => src.QueryId);
         fromDto.MapMember(dest => dest.Query, src => src.Query);

@@ -19,6 +19,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<Instance> Instances { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="Metric"/> records, in 'dbo.metrics'.
+    /// </summary>
+    public virtual DbSet<Metric> Metrics { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Permission"/> records, in 'dbo.permissions'.
     /// </summary>
     public virtual DbSet<Permission> Permissions { get; set; }
@@ -77,51 +82,125 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Address);
             entity.PropertyWithAnnotations(e => e.Port);
 
-            entity.HasMany(e => e.QueryBlacklists)
+            entity.HasMany(e => e.MetricsByDay)
                 .WithOne(e => e.Instance)
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);
 
-            entity.HasMany(e => e.QueryDatabaseOverrides)
+            entity.HasMany(e => e.MetricsByHour)
                 .WithOne(e => e.Instance)
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);
 
-            entity.HasMany(e => e.QueryWhitelists)
+            entity.HasMany(e => e.MetricsByMinute)
+                .WithOne(e => e.Instance)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.InstanceId);
+
+            entity.HasMany(e => e.MetricsBySecond)
                 .WithOne(e => e.Instance)
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(e => e.InstanceId);
         });
 
-        modelBuilder.Entity<InstanceQueryBlacklist>(entity =>
+        modelBuilder.Entity<InstanceMetricByDay>(entity =>
         {
             entity.ToTableWithAnnotations();
 
-            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+            entity.HasKey(e => new { e.InstanceId, e.MeasuredAtUtc, e.MetricId, e.MetricBucketId });
 
             entity.PropertyWithAnnotations(e => e.InstanceId);
-            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
         });
 
-        modelBuilder.Entity<InstanceQueryDatabase>(entity =>
+        modelBuilder.Entity<InstanceMetricByHour>(entity =>
         {
             entity.ToTableWithAnnotations();
 
-            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+            entity.HasKey(e => new { e.InstanceId, e.MeasuredAtUtc, e.MetricId, e.MetricBucketId });
 
             entity.PropertyWithAnnotations(e => e.InstanceId);
-            entity.PropertyWithAnnotations(e => e.QueryId);
-            entity.PropertyWithAnnotations(e => e.DatabaseOverride);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
         });
 
-        modelBuilder.Entity<InstanceQueryWhitelist>(entity =>
+        modelBuilder.Entity<InstanceMetricByMinute>(entity =>
         {
             entity.ToTableWithAnnotations();
 
-            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+            entity.HasKey(e => new { e.InstanceId, e.MeasuredAtUtc, e.MetricId, e.MetricBucketId });
 
             entity.PropertyWithAnnotations(e => e.InstanceId);
-            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+        });
+
+        modelBuilder.Entity<InstanceMetricBySecond>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.MeasuredAtUtc, e.MetricId, e.MetricBucketId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+        });
+
+        modelBuilder.Entity<Metric>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id)
+                .HasDefaultValueSql();
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.AggregateType);
+
+            entity.HasMany(e => e.Severities)
+                .WithOne(e => e.Metric)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.MetricId);
+        });
+
+        modelBuilder.Entity<MetricBucket>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id)
+                .HasDefaultValueSql();
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+        });
+
+        modelBuilder.Entity<MetricSeverity>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.MetricId, e.SeverityType });
+
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.MinimumValue);
+            entity.PropertyWithAnnotations(e => e.MaximumValue);
         });
 
         modelBuilder.Entity<Permission>(entity =>
@@ -174,6 +253,88 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.BucketExpression);
 
             entity.Ignore(e => e.NextRunAtUtc);
+
+            entity.HasMany(e => e.InstanceBlacklists)
+                .WithOne(e => e.Query)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.QueryId);
+
+            entity.HasMany(e => e.InstanceDatabaseOverrides)
+                .WithOne(e => e.Query)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.QueryId);
+
+            entity.HasMany(e => e.InstanceWhitelists)
+                .WithOne(e => e.Query)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.QueryId);
+
+            entity.HasMany(e => e.Metrics)
+                .WithOne(e => e.Query)
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(e => e.QueryId);
+        });
+
+        modelBuilder.Entity<QueryInstanceBlacklist>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.QueryId);
+        });
+
+        modelBuilder.Entity<QueryInstanceDatabase>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.DatabaseOverride);
+        });
+
+        modelBuilder.Entity<QueryInstanceWhitelist>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.InstanceId, e.QueryId });
+
+            entity.PropertyWithAnnotations(e => e.InstanceId);
+            entity.PropertyWithAnnotations(e => e.QueryId);
+        });
+
+        modelBuilder.Entity<QueryMetric>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.QueryId, e.MetricId });
+
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.ValueExpression);
+
+            entity.HasMany(e => e.Severities)
+                .WithOne(e => e.QueryMetric)
+                .HasPrincipalKey(e => new { e.QueryId, e.MetricId })
+                .HasForeignKey(e => new { e.QueryId, e.MetricId });
+        });
+
+        modelBuilder.Entity<QueryMetricSeverity>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.QueryId, e.MetricId, e.SeverityType });
+
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.MinimumExpression);
+            entity.PropertyWithAnnotations(e => e.MaximumExpression);
         });
 
         modelBuilder.Entity<Securable>(entity =>
@@ -236,6 +397,14 @@ public class DatabaseContext : DbContext
             app => app != null ? app.Value.UtcDateTime : null,
             db => db != null ? new DateTimeOffset((DateTime)db, TimeSpan.Zero) : null));
 
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<AggregateType, string>(
+            app => AggregateTypeConverter.ToString(app),
+            db => AggregateTypeConverter.FromString(db)));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<AggregateType?, string?>(
+            app => AggregateTypeConverter.ToStringOrDefault(app),
+            db => AggregateTypeConverter.FromStringOrDefault(db)));
+
         modelBuilder.AddGlobalValueConverter(new ValueConverter<PrincipalType, string>(
             app => PrincipalTypeConverter.ToString(app),
             db => PrincipalTypeConverter.FromString(db)));
@@ -243,5 +412,13 @@ public class DatabaseContext : DbContext
         modelBuilder.AddGlobalValueConverter(new ValueConverter<PrincipalType?, string?>(
             app => PrincipalTypeConverter.ToStringOrDefault(app),
             db => PrincipalTypeConverter.FromStringOrDefault(db)));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<SeverityType, string>(
+            app => SeverityTypeConverter.ToString(app),
+            db => SeverityTypeConverter.FromString(db)));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<SeverityType?, string?>(
+            app => SeverityTypeConverter.ToStringOrDefault(app),
+            db => SeverityTypeConverter.FromStringOrDefault(db)));
     }
 }

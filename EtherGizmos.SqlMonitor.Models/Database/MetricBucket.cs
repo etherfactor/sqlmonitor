@@ -1,10 +1,11 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("metric_buckets")]
-public class MetricBucket
+public class MetricBucket : Auditable
 {
     [Column("metric_bucket_id")]
     [SqlDefaultValue]

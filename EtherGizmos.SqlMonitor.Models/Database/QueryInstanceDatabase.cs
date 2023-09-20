@@ -3,7 +3,7 @@
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("instance_query_databases")]
-public class InstanceQueryDatabase
+public class QueryInstanceDatabase
 {
     [Column("instance_id")]
     public virtual Guid InstanceId { get; set; }
@@ -21,7 +21,7 @@ public class InstanceQueryDatabase
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
-    public InstanceQueryDatabase()
+    public QueryInstanceDatabase()
     {
         Instance = null!;
         Query = null!;

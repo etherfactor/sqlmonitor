@@ -47,6 +47,12 @@ public class Query : Auditable
     [Indexed]
     public DateTimeOffset NextRunAtUtc => (LastRunAtUtc ?? DateTimeOffset.MinValue).Add(RunFrequency);
 
+    public virtual List<QueryInstanceBlacklist> InstanceBlacklists { get; set; } = new List<QueryInstanceBlacklist>();
+
+    public virtual List<QueryInstanceWhitelist> InstanceWhitelists { get; set; } = new List<QueryInstanceWhitelist>();
+
+    public virtual List<QueryInstanceDatabase> InstanceDatabaseOverrides { get; set; } = new List<QueryInstanceDatabase>();
+
     public virtual List<QueryMetric> Metrics { get; set; } = new List<QueryMetric>();
 
     /// <summary>

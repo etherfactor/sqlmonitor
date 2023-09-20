@@ -21,22 +21,22 @@ public static class ForInstanceQueryDTO
 {
     public static IProfileExpression AddInstanceQuery(this IProfileExpression @this)
     {
-        var toDtoB = @this.CreateMap<InstanceQueryBlacklist, InstanceQueryDTO>();
+        var toDtoB = @this.CreateMap<QueryInstanceBlacklist, InstanceQueryDTO>();
         toDtoB.IgnoreAllMembers();
         toDtoB.MapMember(dest => dest.QueryId, src => src.QueryId);
         toDtoB.MapMember(dest => dest.Query, src => src.Query);
 
-        var fromDtoB = @this.CreateMap<InstanceQueryDTO, InstanceQueryBlacklist>();
+        var fromDtoB = @this.CreateMap<InstanceQueryDTO, QueryInstanceBlacklist>();
         fromDtoB.IgnoreAllMembers();
         fromDtoB.MapMember(dest => dest.QueryId, src => src.QueryId);
         fromDtoB.MapMember(dest => dest.Query, src => src.Query);
 
-        var toDtoW = @this.CreateMap<InstanceQueryWhitelist, InstanceQueryDTO>();
+        var toDtoW = @this.CreateMap<QueryInstanceWhitelist, InstanceQueryDTO>();
         toDtoW.IgnoreAllMembers();
         toDtoW.MapMember(dest => dest.QueryId, src => src.QueryId);
         toDtoW.MapMember(dest => dest.Query, src => src.Query);
 
-        var fromDtoW = @this.CreateMap<InstanceQueryDTO, InstanceQueryWhitelist>();
+        var fromDtoW = @this.CreateMap<InstanceQueryDTO, QueryInstanceWhitelist>();
         fromDtoW.IgnoreAllMembers();
         fromDtoW.MapMember(dest => dest.QueryId, src => src.QueryId);
         fromDtoW.MapMember(dest => dest.Query, src => src.Query);
