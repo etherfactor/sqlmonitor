@@ -22,6 +22,8 @@ public class InstanceMetricByTime
     [Column("metric_bucket_id")]
     public virtual int MetricBucketId { get; set; }
 
+    public virtual MetricBucket MetricBucket { get; set; }
+
     [Column("value")]
     public virtual double Value { get; set; }
 
@@ -35,5 +37,6 @@ public class InstanceMetricByTime
     {
         Instance = null!;
         Metric = null!;
+        MetricBucket = null!;
     }
 }

@@ -37,6 +37,9 @@ public static class SeverityTypeConverter
 
     public static string ToString(SeverityType value)
     {
+        if (value == SeverityType.Unknown)
+            return "UNKNOWN";
+
         if (!Mappings.ContainsKey(value))
             throw new InvalidOperationException(string.Format("Unmapped type: {0}", value));
 
@@ -45,6 +48,9 @@ public static class SeverityTypeConverter
 
     public static string? ToStringOrDefault(SeverityType? value)
     {
+        if (value == SeverityType.Unknown)
+            return "UNKNOWN";
+
         if (value == null || !Mappings.ContainsKey((SeverityType)value))
             return null;
 

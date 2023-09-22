@@ -34,7 +34,7 @@ public enum AggregateTypeDTO
 
 public static class ForAggregateTypeDTO
 {
-    private static readonly Expression<Func<AggregateType, AggregateTypeDTO>> _toDto = @in =>
+    private static readonly Expression<Func<AggregateType, AggregateTypeDTO?>> _toDto = @in =>
         @in == AggregateType.Unknown ? AggregateTypeDTO.Unknown
         : @in == AggregateType.Average ? AggregateTypeDTO.Average
         : @in == AggregateType.Maximum ? AggregateTypeDTO.Maximum
@@ -54,7 +54,7 @@ public static class ForAggregateTypeDTO
         : @in == AggregateType.Variance ? AggregateTypeDTO.Variance
         : default;
 
-    private static readonly Expression<Func<AggregateTypeDTO, AggregateType>> _fromDto = @in =>
+    private static readonly Expression<Func<AggregateTypeDTO?, AggregateType>> _fromDto = @in =>
         @in == AggregateTypeDTO.Unknown ? AggregateType.Unknown
         : @in == AggregateTypeDTO.Average ? AggregateType.Average
         : @in == AggregateTypeDTO.Maximum ? AggregateType.Maximum
@@ -76,13 +76,13 @@ public static class ForAggregateTypeDTO
 
     public static IProfileExpression AddAggregateType(this IProfileExpression @this)
     {
-        var toDto = @this.CreateMap<AggregateType, AggregateTypeDTO>();
+        var toDto = @this.CreateMap<AggregateType, AggregateTypeDTO?>();
         toDto.ConvertUsing(_toDto);
 
         var toDtoNull = @this.CreateMap<AggregateType?, AggregateTypeDTO?>();
         toDtoNull.ConvertUsing(_toDtoNull);
 
-        var fromDto = @this.CreateMap<AggregateTypeDTO, AggregateType>();
+        var fromDto = @this.CreateMap<AggregateTypeDTO?, AggregateType>();
         fromDto.ConvertUsing(_fromDto);
 
         var fromDtoNull = @this.CreateMap<AggregateTypeDTO?, AggregateType?>();

@@ -141,36 +141,36 @@ internal class InstancesControllerTests
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
     }
 
-    [Test]
-    public async Task Search_IsValid_WithExpand_Returns200Ok()
-    {
-        var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
-            model,
-            "GET",
-            "https://localhost:7200",
-            "api/v1",
-            "instances",
-            "",
-            "$expand=query_whitelists/query");
+    //[Test]
+    //public async Task Search_IsValid_WithExpand_Returns200Ok()
+    //{
+    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+    //        model,
+    //        "GET",
+    //        "https://localhost:7200",
+    //        "api/v1",
+    //        "instances",
+    //        "",
+    //        "$expand=query_whitelists/query");
 
-        var result = await Controller.Search(queryOptions);
-        var status = result.GetStatusCode();
-        var content = result.GetContent();
+    //    var result = await Controller.Search(queryOptions);
+    //    var status = result.GetStatusCode();
+    //    var content = result.GetContent();
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.Not.Null);
-            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
-        });
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.That(result, Is.Not.Null);
+    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+    //        Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
+    //    });
 
-        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+    //    var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
-        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-        mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
-    }
+    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
+    //}
 
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
@@ -414,38 +414,38 @@ internal class InstancesControllerTests
         });
     }
 
-    [Test]
-    public async Task Get_IsValid_WithExpand_Returns200Ok()
-    {
-        Guid recordId = RecordId;
+    //[Test]
+    //public async Task Get_IsValid_WithExpand_Returns200Ok()
+    //{
+    //    Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
-            model,
-            "GET",
-            "https://localhost:7200",
-            "api/v1",
-            "instances",
-            $"('{recordId}')",
-            "$expand=query_whitelists/query");
+    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+    //        model,
+    //        "GET",
+    //        "https://localhost:7200",
+    //        "api/v1",
+    //        "instances",
+    //        $"('{recordId}')",
+    //        "$expand=query_whitelists/query");
 
-        var result = await Controller.Get(recordId, queryOptions);
-        var status = result.GetStatusCode();
-        var content = result.GetContent();
+    //    var result = await Controller.Get(recordId, queryOptions);
+    //    var status = result.GetStatusCode();
+    //    var content = result.GetContent();
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.Not.Null);
-            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
-        });
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.That(result, Is.Not.Null);
+    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+    //    });
 
-        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+    //    var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
-        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-        mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
-    }
+    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Never());
+    //}
 
     [Test]
     public async Task Get_IsValid_WithSelect_Returns200Ok()
@@ -626,42 +626,42 @@ internal class InstancesControllerTests
         });
     }
 
-    [Test]
-    public async Task Create_IsValid_WithExpand_Returns200Ok()
-    {
-        var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
-            model,
-            "GET",
-            "https://localhost:7200",
-            "api/v1",
-            "instances",
-            "",
-            "$expand=query_whitelists/query");
+    //[Test]
+    //public async Task Create_IsValid_WithExpand_Returns200Ok()
+    //{
+    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+    //        model,
+    //        "GET",
+    //        "https://localhost:7200",
+    //        "api/v1",
+    //        "instances",
+    //        "",
+    //        "$expand=query_whitelists/query");
 
-        var record = new InstanceDTO()
-        {
-            Name = "Test",
-            Address = "localhost"
-        };
+    //    var record = new InstanceDTO()
+    //    {
+    //        Name = "Test",
+    //        Address = "localhost"
+    //    };
 
-        var result = await Controller.Create(record, queryOptions);
-        var status = result.GetStatusCode();
-        var content = result.GetContent();
+    //    var result = await Controller.Create(record, queryOptions);
+    //    var status = result.GetStatusCode();
+    //    var content = result.GetContent();
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.Not.Null);
-            Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
-        });
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.That(result, Is.Not.Null);
+    //        Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
+    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+    //    });
 
-        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+    //    var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
-        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-        mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
-    }
+    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    //}
 
     [Test]
     public async Task Create_IsValid_WithSelect_Returns201Created()
@@ -896,41 +896,41 @@ internal class InstancesControllerTests
         });
     }
 
-    [Test]
-    public async Task Update_IsValid_WithExpand_Returns200Ok()
-    {
-        var recordId = RecordId;
+    //[Test]
+    //public async Task Update_IsValid_WithExpand_Returns200Ok()
+    //{
+    //    var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
-            model,
-            "GET",
-            "https://localhost:7200",
-            "api/v1",
-            "instances",
-            $"({recordId})",
-            "$expand=query_whitelists/query");
+    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<InstanceDTO>(
+    //        model,
+    //        "GET",
+    //        "https://localhost:7200",
+    //        "api/v1",
+    //        "instances",
+    //        $"({recordId})",
+    //        "$expand=query_whitelists/query");
 
-        var record = new Delta<InstanceDTO>();
-        record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
+    //    var record = new Delta<InstanceDTO>();
+    //    record.TrySetPropertyValue(nameof(InstanceDTO.Name), "New Name");
 
-        var result = await Controller.Update(recordId, record, queryOptions);
-        var status = result.GetStatusCode();
-        var content = result.GetContent();
+    //    var result = await Controller.Update(recordId, record, queryOptions);
+    //    var status = result.GetStatusCode();
+    //    var content = result.GetContent();
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.Not.Null);
-            Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
-        });
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.That(result, Is.Not.Null);
+    //        Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
+    //        Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
+    //    });
 
-        var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+    //    var mockServ = Provider.GetRequiredService<Mock<IInstanceService>>();
+    //    mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
-        var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
-        mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
-    }
+    //    var mockSave = Provider.GetRequiredService<Mock<ISaveService>>();
+    //    mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
+    //}
 
     [Test]
     public async Task Update_IsValid_WithSelect_Returns200Ok()

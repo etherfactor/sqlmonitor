@@ -16,7 +16,7 @@ public class Migration002_CreateInstanceMetricTables : AutoReversingMigration
             .WithColumn("measured_at_utc").AsDateTime2().PrimaryKey()
             .WithColumn("metric_id").AsGuid().PrimaryKey()
             .WithColumn("metric_bucket_id").AsInt32().PrimaryKey()
-            .WithColumn("value").AsFloat().NotNullable()
+            .WithColumn("value").AsDouble().NotNullable()
             .WithColumn("severity_type_id").AsAnsiString(20).NotNullable();
 
         Create.ForeignKey("FK_instance_metrics_by_day_instance_id")
@@ -43,7 +43,7 @@ public class Migration002_CreateInstanceMetricTables : AutoReversingMigration
             .WithColumn("measured_at_utc").AsDateTime2().PrimaryKey()
             .WithColumn("metric_id").AsGuid().PrimaryKey()
             .WithColumn("metric_bucket_id").AsInt32().PrimaryKey()
-            .WithColumn("value").AsFloat().NotNullable()
+            .WithColumn("value").AsDouble().NotNullable()
             .WithColumn("severity_type_id").AsAnsiString(20).NotNullable();
 
         Create.ForeignKey("FK_instance_metrics_by_hour_instance_id")
@@ -70,7 +70,7 @@ public class Migration002_CreateInstanceMetricTables : AutoReversingMigration
             .WithColumn("measured_at_utc").AsDateTime2().PrimaryKey()
             .WithColumn("metric_id").AsGuid().PrimaryKey()
             .WithColumn("metric_bucket_id").AsInt32().PrimaryKey()
-            .WithColumn("value").AsFloat().NotNullable()
+            .WithColumn("value").AsDouble().NotNullable()
             .WithColumn("severity_type_id").AsAnsiString(20).NotNullable();
 
         Create.ForeignKey("FK_instance_metrics_by_minute_instance_id")
@@ -97,7 +97,7 @@ public class Migration002_CreateInstanceMetricTables : AutoReversingMigration
             .WithColumn("measured_at_utc").AsDateTime2().PrimaryKey()
             .WithColumn("metric_id").AsGuid().PrimaryKey()
             .WithColumn("metric_bucket_id").AsInt32().PrimaryKey()
-            .WithColumn("value").AsFloat().NotNullable()
+            .WithColumn("value").AsDouble().NotNullable()
             .WithColumn("severity_type_id").AsAnsiString(20).NotNullable();
 
         Create.ForeignKey("FK_instance_metrics_by_second_instance_id")

@@ -32,13 +32,14 @@ public class MetricDTO
     [Display(Name = "description")]
     public string? Description { get; set; }
 
+    [Required]
     [Display(Name = "aggregate_type")]
     public AggregateTypeDTO? AggregateType { get; set; }
 
     [Display(Name = "severities")]
     public List<MetricSeverityDTO> Severities { get; set; } = new List<MetricSeverityDTO>();
 
-    public Task EnsureValid(IQueryable<MetricDTO> records)
+    public Task EnsureValid(IQueryable<Metric> records)
     {
         return Task.CompletedTask;
     }
@@ -95,7 +96,7 @@ public static class ForMetricDTO
         entity.PropertyWithAnnotations(e => e.Name);
         entity.PropertyWithAnnotations(e => e.Description);
         entity.EnumPropertyWithAnnotations(e => e.AggregateType);
-        entity.HasManyWithAnnotations(e => e.Severities);
+        entity.CollectionPropertyWithAnnotations(e => e.Severities);
 
         return @this;
     }

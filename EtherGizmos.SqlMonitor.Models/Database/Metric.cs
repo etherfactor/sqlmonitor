@@ -16,7 +16,7 @@ public class Metric : Auditable
     public virtual string Name { get; set; }
 
     [Column("description")]
-    public virtual string Description { get; set; }
+    public virtual string? Description { get; set; }
 
     [Column("aggregate_type_id")]
     public virtual AggregateType AggregateType { get; set; }

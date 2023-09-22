@@ -2,7 +2,7 @@
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
-[Table("instance_query_whitelists")]
+[Table("query_instance_whitelists")]
 public class QueryInstanceWhitelist
 {
     [Column("instance_id")]

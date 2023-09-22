@@ -12,7 +12,7 @@ public class MetricSeverity : Auditable
 
     public virtual Metric Metric { get; set; }
 
-    [Column("severity_id")]
+    [Column("severity_type_id")]
     public virtual SeverityType SeverityType { get; set; }
 
     [Column("minimum_value")]

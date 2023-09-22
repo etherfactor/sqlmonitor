@@ -2,6 +2,7 @@
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
@@ -21,12 +22,19 @@ public static class IServiceCollectionExtensions
         {
             MapperConfiguration configuration = new MapperConfiguration(opt =>
             {
+                //Add enums
+                opt.AddAggregateType();
+                opt.AddSeverityType();
+
+                //Add entities
                 opt.AddInstance();
-                opt.AddInstanceQuery();
-                opt.AddInstanceQueryDatabase();
+                opt.AddMetric();
+                opt.AddMetricSeverity();
+                opt.AddQueryInstance();
+                opt.AddQueryInstanceDatabase();
                 opt.AddPermission();
-                opt.AddSecurable();
                 opt.AddQuery();
+                opt.AddSecurable();
                 opt.AddUser();
             });
 

@@ -48,8 +48,8 @@ public class Migration001_CreateMetricTables : AutoReversingMigration
             .WithColumn("metric_id").AsGuid().PrimaryKey()
             .WithColumn("severity_type_id").AsAnsiString(20).PrimaryKey()
             .WithAuditColumns()
-            .WithColumn("minimum_value").AsFloat()
-            .WithColumn("maximum_value").AsFloat();
+            .WithColumn("minimum_value").AsDouble()
+            .WithColumn("maximum_value").AsDouble();
 
         Create.ForeignKey("FK_metric_severities_metric_id")
             .FromTable("metric_severities").ForeignColumn("metric_id")

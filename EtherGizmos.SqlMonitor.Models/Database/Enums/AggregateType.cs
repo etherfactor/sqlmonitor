@@ -41,6 +41,9 @@ public static class AggregateTypeConverter
 
     public static string ToString(AggregateType value)
     {
+        if (value == AggregateType.Unknown)
+            return "UNKNOWN";
+
         if (!Mappings.ContainsKey(value))
             throw new InvalidOperationException(string.Format("Unmapped type: {0}", value));
 
@@ -49,6 +52,9 @@ public static class AggregateTypeConverter
 
     public static string? ToStringOrDefault(AggregateType? value)
     {
+        if (value == AggregateType.Unknown)
+            return "UNKNOWN";
+
         if (value == null || !Mappings.ContainsKey((AggregateType)value))
             return null;
 

@@ -81,6 +81,7 @@ builder.Services
     .AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>()
     .AddScoped<ISaveService, SaveService>()
     .AddScoped<IInstanceService, InstanceService>()
+    .AddScoped<IMetricService, MetricService>()
     .AddScoped<IPermissionService, PermissionService>()
     .AddScoped<IQueryService, QueryService>()
     .AddScoped<ISecurableService, SecurableService>()

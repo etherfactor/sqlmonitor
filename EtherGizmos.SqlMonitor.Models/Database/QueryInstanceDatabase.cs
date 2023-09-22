@@ -2,7 +2,7 @@
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
-[Table("instance_query_databases")]
+[Table("query_instance_databases")]
 public class QueryInstanceDatabase
 {
     [Column("instance_id")]

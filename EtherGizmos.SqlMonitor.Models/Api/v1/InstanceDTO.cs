@@ -44,15 +44,6 @@ public class InstanceDTO
     [Display(Name = "database")]
     public string? Database { get; set; }
 
-    [Display(Name = "query_blacklists")]
-    public List<InstanceQueryDTO> QueryBlacklists { get; set; } = new List<InstanceQueryDTO>();
-
-    [Display(Name = "query_whitelists")]
-    public List<InstanceQueryDTO> QueryWhitelists { get; set; } = new List<InstanceQueryDTO>();
-
-    [Display(Name = "query_database_overrides")]
-    public List<InstanceQueryDatabaseDTO> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabaseDTO>();
-
     public Task EnsureValid(IQueryable<Instance> records)
     {
         return Task.CompletedTask;
