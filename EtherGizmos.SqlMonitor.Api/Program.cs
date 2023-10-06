@@ -12,6 +12,7 @@ using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using MassTransit;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -192,6 +193,16 @@ builder.Services.AddMapper();
 builder.Services.AddHostedService<CacheLoadService>();
 builder.Services.AddHostedService<EnqueueMonitorQueriesService>();
 
+builder.Services.AddCors(opt =>
+    {
+        opt.AddPolicy("All", builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+
 //**********************************************************
 // Add Middleware
 
@@ -216,6 +227,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseCors("All");
 
 if (app.Environment.IsDevelopment())
 {
