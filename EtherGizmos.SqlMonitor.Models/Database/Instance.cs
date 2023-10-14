@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

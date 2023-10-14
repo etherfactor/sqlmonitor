@@ -10,32 +10,32 @@ public class RunQueryConsumer : IConsumer<RunQuery>
 {
     public const string Queue = "run-query";
 
-    private ILogger Logger { get; }
+    private readonly ILogger _logger;
 
     public RunQueryConsumer(ILogger<RunQueryConsumer> logger)
     {
-        Logger = logger;
+        _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<RunQuery> context)
     {
-        Logger.Log(LogLevel.Information, "Received data: {Data}", context.Message);
+        _logger.Log(LogLevel.Information, "Received data: {Data}", context.Message);
 
         var message = context.Message;
 
         var instance = message.Instance;
         var query = message.Query;
 
-        Logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
+        _logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
 
         using var connection = await ConnectToInstanceAsync(instance);
         using var command = new SqlCommand(null, connection);
 
         command.CommandText = GenerateLoadForQuery(query);
-        await command.ExecuteLoggedNonQueryAsync(Logger);
+        await command.ExecuteLoggedNonQueryAsync(_logger);
 
         command.CommandText = GenerateReadForQuery(query);
-        using (var reader = await command.ExecuteLoggedReaderAsync(Logger))
+        using (var reader = await command.ExecuteLoggedReaderAsync(_logger))
         {
             while (await reader.ReadAsync())
             {
@@ -43,12 +43,17 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                 int fieldCount = reader.GetValues(values);
 
                 var logContent = string.Join(", ", values.Select(e => e?.ToString()));
-                Logger.Log(LogLevel.Information, logContent);
+                _logger.Log(LogLevel.Information, logContent);
+
+                foreach (var metric in query.Metrics)
+                {
+                    _logger.Log(LogLevel.Information, "{Metric}", metric);
+                }
             }
         }
 
         command.CommandText = GenerateDropForQuery(query);
-        await command.ExecuteLoggedNonQueryAsync(Logger);
+        await command.ExecuteLoggedNonQueryAsync(_logger);
     }
 
     /// <summary>

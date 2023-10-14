@@ -1,6 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
@@ -10,6 +11,7 @@ public class Metric : Auditable
 {
     [Column("metric_id")]
     [SqlDefaultValue]
+    [Key]
     public virtual Guid Id { get; set; }
 
     [Column("name")]
