@@ -32,6 +32,8 @@ public static class IServiceCollectionExtensions
                 opt.AddMetricSeverity();
                 opt.AddQueryInstance();
                 opt.AddQueryInstanceDatabase();
+                opt.AddQueryMetric();
+                opt.AddQueryMetricSeverity();
                 opt.AddPermission();
                 opt.AddQuery();
                 opt.AddSecurable();

@@ -24,6 +24,8 @@ public static class ODataModel
         builder.AddQuery();
         builder.AddQueryInstance();
         builder.AddQueryInstanceDatabase();
+        builder.AddQueryMetric();
+        builder.AddQueryMetricSeverity();
         builder.AddSecurable();
         builder.AddUser();
 
