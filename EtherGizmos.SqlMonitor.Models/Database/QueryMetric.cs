@@ -26,6 +26,7 @@ public class QueryMetric : Auditable
     [Column("value_expression")]
     public virtual string ValueExpression { get; set; }
 
+    [LookupIndex("severities")]
     public virtual List<QueryMetricSeverity> Severities { get; set; } = new List<QueryMetricSeverity>();
 
     /// <summary>

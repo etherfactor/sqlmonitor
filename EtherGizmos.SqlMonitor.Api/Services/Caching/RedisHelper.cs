@@ -21,10 +21,11 @@ public class RedisHelper<TEntity>
     private const char IdSeparator = '|';
 
     private readonly string _tableKey;
+    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _all;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _keys;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _indexes;
     private readonly IEnumerable<(PropertyInfo, LookupAttribute)> _lookupSingles;
-    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _lookupSets;
+    private readonly IEnumerable<(PropertyInfo, LookupIndexAttribute)> _lookupSets;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _properties;
 
     /// <summary>
@@ -54,6 +55,7 @@ public class RedisHelper<TEntity>
             })
             .Where(e => e.Attribute is not null)
             .OrderBy(e => e.Attribute.Name).ToList();
+        _all = sortedProperties;
 
         //Keys define a KeyAttribute
         _keys = sortedProperties
@@ -86,8 +88,14 @@ public class RedisHelper<TEntity>
         ValidateLookupSingles();
 
         //Lookups define a LookupSetAttribute
-        _lookupSets = sortedProperties
-            .Where(e => e.Property.GetCustomAttribute<LookupFromAttribute>() is not null)
+        _lookupSets = allProperties
+            .Select(e =>
+            {
+                var Property = e;
+                var Attribute = e.GetCustomAttribute<LookupIndexAttribute>()!;
+                return (Property, Attribute);
+            })
+            .Where(e => e.Attribute is not null)
             .ToList();
         ValidateLookupSets();
     }
@@ -188,11 +196,58 @@ public class RedisHelper<TEntity>
     /// <exception cref="InvalidOperationException"></exception>
     private RedisKey GetEntitySetLookupSetKey(PropertyInfo lookup)
     {
-        var lookupAttribute = lookup.GetCustomAttribute<LookupFromAttribute>()
-            ?? throw new InvalidOperationException($"Can only get a lookup for a lookup property, specifying a {nameof(LookupFromAttribute)}.");
+        var lookupAttribute = lookup.GetCustomAttribute<LookupIndexAttribute>()
+            ?? throw new InvalidOperationException($"Can only get a lookup for a lookup property, specifying a {nameof(LookupIndexAttribute)}.");
 
         var lookupData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:${lookup.GetCustomAttribute<ColumnAttribute>()!.Name!.ToSnakeCase()}");
         return lookupData;
+    }
+
+    private (RedisKey, RedisValue)? GetEntitySetLookup(PropertyInfo lookup, TEntity entity)
+    {
+        var lookupAttribute = _lookupSingles.Single(e => e.Item1 == lookup).Item2;
+
+        if (lookupAttribute.List is not null && lookupAttribute.Record is not null)
+            throw new InvalidOperationException($"{lookup.DeclaringType?.Name}.{lookup.Name} specifies both a list and record lookup.");
+
+        if (lookupAttribute.List is not null)
+        {
+            var lookupProperty = lookup.PropertyType
+                .GetProperty(lookupAttribute.List, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new InvalidOperationException($"{typeof(TEntity).Name} contains a {nameof(LookupAttribute)} " +
+                $"pointing at {lookupAttribute.List}, which does not exist.");
+
+            var lookupIndexAttribute = lookupProperty
+                .GetCustomAttribute<LookupIndexAttribute>()
+                ?? throw new InvalidOperationException($"{typeof(TEntity).Name} contains a {nameof(LookupAttribute)}, " +
+                $"but {lookup.PropertyType.Name} does not specify a {nameof(LookupIndexAttribute)}.");
+
+            var lookupProperties = lookupAttribute.IdProperties
+                .Select(e => _all.Single(p => p.Item1.Name == e))
+                .OrderBy(e => e.Item2.Name);
+
+            var maybeLookupValues = lookupProperties
+                .Select(e => e.Item1.GetValue(entity));
+
+            if (maybeLookupValues.All(e => e is not null))
+            {
+                var lookupValues = maybeLookupValues.Select(e => JsonSerializer.Serialize(e))
+                    .Select(e => Encode(e));
+
+                var lookupTableKey = lookup.PropertyType.GetCustomAttribute<TableAttribute>()!.Name;
+
+                var redisKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{lookupTableKey}:${lookupIndexAttribute.Name.ToSnakeCase()}");
+                var redisValue = new RedisValue(string.Join("|", lookupValues));
+
+                return (redisKey, redisValue);
+            }
+        }
+        else if (lookupAttribute.Record is not null)
+        {
+
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -436,12 +491,19 @@ public class RedisHelper<TEntity>
 
         foreach (var lookup in _lookupSingles)
         {
+            var maybeSetLookup = GetEntitySetLookup(lookup.Item1, entity);
+            if (maybeSetLookup != null)
+            {
+                var (indexKey, indexValue) = maybeSetLookup.Value;
+                _ = transaction.SortedSetAddAsync(indexKey, indexValue, 0);
+            }
+
             var lookupValue = lookup.Item1.GetValue(entity);
             if (lookupValue is not null)
             {
                 var lookupType = lookupValue.GetType();
                 var helper = typeof(RedisHelper<TEntity>)
-                    .GetMethod(nameof(BuildAddActionLookupSingle), BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod(lookupType);
 
                 helper.Invoke(this, new object[] { lookupValue, transaction, savedObjects });
@@ -450,21 +512,23 @@ public class RedisHelper<TEntity>
 
         foreach (var lookup in _lookupSets)
         {
-            var lookupKey = GetEntitySetLookupSetKey(lookup.Item1);
             var lookupValue = lookup.Item1.GetValue(entity) as IEnumerable<object>;
             if (lookupValue is not null)
             {
                 var lookupType = lookupValue.GetType().GenericTypeArguments[0];
                 var helper = typeof(RedisHelper<TEntity>)
-                    .GetMethod(nameof(BuildAddActionLookupSet), BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod(lookupType);
 
-                helper.Invoke(this, new object[] { lookupValue, lookupKey, transaction, savedObjects });
+                foreach (var value in lookupValue)
+                {
+                    helper.Invoke(this, new object[] { value, transaction, savedObjects });
+                }
             }
         }
     }
 
-    private void BuildAddActionLookupSingle<TSubEntity>(TSubEntity entity, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildAddActionLookup<TSubEntity>(TSubEntity entity, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : new()
     {
         var helper = RedisHelperCache.For<TSubEntity>();
@@ -478,23 +542,21 @@ public class RedisHelper<TEntity>
         }
     }
 
-    private void BuildAddActionLookupSet<TSubEntity>(IEnumerable<TSubEntity> entities, RedisKey lookupKey, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
-        where TSubEntity : new()
-    {
-        var helper = RedisHelperCache.For<TSubEntity>();
-        foreach (var entity in entities)
-        {
-            var entityKey = helper.GetSetEntityKey(entity);
+    //private void BuildAddActionLookupSet<TSubEntity>(IEnumerable<TSubEntity> entities, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
+    //    where TSubEntity : new()
+    //{
+    //    var helper = RedisHelperCache.For<TSubEntity>();
+    //    foreach (var entity in entities)
+    //    {
+    //        var entityKey = helper.GetSetEntityKey(entity);
 
-            //Only write the record to Redis if it wasn't written already
-            if (savedObjects.TryAdd(entityKey.ToString(), entity!))
-            {
-                var id = helper.GetRecordId(entity);
-                _ = transaction.SortedSetAddAsync(lookupKey, id, 0);
-                helper.BuildAddAction(entity, transaction, savedObjects);
-            }
-        }
-    }
+    //        //Only write the record to Redis if it wasn't written already
+    //        if (savedObjects.TryAdd(entityKey.ToString(), entity!))
+    //        {
+    //            helper.BuildAddAction(entity, transaction, savedObjects);
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// Constructs an action to remove an entity from a set in Redis.

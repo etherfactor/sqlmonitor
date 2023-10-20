@@ -53,7 +53,7 @@ public class Query : Auditable
 
     public virtual List<QueryInstanceDatabase> InstanceDatabaseOverrides { get; set; } = new List<QueryInstanceDatabase>();
 
-    [ForeignKey("metrics")]
+    [LookupIndex("metrics")]
     public virtual List<QueryMetric> Metrics { get; set; } = new List<QueryMetric>();
 
     /// <summary>

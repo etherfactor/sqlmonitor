@@ -7,7 +7,7 @@ public class LookupAttribute : Attribute
 
     public string? List { get; set; }
 
-    public string? Single { get; set; }
+    public string? Record { get; set; }
 
     public LookupAttribute(params string[] lookupIdProperties)
     {
