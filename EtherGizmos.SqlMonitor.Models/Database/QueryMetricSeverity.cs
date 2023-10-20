@@ -1,5 +1,7 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
@@ -7,12 +9,16 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 [Table("query_metric_severities")]
 public class QueryMetricSeverity : Auditable
 {
+    [Key]
     [Column("query_id")]
     public virtual Guid QueryId { get; set; }
 
+    [Key]
     [Column("metric_id")]
     public virtual Guid MetricId { get; set; }
 
+    [Lookup(nameof(QueryId), nameof(MetricId),
+        List = nameof(QueryMetric.Severities))]
     public virtual QueryMetric QueryMetric { get; set; }
 
     [Column("severity_type_id")]

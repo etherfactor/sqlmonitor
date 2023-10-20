@@ -23,7 +23,7 @@ public class RedisHelper<TEntity>
     private readonly string _tableKey;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _keys;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _indexes;
-    private readonly IEnumerable<(PropertyInfo, LookupSingleAttribute)> _lookupSingles;
+    private readonly IEnumerable<(PropertyInfo, LookupAttribute)> _lookupSingles;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _lookupSets;
     private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _properties;
 
@@ -78,7 +78,7 @@ public class RedisHelper<TEntity>
             .Select(e =>
             {
                 var Property = e;
-                var Attribute = e.GetCustomAttribute<LookupSingleAttribute>()!;
+                var Attribute = e.GetCustomAttribute<LookupAttribute>()!;
                 return (Property, Attribute);
             })
             .Where(e => e.Attribute is not null)
@@ -87,7 +87,7 @@ public class RedisHelper<TEntity>
 
         //Lookups define a LookupSetAttribute
         _lookupSets = sortedProperties
-            .Where(e => e.Property.GetCustomAttribute<LookupSetAttribute>() is not null)
+            .Where(e => e.Property.GetCustomAttribute<LookupFromAttribute>() is not null)
             .ToList();
         ValidateLookupSets();
     }
@@ -132,7 +132,12 @@ public class RedisHelper<TEntity>
     /// <returns>The entity's id.</returns>
     private RedisValue GetRecordId(TEntity entity)
     {
-        var raw = _keys.Select(e => JsonSerializer.Serialize(e.Item1.GetValue(entity)))
+        return GetRecordId(_keys.Select(e => e.Item1.GetValue(entity)!));
+    }
+
+    private RedisValue GetRecordId(IEnumerable<object> keys)
+    {
+        var raw = keys.Select(e => JsonSerializer.Serialize(e))
             .Select(e => Encode(e));
         var value = new RedisValue(string.Join(IdSeparator, raw));
 
@@ -183,8 +188,8 @@ public class RedisHelper<TEntity>
     /// <exception cref="InvalidOperationException"></exception>
     private RedisKey GetEntitySetLookupSetKey(PropertyInfo lookup)
     {
-        var lookupAttribute = lookup.GetCustomAttribute<LookupSetAttribute>()
-            ?? throw new InvalidOperationException($"Can only get a lookup for a lookup property, specifying a {nameof(LookupSetAttribute)}.");
+        var lookupAttribute = lookup.GetCustomAttribute<LookupFromAttribute>()
+            ?? throw new InvalidOperationException($"Can only get a lookup for a lookup property, specifying a {nameof(LookupFromAttribute)}.");
 
         var lookupData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:${lookup.GetCustomAttribute<ColumnAttribute>()!.Name!.ToSnakeCase()}");
         return lookupData;
@@ -527,8 +532,16 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="filters">The filters to apply to the set.</param>
     /// <returns>The list action.</returns>
-    public Func<IDatabase, Task<List<TEntity>>> GetListAction(IEnumerable<ICacheEntitySetFilter<TEntity>> filters)
+    public Func<IDatabase, Task<List<TEntity>>> GetListAction(
+        IEnumerable<ICacheEntitySetFilter<TEntity>>? filters = null,
+        RedisKey? lookupKey = null,
+        ConcurrentDictionary<string, object>? savedObjects = null)
     {
+        if (filters is not null && lookupKey is not null)
+            throw new ArgumentException($"May only specify either {nameof(filters)} or {nameof(lookupKey)}");
+
+        filters ??= Enumerable.Empty<ICacheEntitySetFilter<TEntity>>();
+
         var primaryKey = GetEntitySetPrimaryKey();
         var properties = GetProperties();
 
@@ -537,6 +550,9 @@ public class RedisHelper<TEntity>
 
         var action = async (IDatabase database) =>
         {
+            var thisSavedObjects = savedObjects
+                ?? new ConcurrentDictionary<string, object>();
+
             var transaction = database.CreateTransaction();
 
             if (filters.Any())
@@ -574,35 +590,101 @@ public class RedisHelper<TEntity>
                 useKey = finalTempKey;
             }
 
-            var valuesTask = transaction.SortAsync(
-                useKey,
-                sortType: SortType.Numeric,
-                by: "nosort",
-                get: properties);
-
-            if (useKeyDelete)
-            {
-                _ = transaction.KeyDeleteAsync(useKey);
-            }
+            var entitiesTask = BuildListAction(transaction, useKey, useKeyDelete, thisSavedObjects);
 
             await transaction.ExecuteAsync();
-            var values = await valuesTask;
 
-            var entities = DeserializeSet(values);
+            var entities = await entitiesTask();
 
             foreach (var entity in entities)
             {
-                foreach (var lookup in GetLookupKeys(entity))
-                {
-                    //adjust method to also return property, probably
-                    //create a RedisHelperCache.For<TEntity>() on the entity type
-                    //use that cache to fetch corresponding lookup records
-                }
+                await PopulateLookups(entity, database, thisSavedObjects);
             }
+
             return entities;
         };
 
         return action;
+    }
+
+    private Func<Task<List<TEntity>>> BuildListAction(ITransaction transaction, RedisKey listKey, bool deleteListKey, ConcurrentDictionary<string, object> savedObjects)
+    {
+        var properties = GetProperties();
+
+        var valuesTask = transaction.SortAsync(
+            listKey,
+            sortType: SortType.Numeric,
+            by: "nosort",
+            get: properties);
+
+        if (deleteListKey)
+        {
+            _ = transaction.KeyDeleteAsync(listKey);
+        }
+
+        var action = async () =>
+        {
+            var values = await valuesTask;
+
+            var entities = DeserializeSet(values);
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                var entity = entities[i];
+                var entityKey = GetRecordId(entity).ToString();
+                if (!savedObjects.TryAdd(entityKey, entity!))
+                {
+                    entities[i] = (TEntity)savedObjects[entityKey];
+                }
+            }
+
+            return entities;
+        };
+
+        return action;
+    }
+
+    //TODO: abstract the above away, so it passes the key name of a list used to look up entities
+    //On a given entity, its metadata can be used to find its lookup list, which can be passed to the same method
+    //Allows for recursive record retrieval
+    private async Task PopulateLookups(TEntity entity, IDatabase database, ConcurrentDictionary<string, object> savedObjects)
+    {
+        foreach (var lookup in _lookupSingles)
+        {
+            var keyProperties = lookup.Item2.IdProperties
+                .Select(e => typeof(TEntity).GetProperty(e, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                .Select(e => e!.GetValue(entity)!);
+
+            var key = GetRecordId(keyProperties);
+        }
+
+        foreach (var lookup in _lookupSets)
+        {
+            var lookupType = lookup.Item1.PropertyType.GenericTypeArguments[0];
+
+            var method = typeof(RedisHelper<TEntity>).GetMethod(nameof(PopulateLookupSet), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(lookupType);
+
+            var methodTask = (Task)method.Invoke(this, new object?[] { entity, lookup.Item1, database, savedObjects })!;
+            await methodTask;
+        }
+    }
+
+    //private async Task PopulateLookupSingle<TSubEntity>(TEntity entity, ConcurrentDictionary<string, object> savedObjects)
+    //{
+
+    //}
+
+    private async Task PopulateLookupSet<TSubEntity>(TEntity entity, PropertyInfo lookupProperty, IDatabase database, ConcurrentDictionary<string, object> savedObjects)
+        where TSubEntity : new()
+    {
+        var helper = RedisHelperCache.For<TSubEntity>();
+
+        var lookupKey = GetEntitySetLookupSetKey(lookupProperty);
+        var action = helper.GetListAction(lookupKey: lookupKey, savedObjects: savedObjects);
+
+        var lookupSet = await action(database);
+        lookupProperty.SetValue(entity, lookupSet);
     }
     #endregion Actions
 }
