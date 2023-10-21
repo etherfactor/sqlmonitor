@@ -7,7 +7,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity.</typeparam>
 public struct EntitySetRecordCacheKey<TEntity> : ICacheKey
-    where TEntity : new()
+    where TEntity : class, new()
 {
     /// <inheritdoc/>
     public readonly string KeyName { get; }

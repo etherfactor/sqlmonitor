@@ -8,7 +8,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
 internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
-    where TEntity : new()
+    where TEntity : class, new()
 {
     private readonly IDatabase _database;
     private readonly EntityCacheKey<TEntity> _key;

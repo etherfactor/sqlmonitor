@@ -13,7 +13,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
 internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
-    where TEntity : new()
+    where TEntity : class, new()
 {
     private static readonly IDictionary<string, TEntity> _entities = new Dictionary<string, TEntity>();
 

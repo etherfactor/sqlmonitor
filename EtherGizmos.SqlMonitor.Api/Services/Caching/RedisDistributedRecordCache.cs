@@ -42,14 +42,14 @@ internal class RedisDistributedRecordCache : IDistributedRecordCache
 
     /// <inheritdoc/>
     public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
-        where TEntity : new()
+        where TEntity : class, new()
     {
         return new RedisCacheEntity<TEntity>(_multiplexer.GetDatabase(), key);
     }
 
     /// <inheritdoc/>
     public ICacheEntitySet<TEntity> EntitySet<TEntity>()
-        where TEntity : new()
+        where TEntity : class, new()
     {
         return new RedisCacheEntitySet<TEntity>(_multiplexer.GetDatabase());
     }

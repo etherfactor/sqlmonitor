@@ -24,13 +24,15 @@ internal class InMemoryRecordCache : IDistributedRecordCache
     }
 
     /// <inheritdoc/>
-    public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key) where TEntity : new()
+    public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
+        where TEntity : class, new()
     {
         return new InMemoryCacheEntity<TEntity>(_serviceProvider);
     }
 
     /// <inheritdoc/>
-    public ICacheEntitySet<TEntity> EntitySet<TEntity>() where TEntity : new()
+    public ICacheEntitySet<TEntity> EntitySet<TEntity>()
+        where TEntity : class, new()
     {
         return new InMemoryCacheEntitySet<TEntity>(_serviceProvider);
     }

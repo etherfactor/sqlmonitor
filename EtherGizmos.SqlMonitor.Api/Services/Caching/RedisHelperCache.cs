@@ -13,7 +13,7 @@ public static class RedisHelperCache
     /// <typeparam name="TEntity">The entity type.</typeparam>
     /// <returns>The <see cref="RedisHelper{TEntity}"/>.</returns>
     public static RedisHelper<TEntity> For<TEntity>()
-        where TEntity : new()
+        where TEntity : class, new()
     {
         if (!_helpers.ContainsKey(typeof(TEntity)))
         {
