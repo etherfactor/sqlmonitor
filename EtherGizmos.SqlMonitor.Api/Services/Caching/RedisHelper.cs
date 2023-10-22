@@ -343,8 +343,13 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="data">The data to deserialize.</param>
     /// <returns>The deserialized entity.</returns>
-    private TEntity Deserialize(TEntity entity, RedisValue[] data)
+    private TEntity Deserialize(IDatabase database, RedisValue[] data, ConcurrentDictionary<string, object> savedObjects)
     {
+        var interceptor = GetInterceptor(database, savedObjects);
+        var entity = RedisHelperProxy.Generator.CreateClassProxy<TEntity>(interceptor);
+
+        var values = new Dictionary<string, object?>();
+
         var keyData = data[0].ToString();
         var keyRawValues = keyData.Split(IdSeparator);
 
@@ -354,7 +359,10 @@ public class RedisHelper<TEntity>
             var key = tuple.Item1;
             var keyValue = JsonSerializer.Deserialize(Decode(keyRawValues[index]), key.PropertyType);
             if (key.CanWrite)
+            {
                 key.SetValue(entity, keyValue);
+                values.Add(key.Name, keyValue);
+            }
 
             index++;
         }
@@ -365,10 +373,15 @@ public class RedisHelper<TEntity>
             var property = tuple.Item1;
             var propertyValue = JsonSerializer.Deserialize(data[index].ToString(), property.PropertyType);
             if (property.CanWrite)
+            {
                 property.SetValue(entity, propertyValue);
+                values.Add(property.Name, propertyValue);
+            }
 
             index++;
         }
+
+        interceptor.SetInitialValues(values);
 
         return entity;
     }
@@ -385,9 +398,7 @@ public class RedisHelper<TEntity>
 
         foreach (var chunk in chunks)
         {
-            var entity = RedisHelperProxy.Generator.CreateClassProxy<TEntity>(GetInterceptor(database, savedObjects));
-
-            entity = Deserialize(entity, chunk);
+            var entity = Deserialize(database, chunk, savedObjects);
             entities.Add(entity);
         }
 
@@ -439,19 +450,28 @@ public class RedisHelper<TEntity>
     /// <returns>The read action.</returns>
     public Func<IDatabase, Task<TEntity?>> GetReadAction(EntityCacheKey<TEntity> key, ConcurrentDictionary<string, object>? savedObjects = null)
     {
+        var entityKey = GetEntityKey(key);
+        var action = GetReadAction(entityKey, savedObjects);
+        return action;
+    }
+
+    /// <summary>
+    /// Constructs an action to read an entity from Redis.
+    /// </summary>
+    /// <param name="key">The key of the entity being read.</param>
+    /// <returns>The read action.</returns>
+    public Func<IDatabase, Task<TEntity?>> GetReadAction(RedisKey key, ConcurrentDictionary<string, object>? savedObjects = null)
+    {
         savedObjects ??= new ConcurrentDictionary<string, object>();
 
-        var entityKey = GetEntityKey(key);
         var properties = GetProperties();
 
         var action = async (IDatabase database) =>
         {
-            var values = await database.HashGetAsync(entityKey, properties);
+            var values = await database.HashGetAsync(key, properties);
             if (values.Any(e => e.ToString() is not null))
             {
-                var entity = RedisHelperProxy.Generator.CreateClassProxy<TEntity>(GetInterceptor(database, savedObjects));
-
-                entity = Deserialize(entity, values);
+                var entity = Deserialize(database, values, savedObjects);
                 return entity;
             }
 
@@ -753,60 +773,16 @@ public class RedisHelper<TEntity>
         lookupProperty.SetValue(entity, lookupSet);
     }
 
-    private RedisLazyLoadingInterceptor GetInterceptor(IDatabase database, ConcurrentDictionary<string, object> savedObjects)
+    private RedisLazyLoadingInterceptor<TEntity> GetInterceptor(IDatabase database, ConcurrentDictionary<string, object> savedObjects)
     {
-        var interceptor = new RedisLazyLoadingInterceptor(database);
-
-        foreach (var lookup in _lookupSingles)
-        {
-            var propertyName = lookup.Item1.Name;
-            var lookupType = lookup.Item1.PropertyType;
-            var lookupProperties = lookup.Item2.IdProperties;
-
-            var helper = typeof(RedisHelper<TEntity>)
-                .GetMethod(nameof(BuildSingleInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
-                .MakeGenericMethod(lookupType);
-
-            helper.Invoke(this, new object[] { interceptor, propertyName, lookupProperties, savedObjects });
-        }
-
-        foreach (var lookup in _lookupSets)
-        {
-            var propertyName = lookup.Item1.Name;
-            var lookupType = lookup.Item1.PropertyType.GenericTypeArguments[0];
-            var lookupKey = lookup.Item2.Name;
-
-            var helper = typeof(RedisHelper<TEntity>)
-                .GetMethod(nameof(BuildSetInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
-                .MakeGenericMethod(lookupType);
-
-            helper.Invoke(this, new object[] { interceptor, propertyName, lookupKey, savedObjects });
-        }
+        var interceptor = new RedisLazyLoadingInterceptor<TEntity>(database, savedObjects, _lookupSingles, _lookupSets);
 
         return interceptor;
     }
-
-    private void BuildSingleInterceptor<TSubEntity>(RedisLazyLoadingInterceptor interceptor, string propertyName, string[] lookupKeys, ConcurrentDictionary<string, object> savedObjects)
-        where TSubEntity : class, new()
-    {
-        var helper = RedisHelperCache.For<TSubEntity>();
-        var tempEntity = new TSubEntity();
-
-        var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{helper._tableKey}:${lookupKey.ToSnakeCase()}");
-        var action = helper.GetReadAction(key: entityKey, savedObjects: savedObjects);
-
-        interceptor.SetInterceptor(propertyName, action);
-    }
-
-    private void BuildSetInterceptor<TSubEntity>(RedisLazyLoadingInterceptor interceptor, string propertyName, string lookupKey, ConcurrentDictionary<string, object> savedObjects)
-        where TSubEntity : class, new()
-    {
-        var helper = RedisHelperCache.For<TSubEntity>();
-
-        var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{helper._tableKey}:${lookupKey.ToSnakeCase()}");
-        var action = helper.GetListAction(lookupKey: useLookupKey, savedObjects: savedObjects);
-
-        interceptor.SetListInterceptor(propertyName, action);
-    }
     #endregion Actions
+
+    public string GetTableName()
+    {
+        return _tableKey;
+    }
 }
