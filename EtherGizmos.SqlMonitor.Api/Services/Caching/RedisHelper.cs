@@ -242,15 +242,17 @@ public class RedisHelper<TEntity>
 
                 var lookupTableKey = lookup.PropertyType.GetCustomAttribute<TableAttribute>()!.Name;
 
-                var redisKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{lookupTableKey}:${lookupIndexAttribute.Name.ToSnakeCase()}");
-                var redisValue = new RedisValue(string.Join(IdSeparator, lookupValues));
+                var redisKeyValue = new RedisValue(string.Join(IdSeparator, lookupValues));
+                var redisKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{lookupTableKey}:{redisKeyValue}:${lookupIndexAttribute.Name.ToSnakeCase()}");
+
+                var redisValue = GetRecordId(entity);
 
                 return (redisKey, redisValue);
             }
         }
         else if (lookupAttribute.Record is not null)
         {
-
+            throw new NotImplementedException();
         }
 
         return null;

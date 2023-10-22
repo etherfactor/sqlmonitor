@@ -46,13 +46,13 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
             var lookupType = lookup.Item1.PropertyType;
             var lookupProperties = lookup.Item2.IdProperties;
 
-            var lookupKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e).Item1);
+            var foreignKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e).Item1);
 
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSingleInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(lookupType);
 
-            method.Invoke(this, new object[] { propertyName, lookupKeys, savedObjects });
+            method.Invoke(this, new object[] { propertyName, foreignKeys, savedObjects });
         }
 
         foreach (var lookup in lookupSets)
@@ -61,15 +61,17 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
             var lookupType = lookup.Item1.PropertyType.GenericTypeArguments[0];
             var lookupKey = lookup.Item2.Name;
 
+            var primaryKeys = keys.Select(e => e.Item1);
+
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSetInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(lookupType);
 
-            method.Invoke(this, new object[] { propertyName, lookupKey, savedObjects });
+            method.Invoke(this, new object[] { propertyName, primaryKeys, lookupKey, savedObjects });
         }
     }
 
-    private void BuildSingleInterceptor<TSubEntity>(string propertyName, IEnumerable<PropertyInfo> lookupKeys, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildSingleInterceptor<TSubEntity>(string propertyName, IEnumerable<PropertyInfo> foreignKeys, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
         var helper = RedisHelperCache.For<TEntity>();
@@ -81,7 +83,7 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         var action = async () =>
         {
             var tempEntity = new TSubEntity();
-            foreach (var lookupKey in lookupKeys)
+            foreach (var lookupKey in foreignKeys)
             {
                 var lookupValue = _defaultValues[lookupKey.Name];
                 lookupKey.SetValue(tempEntity, lookupValue);
@@ -99,32 +101,19 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         AddSingleInterceptor(propertyName, action);
     }
 
-    private void BuildSetInterceptor<TSubEntity>(string propertyName, string lookupKey, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildSetInterceptor<TSubEntity>(string propertyName, IEnumerable<PropertyInfo> primaryKeys, string lookupKey, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
         var helper = RedisHelperCache.For<TEntity>();
         var subHelper = RedisHelperCache.For<TSubEntity>();
 
-        var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:${lookupKey.ToSnakeCase()}");
-
         var action = async () =>
         {
+            var primaryKey = helper.GetRecordId(primaryKeys.Select(e => _defaultValues[e.Name]!));
+            var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookupKey.ToSnakeCase()}");
+
             var transaction = _database.CreateTransaction();
-
-            var tempKey = helper.GetTempKey();
-
-            var useLookupValue = helper.GetRecordId(_keys.Select(e => _defaultValues[e.Item1.Name.ToString()]!));
-            var test = transaction.SortedSetRangeAndStoreAsync(
-                useLookupKey,
-                tempKey,
-                useLookupValue,
-                useLookupValue,
-                exclude: Exclude.None,
-                sortedSetOrder: SortedSetOrder.ByLex);
-
-            var subAction = subHelper.AppendListAction(_database, transaction, lookupKey: tempKey, savedObjects: savedObjects);
-
-            //_ = transaction.KeyDeleteAsync(tempKey);
+            var subAction = subHelper.AppendListAction(_database, transaction, lookupKey: useLookupKey, savedObjects: savedObjects);
 
             await transaction.ExecuteAsync();
             return await subAction();
