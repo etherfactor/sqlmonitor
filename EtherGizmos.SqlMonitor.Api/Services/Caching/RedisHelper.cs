@@ -149,7 +149,7 @@ public class RedisHelper<TEntity>
         return GetRecordId(_keys.Select(e => e.Item1.GetValue(entity)!));
     }
 
-    private RedisValue GetRecordId(IEnumerable<object> keys)
+    internal RedisValue GetRecordId(IEnumerable<object> keys)
     {
         var raw = keys.Select(e => JsonSerializer.Serialize(e))
             .Select(e => Encode(e));
@@ -260,7 +260,7 @@ public class RedisHelper<TEntity>
     /// Generate a temporary key.
     /// </summary>
     /// <returns>The temporary key.</returns>
-    private RedisKey GetTempKey()
+    internal RedisKey GetTempKey()
     {
         var guid = Guid.NewGuid();
         var tempKey = new RedisKey($"{Constants.Cache.SchemaName}:$$temp:{guid}");
@@ -413,22 +413,12 @@ public class RedisHelper<TEntity>
     /// <param name="key">The key of the entity being set.</param>
     /// <param name="entity">The entity to set.</param>
     /// <returns>The set action.</returns>
-    public Func<IDatabase, Func<Task>> GetSetActionBuilder(EntityCacheKey<TEntity> key, TEntity entity, ITransaction? transaction = null)
+    public void AppendSetAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key, TEntity entity)
     {
         var entityKey = GetEntityKey(key);
         var recordData = Serialize(entity);
 
-        var action = (IDatabase database) =>
-        {
-            transaction ??= database.CreateTransaction();
-
-            return async () =>
-            {
-                await database.HashSetAsync(entityKey, recordData);
-            };
-        };
-
-        return action;
+        _ = transaction.HashSetAsync(entityKey, recordData);
     }
 
     /// <summary>
@@ -436,15 +426,22 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="key">The key of the entity being deleted.</param>
     /// <returns>The delete action.</returns>
-    public Func<IDatabase, Task> GetDeleteAction(EntityCacheKey<TEntity> key)
+    public void AppendDeleteAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key)
     {
         var entityKey = GetEntityKey(key);
 
-        var action = async (IDatabase database) =>
-        {
-            await database.KeyDeleteAsync(entityKey);
-        };
+        _ = transaction.KeyDeleteAsync(entityKey);
+    }
 
+    /// <summary>
+    /// Constructs an action to read an entity from Redis.
+    /// </summary>
+    /// <param name="key">The key of the entity being read.</param>
+    /// <returns>The read action.</returns>
+    public Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key, ConcurrentDictionary<string, object>? savedObjects = null)
+    {
+        var entityKey = GetEntityKey(key);
+        var action = AppendReadAction(database, transaction, entityKey, savedObjects);
         return action;
     }
 
@@ -453,40 +450,25 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="key">The key of the entity being read.</param>
     /// <returns>The read action.</returns>
-    public Func<IDatabase, Func<Task<TEntity?>>> GetReadActionBuilder(EntityCacheKey<TEntity> key, ConcurrentDictionary<string, object>? savedObjects = null)
-    {
-        var entityKey = GetEntityKey(key);
-        var action = GetReadActionBuilder(entityKey, savedObjects);
-        return action;
-    }
-
-    /// <summary>
-    /// Constructs an action to read an entity from Redis.
-    /// </summary>
-    /// <param name="key">The key of the entity being read.</param>
-    /// <returns>The read action.</returns>
-    public Func<IDatabase, Func<Task<TEntity?>>> GetReadActionBuilder(RedisKey key, ConcurrentDictionary<string, object>? savedObjects = null)
+    internal Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, RedisKey key, ConcurrentDictionary<string, object>? savedObjects = null)
     {
         savedObjects ??= new ConcurrentDictionary<string, object>();
 
         var properties = GetProperties();
 
-        var action = (IDatabase database) =>
+        var valuesTask = transaction.HashGetAsync(key, properties);
+
+        return async () =>
         {
-            return async () =>
+            var values = await valuesTask;
+            if (values.Any(e => e.ToString() is not null))
             {
-                var values = await database.HashGetAsync(key, properties);
-                if (values.Any(e => e.ToString() is not null))
-                {
-                    var entity = Deserialize(database, values, savedObjects);
-                    return entity;
-                }
+                var entity = Deserialize(database, values, savedObjects);
+                return entity;
+            }
 
-                return default;
-            };
+            return default;
         };
-
-        return action;
     }
 
     /// <summary>
@@ -494,21 +476,14 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="entity">The entity being added.</param>
     /// <returns>The add action.</returns>
-    public Func<IDatabase, Task> GetAddAction(TEntity entity)
+    public void AppendAddAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object>? savedObjects = null)
     {
-        var action = async (IDatabase database) =>
-        {
-            var transaction = database.CreateTransaction();
+        savedObjects ??= new ConcurrentDictionary<string, object>();
 
-            BuildAddAction(entity, transaction, new ConcurrentDictionary<string, object>());
-
-            await transaction.ExecuteAsync();
-        };
-
-        return action;
+        BuildAddAction(database, transaction, entity, savedObjects);
     }
 
-    private void BuildAddAction(TEntity entity, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildAddAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object> savedObjects)
     {
         var setKey = GetSetEntityKey(entity);
         var recordData = Serialize(entity);
@@ -544,7 +519,7 @@ public class RedisHelper<TEntity>
                     .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod(lookupType);
 
-                helper.Invoke(this, new object[] { lookupValue, transaction, savedObjects });
+                helper.Invoke(this, new object[] { database, transaction, lookupValue, savedObjects });
             }
         }
 
@@ -560,13 +535,13 @@ public class RedisHelper<TEntity>
 
                 foreach (var value in lookupValue)
                 {
-                    helper.Invoke(this, new object[] { value, transaction, savedObjects });
+                    helper.Invoke(this, new object[] { database, transaction, value, savedObjects });
                 }
             }
         }
     }
 
-    private void BuildAddActionLookup<TSubEntity>(TSubEntity entity, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildAddActionLookup<TSubEntity>(IDatabase database, ITransaction transaction, TSubEntity entity, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
         var helper = RedisHelperCache.For<TSubEntity>();
@@ -576,55 +551,30 @@ public class RedisHelper<TEntity>
         //Only write the record to Redis if it wasn't written already
         if (savedObjects.TryAdd(entityKey.ToString(), entity!))
         {
-            helper.BuildAddAction(entity, transaction, savedObjects);
+            helper.BuildAddAction(database, transaction, entity, savedObjects);
         }
     }
-
-    //private void BuildAddActionLookupSet<TSubEntity>(IEnumerable<TSubEntity> entities, ITransaction transaction, ConcurrentDictionary<string, object> savedObjects)
-    //    where TSubEntity : new()
-    //{
-    //    var helper = RedisHelperCache.For<TSubEntity>();
-    //    foreach (var entity in entities)
-    //    {
-    //        var entityKey = helper.GetSetEntityKey(entity);
-
-    //        //Only write the record to Redis if it wasn't written already
-    //        if (savedObjects.TryAdd(entityKey.ToString(), entity!))
-    //        {
-    //            helper.BuildAddAction(entity, transaction, savedObjects);
-    //        }
-    //    }
-    //}
 
     /// <summary>
     /// Constructs an action to remove an entity from a set in Redis.
     /// </summary>
     /// <param name="entity">The entity being removed.</param>
     /// <returns>The remove action.</returns>
-    public Func<IDatabase, Task> GetRemoveAction(TEntity entity)
+    public void AppendRemoveAction(IDatabase database, ITransaction transaction, TEntity entity)
     {
         var setKey = GetSetEntityKey(entity);
-        var recordData = Serialize(entity);
 
         var primaryKey = GetEntitySetPrimaryKey();
         var id = GetRecordId(entity);
 
-        var action = async (IDatabase database) =>
+        _ = transaction.KeyDeleteAsync(setKey);
+        _ = transaction.SortedSetRemoveAsync(primaryKey, id);
+
+        foreach (var index in _indexes)
         {
-            var transaction = database.CreateTransaction();
-            _ = transaction.KeyDeleteAsync(setKey);
-            _ = transaction.SortedSetRemoveAsync(primaryKey, id);
-
-            foreach (var index in _indexes)
-            {
-                var indexKey = GetEntitySetIndexKey(index.Item1);
-                _ = transaction.SortedSetRemoveAsync(indexKey, id);
-            }
-
-            await transaction.ExecuteAsync();
-        };
-
-        return action;
+            var indexKey = GetEntitySetIndexKey(index.Item1);
+            _ = transaction.SortedSetRemoveAsync(indexKey, id);
+        }
     }
 
     /// <summary>
@@ -632,75 +582,67 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="filters">The filters to apply to the set.</param>
     /// <returns>The list action.</returns>
-    public Func<IDatabase, Func<Task<List<TEntity>>>> GetListActionBuilder(
+    public Func<Task<List<TEntity>>> AppendListAction(
+        IDatabase database,
+        ITransaction transaction,
         IEnumerable<ICacheEntitySetFilter<TEntity>>? filters = null,
         RedisKey? lookupKey = null,
-        ConcurrentDictionary<string, object>? savedObjects = null,
-        ITransaction? transaction = null)
+        ConcurrentDictionary<string, object>? savedObjects = null)
     {
         if (filters is not null && lookupKey is not null)
             throw new ArgumentException($"May only specify either {nameof(filters)} or {nameof(lookupKey)}");
 
         filters ??= Enumerable.Empty<ICacheEntitySetFilter<TEntity>>();
+        savedObjects ??= new ConcurrentDictionary<string, object>();
 
         var primaryKey = GetEntitySetPrimaryKey();
         var properties = GetProperties();
 
         var useKeyDelete = false;
-        var useKey = primaryKey;
+        var useKey = lookupKey ?? primaryKey;
 
-        var buildTransaction = (IDatabase database) =>
+        if (filters.Any())
         {
-            var thisSavedObjects = savedObjects
-                ?? new ConcurrentDictionary<string, object>();
-
-            transaction ??= database.CreateTransaction();
-
-            if (filters.Any())
+            var allTempKeys = new List<RedisKey>();
+            foreach (var filter in filters)
             {
-                var allTempKeys = new List<RedisKey>();
-                foreach (var filter in filters)
-                {
-                    var indexProperty = filter.GetProperty();
-                    var indexKey = GetEntitySetIndexKey(indexProperty);
+                var indexProperty = filter.GetProperty();
+                var indexKey = GetEntitySetIndexKey(indexProperty);
 
-                    var startScore = filter.GetStartScore();
-                    var endScore = filter.GetEndScore();
-                    var exclusivity =
-                        filter.GetStartInclusivity() && filter.GetEndInclusivity() ? Exclude.None
-                        : filter.GetStartInclusivity() ? Exclude.Stop
-                        : filter.GetEndInclusivity() ? Exclude.Start
-                        : Exclude.Both;
+                var startScore = filter.GetStartScore();
+                var endScore = filter.GetEndScore();
+                var exclusivity =
+                    filter.GetStartInclusivity() && filter.GetEndInclusivity() ? Exclude.None
+                    : filter.GetStartInclusivity() ? Exclude.Stop
+                    : filter.GetEndInclusivity() ? Exclude.Start
+                    : Exclude.Both;
 
-                    var tempKey = GetTempKey();
-                    allTempKeys.Add(tempKey);
+                var tempKey = GetTempKey();
+                allTempKeys.Add(tempKey);
 
-                    _ = transaction.SortedSetRangeAndStoreAsync(
-                        indexKey,
-                        tempKey,
-                        startScore,
-                        endScore,
-                        sortedSetOrder: SortedSetOrder.ByScore);
-                }
-
-                var finalTempKey = GetTempKey();
-                _ = transaction.SortedSetCombineAndStoreAsync(SetOperation.Intersect, finalTempKey, allTempKeys.ToArray());
-                _ = transaction.KeyDeleteAsync(allTempKeys.ToArray());
-
-                useKeyDelete = true;
-                useKey = finalTempKey;
+                _ = transaction.SortedSetRangeAndStoreAsync(
+                    indexKey,
+                    tempKey,
+                    startScore,
+                    endScore,
+                    exclude: exclusivity,
+                    sortedSetOrder: SortedSetOrder.ByScore);
             }
 
-            var entitiesTask = BuildListAction(database, transaction, useKey, useKeyDelete, thisSavedObjects);
+            var finalTempKey = GetTempKey();
+            _ = transaction.SortedSetCombineAndStoreAsync(SetOperation.Intersect, finalTempKey, allTempKeys.ToArray());
+            _ = transaction.KeyDeleteAsync(allTempKeys.ToArray());
 
-            return async () =>
-            {
-                await transaction.ExecuteAsync();
-                return await entitiesTask();
-            };
+            useKeyDelete = true;
+            useKey = finalTempKey;
+        }
+
+        var entitiesTask = BuildListAction(database, transaction, useKey, useKeyDelete, savedObjects);
+
+        return async () =>
+        {
+            return await entitiesTask();
         };
-
-        return buildTransaction;
     }
 
     private Func<Task<List<TEntity>>> BuildListAction(IDatabase database, ITransaction transaction, RedisKey listKey, bool deleteListKey, ConcurrentDictionary<string, object> savedObjects)
@@ -740,54 +682,9 @@ public class RedisHelper<TEntity>
         return action;
     }
 
-    //TODO: abstract the above away, so it passes the key name of a list used to look up entities
-    //On a given entity, its metadata can be used to find its lookup list, which can be passed to the same method
-    //Allows for recursive record retrieval
-    private async Task PopulateLookups(TEntity entity, IDatabase database, ConcurrentDictionary<string, object> savedObjects)
-    {
-        foreach (var lookup in _lookupSingles)
-        {
-            var keyProperties = lookup.Item2.IdProperties
-                .Select(e => typeof(TEntity).GetProperty(e, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                .Select(e => e!.GetValue(entity)!);
-
-            var key = GetRecordId(keyProperties);
-        }
-
-        foreach (var lookup in _lookupSets)
-        {
-            var lookupType = lookup.Item1.PropertyType.GenericTypeArguments[0];
-
-            var method = typeof(RedisHelper<TEntity>).GetMethod(nameof(PopulateLookupSet), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
-                .MakeGenericMethod(lookupType);
-
-            var methodTask = (Task)method.Invoke(this, new object?[] { entity, lookup.Item1, database, savedObjects })!;
-            await methodTask;
-        }
-    }
-
-    //private async Task PopulateLookupSingle<TSubEntity>(TEntity entity, ConcurrentDictionary<string, object> savedObjects)
-    //{
-
-    //}
-
-    private async Task PopulateLookupSet<TSubEntity>(TEntity entity, PropertyInfo lookupProperty, IDatabase database, ConcurrentDictionary<string, object> savedObjects)
-        where TSubEntity : class, new()
-    {
-        var helper = RedisHelperCache.For<TSubEntity>();
-
-        var lookupKey = GetEntitySetLookupSetKey(lookupProperty);
-        var builder = helper.GetListActionBuilder(lookupKey: lookupKey, savedObjects: savedObjects);
-
-        var action = builder(database);
-        var lookupSet = await action();
-
-        lookupProperty.SetValue(entity, lookupSet);
-    }
-
     private RedisLazyLoadingInterceptor<TEntity> GetInterceptor(IDatabase database, ConcurrentDictionary<string, object> savedObjects)
     {
-        var interceptor = new RedisLazyLoadingInterceptor<TEntity>(database, savedObjects, _lookupSingles, _lookupSets);
+        var interceptor = new RedisLazyLoadingInterceptor<TEntity>(database, savedObjects, _keys, _all, _lookupSingles, _lookupSets);
 
         return interceptor;
     }

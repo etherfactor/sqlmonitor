@@ -28,8 +28,11 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
             throw new ArgumentNullException(nameof(entity));
 
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetAddAction(entity);
-        await action(_database);
+
+        var transaction = _database.CreateTransaction();
+        serializer.AppendAddAction(_database, transaction, entity);
+
+        await transaction.ExecuteAsync();
     }
 
     /// <inheritdoc/>
@@ -39,17 +42,22 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
             throw new ArgumentNullException(nameof(entity));
 
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetRemoveAction(entity);
-        await action(_database);
+
+        var transaction = _database.CreateTransaction();
+        serializer.AppendRemoveAction(_database, transaction, entity);
+
+        await transaction.ExecuteAsync();
     }
 
     /// <inheritdoc/>
     public async Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var builder = serializer.GetListActionBuilder(Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
 
-        var action = builder(_database);
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendListAction(_database, transaction, filters: Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
+
+        await transaction.ExecuteAsync();
         return await action();
     }
 
@@ -67,9 +75,11 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     async Task<List<TEntity>> ICanList<TEntity>.ToListAsync(IEnumerable<ICacheEntitySetFilter<TEntity>> filters, CancellationToken cancellationToken)
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var builder = serializer.GetListActionBuilder(filters);
 
-        var action = builder(_database);
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendListAction(_database, transaction, filters);
+
+        await transaction.ExecuteAsync();
         return await action();
     }
 }
