@@ -47,8 +47,10 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     public async Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetListAction(Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
-        return await action(_database);
+        var builder = serializer.GetListActionBuilder(Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
+
+        var action = builder(_database);
+        return await action();
     }
 
     /// <inheritdoc/>
@@ -65,7 +67,9 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     async Task<List<TEntity>> ICanList<TEntity>.ToListAsync(IEnumerable<ICacheEntitySetFilter<TEntity>> filters, CancellationToken cancellationToken)
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetListAction(filters);
-        return await action(_database);
+        var builder = serializer.GetListActionBuilder(filters);
+
+        var action = builder(_database);
+        return await action();
     }
 }

@@ -12,8 +12,8 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
 {
     private readonly IDatabase _database;
     private readonly ConcurrentDictionary<string, object> _savedObjects;
-    private readonly Dictionary<string, Func<IDatabase, Task>> _interceptorSingles;
-    private readonly Dictionary<string, Func<IDatabase, Task>> _interceptorSets;
+    private readonly Dictionary<string, Func<Task>> _interceptorSingles;
+    private readonly Dictionary<string, Func<Task>> _interceptorSets;
     private readonly Dictionary<string, bool> _loadedProperties;
 
     private Dictionary<string, object?> _defaultValues;
@@ -23,8 +23,8 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         _database = database;
         _savedObjects = savedObjects;
         _defaultValues = new Dictionary<string, object?>();
-        _interceptorSingles = new Dictionary<string, Func<IDatabase, Task>>();
-        _interceptorSets = new Dictionary<string, Func<IDatabase, Task>>();
+        _interceptorSingles = new Dictionary<string, Func<Task>>();
+        _interceptorSets = new Dictionary<string, Func<Task>>();
         _loadedProperties = new Dictionary<string, bool>();
 
         var helper = RedisHelperCache.For<TEntity>();
@@ -68,8 +68,9 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         var subTableName = subHelper.GetTableName();
 
         var entityKey = subHelper.GetSetEntityKey(tempEntity);
-        var action = subHelper.GetReadAction(key: entityKey, savedObjects: savedObjects);
+        var builder = subHelper.GetReadActionBuilder(key: entityKey, savedObjects: savedObjects);
 
+        var action = builder(_database);
         AddSingleInterceptor(propertyName, action);
     }
 
@@ -80,8 +81,9 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         var subHelper = RedisHelperCache.For<TSubEntity>();
 
         var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper}:{helper}:${lookupKey.ToSnakeCase()}");
-        var action = helper.GetListAction(lookupKey: useLookupKey, savedObjects: savedObjects);
+        var builder = helper.GetListActionBuilder(lookupKey: useLookupKey, savedObjects: savedObjects);
 
+        var action = builder(_database);
         AddSetInterceptor(propertyName, action);
     }
 
@@ -90,13 +92,13 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         _defaultValues = values;
     }
 
-    public void AddSingleInterceptor<TData>(string propertyName, Func<IDatabase, Task<TData?>> action)
+    public void AddSingleInterceptor<TData>(string propertyName, Func<Task<TData?>> action)
         where TData : class, new()
     {
         _interceptorSingles.Add(propertyName, action);
     }
 
-    public void AddSetInterceptor<TData>(string propertyName, Func<IDatabase, Task<List<TData>>> action)
+    public void AddSetInterceptor<TData>(string propertyName, Func<Task<List<TData>>> action)
         where TData : class, new()
     {
         _interceptorSets.Add(propertyName, action);
@@ -157,8 +159,8 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     private void HandleGetSingle<TData>(IInvocation invocation, PropertyInfo property)
         where TData : class, new()
     {
-        var action = (Func<IDatabase, Task<TData?>>)_interceptorSingles[property.Name];
-        var actionTask = action(_database);
+        var action = (Func<Task<TData?>>)_interceptorSingles[property.Name];
+        var actionTask = action();
         
         actionTask.Wait();
         var data = actionTask.Result;
@@ -169,8 +171,8 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     private void HandleGetSet<TData>(IInvocation invocation, PropertyInfo property)
         where TData : class, new()
     {
-        var action = (Func<IDatabase, Task<List<TData>>>)_interceptorSets[property.Name];
-        var actionTask = action(_database);
+        var action = (Func<Task<List<TData>>>)_interceptorSets[property.Name];
+        var actionTask = action();
 
         actionTask.Wait();
         var data = actionTask.Result;

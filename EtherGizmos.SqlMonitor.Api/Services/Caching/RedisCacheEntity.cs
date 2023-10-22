@@ -31,8 +31,10 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     public async Task<TEntity?> GetAsync(CancellationToken cancellationToken = default)
     {
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetReadAction(_key);
-        return await action(_database);
+        var builder = serializer.GetReadActionBuilder(_key);
+
+        var action = builder(_database);
+        return await action();
     }
 
     /// <inheritdoc/>
@@ -42,7 +44,9 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
             throw new ArgumentNullException(nameof(entity));
 
         var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetSetAction(_key, entity);
-        await action(_database);
+        var builder = serializer.GetSetActionBuilder(_key, entity);
+
+        var action = builder(_database);
+        await action();
     }
 }
