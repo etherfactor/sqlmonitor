@@ -16,7 +16,7 @@ public class Query : Auditable
     public virtual Guid SystemId { get; set; }
 
     [Column("name")]
-    public virtual string Name { get; set; }
+    public virtual string Name { get; set; } = null!;
 
     [Column("description")]
     public virtual string? Description { get; set; }
@@ -29,7 +29,7 @@ public class Query : Auditable
     public virtual bool IsSoftDeleted { get; set; } = false;
 
     [Column("sql_text")]
-    public virtual string SqlText { get; set; }
+    public virtual string SqlText { get; set; } = null!;
 
     [Column("run_frequency")]
     public virtual TimeSpan RunFrequency { get; set; }
@@ -61,8 +61,6 @@ public class Query : Auditable
     /// </summary>
     public Query()
     {
-        Name = null!;
-        SqlText = null!;
     }
 
     public Task EnsureValid(IQueryable<Query> records)

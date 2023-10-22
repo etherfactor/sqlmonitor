@@ -53,6 +53,11 @@ public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
         foreach (var queryToRun in queriesToRun)
         {
             allMetrics.Add(queryToRun.Metrics);
+            foreach (var queryMetric in queryToRun.Metrics)
+            {
+                _ = queryMetric.Metric;
+                _ = queryMetric.Query;
+            }
         }
 
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();

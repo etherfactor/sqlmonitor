@@ -19,6 +19,7 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     private readonly Dictionary<string, Func<Task>> _interceptorSets;
     private readonly Dictionary<string, bool> _loadedProperties;
 
+    private bool _enabled;
     private Dictionary<string, object?> _defaultValues;
 
     public RedisLazyLoadingInterceptor(
@@ -33,10 +34,12 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         _savedObjects = savedObjects;
         _keys = keys;
         _all = all;
-        _defaultValues = new Dictionary<string, object?>();
         _interceptorSingles = new Dictionary<string, Func<Task>>();
         _interceptorSets = new Dictionary<string, Func<Task>>();
         _loadedProperties = new Dictionary<string, bool>();
+
+        _enabled = false;
+        _defaultValues = new Dictionary<string, object?>();
 
         var helper = RedisHelperCache.For<TEntity>();
 
@@ -82,6 +85,7 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
 
         var action = async () =>
         {
+            //TODO: Find a better way of passing column data, as TSubEntity needs its ids for lookup, but we only have TEntity ids
             var tempEntity = new TSubEntity();
             foreach (var lookupKey in foreignKeys)
             {
@@ -122,7 +126,12 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         AddSetInterceptor(propertyName, action);
     }
 
-    public void SetInitialValues(Dictionary<string, object?> values)
+    internal void Enable()
+    {
+        _enabled = true;
+    }
+
+    internal void SetInitialValues(Dictionary<string, object?> values)
     {
         _defaultValues = values;
     }
@@ -141,15 +150,18 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
 
     public void Intercept(IInvocation invocation)
     {
-        var methodName = invocation.Method.Name;
+        if (_enabled)
+        {
+            var methodName = invocation.Method.Name;
 
-        if (methodName.StartsWith("get_"))
-        {
-            HandleGet(invocation);
-        }
-        else if (methodName.StartsWith("set_"))
-        {
-            HandleSet(invocation);
+            if (methodName.StartsWith("get_"))
+            {
+                HandleGet(invocation);
+            }
+            else if (methodName.StartsWith("set_"))
+            {
+                HandleSet(invocation);
+            }
         }
 
         invocation.Proceed();

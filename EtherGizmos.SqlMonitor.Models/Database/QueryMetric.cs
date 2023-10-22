@@ -14,17 +14,17 @@ public class QueryMetric : Auditable
 
     [Lookup(nameof(QueryId),
         List = nameof(Query.Metrics))]
-    public virtual Query Query { get; set; }
+    public virtual Query Query { get; set; } = null!;
 
     [Column("metric_id")]
     [Key]
     public virtual Guid MetricId { get; set; }
 
     [Lookup(nameof(MetricId))]
-    public virtual Metric Metric { get; set; }
+    public virtual Metric Metric { get; set; } = null!;
 
     [Column("value_expression")]
-    public virtual string ValueExpression { get; set; }
+    public virtual string ValueExpression { get; set; } = null!;
 
     [LookupIndex("severities")]
     public virtual List<QueryMetricSeverity> Severities { get; set; } = new List<QueryMetricSeverity>();
@@ -34,8 +34,5 @@ public class QueryMetric : Auditable
     /// </summary>
     public QueryMetric()
     {
-        Query = null!;
-        Metric = null!;
-        ValueExpression = null!;
     }
 }

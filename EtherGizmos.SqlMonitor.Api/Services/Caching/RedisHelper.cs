@@ -384,6 +384,7 @@ public class RedisHelper<TEntity>
         }
 
         interceptor.SetInitialValues(values);
+        interceptor.Enable();
 
         return entity;
     }
