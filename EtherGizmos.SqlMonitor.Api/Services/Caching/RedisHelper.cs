@@ -71,7 +71,7 @@ public class RedisHelper<TEntity>
 
         //While properties do not; keys do not need to be duplicated where properties are stored
         _properties = sortedProperties
-            .Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is null)
+            //.Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is null)
             .Where(e => !e.Property.PropertyType.IsComplexType())
             .ToList();
 
@@ -128,6 +128,8 @@ public class RedisHelper<TEntity>
     #endregion Validation
 
     #region Keys & Values
+    internal IEnumerable<(PropertyInfo, ColumnAttribute)> GetKeyProperties() => _keys;
+
     /// <summary>
     /// Constructs the Redis key for a given entity.
     /// </summary>
@@ -270,13 +272,26 @@ public class RedisHelper<TEntity>
     }
 
     /// <summary>
-    /// Constructs the Redis properties for the entity.
+    /// Constructs the Redis properties for reading the entity.
     /// </summary>
     /// <returns>The Redis properties.</returns>
-    private RedisValue[] GetProperties()
+    private RedisValue[] GetReadProperties()
     {
-        var propertyNames = "#".Yield()
-            .Concat(_properties.Select(e => $"{Constants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.Item1.Name.ToSnakeCase()}"))
+        var propertyNames = _properties.Select(e => e.Item1.Name.ToSnakeCase())
+            .Select(e => new RedisValue(e))
+            .ToArray();
+
+        return propertyNames;
+    }
+
+    /// <summary>
+    /// Constructs the Redis properties for listing the entity.
+    /// </summary>
+    /// <returns>The Redis properties.</returns>
+    private RedisValue[] GetListProperties()
+    {
+        var propertyNames = _properties
+            .Select(e => $"{Constants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.Item1.Name.ToSnakeCase()}")
             .Select(e => new RedisValue(e))
             .ToArray();
 
@@ -355,21 +370,21 @@ public class RedisHelper<TEntity>
         var keyData = data[0].ToString();
         var keyRawValues = keyData.Split(IdSeparator);
 
+        //int index = 0;
+        //foreach (var tuple in _keys)
+        //{
+        //    var key = tuple.Item1;
+        //    var keyValue = JsonSerializer.Deserialize(Decode(keyRawValues[index]), key.PropertyType);
+        //    if (key.CanWrite)
+        //    {
+        //        key.SetValue(entity, keyValue);
+        //        values.Add(key.Name, keyValue);
+        //    }
+
+        //    index++;
+        //}
+
         int index = 0;
-        foreach (var tuple in _keys)
-        {
-            var key = tuple.Item1;
-            var keyValue = JsonSerializer.Deserialize(Decode(keyRawValues[index]), key.PropertyType);
-            if (key.CanWrite)
-            {
-                key.SetValue(entity, keyValue);
-                values.Add(key.Name, keyValue);
-            }
-
-            index++;
-        }
-
-        index = 1;
         foreach (var tuple in _properties)
         {
             var property = tuple.Item1;
@@ -397,7 +412,7 @@ public class RedisHelper<TEntity>
     private List<TEntity> DeserializeSet(IDatabase database, RedisValue[] data, ConcurrentDictionary<string, object> savedObjects)
     {
         var entities = new List<TEntity>();
-        var chunks = data.Chunk(_properties.Count() + 1);
+        var chunks = data.Chunk(_properties.Count());
 
         foreach (var chunk in chunks)
         {
@@ -457,7 +472,7 @@ public class RedisHelper<TEntity>
     {
         savedObjects ??= new ConcurrentDictionary<string, object>();
 
-        var properties = GetProperties();
+        var properties = GetReadProperties();
 
         var valuesTask = transaction.HashGetAsync(key, properties);
 
@@ -599,7 +614,7 @@ public class RedisHelper<TEntity>
         savedObjects ??= new ConcurrentDictionary<string, object>();
 
         var primaryKey = GetEntitySetPrimaryKey();
-        var properties = GetProperties();
+        var properties = GetListProperties();
 
         var useKeyDelete = false;
         var useKey = lookupKey ?? primaryKey;
@@ -650,7 +665,7 @@ public class RedisHelper<TEntity>
 
     private Func<Task<List<TEntity>>> BuildListAction(IDatabase database, ITransaction transaction, RedisKey listKey, bool deleteListKey, ConcurrentDictionary<string, object> savedObjects)
     {
-        var properties = GetProperties();
+        var properties = GetListProperties();
 
         var valuesTask = transaction.SortAsync(
             listKey,

@@ -49,13 +49,13 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
             var lookupType = lookup.Item1.PropertyType;
             var lookupProperties = lookup.Item2.IdProperties;
 
-            var foreignKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e.ForeignKey).Item1);
+            //var foreignKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e.ForeignKey).Item1);
 
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSingleInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(lookupType);
 
-            method.Invoke(this, new object[] { propertyName, foreignKeys, savedObjects });
+            method.Invoke(this, new object[] { propertyName, lookupProperties, savedObjects });
         }
 
         foreach (var lookup in lookupSets)
@@ -74,11 +74,13 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         }
     }
 
-    private void BuildSingleInterceptor<TSubEntity>(string propertyName, IEnumerable<PropertyInfo> foreignKeys, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildSingleInterceptor<TSubEntity>(string propertyName, IEnumerable<(string ForeignKey, string PrimaryKey)> foreignKeys, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
         var helper = RedisHelperCache.For<TEntity>();
         var subHelper = RedisHelperCache.For<TSubEntity>();
+
+        var keyProperties = subHelper.GetKeyProperties();
 
         var tableName = helper.GetTableName();
         var subTableName = subHelper.GetTableName();
@@ -87,10 +89,14 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         {
             //TODO: Find a better way of passing column data, as TSubEntity needs its ids for lookup, but we only have TEntity ids
             var tempEntity = new TSubEntity();
-            foreach (var lookupKey in foreignKeys)
+            foreach (var keyPropertyData in keyProperties)
             {
-                var lookupValue = _defaultValues[lookupKey.Name];
-                lookupKey.SetValue(tempEntity, lookupValue);
+                var keyProperty = keyPropertyData.Item1;
+
+                var foreignKey = foreignKeys.Single(e => e.PrimaryKey == keyProperty.Name).ForeignKey;
+                var useValue = _defaultValues[foreignKey];
+
+                keyProperty.SetValue(tempEntity, useValue);
             }
 
             var entityKey = subHelper.GetSetEntityKey(tempEntity);
