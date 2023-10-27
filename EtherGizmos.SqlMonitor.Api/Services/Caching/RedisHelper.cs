@@ -229,7 +229,7 @@ public class RedisHelper<TEntity>
                 $"but {lookup.PropertyType.Name} does not specify a {nameof(LookupIndexAttribute)}.");
 
             var lookupProperties = lookupAttribute.IdProperties
-                .Select(e => _all.Single(p => p.Item1.Name == e))
+                .Select(e => _all.Single(p => p.Item1.Name == e.ForeignKey))
                 .OrderBy(e => e.Item2.Name);
 
             var maybeLookupValues = lookupProperties

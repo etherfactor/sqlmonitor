@@ -12,7 +12,7 @@ public class QueryMetric : Auditable
     [Key]
     public virtual Guid QueryId { get; set; }
 
-    [Lookup(nameof(QueryId),
+    [Lookup(nameof(QueryId), nameof(Query.Id),
         List = nameof(Query.Metrics))]
     public virtual Query Query { get; set; } = null!;
 
@@ -20,7 +20,7 @@ public class QueryMetric : Auditable
     [Key]
     public virtual Guid MetricId { get; set; }
 
-    [Lookup(nameof(MetricId))]
+    [Lookup(nameof(MetricId), nameof(Metric.Id))]
     public virtual Metric Metric { get; set; } = null!;
 
     [Column("value_expression")]

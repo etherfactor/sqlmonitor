@@ -49,7 +49,7 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
             var lookupType = lookup.Item1.PropertyType;
             var lookupProperties = lookup.Item2.IdProperties;
 
-            var foreignKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e).Item1);
+            var foreignKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e.ForeignKey).Item1);
 
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSingleInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
