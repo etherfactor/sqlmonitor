@@ -22,7 +22,7 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     /// <inheritdoc/>
     public async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         serializer.AppendDeleteAction(_database, transaction, _key);
@@ -33,7 +33,7 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     /// <inheritdoc/>
     public async Task<TEntity?> GetAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         var action = serializer.AppendReadAction(_database, transaction, _key);
@@ -48,7 +48,7 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         serializer.AppendSetAction(_database, transaction, _key, entity);

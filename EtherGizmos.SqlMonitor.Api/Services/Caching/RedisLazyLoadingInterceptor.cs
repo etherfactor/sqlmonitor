@@ -1,5 +1,6 @@
 ﻿using Castle.DynamicProxy;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Annotations;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
@@ -11,10 +12,10 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     where TEntity : class, new()
 {
+    private readonly IRedisHelperFactory _factory;
+
     private readonly IDatabase _database;
     private readonly ConcurrentDictionary<string, object> _savedObjects;
-    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _keys;
-    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _all;
     private readonly Dictionary<string, Func<Task>> _interceptorSingles;
     private readonly Dictionary<string, Func<Task>> _interceptorSets;
     private readonly Dictionary<string, bool> _loadedProperties;
@@ -23,17 +24,14 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     private Dictionary<string, object?> _defaultValues;
 
     public RedisLazyLoadingInterceptor(
+        IRedisHelperFactory factory,
         IDatabase database,
-        ConcurrentDictionary<string, object> savedObjects,
-        IEnumerable<(PropertyInfo, ColumnAttribute)> keys,
-        IEnumerable<(PropertyInfo, ColumnAttribute)> all,
-        IEnumerable<(PropertyInfo, LookupAttribute)> lookupSingles,
-        IEnumerable<(PropertyInfo, LookupIndexAttribute)> lookupSets)
+        ConcurrentDictionary<string, object> savedObjects)
     {
+        _factory = factory;
+
         _database = database;
         _savedObjects = savedObjects;
-        _keys = keys;
-        _all = all;
         _interceptorSingles = new Dictionary<string, Func<Task>>();
         _interceptorSets = new Dictionary<string, Func<Task>>();
         _loadedProperties = new Dictionary<string, bool>();
@@ -41,8 +39,9 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         _enabled = false;
         _defaultValues = new Dictionary<string, object?>();
 
-        var helper = RedisHelperCache.For<TEntity>();
+        var helper = _factory.CreateHelper<TEntity>();
 
+        var lookupSingles = helper.GetLookupSingleProperties();
         foreach (var lookup in lookupSingles)
         {
             var propertyName = lookup.Item1.Name;
@@ -58,13 +57,14 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
             method.Invoke(this, new object[] { propertyName, lookupProperties, savedObjects });
         }
 
+        var lookupSets = helper.GetLookupSetProperties();
         foreach (var lookup in lookupSets)
         {
             var propertyName = lookup.Item1.Name;
             var lookupType = lookup.Item1.PropertyType.GenericTypeArguments[0];
             var lookupKey = lookup.Item2.Name;
 
-            var primaryKeys = keys.Select(e => e.Item1);
+            var primaryKeys = helper.GetKeyProperties();
 
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSetInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
@@ -77,8 +77,8 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     private void BuildSingleInterceptor<TSubEntity>(string propertyName, IEnumerable<(string ForeignKey, string PrimaryKey)> foreignKeys, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
-        var helper = RedisHelperCache.For<TEntity>();
-        var subHelper = RedisHelperCache.For<TSubEntity>();
+        var helper = _factory.CreateHelper<TEntity>();
+        var subHelper = _factory.CreateHelper<TSubEntity>();
 
         var keyProperties = subHelper.GetKeyProperties();
 
@@ -111,11 +111,11 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         AddSingleInterceptor(propertyName, action);
     }
 
-    private void BuildSetInterceptor<TSubEntity>(string propertyName, IEnumerable<PropertyInfo> primaryKeys, string lookupKey, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildSetInterceptor<TSubEntity>(string propertyName, IEnumerable<IRedisKeyProperty<TEntity>> primaryKeys, string lookupKey, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
-        var helper = RedisHelperCache.For<TEntity>();
-        var subHelper = RedisHelperCache.For<TSubEntity>();
+        var helper = _factory.CreateHelper<TEntity>();
+        var subHelper = _factory.CreateHelper<TSubEntity>();
 
         var action = async () =>
         {

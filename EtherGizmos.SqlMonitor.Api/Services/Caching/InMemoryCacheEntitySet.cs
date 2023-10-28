@@ -28,7 +28,7 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        var helper = RedisHelperCache.For<TEntity>();
+        var helper = RedisHelperFactory.For<TEntity>();
         var id = helper.GetSetEntityKey(entity).ToString();
 
         //Forcefully detach the entity from any contexts
@@ -45,7 +45,7 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     public Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        var helper = RedisHelperCache.For<TEntity>();
+        var helper = RedisHelperFactory.For<TEntity>();
         var id = helper.GetSetEntityKey(entity).ToString();
         if (_entities.ContainsKey(id))
         {

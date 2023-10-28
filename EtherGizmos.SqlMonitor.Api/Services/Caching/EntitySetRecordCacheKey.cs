@@ -17,7 +17,7 @@ public struct EntitySetRecordCacheKey<TEntity> : ICacheKey
     /// </summary>
     internal EntitySetRecordCacheKey(TEntity entity)
     {
-        var helper = RedisHelperCache.For<TEntity>();
+        var helper = RedisHelperFactory.For<TEntity>();
         var setKey = helper.GetSetEntityKey(entity);
         KeyName = setKey.ToString();
     }

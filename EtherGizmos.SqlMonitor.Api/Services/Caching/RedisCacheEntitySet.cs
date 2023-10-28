@@ -27,7 +27,7 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         serializer.AppendAddAction(_database, transaction, entity);
@@ -41,7 +41,7 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         serializer.AppendRemoveAction(_database, transaction, entity);
@@ -52,7 +52,7 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     public async Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         var action = serializer.AppendListAction(_database, transaction, filters: Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
@@ -74,7 +74,7 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     async Task<List<TEntity>> ICanList<TEntity>.ToListAsync(IEnumerable<ICacheEntitySetFilter<TEntity>> filters, CancellationToken cancellationToken)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
+        var serializer = RedisHelperFactory.For<TEntity>();
 
         var transaction = _database.CreateTransaction();
         var action = serializer.AppendListAction(_database, transaction, filters);

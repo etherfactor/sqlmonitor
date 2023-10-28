@@ -17,9 +17,9 @@ public class QueryMetricSeverity : Auditable
     [Column("metric_id")]
     public virtual Guid MetricId { get; set; }
 
-    [Lookup(nameof(QueryId), nameof(MetricId),
+    [Lookup(nameof(QueryId), nameof(QueryMetric.QueryId), nameof(MetricId), nameof(QueryMetric.MetricId),
         List = nameof(QueryMetric.Severities))]
-    public virtual QueryMetric QueryMetric { get; set; } = null!;
+    public virtual QueryMetric QueryMetric { get; set; }
 
     [Column("severity_type_id")]
     public virtual SeverityType SeverityType { get; set; }
@@ -35,5 +35,6 @@ public class QueryMetricSeverity : Auditable
     /// </summary>
     public QueryMetricSeverity()
     {
+        QueryMetric = null!;
     }
 }
