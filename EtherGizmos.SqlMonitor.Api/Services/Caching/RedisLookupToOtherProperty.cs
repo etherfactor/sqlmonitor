@@ -76,7 +76,7 @@ public class RedisLookupToOtherProperty<TEntity> : IRedisLookupToOtherProperty<T
             var property = association.Key;
             var subProperty = (IRedisProperty<TSubEntity>)association.Value;
 
-            var value = entityProperties[property.PropertyName];
+            var value = entityProperties[property.DisplayName];
             subProperty.SetValue(subEntity, value);
         }
 

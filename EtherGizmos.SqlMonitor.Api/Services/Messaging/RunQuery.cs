@@ -4,22 +4,20 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Messaging;
 
 public class RunQuery
 {
-    public Instance Instance { get; set; }
+    public Guid InstanceId { get; set; }
 
-    public Query Query { get; set; }
+    public Guid QueryId { get; set; }
 
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
     public RunQuery()
     {
-        Instance = null!;
-        Query = null!;
     }
 
-    public RunQuery(Instance instance, Query query)
+    public RunQuery(Guid instanceId, Guid queryId)
     {
-        Instance = instance;
-        Query = query;
+        InstanceId = instanceId;
+        QueryId = queryId;
     }
 }

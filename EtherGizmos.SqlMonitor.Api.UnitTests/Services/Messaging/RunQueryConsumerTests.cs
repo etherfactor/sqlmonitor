@@ -30,11 +30,11 @@ internal class RunQueryConsumerTests
             @interface.Message)
             .Returns(new RunQuery()
             {
-                Instance = new Instance()
+                InstanceId = new Instance()
                 {
                     Address = "(localdb)\\mssqllocaldb"
                 },
-                Query = new Query()
+                QueryId = new Query()
                 {
                     SqlText = "select 1 as [value];"
                 }

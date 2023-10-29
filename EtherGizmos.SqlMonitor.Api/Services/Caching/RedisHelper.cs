@@ -428,7 +428,16 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
             if (values.Any(e => e.ToString() is not null))
             {
                 var entity = Deserialize(database, values, savedObjects);
-                return entity;
+
+                var entityKey = GetEntitySetEntityKey(entity).ToString();
+                if (savedObjects.TryAdd(entityKey, entity))
+                {
+                    return entity;
+                }
+                else
+                {
+                    return (TEntity)savedObjects[entityKey];
+                }
             }
 
             return default;
@@ -634,7 +643,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
             for (int i = 0; i < entities.Count; i++)
             {
                 var entity = entities[i];
-                var entityKey = GetRecordId(entity).ToString();
+                var entityKey = GetEntitySetEntityKey(entity).ToString();
                 if (!savedObjects.TryAdd(entityKey, entity!))
                 {
                     entities[i] = (TEntity)savedObjects[entityKey];

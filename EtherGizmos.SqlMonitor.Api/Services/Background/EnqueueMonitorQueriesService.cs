@@ -77,8 +77,8 @@ public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
 
                 await endpoint.Send(new RunQuery()
                 {
-                    Instance = instance,
-                    Query = query
+                    InstanceId = instance.Id,
+                    QueryId = query.Id
                 }, cancellationToken);
 
                 var updateScope = scope.CreateScope().ServiceProvider;

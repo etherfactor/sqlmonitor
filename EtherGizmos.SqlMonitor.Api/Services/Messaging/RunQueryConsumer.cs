@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
 using Microsoft.Data.SqlClient;
@@ -11,10 +12,14 @@ public class RunQueryConsumer : IConsumer<RunQuery>
     public const string Queue = "run-query";
 
     private readonly ILogger _logger;
+    private readonly IDistributedRecordCache _distributedRecordCache;
 
-    public RunQueryConsumer(ILogger<RunQueryConsumer> logger)
+    public RunQueryConsumer(
+        ILogger<RunQueryConsumer> logger,
+        IDistributedRecordCache distributedRecordCache)
     {
         _logger = logger;
+        _distributedRecordCache = distributedRecordCache;
     }
 
     public async Task Consume(ConsumeContext<RunQuery> context)
@@ -23,8 +28,15 @@ public class RunQueryConsumer : IConsumer<RunQuery>
 
         var message = context.Message;
 
-        var instance = message.Instance;
-        var query = message.Query;
+        var instanceId = message.InstanceId;
+        var instance = _distributedRecordCache
+            .EntitySet<Instance>()
+            .GetAsync(instanceId);
+
+        var queryId = message.QueryId;
+        var query = _distributedRecordCache
+            .EntitySet<Query>()
+            .GetAsync(queryId);
 
         _logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
 
