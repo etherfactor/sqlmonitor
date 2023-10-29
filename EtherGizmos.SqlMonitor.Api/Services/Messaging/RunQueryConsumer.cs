@@ -29,14 +29,20 @@ public class RunQueryConsumer : IConsumer<RunQuery>
         var message = context.Message;
 
         var instanceId = message.InstanceId;
-        var instance = _distributedRecordCache
+        var instance = await _distributedRecordCache
             .EntitySet<Instance>()
-            .GetAsync(instanceId);
+            .GetAsync(new object[] { instanceId });
+
+        if (instance is null)
+            throw new InvalidOperationException($"Instance ({instanceId}) could not be read from the cache.");
 
         var queryId = message.QueryId;
-        var query = _distributedRecordCache
+        var query = await _distributedRecordCache
             .EntitySet<Query>()
-            .GetAsync(queryId);
+            .GetAsync(new object[] { queryId });
+
+        if (query is null)
+            throw new InvalidOperationException($"Query ({queryId}) could not be read from the cache.");
 
         _logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
 

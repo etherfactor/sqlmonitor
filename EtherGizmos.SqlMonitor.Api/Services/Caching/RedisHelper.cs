@@ -187,6 +187,17 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     }
 
     /// <summary>
+    /// Constructs the Redis key for a given entity in a set, from its ids.
+    /// </summary>
+    /// <param name="keys">The ids of the entity for which to calculate the key. Must be in lexicographical order.</param>
+    /// <returns>The Redis key for the entity.</returns>
+    public RedisKey GetEntitySetEntityKey(object[] keys)
+    {
+        var value = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(keys)}");
+        return value;
+    }
+
+    /// <summary>
     /// Constructs the set's primary key.
     /// </summary>
     /// <returns>The set's primary key.</returns>

@@ -24,4 +24,5 @@ public interface IRedisHelper<TEntity> : IRedisHelper
     Func<Task<List<TEntity>>> AppendListAction(IDatabase database, ITransaction transaction, IEnumerable<ICacheEntitySetFilter<TEntity>>? filters = null, RedisKey? lookupKey = null, ConcurrentDictionary<string, object>? savedObjects = null);
     Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, RedisKey key, ConcurrentDictionary<string, object>? savedObjects = null);
     void BuildAddAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object> savedObjects);
+    RedisKey GetEntitySetEntityKey(object[] keys);
 }

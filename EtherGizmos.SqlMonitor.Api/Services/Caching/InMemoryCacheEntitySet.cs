@@ -44,6 +44,25 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     }
 
     /// <inheritdoc/>
+    public Task<TEntity?> GetAsync(object[] keys, CancellationToken cancellationToken = default)
+    {
+        if (keys.Length == 0)
+            throw new ArgumentException("Must provide at least one key.", nameof(keys));
+
+        var factory = _serviceProvider.GetRequiredService<IRedisHelperFactory>();
+
+        var helper = factory.CreateHelper<TEntity>();
+        var entitySetKey = helper.GetEntitySetEntityKey(keys).ToString();
+
+        if (_entities.ContainsKey(entitySetKey))
+        {
+            return Task.FromResult<TEntity?>(_entities[entitySetKey]);
+        }
+
+        return Task.FromResult<TEntity?>(null);
+    }
+
+    /// <inheritdoc/>
     public Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         var factory = _serviceProvider.GetRequiredService<IRedisHelperFactory>();

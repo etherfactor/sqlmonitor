@@ -38,6 +38,23 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     }
 
     /// <inheritdoc/>
+    public async Task<TEntity?> GetAsync(object[] keys, CancellationToken cancellationToken = default)
+    {
+        if (keys.Length == 0)
+            throw new ArgumentException("Must provide at least one key.", nameof(keys));
+
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var entitySetKey = serializer.GetEntitySetEntityKey(keys);
+
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendReadAction(_database, transaction, entitySetKey);
+
+        await transaction.ExecuteAsync();
+        return await action();
+    }
+
+    /// <inheritdoc/>
     public async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (entity is null)
