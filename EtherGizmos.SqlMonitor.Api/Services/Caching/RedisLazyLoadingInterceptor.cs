@@ -1,10 +1,8 @@
 ﻿using Castle.DynamicProxy;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Annotations;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
@@ -44,37 +42,31 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         var lookupSingles = helper.GetLookupSingleProperties();
         foreach (var lookup in lookupSingles)
         {
-            var propertyName = lookup.Item1.Name;
-            var lookupType = lookup.Item1.PropertyType;
-            var lookupProperties = lookup.Item2.IdProperties;
-
-            //var foreignKeys = lookupProperties.Select(e => _all.Single(p => p.Item1.Name == e.ForeignKey).Item1);
+            var propertyName = lookup.PropertyName;
+            var lookupType = lookup.PropertyType;
 
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSingleInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(lookupType);
 
-            method.Invoke(this, new object[] { propertyName, lookupProperties, savedObjects });
+            method.Invoke(this, new object[] { propertyName, lookup, savedObjects });
         }
 
         var lookupSets = helper.GetLookupSetProperties();
         foreach (var lookup in lookupSets)
         {
-            var propertyName = lookup.Item1.Name;
-            var lookupType = lookup.Item1.PropertyType.GenericTypeArguments[0];
-            var lookupKey = lookup.Item2.Name;
-
-            var primaryKeys = helper.GetKeyProperties();
+            var propertyName = lookup.PropertyName;
+            var lookupType = lookup.PropertyType.GenericTypeArguments[0];
 
             var method = typeof(RedisLazyLoadingInterceptor<TEntity>)
                 .GetMethod(nameof(BuildSetInterceptor), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(lookupType);
 
-            method.Invoke(this, new object[] { propertyName, primaryKeys, lookupKey, savedObjects });
+            method.Invoke(this, new object[] { propertyName, lookup, savedObjects });
         }
     }
 
-    private void BuildSingleInterceptor<TSubEntity>(string propertyName, IEnumerable<(string ForeignKey, string PrimaryKey)> foreignKeys, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildSingleInterceptor<TSubEntity>(string propertyName, IRedisLookupToOtherProperty<TEntity> lookup, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
         var helper = _factory.CreateHelper<TEntity>();
@@ -82,24 +74,11 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
 
         var keyProperties = subHelper.GetKeyProperties();
 
-        var tableName = helper.GetTableName();
-        var subTableName = subHelper.GetTableName();
-
         var action = async () =>
         {
-            //TODO: Find a better way of passing column data, as TSubEntity needs its ids for lookup, but we only have TEntity ids
-            var tempEntity = new TSubEntity();
-            foreach (var keyPropertyData in keyProperties)
-            {
-                var keyProperty = keyPropertyData.Item1;
+            var lookupEntity = lookup.GetLookupEntity<TSubEntity>(_defaultValues);
 
-                var foreignKey = foreignKeys.Single(e => e.PrimaryKey == keyProperty.Name).ForeignKey;
-                var useValue = _defaultValues[foreignKey];
-
-                keyProperty.SetValue(tempEntity, useValue);
-            }
-
-            var entityKey = subHelper.GetSetEntityKey(tempEntity);
+            var entityKey = subHelper.GetEntitySetEntityKey(lookupEntity);
 
             var transaction = _database.CreateTransaction();
             var subAction = subHelper.AppendReadAction(_database, transaction, key: entityKey, savedObjects: savedObjects);
@@ -111,16 +90,18 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
         AddSingleInterceptor(propertyName, action);
     }
 
-    private void BuildSetInterceptor<TSubEntity>(string propertyName, IEnumerable<IRedisKeyProperty<TEntity>> primaryKeys, string lookupKey, ConcurrentDictionary<string, object> savedObjects)
+    private void BuildSetInterceptor<TSubEntity>(string propertyName, IRedisLookupFromOtherProperty<TEntity> lookup, ConcurrentDictionary<string, object> savedObjects)
         where TSubEntity : class, new()
     {
         var helper = _factory.CreateHelper<TEntity>();
         var subHelper = _factory.CreateHelper<TSubEntity>();
 
+        var primaryKeys = helper.GetKeyProperties();
+
         var action = async () =>
         {
-            var primaryKey = helper.GetRecordId(primaryKeys.Select(e => _defaultValues[e.Name]!));
-            var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookupKey.ToSnakeCase()}");
+            var primaryKey = helper.GetRecordId(primaryKeys.Select(e => _defaultValues[e.DisplayName]!));
+            var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookup.DisplayName.ToSnakeCase()}");
 
             var transaction = _database.CreateTransaction();
             var subAction = subHelper.AppendListAction(_database, transaction, lookupKey: useLookupKey, savedObjects: savedObjects);
@@ -236,7 +217,6 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
     private void HandleSet(IInvocation invocation)
     {
         var propertyName = invocation.Method.Name.Replace("set_", "");
-        //var property = invocation.Method.DeclaringType?.GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
         _loadedProperties.TryAdd(propertyName, true);
     }

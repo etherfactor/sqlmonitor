@@ -11,8 +11,9 @@ public class RedisKeyProperty<TEntity> : IRedisKeyProperty<TEntity>
     private readonly string _name;
     private readonly int _position;
 
-    public string Name => _name;
-    public Type Type => _property.PropertyType;
+    public string DisplayName => _name;
+    public string PropertyName => _property.Name;
+    public Type PropertyType => _property.PropertyType;
     public int Position => _position;
 
     public RedisKeyProperty(PropertyInfo property, ColumnAttribute attribute, int position)
@@ -22,7 +23,7 @@ public class RedisKeyProperty<TEntity> : IRedisKeyProperty<TEntity>
         _position = position;
     }
 
-    public void SetValue(TEntity entity, object value)
+    public void SetValue(TEntity entity, object? value)
     {
         _property.SetValue(entity, value);
     }

@@ -2,6 +2,8 @@ using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Data;
@@ -185,7 +187,8 @@ builder.Services
         {
             throw new InvalidOperationException(string.Format("Unknown cache type: {0}", options.Cache));
         }
-    });
+    })
+    .AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
 
 builder.Services.AddMapper();
 

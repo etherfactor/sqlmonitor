@@ -10,11 +10,13 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     where TEntity : class, new()
 {
+    private readonly IRedisHelperFactory _factory;
     private readonly IDatabase _database;
     private readonly EntityCacheKey<TEntity> _key;
 
-    public RedisCacheEntity(IDatabase database, EntityCacheKey<TEntity> key)
+    public RedisCacheEntity(IRedisHelperFactory factory, IDatabase database, EntityCacheKey<TEntity> key)
     {
+        _factory = factory;
         _database = database;
         _key = key;
     }
@@ -22,7 +24,7 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     /// <inheritdoc/>
     public async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperFactory.For<TEntity>();
+        var serializer = _factory.CreateHelper<TEntity>();
 
         var transaction = _database.CreateTransaction();
         serializer.AppendDeleteAction(_database, transaction, _key);
@@ -33,7 +35,7 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     /// <inheritdoc/>
     public async Task<TEntity?> GetAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperFactory.For<TEntity>();
+        var serializer = _factory.CreateHelper<TEntity>();
 
         var transaction = _database.CreateTransaction();
         var action = serializer.AppendReadAction(_database, transaction, _key);
@@ -48,7 +50,7 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperFactory.For<TEntity>();
+        var serializer = _factory.CreateHelper<TEntity>();
 
         var transaction = _database.CreateTransaction();
         serializer.AppendSetAction(_database, transaction, _key, entity);
