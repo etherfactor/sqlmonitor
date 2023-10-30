@@ -27,7 +27,7 @@ public class InstanceMetricByTime
     [Column("value")]
     public virtual double Value { get; set; }
 
-    [Column("severity_type")]
+    [Column("severity_type_id")]
     public virtual SeverityType SeverityType { get; set; }
 
     /// <summary>

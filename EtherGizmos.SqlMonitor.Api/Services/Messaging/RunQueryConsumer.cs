@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using MassTransit;
@@ -14,13 +15,18 @@ public class RunQueryConsumer : IConsumer<RunQuery>
     public const string Queue = "run-query";
 
     private readonly ILogger _logger;
+
+    private readonly IServiceProvider _serviceProvider;
     private readonly IDistributedRecordCache _distributedRecordCache;
 
     public RunQueryConsumer(
         ILogger<RunQueryConsumer> logger,
-        IDistributedRecordCache distributedRecordCache)
+        IDistributedRecordCache distributedRecordCache,
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
+
+        _serviceProvider = serviceProvider;
         _distributedRecordCache = distributedRecordCache;
     }
 
@@ -52,6 +58,14 @@ public class RunQueryConsumer : IConsumer<RunQuery>
             return;
         }
 
+        //Create a service scope for this run
+        using var scope = _serviceProvider.CreateScope();
+        var provider = scope.ServiceProvider;
+
+        //Pull out the necessary services
+        var instanceMetricsBySecond = provider.GetRequiredService<IInstanceMetricBySecondService>();
+        var saveService = provider.GetRequiredService<ISaveService>();
+
         _logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
 
         using var connection = await ConnectToInstanceAsync(instance);
@@ -82,10 +96,22 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                     else
                     {
                         _logger.Log(LogLevel.Information, "Metric {MetricName} returned {MetricBucket}:{MetricValue} at {MetricTimestamp}", metric.Metric.Name, bucket, metricValue, utcTimestamp);
+
+                        instanceMetricsBySecond.Add(new InstanceMetricBySecond()
+                        {
+                            InstanceId = instance.Id,
+                            MetricId = metric.Metric.Id,
+                            MetricBucketId = 2,
+                            MeasuredAtUtc = utcTimestamp,
+                            Value = metricValue.Value,
+                            SeverityType = SeverityType.Nominal,
+                        });
                     }
                 }
             }
         }
+
+        await saveService.SaveChangesAsync();
     }
 
     /// <summary>

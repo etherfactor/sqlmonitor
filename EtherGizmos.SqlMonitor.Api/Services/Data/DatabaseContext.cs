@@ -19,6 +19,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<Instance> Instances { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="InstanceMetricBySecond"/> records, in 'dbo.instance_metrics_by_second'.
+    /// </summary>
+    public virtual DbSet<InstanceMetricBySecond> InstanceMetricsBySecond { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Metric"/> records, in 'dbo.metrics'.
     /// </summary>
     public virtual DbSet<Metric> Metrics { get; set; }
