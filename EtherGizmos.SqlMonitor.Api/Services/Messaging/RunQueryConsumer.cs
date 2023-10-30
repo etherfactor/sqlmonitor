@@ -5,6 +5,7 @@ using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using MassTransit;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Reflection;
 
@@ -64,6 +65,7 @@ public class RunQueryConsumer : IConsumer<RunQuery>
 
         //Pull out the necessary services
         var instanceMetricsBySecond = provider.GetRequiredService<IInstanceMetricBySecondService>();
+        var metricBuckets = provider.GetRequiredService<IMetricBucketService>();
         var saveService = provider.GetRequiredService<ISaveService>();
 
         _logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
@@ -77,7 +79,7 @@ public class RunQueryConsumer : IConsumer<RunQuery>
             {
                 var utcTimestamp = reader.GetDateTime("__timestamp");
 
-                string? bucket = null;
+                string bucket = "";
                 if (!reader.IsDBNull("__bucket"))
                     bucket = reader.GetString("__bucket");
 
@@ -97,11 +99,33 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                     {
                         _logger.Log(LogLevel.Information, "Metric {MetricName} returned {MetricBucket}:{MetricValue} at {MetricTimestamp}", metric.Metric.Name, bucket, metricValue, utcTimestamp);
 
+                        var anyBuckets = await metricBuckets.GetQueryable()
+                            .AnyAsync(e => e.Name == bucket);
+
+                        if (!anyBuckets)
+                        {
+                            using var subScope = provider.CreateScope();
+                            var subProvider = subScope.ServiceProvider;
+
+                            var subMetricBuckets = subProvider.GetRequiredService<IMetricBucketService>();
+                            var subSaveService = subProvider.GetRequiredService<ISaveService>();
+
+                            subMetricBuckets.Add(new MetricBucket()
+                            {
+                                Name = bucket,
+                            });
+
+                            await subSaveService.SaveChangesAsync();
+                        }
+
+                        var metricBucket = await metricBuckets.GetQueryable()
+                            .FirstAsync(e => e.Name == bucket);
+
                         instanceMetricsBySecond.Add(new InstanceMetricBySecond()
                         {
                             InstanceId = instance.Id,
                             MetricId = metric.Metric.Id,
-                            MetricBucketId = 2,
+                            MetricBucketId = metricBucket.Id,
                             MeasuredAtUtc = utcTimestamp,
                             Value = metricValue.Value,
                             SeverityType = SeverityType.Nominal,

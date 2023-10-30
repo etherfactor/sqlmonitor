@@ -24,6 +24,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<InstanceMetricBySecond> InstanceMetricsBySecond { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="MetricBucket"/> records, in 'dbo.metric_buckets'.
+    /// </summary>
+    public virtual DbSet<MetricBucket> MetricBuckets { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Metric"/> records, in 'dbo.metrics'.
     /// </summary>
     public virtual DbSet<Metric> Metrics { get; set; }
