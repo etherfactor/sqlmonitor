@@ -1,9 +1,11 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using MassTransit;
 using Microsoft.Data.SqlClient;
-using System.Text.RegularExpressions;
+using System.Data;
+using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Messaging;
 
@@ -44,34 +46,46 @@ public class RunQueryConsumer : IConsumer<RunQuery>
         if (query is null)
             throw new InvalidOperationException($"Query ({queryId}) could not be read from the cache.");
 
+        if (!query.Metrics.Any())
+        {
+            _logger.Log(LogLevel.Information, "No metrics associated with {QueryName}, so nothing will be run.", query.Name);
+            return;
+        }
+
         _logger.Log(LogLevel.Information, "Running query {QueryName} on instance {InstanceName}", query.Name, instance.Name);
 
         using var connection = await ConnectToInstanceAsync(instance);
-        using var command = new SqlCommand(null, connection);
+        using var command = GenerateForQuery(connection, query);
 
-        command.CommandText = GenerateLoadForQuery(query);
-        await command.ExecuteLoggedNonQueryAsync(_logger);
-
-        command.CommandText = GenerateReadForQuery(query);
         using (var reader = await command.ExecuteLoggedReaderAsync(_logger))
         {
             while (await reader.ReadAsync())
             {
-                var values = new object[reader.FieldCount];
-                int fieldCount = reader.GetValues(values);
+                var utcTimestamp = reader.GetDateTime("__timestamp");
 
-                var logContent = string.Join(", ", values.Select(e => e?.ToString()));
-                _logger.Log(LogLevel.Information, logContent);
+                string? bucket = null;
+                if (!reader.IsDBNull("__bucket"))
+                    bucket = reader.GetString("__bucket");
 
-                foreach (var metric in query.Metrics)
+                for (int m = 0; m < query.Metrics.Count; m++)
                 {
-                    _logger.Log(LogLevel.Information, "{Metric}", metric);
+                    var metric = query.Metrics[m];
+
+                    double? metricValue = null;
+                    if (!reader.IsDBNull($"metric_{m}"))
+                        metricValue = reader.GetDouble($"metric_{m}");
+
+                    if (metricValue is null)
+                    {
+                        _logger.Log(LogLevel.Warning, "Metric {MetricName} returned a null value at {MetricTimestamp}", metric.Metric.Name, utcTimestamp);
+                    }
+                    else
+                    {
+                        _logger.Log(LogLevel.Information, "Metric {MetricName} returned {MetricBucket}:{MetricValue} at {MetricTimestamp}", metric.Metric.Name, bucket, metricValue, utcTimestamp);
+                    }
                 }
             }
         }
-
-        command.CommandText = GenerateDropForQuery(query);
-        await command.ExecuteLoggedNonQueryAsync(_logger);
     }
 
     /// <summary>
@@ -103,64 +117,65 @@ public class RunQueryConsumer : IConsumer<RunQuery>
     }
 
     /// <summary>
-    /// Creates the load step for a given query.
+    /// Generates a command to run a <see cref="Query"/> on an active <see cref="Instance"/> connection.
     /// </summary>
-    /// <param name="query">The query.</param>
-    /// <returns>The load SQL.</returns>
-    private string GenerateLoadForQuery(Query query)
+    /// <param name="connection">The connection on which to run the query.</param>
+    /// <param name="query">The query to run.</param>
+    /// <returns>The generated command.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private SqlCommand GenerateForQuery(SqlConnection connection, Query query)
     {
-        var queryBase = query.SqlText;
+        var dynamicQueryStream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("EtherGizmos.SqlMonitor.Api.Resources.Sql.DynamicQuery.sql");
 
-        var fromRegex = new Regex(@"(?'SPACE'[\r\n \t]*)from[\s\[]");
-        var finalFrom = fromRegex.Matches(queryBase).LastOrDefault();
-        string newLineSpace;
+        if (dynamicQueryStream is null)
+            throw new InvalidOperationException("Unable to locate resource stream: EtherGizmos.SqlMonitor.Api.Resources.Sql.DynamicQuery.sql");
 
-        if (finalFrom is not null)
-        {
-            newLineSpace = finalFrom.Groups["SPACE"].Value;
-        }
-        else
-        {
-            var endRegex = new Regex(@"(?'END';|$)");
-            finalFrom = endRegex.Matches(queryBase).First();
-            newLineSpace = " ";
-        }
+        var dynamicQueryReader = new StreamReader(dynamicQueryStream);
+        var dynamicQuery = dynamicQueryReader.ReadToEnd();
 
-        var queryText = queryBase.Substring(0, finalFrom.Index) +
-            newLineSpace +
-            "into #metric_result" +
-            queryBase.Substring(finalFrom.Index);
+        var metricStrings = query.Metrics.Select(e => GetAggregateFunction(e.Metric.AggregateType) + ":" + e.ValueExpression.Replace(";", "%3B"));
+        var metricString = string.Join(";", metricStrings);
 
-        return queryText;
+        var command = new SqlCommand(dynamicQuery, connection);
+        command.Parameters.Add("@Sql", SqlDbType.NVarChar).Value = query.SqlText;
+        command.Parameters.Add("@TimestampUtcExpression", SqlDbType.NVarChar).Value = query.TimestampUtcExpression ?? (object)DBNull.Value;
+        command.Parameters.Add("@BucketExpression", SqlDbType.NVarChar).Value = query.BucketExpression ?? (object)DBNull.Value;
+        command.Parameters.Add("@MetricValues", SqlDbType.NVarChar).Value = metricString;
+
+        return command;
     }
 
     /// <summary>
-    /// Creates the read step for a given query.
+    /// Converts an <see cref="AggregateType"/> to an equivalent aggregate function.
     /// </summary>
-    /// <param name="query">The query.</param>
-    /// <returns>The read SQL.</returns>
-    private string GenerateReadForQuery(Query query)
+    /// <param name="aggregate">The aggregate type to convert.</param>
+    /// <returns>The aggregate function.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private string GetAggregateFunction(AggregateType aggregate)
     {
-        var bucketExpression = query.BucketExpression ?? "null";
-        var timestampExpression = query.TimestampUtcExpression ?? "getutcdate()";
+        switch (aggregate)
+        {
+            case AggregateType.Average:
+                return "avg";
 
-        var queryText = $@"select {timestampExpression} as [timestamp_utc],
-  {bucketExpression} as [bucket_name],
-  [m].*
-  from #metric_result [m];";
+            case AggregateType.Maximum:
+                return "max";
 
-        return queryText;
-    }
+            case AggregateType.Minimum:
+                return "min";
 
-    /// <summary>
-    /// Creates the drop step for a given query.
-    /// </summary>
-    /// <param name="query">The query.</param>
-    /// <returns>The drop SQL.</returns>
-    private string GenerateDropForQuery(Query query)
-    {
-        var queryText = "drop table #metric_result;";
+            case AggregateType.StandardDeviation:
+                return "stdev";
 
-        return queryText;
+            case AggregateType.Sum:
+                return "sum";
+
+            case AggregateType.Variance:
+                return "var";
+
+            default:
+                throw new InvalidOperationException($"Unrecognized aggregate type: {aggregate}");
+        }
     }
 }
