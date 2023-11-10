@@ -512,37 +512,39 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
                 _ = transaction.SortedSetAddAsync(indexKey, indexValue, 0);
             }
 
+            var lookupType = lookup.PropertyType;
             var lookupValue = lookup.GetValue(entity);
             if (lookupValue is not null)
             {
-                var lookupType = lookup.PropertyType;
                 var helper = typeof(RedisHelper<TEntity>)
                     .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod(lookupType);
 
                 helper.Invoke(this, new object[] { database, transaction, lookupValue, savedObjects });
+            }
+            else
+            {
+                if (entityInCache is not null)
+                {
+                    var entityInCacheValue = lookup.GetValue(entityInCache);
+                    if (entityInCacheValue is not null)
+                    {
+                        var removeHelper = typeof(RedisHelper<TEntity>)
+                            .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                            .MakeGenericMethod(lookupType);
 
-                //if (entityInCache is not null)
-                //{
-                //    var entityInCacheValue = lookup.GetValue(entityInCache);
-                //    if (entityInCacheValue is not null)
-                //    {
-                //        var removeHelper = typeof(RedisHelper<TEntity>)
-                //            .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
-                //            .MakeGenericMethod(lookupType);
-
-                //        removeHelper.Invoke(this, new object[] { database, transaction, entityInCacheValue, new ConcurrentDictionary<string, object>() });
-                //    }
-                //}
+                        removeHelper.Invoke(this, new object[] { database, transaction, entityInCacheValue, new ConcurrentDictionary<string, object>() });
+                    }
+                }
             }
         }
 
         foreach (var lookup in _lookupSets)
         {
+            var lookupType = lookup.PropertyType.GenericTypeArguments[0];
             var lookupValue = lookup.GetValue(entity) as IEnumerable<object>;
             if (lookupValue is not null)
             {
-                var lookupType = lookup.PropertyType.GenericTypeArguments[0];
                 var helper = typeof(RedisHelper<TEntity>)
                     .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod(lookupType);
