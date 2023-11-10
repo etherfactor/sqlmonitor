@@ -100,14 +100,21 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
 
         var action = async () =>
         {
-            var primaryKey = helper.GetRecordId(primaryKeys.Select(e => _defaultValues[e.DisplayName]!));
-            var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookup.DisplayName.ToSnakeCase()}");
+            if (primaryKeys.All(e => _defaultValues.ContainsKey(e.DisplayName)))
+            {
+                var primaryKey = helper.GetRecordId(primaryKeys.Select(e => _defaultValues[e.DisplayName]!));
+                var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookup.DisplayName.ToSnakeCase()}");
 
-            var transaction = _database.CreateTransaction();
-            var subAction = subHelper.AppendListAction(_database, transaction, lookupKey: useLookupKey, savedObjects: savedObjects);
+                var transaction = _database.CreateTransaction();
+                var subAction = subHelper.AppendListAction(_database, transaction, lookupKey: useLookupKey, savedObjects: savedObjects);
 
-            await transaction.ExecuteAsync();
-            return await subAction();
+                await transaction.ExecuteAsync();
+                return await subAction();
+            }
+            else
+            {
+                return new List<TSubEntity>();
+            }
         };
 
         AddSetInterceptor(propertyName, action);

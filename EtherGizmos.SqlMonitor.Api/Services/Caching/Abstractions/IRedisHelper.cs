@@ -20,9 +20,10 @@ public interface IRedisHelper<TEntity> : IRedisHelper
     Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key, ConcurrentDictionary<string, object>? savedObjects = null);
     void AppendDeleteAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key);
     void AppendSetAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key, TEntity entity);
-    void AppendRemoveAction(IDatabase database, ITransaction transaction, TEntity entity);
+    void AppendRemoveAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object>? savedObjects = null);
     Func<Task<List<TEntity>>> AppendListAction(IDatabase database, ITransaction transaction, IEnumerable<ICacheEntitySetFilter<TEntity>>? filters = null, RedisKey? lookupKey = null, ConcurrentDictionary<string, object>? savedObjects = null);
     Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, RedisKey key, ConcurrentDictionary<string, object>? savedObjects = null);
     void BuildAddAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object> savedObjects);
     RedisKey GetEntitySetEntityKey(object[] keys);
+    void BuildRemoveAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object> savedObjects);
 }
