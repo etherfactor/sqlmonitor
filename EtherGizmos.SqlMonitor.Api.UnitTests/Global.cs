@@ -34,6 +34,8 @@ internal static class Global
         services.AddScoped<UsersController>();
 
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
+        services.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+
         services.AddSingleton<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
         services.AddSingleton<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);

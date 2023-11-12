@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Messaging;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Models.Database;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,13 +13,32 @@ internal class RunQueryConsumerTests
     private IServiceProvider _serviceProvider;
     private RunQueryConsumer _service;
 
+    private readonly Guid _queryId = Guid.NewGuid();
+    private readonly Guid _instanceId = Guid.NewGuid();
+
     [SetUp]
-    public void SetUp()
+    public async Task SetUp()
     {
         _serviceProvider = Global.CreateScope();
 
+        var memoryCache = new InMemoryRecordCache(_serviceProvider);
+
+        await memoryCache.EntitySet<Query>()
+            .AddAsync(new Query()
+            {
+                Id = _queryId,
+                SqlText = "select 1 as [value];"
+            });
+
+        await memoryCache.EntitySet<Instance>()
+            .AddAsync(new Instance()
+            {
+                Id = _instanceId,
+                Address = "(localdb)\\mssqllocaldb"
+            });
+
         var logger = _serviceProvider.GetRequiredService<ILogger<RunQueryConsumer>>();
-        _service = new RunQueryConsumer(logger);
+        _service = new RunQueryConsumer(logger, memoryCache, _serviceProvider);
     }
 
     [Test]
@@ -30,14 +50,8 @@ internal class RunQueryConsumerTests
             @interface.Message)
             .Returns(new RunQuery()
             {
-                InstanceId = new Instance()
-                {
-                    Address = "(localdb)\\mssqllocaldb"
-                },
-                QueryId = new Query()
-                {
-                    SqlText = "select 1 as [value];"
-                }
+                InstanceId = _instanceId,
+                QueryId = _queryId
             });
 
         //Act
