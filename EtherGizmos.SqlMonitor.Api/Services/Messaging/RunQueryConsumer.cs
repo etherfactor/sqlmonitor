@@ -98,38 +98,6 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                     else
                     {
                         _logger.Log(LogLevel.Information, "Metric {MetricName} returned {MetricBucket}:{MetricValue} at {MetricTimestamp}", metric.Metric.Name, bucket, metricValue, utcTimestamp);
-
-                        var anyBuckets = await metricBuckets.GetQueryable()
-                            .AnyAsync(e => e.Name == bucket);
-
-                        if (!anyBuckets)
-                        {
-                            using var subScope = provider.CreateScope();
-                            var subProvider = subScope.ServiceProvider;
-
-                            var subMetricBuckets = subProvider.GetRequiredService<IMetricBucketService>();
-                            var subSaveService = subProvider.GetRequiredService<ISaveService>();
-
-                            subMetricBuckets.Add(new MetricBucket()
-                            {
-                                Name = bucket,
-                            });
-
-                            await subSaveService.SaveChangesAsync();
-                        }
-
-                        var metricBucket = await metricBuckets.GetQueryable()
-                            .FirstAsync(e => e.Name == bucket);
-
-                        instanceMetricsBySecond.Add(new InstanceMetricBySecond()
-                        {
-                            InstanceId = instance.Id,
-                            MetricId = metric.Metric.Id,
-                            MetricBucketId = metricBucket.Id,
-                            MeasuredAtUtc = utcTimestamp,
-                            Value = metricValue.Value,
-                            SeverityType = SeverityType.Nominal,
-                        });
                     }
                 }
             }
