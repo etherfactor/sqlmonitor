@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,7 +16,7 @@ public class Query : Auditable
     public virtual Guid SystemId { get; set; }
 
     [Column("name")]
-    public virtual string Name { get; set; }
+    public virtual string Name { get; set; } = null!;
 
     [Column("description")]
     public virtual string? Description { get; set; }
@@ -29,7 +29,7 @@ public class Query : Auditable
     public virtual bool IsSoftDeleted { get; set; } = false;
 
     [Column("sql_text")]
-    public virtual string SqlText { get; set; }
+    public virtual string SqlText { get; set; } = null!;
 
     [Column("run_frequency")]
     public virtual TimeSpan RunFrequency { get; set; }
@@ -47,13 +47,20 @@ public class Query : Auditable
     [Indexed]
     public DateTimeOffset NextRunAtUtc => (LastRunAtUtc ?? DateTimeOffset.MinValue).Add(RunFrequency);
 
+    public virtual List<QueryInstanceBlacklist> InstanceBlacklists { get; set; } = new List<QueryInstanceBlacklist>();
+
+    public virtual List<QueryInstanceWhitelist> InstanceWhitelists { get; set; } = new List<QueryInstanceWhitelist>();
+
+    public virtual List<QueryInstanceDatabase> InstanceDatabaseOverrides { get; set; } = new List<QueryInstanceDatabase>();
+
+    [LookupIndex("metrics")]
+    public virtual List<QueryMetric> Metrics { get; set; } = new List<QueryMetric>();
+
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
     public Query()
     {
-        Name = null!;
-        SqlText = null!;
     }
 
     public Task EnsureValid(IQueryable<Query> records)

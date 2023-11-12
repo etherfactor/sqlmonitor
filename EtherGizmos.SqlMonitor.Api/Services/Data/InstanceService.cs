@@ -24,7 +24,7 @@ public class InstanceService : IInstanceService
     /// <param name="context">Provides access to internal records.</param>
     /// <param name="distributedRecordCache">Contains shared, cached records.</param>
     public InstanceService(
-        ILogger<QueryService> logger,
+        ILogger<InstanceService> logger,
         DatabaseContext context,
         IDistributedRecordCache distributedRecordCache)
     {

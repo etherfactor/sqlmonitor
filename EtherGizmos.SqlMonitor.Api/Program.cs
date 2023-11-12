@@ -2,6 +2,8 @@ using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Data;
@@ -81,6 +83,9 @@ builder.Services
     .AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>()
     .AddScoped<ISaveService, SaveService>()
     .AddScoped<IInstanceService, InstanceService>()
+    .AddScoped<IInstanceMetricBySecondService, InstanceMetricBySecondService>()
+    .AddScoped<IMetricBucketService, MetricBucketService>()
+    .AddScoped<IMetricService, MetricService>()
     .AddScoped<IPermissionService, PermissionService>()
     .AddScoped<IQueryService, QueryService>()
     .AddScoped<ISecurableService, SecurableService>()
@@ -184,12 +189,23 @@ builder.Services
         {
             throw new InvalidOperationException(string.Format("Unknown cache type: {0}", options.Cache));
         }
-    });
+    })
+    .AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
 
 builder.Services.AddMapper();
 
 builder.Services.AddHostedService<CacheLoadService>();
 builder.Services.AddHostedService<EnqueueMonitorQueriesService>();
+
+builder.Services.AddCors(opt =>
+    {
+        opt.AddPolicy("All", builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
 
 //**********************************************************
 // Add Middleware
@@ -215,6 +231,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseCors("All");
 
 if (app.Environment.IsDevelopment())
 {

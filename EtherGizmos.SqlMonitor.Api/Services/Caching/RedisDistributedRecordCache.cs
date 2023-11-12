@@ -12,15 +12,18 @@ internal class RedisDistributedRecordCache : IDistributedRecordCache
     private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _multiplexer;
     private readonly IDistributedLockProvider _distributedLockProvider;
+    private readonly IRedisHelperFactory _factory;
 
     public RedisDistributedRecordCache(
         ILogger<RedisDistributedRecordCache> logger,
         IConnectionMultiplexer multiplexer,
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        IRedisHelperFactory factory)
     {
         _logger = logger;
         _multiplexer = multiplexer;
         _distributedLockProvider = distributedLockProvider;
+        _factory = factory;
     }
 
     /// <inheritdoc/>
@@ -42,15 +45,15 @@ internal class RedisDistributedRecordCache : IDistributedRecordCache
 
     /// <inheritdoc/>
     public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
-        where TEntity : new()
+        where TEntity : class, new()
     {
-        return new RedisCacheEntity<TEntity>(_multiplexer.GetDatabase(), key);
+        return new RedisCacheEntity<TEntity>(_factory, _multiplexer.GetDatabase(), key);
     }
 
     /// <inheritdoc/>
     public ICacheEntitySet<TEntity> EntitySet<TEntity>()
-        where TEntity : new()
+        where TEntity : class, new()
     {
-        return new RedisCacheEntitySet<TEntity>(_multiplexer.GetDatabase());
+        return new RedisCacheEntitySet<TEntity>(_factory, _multiplexer.GetDatabase());
     }
 }

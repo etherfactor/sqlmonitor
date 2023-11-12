@@ -1,6 +1,9 @@
-﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using Castle.DynamicProxy;
+using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Annotations;
 using StackExchange.Redis;
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
@@ -9,30 +12,44 @@ using System.Web;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
+internal static class RedisHelperProxy
+{
+    internal static readonly ProxyGenerator Generator = new ProxyGenerator();
+}
+
 /// <summary>
 /// Provides helper methods for working with Redis caching.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
-public class RedisHelper<TEntity>
-    where TEntity : new()
+public class RedisHelper<TEntity> : IRedisHelper<TEntity>
+    where TEntity : class, new()
 {
     private const char IdSeparator = '|';
 
+    private readonly IRedisHelperFactory _factory;
+
     private readonly string _tableKey;
-    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _keys;
-    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _indexes;
-    private readonly IEnumerable<(PropertyInfo, ColumnAttribute)> _properties;
+    private IEnumerable<IRedisKeyProperty<TEntity>> _keys = null!;
+    private IEnumerable<IRedisIndexProperty<TEntity>> _indexes = null!;
+    private IEnumerable<IRedisLookupToOtherProperty<TEntity>> _lookupSingles = null!;
+    private IEnumerable<IRedisLookupFromOtherProperty<TEntity>> _lookupSets = null!;
+    private IEnumerable<IRedisProperty<TEntity>> _properties = null!;
 
     /// <summary>
-    /// Use <see cref="RedisHelperCache.For{TEntity}"/> instead!
+    /// Use <see cref="RedisHelperFactory.For{TEntity}"/> instead!
     /// </summary>
-    public RedisHelper()
+    public RedisHelper(IRedisHelperFactory factory)
     {
+        _factory = factory;
+
         //Ensure the entity has a TableAttribute
         var tableAttribute = typeof(TEntity).GetCustomAttribute<TableAttribute>()
             ?? throw new InvalidOperationException($"To cache {typeof(TEntity).Name}, it must be annotated with a {nameof(TableAttribute)}.");
         _tableKey = tableAttribute.Name;
+    }
 
+    internal void Initialize()
+    {
         //Can only serialize public, non-static properties
         var allProperties = typeof(TEntity)
             .GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -44,27 +61,90 @@ public class RedisHelper<TEntity>
         var sortedProperties = clrProperties
             .Select(e =>
             {
-                var Property = e;
-                var Attribute = e.GetCustomAttribute<ColumnAttribute>()!;
-                return (Property, Attribute);
+                var attribute = e.GetCustomAttribute<ColumnAttribute>()!;
+                return (Property: e, Column: attribute);
             })
-            .Where(e => e.Attribute is not null)
-            .OrderBy(e => e.Property.Name).ToList();
+            .Where(e => e.Column is not null)
+            .OrderBy(e => e.Column.Name).ToList();
 
         //Keys define a KeyAttribute
+        var keyIndex = 1;
         _keys = sortedProperties
-            .Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is not null).ToList();
+            .Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is not null)
+            .Select(e => new RedisKeyProperty<TEntity>(e.Property, e.Column, keyIndex++))
+            .ToList();
+        ValidateKeys();
 
-        //While properties do not; keys do not need to be duplicated where properties are stored
+        //Properties are any non-object properties
         _properties = sortedProperties
-            .Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is null).ToList();
+            //.Where(e => e.Property.GetCustomAttribute<KeyAttribute>() is null)
+            .Where(e => !e.Property.PropertyType.IsComplexType())
+            .Select(e => new RedisProperty<TEntity>(e.Property, e.Column))
+            .ToList();
 
         //Indexes define an IndexedAttribute
         _indexes = sortedProperties
-            .Where(e => e.Property.GetCustomAttribute<IndexedAttribute>() is not null).ToList();
+            .Where(e => e.Property.GetCustomAttribute<IndexedAttribute>() is not null)
+            .Select(e => new RedisIndexProperty<TEntity>(e.Property, e.Column))
+            .ToList();
+        ValidateIndexes();
+
+        //Lookups define a LookupAttribute if the current object looks up to another
+        _lookupSingles = allProperties
+            .Select(e =>
+            {
+                var attribute = e.GetCustomAttribute<LookupAttribute>()!;
+                return (Property: e, Attribute: attribute);
+            })
+            .Where(e => e.Attribute is not null)
+            .Select(e => new RedisLookupToOtherProperty<TEntity>(e.Property, e.Attribute, _factory))
+            .ToList();
+        ValidateLookupSingles();
+
+        //Lookups define a LookupIndexAttribute if another object looks up to this one
+        _lookupSets = allProperties
+            .Select(e =>
+            {
+                var Property = e;
+                var Attribute = e.GetCustomAttribute<LookupIndexAttribute>()!;
+                return (Property, Attribute);
+            })
+            .Where(e => e.Attribute is not null)
+            .Select(e => new RedisLookupFromOtherProperty<TEntity>(e.Property, e.Attribute, _factory))
+            .ToList();
+        ValidateLookupSets();
     }
 
+    #region Validation
+    private void ValidateKeys()
+    {
+        if (!_keys.Any())
+            throw new InvalidOperationException($"To cache {typeof(TEntity).Name}, at least one of its properties must be annotated with a {nameof(KeyAttribute)}.");
+    }
+
+    private void ValidateIndexes()
+    {
+    }
+
+    private void ValidateLookupSingles()
+    {
+        //TODO: Make sure that the lookup singles reference keys correctly
+    }
+
+    private void ValidateLookupSets()
+    {
+    }
+    #endregion Validation
+
     #region Keys & Values
+    public IEnumerable<IRedisProperty<TEntity>> GetProperties() => _properties;
+
+    public IEnumerable<IRedisKeyProperty<TEntity>> GetKeyProperties() => _keys;
+
+    public IEnumerable<IRedisLookupToOtherProperty<TEntity>> GetLookupSingleProperties() => _lookupSingles;
+
+    public IEnumerable<IRedisLookupFromOtherProperty<TEntity>> GetLookupSetProperties() => _lookupSets;
+
     /// <summary>
     /// Constructs the Redis key for a given entity.
     /// </summary>
@@ -81,9 +161,14 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="entity">The entity for which to construct the id.</param>
     /// <returns>The entity's id.</returns>
-    private RedisValue GetRecordId(TEntity entity)
+    public RedisValue GetRecordId(TEntity entity)
     {
-        var raw = _keys.Select(e => JsonSerializer.Serialize(e.Item1.GetValue(entity)))
+        return GetRecordId(_keys.Select(e => e.GetValue(entity)!));
+    }
+
+    public RedisValue GetRecordId(IEnumerable<object> keys)
+    {
+        var raw = keys.Select(e => JsonSerializer.Serialize(e))
             .Select(e => Encode(e));
         var value = new RedisValue(string.Join(IdSeparator, raw));
 
@@ -95,9 +180,20 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="entity">The entity for which to calculate the key.</param>
     /// <returns>The Redis key for the entity.</returns>
-    public RedisKey GetSetEntityKey(TEntity entity)
+    public RedisKey GetEntitySetEntityKey(TEntity entity)
     {
         var value = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(entity)}");
+        return value;
+    }
+
+    /// <summary>
+    /// Constructs the Redis key for a given entity in a set, from its ids.
+    /// </summary>
+    /// <param name="keys">The ids of the entity for which to calculate the key. Must be in lexicographical order.</param>
+    /// <returns>The Redis key for the entity.</returns>
+    public RedisKey GetEntitySetEntityKey(object[] keys)
+    {
+        var value = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(keys)}");
         return value;
     }
 
@@ -117,20 +213,48 @@ public class RedisHelper<TEntity>
     /// <param name="index">The indexed property.</param>
     /// <returns>The set's index key.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private RedisKey GetEntitySetIndexKey(PropertyInfo index)
+    private RedisKey GetEntitySetIndexKey(IRedisIndexProperty<TEntity> index)
     {
-        var indexAttribute = index.GetCustomAttribute<IndexedAttribute>()
-            ?? throw new InvalidOperationException($"Can only get an index for an indexed property, specifying an {nameof(IndexedAttribute)}.");
-
-        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:${index.GetCustomAttribute<ColumnAttribute>()!.Name!.ToSnakeCase()}");
+        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:${index.DisplayName.ToSnakeCase()}");
         return keyData;
+    }
+
+    private (RedisKey, RedisValue)? GetEntitySetLookup(IRedisLookupToOtherProperty<TEntity> property, TEntity entity)
+    {
+        if (property.LookupIsList)
+        {
+            var maybeLookupValues = property.LookupAssociations.Select(e => e.Key)
+                .OrderBy(e => e.DisplayName)
+                .Select(e => e.GetValue(entity));
+
+            if (maybeLookupValues.All(e => e is not null))
+            {
+                var lookupValues = maybeLookupValues.Select(e => JsonSerializer.Serialize(e))
+                    .Select(e => Encode(e));
+
+                var lookupTableKey = property.PropertyType.GetCustomAttribute<TableAttribute>()!.Name;
+
+                var redisKeyValue = new RedisValue(string.Join(IdSeparator, lookupValues));
+                var redisKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{lookupTableKey}:{redisKeyValue}:${property.LookupProperty?.DisplayName?.ToSnakeCase()}");
+
+                var redisValue = GetRecordId(entity);
+
+                return (redisKey, redisValue);
+            }
+        }
+        else if (property.LookupIsRecord)
+        {
+            throw new NotImplementedException();
+        }
+
+        return null;
     }
 
     /// <summary>
     /// Generate a temporary key.
     /// </summary>
     /// <returns>The temporary key.</returns>
-    private RedisKey GetTempKey()
+    internal RedisKey GetTempKey()
     {
         var guid = Guid.NewGuid();
         var tempKey = new RedisKey($"{Constants.Cache.SchemaName}:$$temp:{guid}");
@@ -138,13 +262,26 @@ public class RedisHelper<TEntity>
     }
 
     /// <summary>
-    /// Constructs the Redis properties for the entity.
+    /// Constructs the Redis properties for reading the entity.
     /// </summary>
     /// <returns>The Redis properties.</returns>
-    private RedisValue[] GetProperties()
+    private RedisValue[] GetReadProperties()
     {
-        var propertyNames = "#".Yield()
-            .Concat(_properties.Select(e => $"{Constants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.Item1.Name.ToSnakeCase()}"))
+        var propertyNames = _properties.Select(e => e.DisplayName.ToSnakeCase())
+            .Select(e => new RedisValue(e))
+            .ToArray();
+
+        return propertyNames;
+    }
+
+    /// <summary>
+    /// Constructs the Redis properties for listing the entity.
+    /// </summary>
+    /// <returns>The Redis properties.</returns>
+    private RedisValue[] GetListProperties()
+    {
+        var propertyNames = _properties
+            .Select(e => $"{Constants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.DisplayName.ToSnakeCase()}")
             .Select(e => new RedisValue(e))
             .ToArray();
 
@@ -185,10 +322,10 @@ public class RedisHelper<TEntity>
     private HashEntry[] Serialize(TEntity entity)
     {
         var propertyValues = _properties
-            .Where(e => e.Item1.CanRead)
             .Select(e => new HashEntry(
-            e.Item1.Name.ToSnakeCase(),
-            JsonSerializer.Serialize(e.Item1.GetValue(entity))))
+                e.DisplayName.ToSnakeCase(),
+                JsonSerializer.Serialize(e.GetValue(entity)))
+            )
             .ToArray();
 
         return propertyValues;
@@ -199,36 +336,36 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="data">The data to deserialize.</param>
     /// <returns>The deserialized entity.</returns>
-    private TEntity Deserialize(RedisValue[] data)
+    private TEntity? Deserialize(IDatabase database, RedisValue[] data, ConcurrentDictionary<string, object> savedObjects)
     {
-        var entity = new TEntity();
-
-        var keyData = data[0].ToString();
-        var keyRawValues = keyData.Split(IdSeparator);
-
-        int index = 0;
-        foreach (var tuple in _keys)
+        if (data.Any(e => e.HasValue))
         {
-            var key = tuple.Item1;
-            var keyValue = JsonSerializer.Deserialize(Decode(keyRawValues[index]), key.PropertyType);
-            if (key.CanWrite)
-                key.SetValue(entity, keyValue);
+            var interceptor = GetInterceptor(database, savedObjects);
+            var entity = RedisHelperProxy.Generator.CreateClassProxy<TEntity>(interceptor);
 
-            index++;
+            var values = new Dictionary<string, object?>();
+
+            int index = 0;
+            foreach (var property in _properties)
+            {
+                if (data[index].ToString().Length > 0)
+                {
+                    var propertyValue = JsonSerializer.Deserialize(data[index].ToString(), property.PropertyType);
+                    property.SetValue(entity, propertyValue);
+                    values.Add(property.DisplayName, propertyValue);
+                }
+                index++;
+            }
+
+            interceptor.SetInitialValues(values);
+            interceptor.Enable();
+
+            return entity;
         }
-
-        index = 1;
-        foreach (var tuple in _properties)
+        else
         {
-            var property = tuple.Item1;
-            var propertyValue = JsonSerializer.Deserialize(data[index].ToString(), property.PropertyType);
-            if (property.CanWrite)
-                property.SetValue(entity, propertyValue);
-
-            index++;
+            return default;
         }
-
-        return entity;
     }
 
     /// <summary>
@@ -236,15 +373,18 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="data">The data to deserialize.</param>
     /// <returns>The deserialized entities.</returns>
-    private List<TEntity> DeserializeSet(RedisValue[] data)
+    private List<TEntity> DeserializeSet(IDatabase database, RedisValue[] data, ConcurrentDictionary<string, object> savedObjects)
     {
         var entities = new List<TEntity>();
-        var chunks = data.Chunk(_properties.Count() + 1);
+        var chunks = data.Chunk(_properties.Count());
 
         foreach (var chunk in chunks)
         {
-            var entity = Deserialize(chunk);
-            entities.Add(entity);
+            var entity = Deserialize(database, chunk, savedObjects);
+            if (entity is not null)
+            {
+                entities.Add(entity);
+            }
         }
 
         return entities;
@@ -258,17 +398,12 @@ public class RedisHelper<TEntity>
     /// <param name="key">The key of the entity being set.</param>
     /// <param name="entity">The entity to set.</param>
     /// <returns>The set action.</returns>
-    public Func<IDatabase, Task> GetSetAction(EntityCacheKey<TEntity> key, TEntity entity)
+    public void AppendSetAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key, TEntity entity)
     {
         var entityKey = GetEntityKey(key);
         var recordData = Serialize(entity);
 
-        var action = async (IDatabase database) =>
-        {
-            await database.HashSetAsync(entityKey, recordData);
-        };
-
-        return action;
+        _ = transaction.HashSetAsync(entityKey, recordData);
     }
 
     /// <summary>
@@ -276,15 +411,22 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="key">The key of the entity being deleted.</param>
     /// <returns>The delete action.</returns>
-    public Func<IDatabase, Task> GetDeleteAction(EntityCacheKey<TEntity> key)
+    public void AppendDeleteAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key)
     {
         var entityKey = GetEntityKey(key);
 
-        var action = async (IDatabase database) =>
-        {
-            await database.KeyDeleteAsync(entityKey);
-        };
+        _ = transaction.KeyDeleteAsync(entityKey);
+    }
 
+    /// <summary>
+    /// Constructs an action to read an entity from Redis.
+    /// </summary>
+    /// <param name="key">The key of the entity being read.</param>
+    /// <returns>The read action.</returns>
+    public Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, EntityCacheKey<TEntity> key, ConcurrentDictionary<string, object>? savedObjects = null)
+    {
+        var entityKey = GetEntityKey(key);
+        var action = AppendReadAction(database, transaction, entityKey, savedObjects);
         return action;
     }
 
@@ -293,24 +435,36 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="key">The key of the entity being read.</param>
     /// <returns>The read action.</returns>
-    public Func<IDatabase, Task<TEntity?>> GetReadAction(EntityCacheKey<TEntity> key)
+    public Func<Task<TEntity?>> AppendReadAction(IDatabase database, ITransaction transaction, RedisKey key, ConcurrentDictionary<string, object>? savedObjects = null)
     {
-        var entityKey = GetEntityKey(key);
-        var properties = GetProperties();
+        savedObjects ??= new ConcurrentDictionary<string, object>();
 
-        var action = async (IDatabase database) =>
+        var properties = GetReadProperties();
+
+        var valuesTask = transaction.HashGetAsync(key, properties);
+
+        return async () =>
         {
-            var values = await database.HashGetAsync(entityKey, properties);
-            if (values.Any(e => e.ToString() is not null))
+            var values = await valuesTask;
+            var entity = Deserialize(database, values, savedObjects);
+
+            if (entity is not null)
             {
-                var entity = Deserialize(values);
-                return entity;
+                var entityKey = GetEntitySetEntityKey(entity).ToString();
+                if (savedObjects.TryAdd(entityKey, entity))
+                {
+                    return entity;
+                }
+                else
+                {
+                    return (TEntity)savedObjects[entityKey];
+                }
             }
-
-            return default;
+            else
+            {
+                return default;
+            }
         };
-
-        return action;
     }
 
     /// <summary>
@@ -318,32 +472,136 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="entity">The entity being added.</param>
     /// <returns>The add action.</returns>
-    public Func<IDatabase, Task> GetAddAction(TEntity entity)
+    public void AppendAddAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object>? savedObjects = null)
     {
-        var setKey = GetSetEntityKey(entity);
+        savedObjects ??= new ConcurrentDictionary<string, object>();
+
+        (this as IRedisHelper<TEntity>).BuildAddAction(database, transaction, entity, savedObjects);
+    }
+
+    void IRedisHelper<TEntity>.BuildAddAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object> savedObjects)
+    {
+        var setKey = GetEntitySetEntityKey(entity);
         var recordData = Serialize(entity);
 
         var primaryKey = GetEntitySetPrimaryKey();
         var id = GetRecordId(entity);
 
-        var action = async (IDatabase database) =>
-        {
-            var transaction = database.CreateTransaction();
-            _ = transaction.HashSetAsync(setKey, recordData);
-            _ = transaction.SortedSetAddAsync(primaryKey, id, 0);
+        _ = transaction.HashSetAsync(setKey, recordData);
+        _ = transaction.SortedSetAddAsync(primaryKey, id, 0);
 
-            foreach (var index in _indexes)
+        var readTransaction = database.CreateTransaction();
+        var readTask = AppendReadAction(database, readTransaction, setKey, null);
+        readTransaction.Execute();
+        var entityInCache = readTask().Result;
+
+        foreach (var index in _indexes)
+        {
+            var indexKey = GetEntitySetIndexKey(index);
+            var indexValue = index.GetValue(entity);
+            var indexScore = indexValue!.TryGetScore();
+            _ = transaction.SortedSetAddAsync(indexKey, id, indexScore);
+        }
+
+        foreach (var lookup in _lookupSingles)
+        {
+            var maybeSetLookup = GetEntitySetLookup(lookup, entity);
+            if (maybeSetLookup != null)
             {
-                var indexKey = GetEntitySetIndexKey(index.Item1);
-                var indexValue = index.Item1.GetValue(entity);
-                var indexScore = indexValue!.TryGetScore();
-                _ = transaction.SortedSetAddAsync(indexKey, id, indexScore);
+                var (indexKey, indexValue) = maybeSetLookup.Value;
+                _ = transaction.SortedSetAddAsync(indexKey, indexValue, 0);
             }
 
-            await transaction.ExecuteAsync();
-        };
+            var lookupType = lookup.PropertyType;
+            var lookupValue = lookup.GetValue(entity);
+            if (lookupValue is not null)
+            {
+                var helper = typeof(RedisHelper<TEntity>)
+                    .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .MakeGenericMethod(lookupType);
 
-        return action;
+                helper.Invoke(this, new object[] { database, transaction, lookupValue, savedObjects });
+            }
+            else
+            {
+                if (entityInCache is not null)
+                {
+                    var entityInCacheValue = lookup.GetValue(entityInCache);
+                    if (entityInCacheValue is not null)
+                    {
+                        var removeHelper = typeof(RedisHelper<TEntity>)
+                            .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                            .MakeGenericMethod(lookupType);
+
+                        removeHelper.Invoke(this, new object[] { database, transaction, entityInCacheValue, new ConcurrentDictionary<string, object>() });
+                    }
+                }
+            }
+        }
+
+        foreach (var lookup in _lookupSets)
+        {
+            var lookupType = lookup.PropertyType.GenericTypeArguments[0];
+            var lookupValue = lookup.GetValue(entity) as IEnumerable<object>;
+            if (lookupValue is not null)
+            {
+                var helper = typeof(RedisHelper<TEntity>)
+                    .GetMethod(nameof(BuildAddActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .MakeGenericMethod(lookupType);
+
+                foreach (var value in lookupValue)
+                {
+                    helper.Invoke(this, new object[] { database, transaction, value, savedObjects });
+                }
+
+                if (entityInCache is not null)
+                {
+                    var entityInCacheValue = lookup.GetValue(entityInCache) as IEnumerable<object>;
+                    if (entityInCacheValue is not null)
+                    {
+                        var removeHelper = typeof(RedisHelper<TEntity>)
+                            .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                            .MakeGenericMethod(lookupType);
+
+                        var subHelperCreate = _factory.GetType()
+                            .GetMethod(nameof(_factory.CreateHelper), BindingFlags.Public | BindingFlags.Instance)!
+                            .MakeGenericMethod(lookupType);
+
+                        var subHelper = subHelperCreate.Invoke(_factory, new object?[] { })!;
+
+                        var getSubRecordId = subHelper.GetType()
+                            .GetMethod(nameof(GetRecordId), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, new Type[] { lookupType });
+
+                        var missingValues = entityInCacheValue
+                            .Where(e =>
+                                !entityInCacheValue.Any(l =>
+                                    getSubRecordId?.Invoke(subHelper, new object?[] { l })?.ToString()
+                                    == getSubRecordId?.Invoke(subHelper, new object[] { e })?.ToString()
+                                )
+                            );
+
+                        foreach (var value in missingValues)
+                        {
+                            removeHelper.Invoke(this, new object[] { database, transaction, value, new ConcurrentDictionary<string, object>() });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void BuildAddActionLookup<TSubEntity>(IDatabase database, ITransaction transaction, TSubEntity entity, ConcurrentDictionary<string, object> savedObjects)
+        where TSubEntity : class, new()
+    {
+        var helper = _factory.CreateHelper<TSubEntity>();
+
+        var entityKey = helper.GetEntitySetEntityKey(entity);
+
+        //Only write the record to Redis if it wasn't written already
+        if (savedObjects.TryAdd(entityKey.ToString(), entity!))
+        {
+            helper.BuildAddAction(database, transaction, entity, savedObjects);
+        }
     }
 
     /// <summary>
@@ -351,30 +609,80 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="entity">The entity being removed.</param>
     /// <returns>The remove action.</returns>
-    public Func<IDatabase, Task> GetRemoveAction(TEntity entity)
+    public void AppendRemoveAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object>? savedObjects = null)
     {
-        var setKey = GetSetEntityKey(entity);
-        var recordData = Serialize(entity);
+        savedObjects ??= new ConcurrentDictionary<string, object>();
+
+        (this as IRedisHelper<TEntity>).BuildRemoveAction(database, transaction, entity, savedObjects);
+    }
+
+    void IRedisHelper<TEntity>.BuildRemoveAction(IDatabase database, ITransaction transaction, TEntity entity, ConcurrentDictionary<string, object> savedObjects)
+    {
+        var setKey = GetEntitySetEntityKey(entity);
 
         var primaryKey = GetEntitySetPrimaryKey();
         var id = GetRecordId(entity);
 
-        var action = async (IDatabase database) =>
-        {
-            var transaction = database.CreateTransaction();
-            _ = transaction.KeyDeleteAsync(setKey);
-            _ = transaction.SortedSetRemoveAsync(primaryKey, id);
+        _ = transaction.KeyDeleteAsync(setKey);
+        _ = transaction.SortedSetRemoveAsync(primaryKey, id);
 
-            foreach (var index in _indexes)
+        foreach (var index in _indexes)
+        {
+            var indexKey = GetEntitySetIndexKey(index);
+            _ = transaction.SortedSetRemoveAsync(indexKey, id);
+        }
+
+        foreach (var lookup in _lookupSingles)
+        {
+            var maybeSetLookup = GetEntitySetLookup(lookup, entity);
+            if (maybeSetLookup != null)
             {
-                var indexKey = GetEntitySetIndexKey(index.Item1);
-                _ = transaction.SortedSetRemoveAsync(indexKey, id);
+                var (indexKey, indexValue) = maybeSetLookup.Value;
+                _ = transaction.KeyDeleteAsync(indexKey);
             }
 
-            await transaction.ExecuteAsync();
-        };
+            var lookupValue = lookup.GetValue(entity);
+            if (lookupValue is not null)
+            {
+                var lookupType = lookupValue.GetType();
+                var helper = typeof(RedisHelper<TEntity>)
+                    .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .MakeGenericMethod(lookupType);
 
-        return action;
+                helper.Invoke(this, new object[] { database, transaction, lookupValue, savedObjects });
+            }
+        }
+
+        foreach (var lookup in _lookupSets)
+        {
+            var lookupValue = lookup.GetValue(entity) as IEnumerable<object>;
+            if (lookupValue is not null)
+            {
+                var lookupType = lookupValue.GetType().GenericTypeArguments[0];
+                var helper = typeof(RedisHelper<TEntity>)
+                    .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .MakeGenericMethod(lookupType);
+
+                foreach (var value in lookupValue)
+                {
+                    helper.Invoke(this, new object[] { database, transaction, value, savedObjects });
+                }
+            }
+        }
+    }
+
+    private void BuildRemoveActionLookup<TSubEntity>(IDatabase database, ITransaction transaction, TSubEntity entity, ConcurrentDictionary<string, object> savedObjects)
+        where TSubEntity : class, new()
+    {
+        var helper = _factory.CreateHelper<TSubEntity>();
+
+        var entityKey = helper.GetEntitySetEntityKey(entity);
+
+        //Only write the record to Redis if it wasn't written already
+        if (savedObjects.TryAdd(entityKey.ToString(), entity!))
+        {
+            helper.BuildRemoveAction(database, transaction, entity, savedObjects);
+        }
     }
 
     /// <summary>
@@ -382,78 +690,117 @@ public class RedisHelper<TEntity>
     /// </summary>
     /// <param name="filters">The filters to apply to the set.</param>
     /// <returns>The list action.</returns>
-    public Func<IDatabase, Task<List<TEntity>>> GetListAction(IEnumerable<ICacheEntitySetFilter<TEntity>> filters)
+    public Func<Task<List<TEntity>>> AppendListAction(
+        IDatabase database,
+        ITransaction transaction,
+        IEnumerable<ICacheEntitySetFilter<TEntity>>? filters = null,
+        RedisKey? lookupKey = null,
+        ConcurrentDictionary<string, object>? savedObjects = null)
     {
+        if (filters is not null && lookupKey is not null)
+            throw new ArgumentException($"May only specify either {nameof(filters)} or {nameof(lookupKey)}");
+
+        filters ??= Enumerable.Empty<ICacheEntitySetFilter<TEntity>>();
+        savedObjects ??= new ConcurrentDictionary<string, object>();
+
         var primaryKey = GetEntitySetPrimaryKey();
-        var properties = GetProperties();
+        var properties = GetListProperties();
+
+        var useKeyDelete = false;
+        var useKey = lookupKey ?? primaryKey;
 
         if (filters.Any())
         {
-            var action = async (IDatabase database) =>
+            var allTempKeys = new List<RedisKey>();
+            foreach (var filter in filters)
             {
-                var transaction = database.CreateTransaction();
+                var indexReflectionProperty = filter.GetProperty();
+                var indexProperty = _indexes.Single(e => e.PropertyName == indexReflectionProperty.Name);
+                var indexKey = GetEntitySetIndexKey(indexProperty);
 
-                var allTempKeys = new List<RedisKey>();
-                foreach (var filter in filters)
-                {
-                    var indexProperty = filter.GetProperty();
-                    var indexKey = GetEntitySetIndexKey(indexProperty);
+                var startScore = filter.GetStartScore();
+                var endScore = filter.GetEndScore();
+                var exclusivity =
+                    filter.GetStartInclusivity() && filter.GetEndInclusivity() ? Exclude.None
+                    : filter.GetStartInclusivity() ? Exclude.Stop
+                    : filter.GetEndInclusivity() ? Exclude.Start
+                    : Exclude.Both;
 
-                    var startScore = filter.GetStartScore();
-                    var endScore = filter.GetEndScore();
-                    var exclusivity =
-                        filter.GetStartInclusivity() && filter.GetEndInclusivity() ? Exclude.None
-                        : filter.GetStartInclusivity() ? Exclude.Stop
-                        : filter.GetEndInclusivity() ? Exclude.Start
-                        : Exclude.Both;
+                var tempKey = GetTempKey();
+                allTempKeys.Add(tempKey);
 
-                    var tempKey = GetTempKey();
-                    allTempKeys.Add(tempKey);
+                _ = transaction.SortedSetRangeAndStoreAsync(
+                    indexKey,
+                    tempKey,
+                    startScore,
+                    endScore,
+                    exclude: exclusivity,
+                    sortedSetOrder: SortedSetOrder.ByScore);
+            }
 
-                    _ = transaction.SortedSetRangeAndStoreAsync(
-                        indexKey,
-                        tempKey,
-                        startScore,
-                        endScore,
-                        sortedSetOrder: SortedSetOrder.ByScore);
-                }
+            var finalTempKey = GetTempKey();
+            _ = transaction.SortedSetCombineAndStoreAsync(SetOperation.Intersect, finalTempKey, allTempKeys.ToArray());
+            _ = transaction.KeyDeleteAsync(allTempKeys.ToArray());
 
-                var finalTempKey = GetTempKey();
-                _ = transaction.SortedSetCombineAndStoreAsync(SetOperation.Intersect, finalTempKey, allTempKeys.ToArray());
-                _ = transaction.KeyDeleteAsync(allTempKeys.ToArray());
-
-                var valuesTask = transaction.SortAsync(
-                    finalTempKey,
-                    sortType: SortType.Numeric,
-                    by: "nosort",
-                    get: properties);
-                _ = transaction.KeyDeleteAsync(finalTempKey);
-
-                await transaction.ExecuteAsync();
-                var values = await valuesTask;
-
-                var entities = DeserializeSet(values);
-                return entities;
-            };
-
-            return action;
+            useKeyDelete = true;
+            useKey = finalTempKey;
         }
-        else
+
+        var entitiesTask = BuildListAction(database, transaction, useKey, useKeyDelete, savedObjects);
+
+        return async () =>
         {
-            var action = async (IDatabase database) =>
-            {
-                var values = await database.SortAsync(
-                    primaryKey,
-                    sortType: SortType.Numeric,
-                    by: "nosort",
-                    get: properties);
+            return await entitiesTask();
+        };
+    }
 
-                var entities = DeserializeSet(values);
-                return entities;
-            };
+    private Func<Task<List<TEntity>>> BuildListAction(IDatabase database, ITransaction transaction, RedisKey listKey, bool deleteListKey, ConcurrentDictionary<string, object> savedObjects)
+    {
+        var properties = GetListProperties();
 
-            return action;
+        var valuesTask = transaction.SortAsync(
+            listKey,
+            sortType: SortType.Numeric,
+            by: "nosort",
+            get: properties);
+
+        if (deleteListKey)
+        {
+            _ = transaction.KeyDeleteAsync(listKey);
         }
+
+        var action = async () =>
+        {
+            var values = await valuesTask;
+
+            var entities = DeserializeSet(database, values, savedObjects);
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                var entity = entities[i];
+                var entityKey = GetEntitySetEntityKey(entity).ToString();
+                if (!savedObjects.TryAdd(entityKey, entity!))
+                {
+                    entities[i] = (TEntity)savedObjects[entityKey];
+                }
+            }
+
+            return entities;
+        };
+
+        return action;
+    }
+
+    private RedisLazyLoadingInterceptor<TEntity> GetInterceptor(IDatabase database, ConcurrentDictionary<string, object> savedObjects)
+    {
+        var interceptor = new RedisLazyLoadingInterceptor<TEntity>(_factory, database, savedObjects);
+
+        return interceptor;
     }
     #endregion Actions
+
+    public string GetTableName()
+    {
+        return _tableKey;
+    }
 }

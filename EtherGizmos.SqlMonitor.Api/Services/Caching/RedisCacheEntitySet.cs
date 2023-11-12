@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using StackExchange.Redis;
 using System.Linq.Expressions;
@@ -11,12 +12,14 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
 internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
-    where TEntity : new()
+    where TEntity : class, new()
 {
+    private readonly IRedisHelperFactory _factory;
     private readonly IDatabase _database;
 
-    public RedisCacheEntitySet(IDatabase database)
+    public RedisCacheEntitySet(IRedisHelperFactory factory, IDatabase database)
     {
+        _factory = factory;
         _database = database;
     }
 
@@ -26,9 +29,29 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetAddAction(entity);
-        await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        serializer.AppendAddAction(_database, transaction, entity);
+
+        await transaction.ExecuteAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<TEntity?> GetAsync(object[] keys, CancellationToken cancellationToken = default)
+    {
+        if (keys.Length == 0)
+            throw new ArgumentException("Must provide at least one key.", nameof(keys));
+
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var entitySetKey = serializer.GetEntitySetEntityKey(keys);
+
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendReadAction(_database, transaction, entitySetKey);
+
+        await transaction.ExecuteAsync();
+        return await action();
     }
 
     /// <inheritdoc/>
@@ -37,17 +60,24 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetRemoveAction(entity);
-        await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        serializer.AppendRemoveAction(_database, transaction, entity);
+
+        await transaction.ExecuteAsync();
     }
 
     /// <inheritdoc/>
     public async Task<List<TEntity>> ToListAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetListAction(Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
-        return await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendListAction(_database, transaction, filters: Enumerable.Empty<ICacheEntitySetFilter<TEntity>>());
+
+        await transaction.ExecuteAsync();
+        return await action();
     }
 
     /// <inheritdoc/>
@@ -63,8 +93,12 @@ internal class RedisCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     async Task<List<TEntity>> ICanList<TEntity>.ToListAsync(IEnumerable<ICacheEntitySetFilter<TEntity>> filters, CancellationToken cancellationToken)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetListAction(filters);
-        return await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendListAction(_database, transaction, filters);
+
+        await transaction.ExecuteAsync();
+        return await action();
     }
 }

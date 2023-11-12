@@ -42,7 +42,7 @@ public static class CacheKey
     /// <param name="entity">The entity.</param>
     /// <returns>The record key.</returns>
     public static EntitySetRecordCacheKey<TEntity> ForEntitySetRecord<TEntity>(TEntity entity)
-        where TEntity : new()
+        where TEntity : class, new()
     {
         return new EntitySetRecordCacheKey<TEntity>(entity);
     }

@@ -44,15 +44,6 @@ public class InstanceDTO
     [Display(Name = "database")]
     public string? Database { get; set; }
 
-    [Display(Name = "query_blacklists")]
-    public List<InstanceQueryDTO> QueryBlacklists { get; set; } = new List<InstanceQueryDTO>();
-
-    [Display(Name = "query_whitelists")]
-    public List<InstanceQueryDTO> QueryWhitelists { get; set; } = new List<InstanceQueryDTO>();
-
-    [Display(Name = "query_database_overrides")]
-    public List<InstanceQueryDatabaseDTO> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabaseDTO>();
-
     public Task EnsureValid(IQueryable<Instance> records)
     {
         return Task.CompletedTask;
@@ -78,9 +69,6 @@ public static class ForInstanceDTO
         toDto.MapMember(dest => dest.Address, src => src.Address);
         toDto.MapMember(dest => dest.Port, src => src.Port);
         toDto.MapMember(dest => dest.Database, src => src.Database);
-        toDto.MapMember(dest => dest.QueryBlacklists, src => src.QueryBlacklists);
-        toDto.MapMember(dest => dest.QueryWhitelists, src => src.QueryWhitelists);
-        toDto.MapMember(dest => dest.QueryDatabaseOverrides, src => src.QueryDatabaseOverrides);
 
         var fromDto = @this.CreateMap<InstanceDTO, Instance>();
         fromDto.IgnoreAllMembers();
@@ -97,9 +85,6 @@ public static class ForInstanceDTO
         fromDto.MapMember(dest => dest.Address, src => src.Address);
         fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.Database, src => src.Database);
-        fromDto.MapMember(dest => dest.QueryBlacklists, src => src.QueryBlacklists);
-        fromDto.MapMember(dest => dest.QueryWhitelists, src => src.QueryWhitelists);
-        fromDto.MapMember(dest => dest.QueryDatabaseOverrides, src => src.QueryDatabaseOverrides);
 
         return @this;
     }
@@ -123,9 +108,6 @@ public static class ForInstanceDTO
         entity.PropertyWithAnnotations(e => e.Address);
         entity.PropertyWithAnnotations(e => e.Port);
         entity.PropertyWithAnnotations(e => e.Database);
-        entity.CollectionPropertyWithAnnotations(e => e.QueryBlacklists);
-        entity.CollectionPropertyWithAnnotations(e => e.QueryWhitelists);
-        entity.CollectionPropertyWithAnnotations(e => e.QueryDatabaseOverrides);
 
         return @this;
     }

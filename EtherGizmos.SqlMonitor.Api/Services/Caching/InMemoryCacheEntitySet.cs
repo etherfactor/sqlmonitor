@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,11 +13,10 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
 internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
-    where TEntity : new()
+    where TEntity : class, new()
 {
-    private static readonly IDictionary<string, TEntity> _entities = new Dictionary<string, TEntity>();
-
     private readonly IServiceProvider _serviceProvider;
+    private static readonly IDictionary<string, TEntity> _entities = new Dictionary<string, TEntity>();
 
     public InMemoryCacheEntitySet(
         IServiceProvider serviceProvider)
@@ -27,8 +27,10 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     /// <inheritdoc/>
     public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        var helper = RedisHelperCache.For<TEntity>();
-        var id = helper.GetSetEntityKey(entity).ToString();
+        var factory = _serviceProvider.GetRequiredService<IRedisHelperFactory>();
+
+        var helper = factory.CreateHelper<TEntity>();
+        var id = helper.GetEntitySetEntityKey(entity).ToString();
 
         //Forcefully detach the entity from any contexts
         var addEntity = JsonSerializer.Deserialize<TEntity>(JsonSerializer.Serialize(entity))!;
@@ -42,10 +44,31 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
     }
 
     /// <inheritdoc/>
+    public Task<TEntity?> GetAsync(object[] keys, CancellationToken cancellationToken = default)
+    {
+        if (keys.Length == 0)
+            throw new ArgumentException("Must provide at least one key.", nameof(keys));
+
+        var factory = _serviceProvider.GetRequiredService<IRedisHelperFactory>();
+
+        var helper = factory.CreateHelper<TEntity>();
+        var entitySetKey = helper.GetEntitySetEntityKey(keys).ToString();
+
+        if (_entities.ContainsKey(entitySetKey))
+        {
+            return Task.FromResult<TEntity?>(_entities[entitySetKey]);
+        }
+
+        return Task.FromResult<TEntity?>(null);
+    }
+
+    /// <inheritdoc/>
     public Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        var helper = RedisHelperCache.For<TEntity>();
-        var id = helper.GetSetEntityKey(entity).ToString();
+        var factory = _serviceProvider.GetRequiredService<IRedisHelperFactory>();
+
+        var helper = factory.CreateHelper<TEntity>();
+        var id = helper.GetEntitySetEntityKey(entity).ToString();
         if (_entities.ContainsKey(id))
         {
             _entities.Remove(id);

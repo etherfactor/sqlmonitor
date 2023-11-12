@@ -2,8 +2,8 @@
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
-[Table("instance_query_whitelists")]
-public class InstanceQueryWhitelist
+[Table("query_instance_databases")]
+public class QueryInstanceDatabase
 {
     [Column("instance_id")]
     public virtual Guid InstanceId { get; set; }
@@ -15,12 +15,16 @@ public class InstanceQueryWhitelist
 
     public virtual Query Query { get; set; }
 
+    [Column("database_override")]
+    public virtual string DatabaseOverride { get; set; }
+
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
-    public InstanceQueryWhitelist()
+    public QueryInstanceDatabase()
     {
         Instance = null!;
         Query = null!;
+        DatabaseOverride = null!;
     }
 }

@@ -28,15 +28,19 @@ internal static class Global
         services.AddSingleton(typeof(ILogger<>), typeof(ProxyLogger<>));
 
         services.AddScoped<InstancesController>();
+        services.AddScoped<MetricsController>();
         services.AddScoped<PermissionsController>();
         services.AddScoped<QueriesController>();
         services.AddScoped<SecurablesController>();
         services.AddScoped<UsersController>();
 
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
+        services.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+
         services.AddSingleton<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
         services.AddSingleton<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);
+        services.AddSingleton<IMetricService>(provider => provider.GetRequiredService<Mock<IMetricService>>().Object);
         services.AddSingleton<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
         services.AddSingleton<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
         services.AddSingleton<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);

@@ -23,7 +23,7 @@ public interface IDistributedRecordCache
     /// <param name="key">The key indicating where in the cache the entity is stored.</param>
     /// <returns>The cache entity helper.</returns>
     ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
-        where TEntity : new();
+        where TEntity : class, new();
 
     /// <summary>
     /// Provides means to cache and retrieve record sets in Redis.
@@ -31,5 +31,5 @@ public interface IDistributedRecordCache
     /// <typeparam name="TEntity">The type of entity being stored.</typeparam>
     /// <returns>The cache entity set helper.</returns>
     ICacheEntitySet<TEntity> EntitySet<TEntity>()
-        where TEntity : new();
+        where TEntity : class, new();
 }

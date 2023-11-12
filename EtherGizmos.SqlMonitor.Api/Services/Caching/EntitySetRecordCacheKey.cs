@@ -7,7 +7,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity.</typeparam>
 public struct EntitySetRecordCacheKey<TEntity> : ICacheKey
-    where TEntity : new()
+    where TEntity : class, new()
 {
     /// <inheritdoc/>
     public readonly string KeyName { get; }
@@ -17,8 +17,8 @@ public struct EntitySetRecordCacheKey<TEntity> : ICacheKey
     /// </summary>
     internal EntitySetRecordCacheKey(TEntity entity)
     {
-        var helper = RedisHelperCache.For<TEntity>();
-        var setKey = helper.GetSetEntityKey(entity);
+        var helper = RedisHelperFactory.Instance.CreateHelper<TEntity>();
+        var setKey = helper.GetEntitySetEntityKey(entity);
         KeyName = setKey.ToString();
     }
 

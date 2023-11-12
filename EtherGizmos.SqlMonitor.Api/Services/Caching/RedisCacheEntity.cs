@@ -8,13 +8,15 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 /// </summary>
 /// <typeparam name="TEntity">The type of entity being cached.</typeparam>
 internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
-    where TEntity : new()
+    where TEntity : class, new()
 {
+    private readonly IRedisHelperFactory _factory;
     private readonly IDatabase _database;
     private readonly EntityCacheKey<TEntity> _key;
 
-    public RedisCacheEntity(IDatabase database, EntityCacheKey<TEntity> key)
+    public RedisCacheEntity(IRedisHelperFactory factory, IDatabase database, EntityCacheKey<TEntity> key)
     {
+        _factory = factory;
         _database = database;
         _key = key;
     }
@@ -22,17 +24,24 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
     /// <inheritdoc/>
     public async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetDeleteAction(_key);
-        await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        serializer.AppendDeleteAction(_database, transaction, _key);
+
+        await transaction.ExecuteAsync();
     }
 
     /// <inheritdoc/>
     public async Task<TEntity?> GetAsync(CancellationToken cancellationToken = default)
     {
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetReadAction(_key);
-        return await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        var action = serializer.AppendReadAction(_database, transaction, _key);
+
+        await transaction.ExecuteAsync();
+        return await action();
     }
 
     /// <inheritdoc/>
@@ -41,8 +50,11 @@ internal class RedisCacheEntity<TEntity> : ICacheEntity<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var serializer = RedisHelperCache.For<TEntity>();
-        var action = serializer.GetSetAction(_key, entity);
-        await action(_database);
+        var serializer = _factory.CreateHelper<TEntity>();
+
+        var transaction = _database.CreateTransaction();
+        serializer.AppendSetAction(_database, transaction, _key, entity);
+
+        await transaction.ExecuteAsync();
     }
 }

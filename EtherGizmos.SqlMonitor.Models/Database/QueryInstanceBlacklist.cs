@@ -2,8 +2,8 @@
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
-[Table("instance_query_blacklists")]
-public class InstanceQueryBlacklist
+[Table("query_instance_blacklists")]
+public class QueryInstanceBlacklist
 {
     [Column("instance_id")]
     public virtual Guid InstanceId { get; set; }
@@ -18,7 +18,7 @@ public class InstanceQueryBlacklist
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
-    public InstanceQueryBlacklist()
+    public QueryInstanceBlacklist()
     {
         Instance = null!;
         Query = null!;

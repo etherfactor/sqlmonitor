@@ -49,6 +49,17 @@ public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
 
         var instanceQueries = allInstances.CrossJoin(queriesToRun);
 
+        var allMetrics = new List<List<QueryMetric>>();
+        foreach (var queryToRun in queriesToRun)
+        {
+            allMetrics.Add(queryToRun.Metrics);
+            foreach (var queryMetric in queryToRun.Metrics)
+            {
+                _ = queryMetric.Metric;
+                _ = queryMetric.Query;
+            }
+        }
+
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
         var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{RunQueryConsumer.Queue}"));
 
@@ -66,8 +77,8 @@ public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
 
                 await endpoint.Send(new RunQuery()
                 {
-                    Instance = instance,
-                    Query = query
+                    InstanceId = instance.Id,
+                    QueryId = query.Id
                 }, cancellationToken);
 
                 var updateScope = scope.CreateScope().ServiceProvider;

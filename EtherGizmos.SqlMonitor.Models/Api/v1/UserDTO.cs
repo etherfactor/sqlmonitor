@@ -48,8 +48,8 @@ public class UserDTO
     [Display(Name = "is_administrator")]
     public bool? IsAdministrator { get; set; } = false;
 
-    [Display(Name = "last_login_at_utc")]
-    public DateTimeOffset? LastLoginAtUtc { get; set; }
+    [Display(Name = "last_login_at")]
+    public DateTimeOffset? LastLoginAt { get; set; }
 
     public Task EnsureValid(IQueryable<User> records)
     {
@@ -81,7 +81,7 @@ public static class ForUserDTO
         toDto.MapMember(dest => dest.Name, src => src.Name);
         toDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         toDto.MapMember(dest => dest.IsAdministrator, src => src.IsAdministrator);
-        toDto.MapMember(dest => dest.LastLoginAtUtc, src => src.LastLoginAtUtc);
+        toDto.MapMember(dest => dest.LastLoginAt, src => src.LastLoginAtUtc);
 
         var fromDto = @this.CreateMap<UserDTO, User>();
         fromDto.IgnoreAllMembers();
@@ -99,7 +99,7 @@ public static class ForUserDTO
         fromDto.MapMember(dest => dest.Name, src => src.Name);
         fromDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         fromDto.MapMember(dest => dest.IsAdministrator, src => src.IsAdministrator);
-        fromDto.MapMember(dest => dest.LastLoginAtUtc, src => src.LastLoginAtUtc);
+        fromDto.MapMember(dest => dest.LastLoginAtUtc, src => src.LastLoginAt);
 
         return @this;
     }
@@ -123,7 +123,7 @@ public static class ForUserDTO
         entity.PropertyWithAnnotations(e => e.Name);
         entity.PropertyWithAnnotations(e => e.IsActive);
         entity.PropertyWithAnnotations(e => e.IsAdministrator);
-        entity.PropertyWithAnnotations(e => e.LastLoginAtUtc);
+        entity.PropertyWithAnnotations(e => e.LastLoginAt);
 
         return @this;
     }

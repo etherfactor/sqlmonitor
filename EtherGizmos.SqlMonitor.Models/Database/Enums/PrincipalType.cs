@@ -31,6 +31,9 @@ public static class PrincipalTypeConverter
 
     public static string ToString(PrincipalType value)
     {
+        if (value == PrincipalType.Unknown)
+            return "UNKNOWN";
+
         if (!Mappings.ContainsKey(value))
             throw new InvalidOperationException(string.Format("Unmapped type: {0}", value));
 
@@ -39,6 +42,9 @@ public static class PrincipalTypeConverter
 
     public static string? ToStringOrDefault(PrincipalType? value)
     {
+        if (value == PrincipalType.Unknown)
+            return "UNKNOWN";
+
         if (value == null || !Mappings.ContainsKey((PrincipalType)value))
             return null;
 

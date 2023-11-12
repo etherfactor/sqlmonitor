@@ -1,26 +1,38 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using System.Collections.Concurrent;
+
+namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
 /// <summary>
-/// Caches <see cref="RedisHelper{TEntity}"/> instances.
+/// Caches <see cref="IRedisHelper{TEntity}"/> instances.
 /// </summary>
-public static class RedisHelperCache
+public class RedisHelperFactory : IRedisHelperFactory
 {
-    private static readonly IDictionary<Type, object> _helpers = new Dictionary<Type, object>();
+    private static readonly ConcurrentDictionary<Type, IRedisHelper> _helpers = new ConcurrentDictionary<Type, IRedisHelper>();
+
+    internal static IRedisHelperFactory Instance { get; } = new RedisHelperFactory();
 
     /// <summary>
     /// Constructs or returns a cached <see cref="RedisHelper{TEntity}"/>.
     /// </summary>
     /// <typeparam name="TEntity">The entity type.</typeparam>
     /// <returns>The <see cref="RedisHelper{TEntity}"/>.</returns>
-    public static RedisHelper<TEntity> For<TEntity>()
-        where TEntity : new()
+    public IRedisHelper<TEntity> CreateHelper<TEntity>()
+        where TEntity : class, new()
     {
-        if (!_helpers.ContainsKey(typeof(TEntity)))
-        {
-            var helper = new RedisHelper<TEntity>();
-            _helpers.Add(typeof(TEntity), helper);
-        }
+        var newlyAdded = false;
 
-        return (RedisHelper<TEntity>)_helpers[typeof(TEntity)];
+        //Attempt to get the helper, and if not, create a new one
+        var helper = (IRedisHelper<TEntity>)_helpers.GetOrAdd(typeof(TEntity), _ =>
+        {
+            newlyAdded = true;
+            return new RedisHelper<TEntity>(this);
+        });
+
+        //If the helper is new, initialize it
+        if (newlyAdded)
+            (helper as RedisHelper<TEntity>)?.Initialize();
+
+        return helper;
     }
 }

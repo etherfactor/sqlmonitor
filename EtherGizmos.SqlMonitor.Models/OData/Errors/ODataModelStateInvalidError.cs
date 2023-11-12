@@ -40,7 +40,8 @@ public class ODataModelStateInvalidError : ODataErrorBase
                         break;
 
                     default:
-                        throw new InvalidOperationException(string.Format("Unexpected error message format: {0}", error.ErrorMessage));
+                        propertyDisplayName = null!;
+                        break;
                 }
 
                 AddDetail(new ODataModelStateInvalidErrorDetail(Code, propertyDisplayName, errorMessage));

@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -34,11 +34,13 @@ public class Instance : Auditable
     [Column("database")]
     public virtual string? Database { get; set; }
 
-    public virtual List<InstanceQueryBlacklist> QueryBlacklists { get; set; } = new List<InstanceQueryBlacklist>();
+    public virtual List<InstanceMetricByDay> MetricsByDay { get; set; } = new List<InstanceMetricByDay>();
 
-    public virtual List<InstanceQueryWhitelist> QueryWhitelists { get; set; } = new List<InstanceQueryWhitelist>();
+    public virtual List<InstanceMetricByHour> MetricsByHour { get; set; } = new List<InstanceMetricByHour>();
 
-    public virtual List<InstanceQueryDatabase> QueryDatabaseOverrides { get; set; } = new List<InstanceQueryDatabase>();
+    public virtual List<InstanceMetricByMinute> MetricsByMinute { get; set; } = new List<InstanceMetricByMinute>();
+
+    public virtual List<InstanceMetricBySecond> MetricsBySecond { get; set; } = new List<InstanceMetricBySecond>();
 
     /// <summary>
     /// Not intended for direct use.

@@ -61,6 +61,42 @@ internal static class StructuralTypeConfigurationExtensions
     }
 
     /// <summary>
+    /// Adds an enum property to an entity, reading from annotations.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of entity.</typeparam>
+    /// <typeparam name="TMember">The type of enum.</typeparam>
+    /// <param name="this">Itself.</param>
+    /// <param name="enumPropertyExpression">The enum property selector.</param>
+    /// <returns>The property builder.</returns>
+    internal static EnumPropertyConfiguration EnumPropertyWithAnnotations<TEntity, TMember>(this StructuralTypeConfiguration<TEntity> @this, Expression<Func<TEntity, TMember>> enumPropertyExpression)
+        where TEntity : class
+        where TMember : struct
+    {
+        var configuration = @this.EnumProperty(enumPropertyExpression);
+        configuration.LoadNameConfiguration(enumPropertyExpression);
+
+        return configuration;
+    }
+
+    /// <summary>
+    /// Adds an enum property to an entity, reading from annotations.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of entity.</typeparam>
+    /// <typeparam name="TMember">The type of enum.</typeparam>
+    /// <param name="this">Itself.</param>
+    /// <param name="enumPropertyExpression">The enum property selector.</param>
+    /// <returns>The property builder.</returns>
+    internal static EnumPropertyConfiguration EnumPropertyWithAnnotations<TEntity, TMember>(this StructuralTypeConfiguration<TEntity> @this, Expression<Func<TEntity, TMember?>> enumPropertyExpression)
+        where TEntity : class
+        where TMember : struct
+    {
+        var configuration = @this.EnumProperty(enumPropertyExpression);
+        configuration.LoadNameConfiguration(enumPropertyExpression);
+
+        return configuration;
+    }
+
+    /// <summary>
     /// Adds a navigational set to an entity, reading from annotations.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity.</typeparam>

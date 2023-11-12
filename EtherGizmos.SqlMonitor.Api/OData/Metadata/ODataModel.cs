@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -11,12 +12,21 @@ public static class ODataModel
         var builder = new ODataModelBuilder();
         builder.Namespace = "SqlMonitor.v1";
 
+        //Add enums
+        builder.AddAggregateType();
+        builder.AddSeverityType();
+
+        //Add entities
         builder.AddInstance();
-        builder.AddInstanceQuery();
-        builder.AddInstanceQueryDatabase();
+        builder.AddMetric();
+        builder.AddMetricSeverity();
         builder.AddPermission();
-        builder.AddSecurable();
         builder.AddQuery();
+        builder.AddQueryInstance();
+        builder.AddQueryInstanceDatabase();
+        builder.AddQueryMetric();
+        builder.AddQueryMetricSeverity();
+        builder.AddSecurable();
         builder.AddUser();
 
         var model = builder.GetEdmModel();

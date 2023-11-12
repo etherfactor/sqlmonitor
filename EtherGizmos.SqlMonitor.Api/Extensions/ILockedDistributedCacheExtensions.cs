@@ -11,7 +11,7 @@ public static class ILockedDistributedCacheExtensions
         Func<Task<TEntity>> calculateAsync,
         TimeSpan timeout = default,
         CancellationToken cancellationToken = default)
-        where TEntity : new()
+        where TEntity : class, new()
     {
         var entitySet = @this.Entity(key);
         TEntity? entity = await entitySet.GetAsync(cancellationToken);

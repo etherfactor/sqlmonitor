@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿namespace EtherGizmos.SqlMonitor.Models.Annotations;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class IndexedAttribute : Attribute

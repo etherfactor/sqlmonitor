@@ -46,14 +46,26 @@ public class QueryDTO
     [Display(Name = "run_frequency")]
     public TimeSpan? RunFrequency { get; set; }
 
-    [Display(Name = "last_run_at_utc")]
-    public DateTimeOffset? LastRunAtUtc { get; set; }
+    [Display(Name = "last_run_at")]
+    public DateTimeOffset? LastRunAt { get; set; }
 
     [Display(Name = "timestamp_utc_expression")]
     public string? TimestampUtcExpression { get; set; }
 
     [Display(Name = "bucket_expression")]
     public string? BucketExpression { get; set; }
+
+    [Display(Name = "metrics")]
+    public List<QueryMetricDTO> Metrics { get; set; } = new List<QueryMetricDTO>();
+
+    [Display(Name = "instance_blacklists")]
+    public List<QueryInstanceDTO> InstanceBlacklists { get; set; } = new List<QueryInstanceDTO>();
+
+    [Display(Name = "instance_whitelists")]
+    public List<QueryInstanceDTO> InstanceWhitelists { get; set; } = new List<QueryInstanceDTO>();
+
+    [Display(Name = "instance_database_overrides")]
+    public List<QueryInstanceDatabaseDTO> InstanceDatabaseOverrides { get; set; } = new List<QueryInstanceDatabaseDTO>();
 
     public Task EnsureValid(IQueryable<Query> records)
     {
@@ -80,9 +92,13 @@ public static class ForQueryDTO
         toDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         toDto.MapMember(dest => dest.SqlText, src => src.SqlText);
         toDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
-        toDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);
+        toDto.MapMember(dest => dest.LastRunAt, src => src.LastRunAtUtc);
         toDto.MapMember(dest => dest.TimestampUtcExpression, src => src.TimestampUtcExpression);
         toDto.MapMember(dest => dest.BucketExpression, src => src.BucketExpression);
+        toDto.MapMember(dest => dest.Metrics, src => src.Metrics);
+        toDto.MapMember(dest => dest.InstanceBlacklists, src => src.InstanceBlacklists);
+        toDto.MapMember(dest => dest.InstanceWhitelists, src => src.InstanceWhitelists);
+        toDto.MapMember(dest => dest.InstanceDatabaseOverrides, src => src.InstanceDatabaseOverrides);
 
         var fromDto = @this.CreateMap<QueryDTO, Query>();
         fromDto.IgnoreAllMembers();
@@ -99,9 +115,13 @@ public static class ForQueryDTO
         fromDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         fromDto.MapMember(dest => dest.SqlText, src => src.SqlText);
         fromDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
-        fromDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);
+        fromDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAt);
         fromDto.MapMember(dest => dest.TimestampUtcExpression, src => src.TimestampUtcExpression);
         fromDto.MapMember(dest => dest.BucketExpression, src => src.BucketExpression);
+        fromDto.MapMember(dest => dest.Metrics, src => src.Metrics);
+        fromDto.MapMember(dest => dest.InstanceBlacklists, src => src.InstanceBlacklists);
+        fromDto.MapMember(dest => dest.InstanceWhitelists, src => src.InstanceWhitelists);
+        fromDto.MapMember(dest => dest.InstanceDatabaseOverrides, src => src.InstanceDatabaseOverrides);
 
         return @this;
     }
@@ -125,9 +145,13 @@ public static class ForQueryDTO
         entity.PropertyWithAnnotations(e => e.IsActive);
         entity.PropertyWithAnnotations(e => e.SqlText);
         entity.PropertyWithAnnotations(e => e.RunFrequency);
-        entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
+        entity.PropertyWithAnnotations(e => e.LastRunAt);
         entity.PropertyWithAnnotations(e => e.TimestampUtcExpression);
         entity.PropertyWithAnnotations(e => e.BucketExpression);
+        entity.CollectionPropertyWithAnnotations(e => e.Metrics);
+        entity.CollectionPropertyWithAnnotations(e => e.InstanceBlacklists);
+        entity.CollectionPropertyWithAnnotations(e => e.InstanceWhitelists);
+        entity.CollectionPropertyWithAnnotations(e => e.InstanceDatabaseOverrides);
 
         return @this;
     }
