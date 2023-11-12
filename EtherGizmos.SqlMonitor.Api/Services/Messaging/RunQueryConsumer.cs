@@ -121,6 +121,8 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                         var metricBucket = await metricBuckets.GetQueryable()
                             .FirstAsync(e => e.Name == bucket);
 
+                        var severity = metric.GetSeverityForValue(reader, metricValue.Value);
+
                         instanceMetricsBySecond.Add(new InstanceMetricBySecond()
                         {
                             InstanceId = instance.Id,
@@ -128,7 +130,7 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                             MetricBucketId = metricBucket.Id,
                             MeasuredAtUtc = utcTimestamp,
                             Value = metricValue.Value,
-                            SeverityType = SeverityType.Nominal,
+                            SeverityType = severity,
                         });
                     }
                 }
@@ -184,16 +186,60 @@ public class RunQueryConsumer : IConsumer<RunQuery>
         var dynamicQueryReader = new StreamReader(dynamicQueryStream);
         var dynamicQuery = dynamicQueryReader.ReadToEnd();
 
-        var metricStrings = query.Metrics.Select(e => GetAggregateFunction(e.Metric.AggregateType) + ":" + e.ValueExpression.Replace(";", "%3B"));
-        var metricString = string.Join(";", metricStrings);
+        var metricValueString = GetMetricValueString(query);
+        var metricSeverityString = GetMetricSeverityString(query);
 
         var command = new SqlCommand(dynamicQuery, connection);
         command.Parameters.Add("@Sql", SqlDbType.NVarChar).Value = query.SqlText;
         command.Parameters.Add("@TimestampUtcExpression", SqlDbType.NVarChar).Value = query.TimestampUtcExpression ?? (object)DBNull.Value;
         command.Parameters.Add("@BucketExpression", SqlDbType.NVarChar).Value = query.BucketExpression ?? (object)DBNull.Value;
-        command.Parameters.Add("@MetricValues", SqlDbType.NVarChar).Value = metricString;
+        command.Parameters.Add("@MetricValues", SqlDbType.NVarChar).Value = metricValueString;
+        command.Parameters.Add("@MetricSeverities", SqlDbType.NVarChar).Value = metricSeverityString;
 
         return command;
+    }
+
+    private string GetMetricValueString(Query query)
+    {
+        var metricStrings = query.Metrics.Select(e => GetAggregateFunction(e.Metric.AggregateType) + ":" + e.ValueExpression.Replace(";", "%3B"));
+        var metricString = string.Join(";", metricStrings);
+
+        return metricString;
+    }
+
+    private string GetMetricSeverityString(Query query)
+    {
+        var metricStrings = query.Metrics.Select(e =>
+        {
+            var severityOverrides = e.Severities
+                .Select(e => new
+                {
+                    Severity = e.SeverityType,
+                    MinimumValue = e.MinimumExpression,
+                    MaximumValue = e.MaximumExpression
+                });
+
+            var severityDefaults = e.Metric.Severities
+                .Where(e => !severityOverrides.Any(o => o.Severity == e.SeverityType))
+                .Select(e => new
+                {
+                    Severity = e.SeverityType,
+                    MinimumValue = e.MinimumValue?.ToString(),
+                    MaximumValue = e.MaximumValue?.ToString()
+                });
+
+            var severities = severityOverrides.Concat(severityDefaults);
+            var severityStrings = severities.Select(e => SeverityTypeConverter.ToString(e.Severity) + ":" + e.MinimumValue + ":" + e.MaximumValue);
+
+            var metricSeverityString = string.Join("|", severityStrings);
+            if (string.IsNullOrWhiteSpace(metricSeverityString))
+                metricSeverityString = SeverityTypeConverter.ToString(SeverityType.Nominal) + ":" + "null" + ":" + "null";
+
+            return metricSeverityString;
+        });
+        var metricString = string.Join(";", metricStrings);
+
+        return metricString;
     }
 
     /// <summary>

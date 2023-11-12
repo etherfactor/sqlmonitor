@@ -36,7 +36,7 @@ declare @Describe as table (
   source_column nvarchar(128), 
   is_identity_column bit null, 
   is_part_of_unique_key bit null, 
-  is_updateable bit null, 
+  is_updateable bit null,
   is_computed_column bit null, 
   is_sparse_column_set bit null, 
   ordinal_in_order_by_list smallint null, 
@@ -71,23 +71,78 @@ exec sp_executesql @InsertSql, N'@Sql nvarchar(max)', @Sql = @Sql;
 
 --Read the results of the query from the temp table, aggregating on time and bucket
 declare @MetricValuesList table (
-  [index] int primary key identity(0, 1),
+  [index] int,
   [aggregate] nvarchar(max),
   [value] nvarchar(max)
 );
 
-insert into @MetricValuesList ( [aggregate], [value] )
-select substring( [s].[value], 0, charindex( ':', [s].[value] ) ),
-  substring( [s].[value], charindex( ':', [s].[value] ) + 1, len( [s].[value] ) - charindex( ':', [s].[value] ) )
-  from string_split( @MetricValues, ';' ) [s];
+with [metric_values] as (
+  select row_number() over ( order by ( select 0 ) ) - 1 as [index],
+    substring( [s].[value], 0, charindex( ':', [s].[value] ) ) as [aggregate],
+    substring( [s].[value], charindex( ':', [s].[value] ) + 1, len( [s].[value] ) - charindex( ':', [s].[value] ) ) as [value]
+    from string_split( @MetricValues, ';' ) [s]
+)
+insert into @MetricValuesList ( [index], [aggregate], [value] )
+select [mv].[index],
+  [mv].[aggregate],
+  replace( [mv].[value], '%3B', ';' )
+  from [metric_values] [mv];
 
 declare @CteSqlColumns nvarchar(max);
-select @CteSqlColumns = string_agg( 'cast( ' + replace( [m].[value], '%3B', ';' ) + ' as float ) as ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) ), ', ' )
+select @CteSqlColumns = string_agg( 'cast( ' + [m].[value] + ' as float ) as ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) ), ', ' )
+  from @MetricValuesList [m];
+  
+declare @SelectSqlValueColumns nvarchar(max);
+select @SelectSqlValueColumns = string_agg(
+    [m].[aggregate] + '( ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) ) + ' ) as ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) ),
+    ', ' )
   from @MetricValuesList [m];
 
+--Pull together the severity ranges into selects
+declare @MetricSeveritiesList table (
+  [index] int,
+  [severity] nvarchar(max),
+  [minimum_value] nvarchar(max),
+  [maximum_value] nvarchar(max)
+);
+
+with [metric_rows] as (
+  select row_number() over ( order by ( select 0 ) ) - 1 as [index],
+    [s].[value]
+    from string_split( @MetricSeverities, ';' ) [s]
+),
+[metric_severities] as (
+  select [mr].[index],
+    substring( [s].[value], 0, charindex( ':', [s].[value] ) ) as [severity],
+    substring( [s].[value], charindex( ':', [s].[value] ) + 1, len( [s].[value] ) - charindex( ':', [s].[value] ) ) as [value_range]
+    from [metric_rows] [mr]
+      cross apply string_split( [mr].[value], '|' ) [s]
+),
+[metric_severity_values] as (
+  select [ms].[index],
+    [ms].[severity],
+    substring( [ms].[value_range], 0, charindex( ':', [ms].[value_range] ) ) as [minimum_value],
+    substring( [ms].[value_range], charindex( ':', [ms].[value_range] ) + 1, len( [ms].[value_range] ) - charindex( ':', [ms].[value_range] ) ) as [maximum_value]
+    from [metric_severities] [ms]
+)
+insert into @MetricSeveritiesList ( [index], [severity], [minimum_value], [maximum_value] )
+select [msv].[index],
+  [msv].[severity],
+  replace( replace( [msv].[minimum_value], '%3B', ';' ), '%7C', '|' ),
+  replace( replace( [msv].[maximum_value], '%3B', ';' ), '%7C', '|' )
+  from [metric_severity_values] [msv];
+
+declare @SelectSqlSeverityColumns nvarchar(max);
+select @SelectSqlSeverityColumns = string_agg(
+    [m].[minimum_value] + ' as ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) + '_' + [m].[severity] + '_min' )
+    + ', '
+    + [m].[maximum_value] + ' as ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) + '_' + [m].[severity] + '_max' ),
+    ', ' )
+  from @MetricSeveritiesList [m];
+
+--Combine values and severity ranges into selects
 declare @SelectSqlColumns nvarchar(max);
-select @SelectSqlColumns = string_agg( [m].[aggregate] + '( ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) ) + ' ) as ' + quotename( 'metric_' + cast( [m].[index] as varchar(max) ) ), ', ' )
-  from @MetricValuesList [m];
+set @SelectSqlColumns = @SelectSqlValueColumns + ', ' + @SelectSqlSeverityColumns;
 
 declare @SelectSql nvarchar(max) =
 'with [data] as (
