@@ -99,27 +99,40 @@ public class RunQueryConsumer : IConsumer<RunQuery>
                     {
                         _logger.Log(LogLevel.Information, "Metric {MetricName} returned {MetricBucket}:{MetricValue} at {MetricTimestamp}", metric.Metric.Name, bucket, metricValue, utcTimestamp);
 
-                        var anyBuckets = await metricBuckets.GetQueryable()
-                            .AnyAsync(e => e.Name == bucket);
+                        var metricBucket = (await _distributedRecordCache
+                            .EntitySet<MetricBucket>()
+                            .Where(e => e.Name)
+                            .IsEqualTo(bucket)
+                            .ToListAsync()).FirstOrDefault();
 
-                        if (!anyBuckets)
+                        if (metricBucket is null)
                         {
-                            using var subScope = provider.CreateScope();
-                            var subProvider = subScope.ServiceProvider;
+                            var anyBuckets = await metricBuckets.GetQueryable()
+                                .AnyAsync(e => e.Name == bucket);
 
-                            var subMetricBuckets = subProvider.GetRequiredService<IMetricBucketService>();
-                            var subSaveService = subProvider.GetRequiredService<ISaveService>();
-
-                            subMetricBuckets.Add(new MetricBucket()
+                            if (!anyBuckets)
                             {
-                                Name = bucket,
-                            });
+                                using var subScope = provider.CreateScope();
+                                var subProvider = subScope.ServiceProvider;
 
-                            await subSaveService.SaveChangesAsync();
+                                var subMetricBuckets = subProvider.GetRequiredService<IMetricBucketService>();
+                                var subSaveService = subProvider.GetRequiredService<ISaveService>();
+
+                                subMetricBuckets.Add(new MetricBucket()
+                                {
+                                    Name = bucket,
+                                });
+
+                                await subSaveService.SaveChangesAsync();
+                            }
+
+                            metricBucket = await metricBuckets.GetQueryable()
+                                .FirstAsync(e => e.Name == bucket);
+
+                            await _distributedRecordCache
+                                .EntitySet<MetricBucket>()
+                                .AddAsync(metricBucket);
                         }
-
-                        var metricBucket = await metricBuckets.GetQueryable()
-                            .FirstAsync(e => e.Name == bucket);
 
                         var severity = metric.GetSeverityForValue(reader, metricValue.Value);
 
