@@ -50,4 +50,9 @@
     <EmbeddedResource Include="Resources\Sql\DynamicQuery.sql" />
   </ItemGroup>
 
+  <Target Name="RunAngularBuild" BeforeTargets="BeforePublish">
+    <Exec Command="npm ci" WorkingDirectory="..\EtherGizmos.SqlMonitor.Web" />
+    <Exec Command="ng build --output-path=&quot;$(MSBuildProjectDirectory)&quot;/wwwroot" WorkingDirectory="..\EtherGizmos.SqlMonitor.Web" />
+  </Target>
+  
 </Project>
