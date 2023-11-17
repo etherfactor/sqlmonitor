@@ -64,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "EtherGizmos.SqlMonitor.Web:build:production"
+              "buildTarget": "EtherGizmos.SqlMonitor.Web:build:production"
             },
             "development": {
-              "browserTarget": "EtherGizmos.SqlMonitor.Web:build:development"
+              "buildTarget": "EtherGizmos.SqlMonitor.Web:build:development"
             }
           },
           "defaultConfiguration": "development",
@@ -78,7 +78,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "EtherGizmos.SqlMonitor.Web:build"
+            "buildTarget": "EtherGizmos.SqlMonitor.Web:build"
           }
         },
         "test": {
