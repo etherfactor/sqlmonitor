@@ -5,8 +5,8 @@
     "ng": "ng",
     "prestart": "node aspnetcore-https",
     "start": "run-script-os",
-    "start:windows": "ng serve --port 4200 --ssl --ssl-cert %APPDATA%\\ASP.NET\\https\\%npm_package_name%.pem --ssl-key %APPDATA%\\ASP.NET\\https\\%npm_package_name%.key",
-    "start:default": "ng serve --port 4200 --ssl --ssl-cert $HOME/.aspnet/https/${npm_package_name}.pem --ssl-key $HOME/.aspnet/https/${npm_package_name}.key",
+    "start:windows": "ng serve --host 127.0.0.1 --port 4200 --ssl --ssl-cert %APPDATA%\\ASP.NET\\https\\%npm_package_name%.pem --ssl-key %APPDATA%\\ASP.NET\\https\\%npm_package_name%.key",
+    "start:default": "ng serve --host 127.0.0.1 --port 4200 --ssl --ssl-cert $HOME/.aspnet/https/${npm_package_name}.pem --ssl-key $HOME/.aspnet/https/${npm_package_name}.key",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -14,6 +14,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^17.0.3",
+    "@angular/cdk": "^17.0.1",
     "@angular/common": "^17.0.3",
     "@angular/compiler": "^17.0.3",
     "@angular/core": "^17.0.3",
@@ -24,6 +25,7 @@
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1",
     "chart.js": "^4.4.0",
+    "gridstack": "^9.5.1",
     "jest-editor-support": "*",
     "ng2-charts": "^5.0.3",
     "rxjs": "~7.5.0",

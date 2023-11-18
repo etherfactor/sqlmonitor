@@ -1,20 +1,43 @@
-import { Component, ViewChild } from '@angular/core';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
+import { Component, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { ChartEvent } from 'chart.js/dist/plugins/plugin.tooltip';
+import { GridStackOptions, GridStackWidget } from 'gridstack';
+import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
+import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 
 @Component({
   selector: 'app-test',
   standalone: true,
   imports: [
     CommonModule,
+    DragDropModule,
+    GridstackModule,
     NgChartsModule,
   ],
   templateUrl: './test.component.html',
-  styleUrls: ['./test.component.css']
+  styleUrls: ['./test.component.scss']
 })
 export class TestComponent {
+
+  gridOptions: GridStackOptions = {
+    margin: 5,
+  };
+
+  items: GridStackWidget[] = [
+    { x: 0, y: 0, minW: 2, id: '1' },
+    { x: 1, y: 0, id: '2' },
+    { x: 0, y: 1, id: '3' },
+  ];
+
+  onChange(data: nodesCB) {
+    console.log('change ', data.nodes);
+  }
+
+  identify(index: number, widget: GridStackWidget) {
+    return widget.id;
+  }
 
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
@@ -125,6 +148,6 @@ export class TestComponent {
     event?: ChartEvent;
     active?: object[];
   }): void {
-    console.log(event, active);
+    //console.log(event, active);
   }
 }
