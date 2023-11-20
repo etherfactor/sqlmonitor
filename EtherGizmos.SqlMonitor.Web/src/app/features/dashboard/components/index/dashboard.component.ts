@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { ChartConfiguration, ChartType } from 'chart.js';
 import { GridStackOptions } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { v4 as uuidv4 } from 'uuid';
 import { DashboardWidget } from '../../models/dashboard-widget';
-import { ChartConfiguration, ChartType } from 'chart.js';
+import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,12 +15,15 @@ import { ChartConfiguration, ChartType } from 'chart.js';
   imports: [
     CommonModule,
     GridstackModule,
+    NgbModalModule,
     NgChartsModule,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+
+  private $modal: NgbModal;
 
   gridOptions: GridStackOptions = {
     margin: 5,
@@ -27,23 +32,45 @@ export class DashboardComponent {
 
   items: DashboardWidget[] = [];
 
+  constructor(
+    $modal: NgbModal
+  ) {
+    this.$modal = $modal;
+  }
+
   identify(index: number, widget: DashboardWidget) {
     return widget.id;
   }
 
-  addChart() {
+  addWidget() {
     this.items.push({
-      id: uuidv4()
+      id: uuidv4(),
+      w: 2,
+      h: 2,
     });
   }
 
-  printCharts() {
+  printWidgets() {
     console.log(this.items);
+  }
+
+  deleteWidget(item: DashboardWidget) {
+    let index: number;
+    while ((index = this.items.indexOf(item)) !== -1) {
+      this.items.splice(index, 1);
+    }
+  }
+
+  deleteWidgetModal(item: DashboardWidget) {
+    this.$modal.open(DeleteWidgetModalComponent, { centered: true }).result.then(
+      close => this.deleteWidget(item),
+      cancel => { }
+    );
   }
 
   onChange(data: nodesCB) {
     for (let node of data.nodes) {
-      let item = this.items.find(e => e.id == node.id);
+      let item = this.items.find(e => e.id === node.id);
       if (!item)
         continue;
 
