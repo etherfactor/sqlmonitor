@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, asyncScheduler, observeOn } from 'rxjs';
+import { BehaviorSubject, Observable, asapScheduler, observeOn } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable, asyncScheduler, observeOn } from 'rxjs';
 export class NavbarMenuService {
   
   private actionsSubject = new BehaviorSubject<NavbarMenuAction[]>([]);
+  private breadcrumbsSubject = new BehaviorSubject<NavbarMenuBreadcrumb[]>([]);
 
   constructor() { }
   
@@ -14,9 +15,19 @@ export class NavbarMenuService {
     this.actionsSubject.next(actions);
   }
 
+  setBreadcrumbs(breadcrumbs: NavbarMenuBreadcrumb[]) {
+    this.breadcrumbsSubject.next(breadcrumbs);
+  }
+
   get actions$(): Observable<NavbarMenuAction[]> {
     return this.actionsSubject.pipe(
-      observeOn(asyncScheduler)
+      observeOn(asapScheduler)
+    );
+  }
+
+  get breadcrumbs$(): Observable<NavbarMenuBreadcrumb[]> {
+    return this.breadcrumbsSubject.pipe(
+      observeOn(asapScheduler)
     );
   }
 }
@@ -35,4 +46,9 @@ export interface NavbarMenuSubAction extends NavbarMenuCallback {
   label?: string;
   icon?: string;
   divider?: boolean;
+}
+
+export interface NavbarMenuBreadcrumb {
+  label: string;
+  link: string;
 }

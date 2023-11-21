@@ -44,6 +44,21 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.$navbarMenu.setBreadcrumbs([
+      {
+        label: 'Home',
+        link: '/',
+      },
+      {
+        label: 'Dashboards',
+        link: '/dashboards',
+      },
+      {
+        label: 'Test',
+        link: '/dashboards/123',
+      },
+    ]);
+
     this.$navbarMenu.setActions([
       {
         icon: 'bi-save',

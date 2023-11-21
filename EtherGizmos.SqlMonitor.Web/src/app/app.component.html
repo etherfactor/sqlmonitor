@@ -4,7 +4,7 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand ms-3" style="font-size: 1.25rem;" href="#">(Logo)</a>
+      <a class="navbar-brand ms-3" style="font-size: 1.25rem;" routerLink="/">(Logo)</a>
     </div>
     <input type="text" style="width: 400px;" class="form-control d-none d-md-block" id="exampleInputEmail1">
     <button type="button" class="btn btn-link d-sm-block d-md-none"><span class="bi bi-search"></span></button>
@@ -22,9 +22,14 @@
   <div class="container-fluid">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item"><a href="/dashboards">Dashboards</a></li>
-        <li class="breadcrumb-item active" aria-current="/dashboards/123">Test</li>
+        <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
+          <ng-container *ngIf="!last; else lastBreadcrumb">
+            <li class="breadcrumb-item"><a [routerLink]="breadcrumb.link">{{breadcrumb.label}}</a></li>
+          </ng-container>
+          <ng-template #lastBreadcrumb>
+            <li class="breadcrumb-item active" [attr.aria-current]="breadcrumb.link">{{breadcrumb.label}}</li>
+          </ng-template>
+        </ng-container>
       </ol>
     </nav>
     <ul class="navbar-nav flex-row mb-lg-0" style="gap: 10px;">
