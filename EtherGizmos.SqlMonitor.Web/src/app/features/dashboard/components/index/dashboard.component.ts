@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { GridStackOptions } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { v4 as uuidv4 } from 'uuid';
+import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
+import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { DashboardWidget } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 
@@ -21,9 +23,10 @@ import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
 
   private $modal: NgbModal;
+  private $navbarMenu: NavbarMenuService;
 
   gridOptions: GridStackOptions = {
     margin: 5,
@@ -33,16 +36,61 @@ export class DashboardComponent {
   items: DashboardWidget[] = [];
 
   constructor(
-    $modal: NgbModal
+    $modal: NgbModal,
+    $navbarMenu: NavbarMenuService,
   ) {
     this.$modal = $modal;
+    this.$navbarMenu = $navbarMenu;
+  }
+
+  ngOnInit(): void {
+    this.$navbarMenu.setActions([
+      {
+        icon: 'bi-save',
+        label: 'Save',
+      },
+      {
+        icon: 'bi-x-square',
+        label: 'Cancel',
+      },
+      {
+        icon: 'bi-three-dots',
+        label: 'More',
+        subActions: [
+          {
+            icon: 'bi-bar-chart',
+            label: 'Add Chart',
+            callback: this.addWidget,
+          },
+          {
+            icon: 'bi-type',
+            label: 'Add Text (not impl.)',
+          },
+          {
+            divider: true,
+          },
+          {
+            icon: 'bi-printer',
+            label: 'Debug Dashboard',
+            callback: this.printWidgets,
+          },
+          {
+            divider: true,
+          },
+          {
+            icon: 'bi-trash',
+            label: 'Delete Dashboard (not impl.)',
+          },
+        ],
+      },
+    ]);
   }
 
   identify(index: number, widget: DashboardWidget) {
     return widget.id;
   }
 
-  addWidget() {
+  @Bound addWidget() {
     this.items.push({
       id: uuidv4(),
       w: 2,
@@ -50,7 +98,7 @@ export class DashboardComponent {
     });
   }
 
-  printWidgets() {
+  @Bound printWidgets() {
     console.log(this.items);
   }
 

@@ -1,11 +1,8 @@
-<button class="btn btn-primary" (click)="addWidget()">Add Chart</button>
-<button class="btn btn-primary" (click)="printWidgets()">Print</button>
-
 <gridstack [options]="gridOptions" (changeCB)="onChange($event)">
   <gridstack-item *ngFor="let item of items" [options]="item" (mouseenter)="item.showOptions = true" (mouseleave)="item.showOptions = false">
     <div class="position-relative w-100 h-100">
       <div class="dropdown">
-        <div class="position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!item.showOptions" role="button" data-bs-toggle="dropdown" aria-expanded="false"></div>
+        <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!item.showOptions" role="button" data-bs-toggle="dropdown" aria-expanded="false"></div>
         <ul class="dropdown-menu">
           <li><a class="dropdown-item">Edit</a></li>
           <li><hr class="dropdown-divider"></li>

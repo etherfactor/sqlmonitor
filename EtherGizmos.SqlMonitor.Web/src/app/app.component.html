@@ -1,1 +1,79 @@
+<nav class="navbar navbar-main bg-body-tertiary sticky-top">
+  <div class="container-fluid">
+    <div class="navbar-grow d-flex flex-row align-items-center">
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand ms-3" style="font-size: 1.25rem;" href="#">(Logo)</a>
+    </div>
+    <input type="text" style="width: 400px;" class="form-control d-none d-md-block" id="exampleInputEmail1">
+    <button type="button" class="btn btn-link d-sm-block d-md-none"><span class="bi bi-search"></span></button>
+    <div class="navbar-grow d-flex flex-row-reverse align-items-center">
+      <ul class="navbar-nav mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0);"><span class="bi bi-box-arrow-in-right"></span> Sign In</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<nav class="navbar navbar-sub bg-body-tertiary sticky-top">
+  <div class="container-fluid">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/dashboards">Dashboards</a></li>
+        <li class="breadcrumb-item active" aria-current="/dashboards/123">Test</li>
+      </ol>
+    </nav>
+    <ul class="navbar-nav flex-row mb-lg-0" style="gap: 10px;">
+      <ng-container *ngFor="let action of actions">
+        <ng-container *ngIf="action.subActions; else noSubActions">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="javascript:void(0);" data-bs-toggle="dropdown" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</a>
+            <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
+              <ng-container *ngFor="let subAction of action.subActions">
+                <ng-container *ngIf="!subAction.divider; else subActionDivider">
+                  <li><a class="dropdown-item" href="javascript:void(0);" (click)="performCallback(subAction)"><span class="bi" [class]="subAction.icon"></span> {{subAction.label}}</a></li>
+                </ng-container>
+                <ng-template #subActionDivider>
+                  <li><hr class="dropdown-divider"></li>
+                </ng-template>
+              </ng-container>
+            </ul>
+          </li>
+        </ng-container>
+        <ng-template #noSubActions>
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0);" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</a>
+          </li>
+        </ng-template>
+      </ng-container>
+    </ul>
+  </div>
+</nav>
+
+<div class="sidebar offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Offcanvas</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div>
+      Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.
+    </div>
+    <div class="dropdown mt-3">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        Dropdown button
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#">Action</a></li>
+        <li><a class="dropdown-item" href="#">Another action</a></li>
+        <li><a class="dropdown-item" href="#">Something else here</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 <router-outlet></router-outlet>
