@@ -32,15 +32,15 @@
         </ng-container>
       </ol>
     </nav>
-    <ul class="navbar-nav flex-row mb-lg-0" style="gap: 10px;">
+    <ul class="navbar-nav flex-row d-none d-md-flex mb-lg-0" style="gap: 10px;">
       <ng-container *ngFor="let action of actions">
         <ng-container *ngIf="action.subActions; else noSubActions">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="javascript:void(0);" data-bs-toggle="dropdown" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</a>
+            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</button>
             <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
               <ng-container *ngFor="let subAction of action.subActions">
                 <ng-container *ngIf="!subAction.divider; else subActionDivider">
-                  <li><a class="dropdown-item" href="javascript:void(0);" (click)="performCallback(subAction)"><span class="bi" [class]="subAction.icon"></span> {{subAction.label}}</a></li>
+                  <li><button class="dropdown-item" (click)="performCallback(subAction)"><span class="bi" [class]="subAction.icon"></span> {{subAction.label}}</button></li>
                 </ng-container>
                 <ng-template #subActionDivider>
                   <li><hr class="dropdown-divider"></li>
@@ -51,7 +51,7 @@
         </ng-container>
         <ng-template #noSubActions>
           <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0);" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</a>
+            <button class="nav-link" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</button>
           </li>
         </ng-template>
       </ng-container>

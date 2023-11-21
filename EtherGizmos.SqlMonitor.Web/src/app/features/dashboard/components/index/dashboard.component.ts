@@ -30,7 +30,7 @@ export class DashboardComponent implements OnInit {
 
   gridOptions: GridStackOptions = {
     margin: 5,
-    cellHeight: 120,
+    cellHeight: 60,
   };
 
   items: DashboardWidget[] = [];
@@ -69,21 +69,25 @@ export class DashboardComponent implements OnInit {
         label: 'Cancel',
       },
       {
-        icon: 'bi-three-dots',
-        label: 'More',
+        icon: 'bi-plus-square',
+        label: 'Add',
         subActions: [
           {
             icon: 'bi-bar-chart',
-            label: 'Add Chart',
-            callback: this.addWidget,
+            label: 'Chart',
+            callback: this.addChart,
           },
           {
             icon: 'bi-type',
-            label: 'Add Text (not impl.)',
+            label: 'Text',
+            callback: this.addText,
           },
-          {
-            divider: true,
-          },
+        ]
+      },
+      {
+        icon: 'bi-three-dots',
+        label: 'More',
+        subActions: [
           {
             icon: 'bi-printer',
             label: 'Debug Dashboard',
@@ -105,11 +109,21 @@ export class DashboardComponent implements OnInit {
     return widget.id;
   }
 
-  @Bound addWidget() {
+  @Bound addChart() {
     this.items.push({
+      type: 'chart',
       id: uuidv4(),
       w: 2,
-      h: 2,
+      h: 4,
+    });
+  }
+
+  @Bound addText() {
+    this.items.push({
+      type: 'text',
+      id: uuidv4(),
+      w: 2,
+      h: 4,
     });
   }
 
@@ -131,7 +145,19 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+  onAdd(data: nodesCB) {
+    this.populateNodes(data);
+  }
+
   onChange(data: nodesCB) {
+    this.populateNodes(data);
+  }
+
+  onRemove(data: nodesCB) {
+    this.populateNodes(data);
+  }
+
+  private populateNodes(data: nodesCB) {
     for (let node of data.nodes) {
       let item = this.items.find(e => e.id === node.id);
       if (!item)

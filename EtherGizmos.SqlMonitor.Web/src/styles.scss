@@ -42,6 +42,10 @@ $navbar-height: 48px;
 }
 
 .grid-stack-item {
+  > .grid-stack-item-content {
+    @extend .bg-body-tertiary;
+  }
+
   .ui-resizable-ne,
   .ui-resizable-nw,
   .ui-resizable-se,
