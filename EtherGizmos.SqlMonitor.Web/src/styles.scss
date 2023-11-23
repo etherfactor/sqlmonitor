@@ -21,12 +21,16 @@ $navbar-height: 48px;
 }
 
 .navbar-sub {
-  top: $navbar-height;
+  top: 0;
   height: 40px;
 
   .nav-link {
     padding-top: 4px;
     padding-bottom: 4px;
+  }
+
+  &[aria-expanded="true"] {
+    top: $navbar-height;
   }
 }
 
@@ -44,6 +48,7 @@ $navbar-height: 48px;
 .grid-stack-item {
   > .grid-stack-item-content {
     @extend .bg-body-tertiary;
+    border: 1px solid var(--bs-border-color-translucent);
   }
 
   .ui-resizable-ne,

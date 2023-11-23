@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { GridStackOptions } from 'gridstack';
@@ -25,6 +26,7 @@ import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget
 })
 export class DashboardComponent implements OnInit {
 
+  private $form: FormBuilder;
   private $modal: NgbModal;
   private $navbarMenu: NavbarMenuService;
 
@@ -36,9 +38,11 @@ export class DashboardComponent implements OnInit {
   items: DashboardWidget[] = [];
 
   constructor(
+    $form: FormBuilder,
     $modal: NgbModal,
     $navbarMenu: NavbarMenuService,
   ) {
+    this.$form = $form;
     this.$modal = $modal;
     this.$navbarMenu = $navbarMenu;
   }
@@ -115,6 +119,16 @@ export class DashboardComponent implements OnInit {
       id: uuidv4(),
       w: 2,
       h: 4,
+      chartType: 'linear',
+      xAxis: {
+        type: 'time',
+      },
+      yAxis: [
+        {
+          id: 'y1',
+          type: 'linear',
+        },
+      ],
     });
   }
 
@@ -173,7 +187,15 @@ export class DashboardComponent implements OnInit {
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
       {
-        data: [65, 59, 80, 81, 56, 55, 40],
+        data: [
+          { x: 0, y: 65, },
+          { x: 1, y: 59, },
+          { x: 2, y: 80, },
+          { x: 3, y: 81, },
+          { x: 4, y: 56, },
+          { x: 5, y: 55, },
+          { x: 6, y: 40, },
+        ],
         label: 'Series A',
         backgroundColor: 'rgba(148,159,177,0.2)',
         borderColor: 'rgba(148,159,177,1)',
@@ -184,7 +206,15 @@ export class DashboardComponent implements OnInit {
         fill: 'origin',
       },
       {
-        data: [28, 48, 40, 19, 86, 27, 90],
+        data: [
+          { x: 0, y: 28, },
+          { x: 1, y: 48, },
+          { x: 2, y: 40, },
+          { x: 3, y: 19, },
+          { x: 4, y: 86, },
+          { x: 5, y: 27, },
+          { x: 6, y: 90, },
+        ],
         label: 'Series B',
         backgroundColor: 'rgba(77,83,96,0.2)',
         borderColor: 'rgba(77,83,96,1)',
@@ -195,15 +225,23 @@ export class DashboardComponent implements OnInit {
         fill: 'origin',
       },
       {
-        data: [180, 480, 770, 90, 1000, 270, 400],
+        data: [
+          { x: 0, y: 180, },
+          { x: 1, y: 480, },
+          { x: 2, y: 770, },
+          { x: 3, y: 90, },
+          { x: 4, y: 1000, },
+          { x: 5, y: 270, },
+          { x: 6, y: 400, },
+        ],
         label: 'Series C',
         yAxisID: 'y1',
         backgroundColor: 'rgba(255,0,0,0.3)',
         borderColor: 'red',
-        pointBackgroundColor: 'rgba(148,159,177,1)',
+        pointBackgroundColor: 'rgba(255,159,177,1)',
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(148,159,177,0.8)',
+        pointHoverBorderColor: 'rgba(255,159,177,0.8)',
         fill: 'origin',
       },
     ],
