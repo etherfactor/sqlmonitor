@@ -123,7 +123,7 @@ export class DashboardComponent implements OnInit {
       xAxis: {
         type: 'time',
       },
-      yAxis: [
+      yAxes: [
         {
           id: 'y1',
           type: 'linear',
