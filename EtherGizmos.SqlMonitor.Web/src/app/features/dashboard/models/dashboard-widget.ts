@@ -1,7 +1,8 @@
 import { ControlConfig, FormBuilder } from "@angular/forms";
 import { GridStackOptions, GridStackWidget } from "gridstack";
+import { FormElementGroup, FormModel } from "ngx-mf";
 import { ModelFormFunction, TypedFormGroup, formFactoryForModel } from "../../../shared/utilities/form/form.util";
-import { FormElementArray, FormElementGroup, FormModel } from "ngx-mf";
+import { ChartConfiguration } from "chart.js";
 
 //==================================================
 // Base widet
@@ -9,6 +10,17 @@ interface DashboardBaseWidget extends GridStackWidget {
 
   showOptions?: boolean;
 }
+
+type Test = ChartConfiguration['options'];
+let a: Test = {
+  scales: {
+    x: {
+      time: {
+        format
+      }
+    }
+  }
+};
 
 //==================================================
 // Chart widget

@@ -1,4 +1,4 @@
-import { ControlConfig, FormArray, FormBuilder, FormGroup, ɵElement } from "@angular/forms";
+import { ControlConfig, FormArray, FormBuilder, FormControl, FormGroup, ɵElement } from "@angular/forms";
 
 export function formFactoryForModel<TModel>(builder: ($form: FormBuilder, model: TModel) => Required<ControlConfigMap<TModel>>) {
   const result: ($form: FormBuilder, model: TModel) => FormGroup<{
@@ -18,7 +18,11 @@ type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 export type ControlConfigMap<TModel> = {
   [K in keyof TModel]:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TModel[K] extends Array<any> ? FormArray<TypedFormGroup<InferArrayType<TModel[K]>>> :
+  TModel[K] extends Array<any> ? (
+    InferArrayType<TModel[K]> extends object ?
+    FormArray<TypedFormGroup<InferArrayType<TModel[K]>>> :
+    FormArray<FormControl<InferArrayType<TModel[K]>>>
+  ) :
   TModel[K] extends object ? TypedFormGroup<TModel[K]> :
   ControlConfig<TModel[K]>; // | FormArray<ɵElement<InferArrayType<TModel[K]>, never>>
 };
@@ -62,18 +66,20 @@ formFactoryForModel(($form: FormBuilder, model: TestInterface) => {
 });
 
 interface Outer {
-  id: string;
+  id: 'id';
   single: Inner;
   array: Inner[];
 }
 
 interface Inner {
   id: string;
+  values: string[];
 }
 
 const innerFormFactory = formFactoryForModel(($form, model: Inner) => {
   return {
     id: [model.id],
+    values: $form.array(model.values.map(item => $form.nonNullable.control(item))),
   };
 });
 
@@ -89,4 +95,12 @@ const outerFormFactory = formFactoryForModel(($form, model: Outer) => {
     single: innerForm($form, model.single),
     array: $form.nonNullable.array(model.array.map(item => innerForm($form, item)))
   };
+});
+
+let f2 = outerFormFactory(f, {
+  id: "id",
+  single: {
+    id: "a"
+  },
+  array: []
 });
