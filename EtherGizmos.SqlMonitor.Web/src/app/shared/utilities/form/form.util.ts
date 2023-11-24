@@ -17,7 +17,8 @@ type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 
 export type ControlConfigMap<TModel> = {
   [K in keyof TModel]:
-  TModel[K] extends Array<any> ? FormArray<ɵElement<InferArrayType<TModel[K]>, never>> :
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TModel[K] extends Array<any> ? FormArray<TypedFormGroup<InferArrayType<TModel[K]>>> :
   TModel[K] extends object ? TypedFormGroup<TModel[K]> :
   ControlConfig<TModel[K]>; // | FormArray<ɵElement<InferArrayType<TModel[K]>, never>>
 };
@@ -57,5 +58,35 @@ formFactoryForModel(($form: FormBuilder, model: TestInterface) => {
       array: $form.nonNullable.array<number>([]),
       id: ['a' as string | undefined],
     }),
+  };
+});
+
+interface Outer {
+  id: string;
+  single: Inner;
+  array: Inner[];
+}
+
+interface Inner {
+  id: string;
+}
+
+const innerFormFactory = formFactoryForModel(($form, model: Inner) => {
+  return {
+    id: [model.id],
+  };
+});
+
+type test = InferArrayType<TypedFormGroup<Outer>['controls']['array']['controls']>;
+
+function innerForm($form: FormBuilder, model: Inner) {
+  return innerFormFactory($form, model);
+}
+
+const outerFormFactory = formFactoryForModel(($form, model: Outer) => {
+  return {
+    id: [model.id],
+    single: innerForm($form, model.single),
+    array: $form.nonNullable.array(model.array.map(item => innerForm($form, item)))
   };
 });

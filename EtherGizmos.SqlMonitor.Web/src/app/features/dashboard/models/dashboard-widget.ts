@@ -1,6 +1,6 @@
-import { FormBuilder } from "@angular/forms";
-import { GridStackWidget } from "gridstack";
-import { ModelFormFunction, formFactoryForModel } from "../../../shared/utilities/form/form.util";
+import { ControlConfig, FormBuilder } from "@angular/forms";
+import { GridStackOptions, GridStackWidget } from "gridstack";
+import { ModelFormFunction, TypedFormGroup, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 import { FormElementArray, FormElementGroup, FormModel } from "ngx-mf";
 
 //==================================================
@@ -28,6 +28,13 @@ export interface DashboardChartWidgetLinearXAxis extends DashboardChartWidgetXAx
   type: 'linear';
 }
 
+function isLinearXAxis(item: DashboardChartWidgetXAxis): item is DashboardChartWidgetLinearXAxis {
+  if ((item as DashboardChartWidgetLinearXAxis).type === "linear")
+    return true;
+
+  return false;
+}
+
 const dashboardChartWidgetLinearXAxisFormFactory = formFactoryForModel(($form: FormBuilder, model: DashboardChartWidgetLinearXAxis) => {
   return {
     type: [model.type],
@@ -49,6 +56,13 @@ export const dashboardChartWidgetLinearXAxisForm: ModelFormFunction<DashboardCha
 export interface DashboardChartWidgetLogarithmicXAxis extends DashboardChartWidgetXAxis {
 
   type: 'logarithmic';
+}
+
+function isLogarithmicXAxis(item: DashboardChartWidgetXAxis): item is DashboardChartWidgetLogarithmicXAxis {
+  if ((item as DashboardChartWidgetLogarithmicXAxis).type === "logarithmic")
+    return true;
+
+  return false;
 }
 
 const dashboardChartWidgetLogarithmicXAxisFormFactory = formFactoryForModel(($form: FormBuilder, model: DashboardChartWidgetLogarithmicXAxis) => {
@@ -75,6 +89,13 @@ export interface DashboardChartWidgetTimeXAxis extends DashboardChartWidgetXAxis
   timeFormat?: string;
 }
 
+function isTimeXAxis(item: DashboardChartWidgetXAxis): item is DashboardChartWidgetTimeXAxis {
+  if ((item as DashboardChartWidgetTimeXAxis).type === "time")
+    return true;
+
+  return false;
+}
+
 const dashboardChartWidgetTimeXAxisFormFactory = formFactoryForModel(($form: FormBuilder, model: DashboardChartWidgetTimeXAxis) => {
   return {
     type: [model.type],
@@ -98,6 +119,22 @@ type DashboardLineChartWidgetXAxis =
   DashboardChartWidgetLinearXAxis |
   DashboardChartWidgetLogarithmicXAxis |
   DashboardChartWidgetTimeXAxis;
+
+const dashboardLineChartWidgetXAxisForm: ModelFormFunction<DashboardLineChartWidgetXAxis> = function ($form: FormBuilder, model: DashboardLineChartWidgetXAxis | undefined) {
+  if (!model)
+    return undefined!;
+
+  if (isLinearXAxis(model))
+    return dashboardChartWidgetLinearXAxisForm($form, model) as TypedFormGroup<DashboardLineChartWidgetXAxis>;
+
+  if (isLogarithmicXAxis(model))
+    return dashboardChartWidgetLogarithmicXAxisForm($form, model) as TypedFormGroup<DashboardLineChartWidgetXAxis>;
+
+  if (isTimeXAxis(model))
+    return dashboardChartWidgetTimeXAxisForm($form, model) as TypedFormGroup<DashboardLineChartWidgetXAxis>;
+
+  throw new Error('Unexpected axis type');
+}
 
 //Y-axis
 interface DashboardChartWidgetYAxis extends DashboardChartWidgetXAxis {
@@ -128,28 +165,28 @@ const dashboardChartWidgetLinearYAxisFormFactory = formFactoryForModel(($form: F
   };
 });
 
-//export const dashboardChartWidgetLinearYAxisForm: ModelFormFunction<DashboardChartWidgetLinearYAxis> = function ($form: FormBuilder, model: DashboardChartWidgetLinearYAxis | undefined) {
-//  if (!model)
-//    return undefined!;
+export const dashboardChartWidgetLinearYAxisForm: ModelFormFunction<DashboardChartWidgetLinearYAxis> = function ($form: FormBuilder, model: DashboardChartWidgetLinearYAxis | undefined) {
+  if (!model)
+    return undefined!;
 
-//  return dashboardChartWidgetLinearYAxisFormFactory($form, model);
-//}
-
-type FormModelControls<TModel extends {}, TRecord extends Record<string, any> | null = null> = FormModel<TModel, TRecord>['controls'];
-type DashboardChartWidgetLinearYAxisForm = FormModelControls<DashboardChartWidgetLinearYAxis>;
-
-export const dashboardChartWidgetLinearYAxisForm = function ($form: FormBuilder, model: DashboardChartWidgetLinearYAxis) {
-  const nn = $form.nonNullable;
-  return nn.group<DashboardChartWidgetLinearYAxisForm>({
-    id: nn.control(model.id),
-    label: nn.control(model.label),
-    max: nn.control(model.max),
-    maxEnforced: nn.control(model.maxEnforced),
-    min: nn.control(model.min),
-    minEnforced: nn.control(model.minEnforced),
-    type: nn.control(model.type),
-  });
+  return dashboardChartWidgetLinearYAxisFormFactory($form, model);
 }
+
+//type FormModelControls<TModel extends {}, TRecord extends Record<string, any> | null = null> = FormModel<TModel, TRecord>['controls'];
+//type DashboardChartWidgetLinearYAxisForm = FormModelControls<DashboardChartWidgetLinearYAxis>;
+
+//export const dashboardChartWidgetLinearYAxisForm = function ($form: FormBuilder, model: DashboardChartWidgetLinearYAxis) {
+//  const nn = $form.nonNullable;
+//  return nn.group<DashboardChartWidgetLinearYAxisForm>({
+//    id: nn.control(model.id),
+//    label: nn.control(model.label),
+//    max: nn.control(model.max),
+//    maxEnforced: nn.control(model.maxEnforced),
+//    min: nn.control(model.min),
+//    minEnforced: nn.control(model.minEnforced),
+//    type: nn.control(model.type),
+//  });
+//}
 
 export interface DashboardChartWidgetLogarithmicYAxis extends DashboardChartWidgetLogarithmicXAxis, DashboardChartWidgetYAxis {
 
@@ -174,27 +211,27 @@ const dashboardChartWidgetLogarithmicYAxisFormFactory = formFactoryForModel(($fo
   };
 });
 
-//export const dashboardChartWidgetLogarithmicYAxisForm: ModelFormFunction<DashboardChartWidgetLogarithmicYAxis> = function ($form: FormBuilder, model: DashboardChartWidgetLogarithmicYAxis | undefined) {
-//  if (!model)
-//    return undefined!;
+export const dashboardChartWidgetLogarithmicYAxisForm: ModelFormFunction<DashboardChartWidgetLogarithmicYAxis> = function ($form: FormBuilder, model: DashboardChartWidgetLogarithmicYAxis | undefined) {
+  if (!model)
+    return undefined!;
 
-//  return dashboardChartWidgetLogarithmicYAxisFormFactory($form, model);
-//}
-
-type DashboardChartWidgetLogarithmicYAxisForm = FormModelControls<DashboardChartWidgetLogarithmicYAxis>;
-
-export const dashboardChartWidgetLogarithmicYAxisForm = function ($form: FormBuilder, model: DashboardChartWidgetLogarithmicYAxis) {
-  const nn = $form.nonNullable;
-  return nn.group<DashboardChartWidgetLogarithmicYAxisForm>({
-    id: nn.control(model.id),
-    label: nn.control(model.label),
-    max: nn.control(model.max),
-    maxEnforced: nn.control(model.maxEnforced),
-    min: nn.control(model.min),
-    minEnforced: nn.control(model.minEnforced),
-    type: nn.control(model.type),
-  });
+  return dashboardChartWidgetLogarithmicYAxisFormFactory($form, model);
 }
+
+//type DashboardChartWidgetLogarithmicYAxisForm = FormModelControls<DashboardChartWidgetLogarithmicYAxis>;
+
+//export const dashboardChartWidgetLogarithmicYAxisForm = function ($form: FormBuilder, model: DashboardChartWidgetLogarithmicYAxis) {
+//  const nn = $form.nonNullable;
+//  return nn.group<DashboardChartWidgetLogarithmicYAxisForm>({
+//    id: nn.control(model.id),
+//    label: nn.control(model.label),
+//    max: nn.control(model.max),
+//    maxEnforced: nn.control(model.maxEnforced),
+//    min: nn.control(model.min),
+//    minEnforced: nn.control(model.minEnforced),
+//    type: nn.control(model.type),
+//  });
+//}
 
 export interface DashboardChartWidgetTimeYAxis extends DashboardChartWidgetTimeXAxis, DashboardChartWidgetYAxis {
 
@@ -220,33 +257,49 @@ const dashboardChartWidgetTimeYAxisFormFactory = formFactoryForModel(($form: For
   };
 });
 
-//export const dashboardChartWidgetTimeYAxisForm: ModelFormFunction<DashboardChartWidgetTimeYAxis> = function ($form: FormBuilder, model: DashboardChartWidgetTimeYAxis | undefined) {
-//  if (!model)
-//    return undefined!;
+export const dashboardChartWidgetTimeYAxisForm: ModelFormFunction<DashboardChartWidgetTimeYAxis> = function ($form: FormBuilder, model: DashboardChartWidgetTimeYAxis | undefined) {
+  if (!model)
+    return undefined!;
 
-//  return dashboardChartWidgetTimeYAxisFormFactory($form, model);
-//}
-
-type DashboardChartWidgetTimeYAxisForm = FormModelControls<DashboardChartWidgetTimeYAxis>;
-
-export const dashboardChartWidgetTimeYAxisForm = function ($form: FormBuilder, model: DashboardChartWidgetTimeYAxis) {
-  const nn = $form.nonNullable;
-  return nn.group<DashboardChartWidgetTimeYAxisForm>({
-    id: nn.control(model.id),
-    label: nn.control(model.label),
-    max: nn.control(model.max),
-    maxEnforced: nn.control(model.maxEnforced),
-    min: nn.control(model.min),
-    minEnforced: nn.control(model.minEnforced),
-    timeFormat: nn.control(model.timeFormat),
-    type: nn.control(model.type),
-  });
+  return dashboardChartWidgetTimeYAxisFormFactory($form, model);
 }
+
+//type DashboardChartWidgetTimeYAxisForm = FormModelControls<DashboardChartWidgetTimeYAxis>;
+
+//export const dashboardChartWidgetTimeYAxisForm = function ($form: FormBuilder, model: DashboardChartWidgetTimeYAxis) {
+//  const nn = $form.nonNullable;
+//  return nn.group<DashboardChartWidgetTimeYAxisForm>({
+//    id: nn.control(model.id),
+//    label: nn.control(model.label),
+//    max: nn.control(model.max),
+//    maxEnforced: nn.control(model.maxEnforced),
+//    min: nn.control(model.min),
+//    minEnforced: nn.control(model.minEnforced),
+//    timeFormat: nn.control(model.timeFormat),
+//    type: nn.control(model.type),
+//  });
+//}
 
 type DashboardLineChartWidgetYAxis =
   DashboardChartWidgetLinearYAxis |
   DashboardChartWidgetLogarithmicYAxis |
   DashboardChartWidgetTimeYAxis;
+
+const dashboardLineChartWidgetYAxisForm: ModelFormFunction<DashboardLineChartWidgetYAxis> = function ($form: FormBuilder, model: DashboardLineChartWidgetYAxis | undefined) {
+  if (!model)
+    return undefined!;
+
+  if (isLinearYAxis(model))
+    return dashboardChartWidgetLinearYAxisForm($form, model) as TypedFormGroup<DashboardLineChartWidgetYAxis>;
+
+  if (isLogarithmicYAxis(model))
+    return dashboardChartWidgetLogarithmicYAxisForm($form, model) as TypedFormGroup<DashboardLineChartWidgetYAxis>;
+
+  if (isTimeYAxis(model))
+    return dashboardChartWidgetTimeYAxisForm($form, model) as TypedFormGroup<DashboardLineChartWidgetYAxis>;
+
+  throw new Error('Unexpected axis type');
+}
 
 //Chart widget
 interface DashboardChartWidgetBase extends DashboardBaseWidget {
@@ -258,46 +311,41 @@ interface DashboardLineChartWidget extends DashboardChartWidgetBase {
 
   chartType: 'linear';
   xAxis: DashboardLineChartWidgetXAxis;
-  yAxes: DashboardLineChartWidgetYAxis[];
+  yAxes: DashboardChartWidgetLinearYAxis[];
 }
 
 const dashboardLineChartWidgetFormFactory = formFactoryForModel(($form: FormBuilder, model: DashboardLineChartWidget) => {
-  return {
-    autoPosition: [model.autoPosition],
-    chartType: [model.chartType],
-    h: [model.h],
-    htmlContent: [model.htmlContent],
-    id: [model.id],
-    locked: [model.locked],
-    maxH: [model.maxH],
-    maxW: [model.maxW],
-    minH: [model.minH],
-    minW: [model.minW],
-    noMove: [model.noMove],
-    noResize: [model.noResize],
-    resizeToContentParent: [model.resizeToContentParent],
-    showOptions: [model.showOptions],
-    sizeToContent: [model.sizeToContent],
-    subGridOpts: [model.subGridOpts],
-    type: [model.type],
-    w: [model.w],
-    x: [model.x],
-    xAxis: [model.xAxis],
-    y: [model.y],
-    yAxes: $form.nonNullable.array(model.yAxes.map(item => {
-      if (isLinearYAxis(item))
-        return dashboardChartWidgetLinearYAxisForm($form, item);
-
-      if (isLogarithmicYAxis(item))
-        return dashboardChartWidgetLogarithmicYAxisForm($form, item);
-
-      if (isTimeYAxis(item))
-        return dashboardChartWidgetTimeYAxisForm($form, item);
-
-      throw new Error('Unexpected axis type');
-    })),
+  let test = {
+    autoPosition: [model.autoPosition] as ControlConfig<boolean | undefined>,
+    chartType: [model.chartType] as ControlConfig<"linear">,
+    h: [model.h] as ControlConfig<number | undefined>,
+    htmlContent: [model.htmlContent] as ControlConfig<string | undefined>,
+    id: [model.id] as ControlConfig<string | undefined>,
+    locked: [model.locked] as ControlConfig<boolean | undefined>,
+    maxH: [model.maxH] as ControlConfig<number | undefined>,
+    maxW: [model.maxW] as ControlConfig<number | undefined>,
+    minH: [model.minH] as ControlConfig<number | undefined>,
+    minW: [model.minW] as ControlConfig<number | undefined>,
+    noMove: [model.noMove] as ControlConfig<boolean | undefined>,
+    noResize: [model.noResize] as ControlConfig<boolean | undefined>,
+    resizeToContentParent: [model.resizeToContentParent] as ControlConfig<string | undefined>,
+    showOptions: [model.showOptions] as ControlConfig<boolean | undefined>,
+    sizeToContent: [model.sizeToContent] as ControlConfig<number | boolean | undefined>,
+    subGridOpts: [model.subGridOpts] as ControlConfig<GridStackOptions | undefined>,
+    type: [model.type] as ControlConfig<"chart">,
+    w: [model.w] as ControlConfig<number | undefined>,
+    x: [model.x] as ControlConfig<number | undefined>,
+    xAxis: dashboardLineChartWidgetXAxisForm($form, model.xAxis),
+    y: [model.y] as ControlConfig<number | undefined>,
+    yAxes: $form.nonNullable.array(model.yAxes.map(item => dashboardChartWidgetLinearYAxisForm($form, item))),
   };
+  const a = test.yAxes.controls[0];
+  a as TypedFormGroup<DashboardChartWidgetLinearYAxis>;
+  return test;
 });
+
+let output = dashboardLineChartWidgetFormFactory(null!, { type: "chart", chartType: "linear", xAxis: { type: "time" }, yAxes: [] });
+output.controls.
 
 type test = FormModel<DashboardLineChartWidget>;
 const model: DashboardLineChartWidget = {
@@ -409,7 +457,6 @@ export const dashboardLineChartWidgetForm: ModelFormFunction<DashboardLineChartW
 };
 
 const a = dashboardLineChartWidgetForm($form, { type: "chart", chartType: "linear", xAxis: { type: "linear" }, yAxes: [] });
-a.
 
 type DashboardChartWidget =
   DashboardLineChartWidget;
