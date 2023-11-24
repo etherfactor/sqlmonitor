@@ -1,13 +1,9 @@
 import { ControlConfig, FormArray, FormBuilder, FormControl, FormGroup, ɵElement } from "@angular/forms";
 
 export function formFactoryForModel<TModel>(builder: ($form: FormBuilder, model: TModel) => Required<ControlConfigMap<TModel>>) {
-  const result: ($form: FormBuilder, model: TModel) => FormGroup<{
-    [K in keyof Required<ControlConfigMap<TModel>>]: ɵElement<Required<ControlConfigMap<TModel>>[K], never>;
-  }> = ($form: FormBuilder, model: TModel) => {
+  const result: ($form: FormBuilder, model: TModel) => TypedFormGroup<TModel> = ($form: FormBuilder, model: TModel) => {
     const config = builder($form, model);
     return $form.nonNullable.group(config);
-    //const cast: Required<ControlConfigMap<TModel>> = (base as unknown as Required<ControlConfigMap<TModel>>);
-    //return $form.nonNullable.group(cast);
   };
 
   return result;
@@ -15,7 +11,7 @@ export function formFactoryForModel<TModel>(builder: ($form: FormBuilder, model:
 
 type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 
-export type ControlConfigMap<TModel> = {
+type ControlConfigMap<TModel> = {
   [K in keyof TModel]:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TModel[K] extends Array<any> ? (
@@ -24,11 +20,13 @@ export type ControlConfigMap<TModel> = {
     FormArray<FormControl<InferArrayType<TModel[K]>>>
   ) :
   TModel[K] extends object ? TypedFormGroup<TModel[K]> :
-  ControlConfig<TModel[K]>; // | FormArray<ɵElement<InferArrayType<TModel[K]>, never>>
+  ControlConfig<TModel[K]>;
 };
 
+export type FormFactoryMap<TModel> = Required<ControlConfigMap<TModel>>;
+
 export type TypedFormGroup<TModel> = FormGroup<{
-  [K in keyof Required<ControlConfigMap<TModel>>]: ɵElement<Required<ControlConfigMap<TModel>>[K], never>;
+  [K in keyof Required<ControlConfigMap<TModel>>]: ɵElement<ControlConfigMap<TModel>[K], never>;
 }>
 
 const f = new FormBuilder();
@@ -36,71 +34,7 @@ f.nonNullable.array([f.nonNullable.group({
   a:[1]
 })]);
 
-export type ModelFormFunction<TModel> = {
+export type FormFunction<TModel> = {
   ($form: FormBuilder, model: TModel): TypedFormGroup<TModel>;
   ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel> | undefined;
 }
-
-type TestMap<TModel> = {
-  [K in keyof TModel]: TModel[K] extends Array<any> ? number : string;
-}
-
-interface TestInterface {
-  simple: number;
-  array: string[];
-  data: {
-    id: string;
-    array: number[];
-  }
-}
-
-formFactoryForModel(($form: FormBuilder, model: TestInterface) => {
-  return {
-    simple: [model.simple],
-    array: $form.nonNullable.array<string>([]),
-    data: $form.nonNullable.group({
-      array: $form.nonNullable.array<number>([]),
-      id: ['a' as string | undefined],
-    }),
-  };
-});
-
-interface Outer {
-  id: 'id';
-  single: Inner;
-  array: Inner[];
-}
-
-interface Inner {
-  id: string;
-  values: string[];
-}
-
-const innerFormFactory = formFactoryForModel(($form, model: Inner) => {
-  return {
-    id: [model.id],
-    values: $form.array(model.values.map(item => $form.nonNullable.control(item))),
-  };
-});
-
-type test = InferArrayType<TypedFormGroup<Outer>['controls']['array']['controls']>;
-
-function innerForm($form: FormBuilder, model: Inner) {
-  return innerFormFactory($form, model);
-}
-
-const outerFormFactory = formFactoryForModel(($form, model: Outer) => {
-  return {
-    id: [model.id],
-    single: innerForm($form, model.single),
-    array: $form.nonNullable.array(model.array.map(item => innerForm($form, item)))
-  };
-});
-
-let f2 = outerFormFactory(f, {
-  id: "id",
-  single: {
-    id: "a"
-  },
-  array: []
-});

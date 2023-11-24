@@ -9,6 +9,7 @@ import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { v4 as uuidv4 } from 'uuid';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
+import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 
@@ -29,6 +30,8 @@ export class DashboardComponent implements OnInit {
   private $form: FormBuilder;
   private $modal: NgbModal;
   private $navbarMenu: NavbarMenuService;
+
+  private widgetForm?: TypedFormGroup<DashboardWidget>;
 
   gridOptions: GridStackOptions = {
     margin: 5,
