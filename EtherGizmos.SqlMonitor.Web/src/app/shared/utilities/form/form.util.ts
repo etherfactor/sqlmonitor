@@ -14,12 +14,12 @@ type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 type ControlConfigMap<TModel> = {
   [K in keyof TModel]:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TModel[K] extends Array<any> ? (
+  NonNullable<TModel[K]> extends Array<any> ? (
     InferArrayType<TModel[K]> extends object ?
     FormArray<TypedFormGroup<InferArrayType<TModel[K]>>> :
     FormArray<FormControl<InferArrayType<TModel[K]>>>
   ) :
-  TModel[K] extends object ? TypedFormGroup<TModel[K]> :
+  NonNullable<TModel[K]> extends object ? TypedFormGroup<TModel[K]> :
   ControlConfig<TModel[K]>;
 };
 

@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
-import { DashboardWidget } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType, GridstackDashboardWidget } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 
 @Component({
@@ -39,6 +39,7 @@ export class DashboardComponent implements OnInit {
   };
 
   items: DashboardWidget[] = [];
+  gridItems: GridstackDashboardWidget[] = [];
 
   constructor(
     $form: FormBuilder,
@@ -112,36 +113,80 @@ export class DashboardComponent implements OnInit {
     ]);
   }
 
+  getGridstackWidget(widget: DashboardWidget): GridstackDashboardWidget {
+    return <GridstackDashboardWidget> {
+      id: widget.id,
+      x: widget.grid?.xPos,
+      y: widget.grid?.yPos,
+      w: widget.grid?.width,
+      h: widget.grid?.height,
+      type: widget.type,
+      chart: widget.chart,
+      text: widget.text,
+    };
+  }
+
+  findGridstackWidget(widget: DashboardWidget): GridstackDashboardWidget {
+    return this.gridItems.find(e => e.id == widget.id)!;
+  }
+
   identify(index: number, widget: DashboardWidget) {
     return widget.id;
   }
 
   @Bound addChart() {
-    this.items.push({
-      type: 'chart',
+    this.addWidget({
       id: uuidv4(),
-      w: 2,
-      h: 4,
-      chartType: 'linear',
-      xAxis: {
-        type: 'time',
+      type: DashboardWidgetType.Chart,
+      grid: {
+        xPos: 4,
+        yPos: 0,
+        width: 4,
+        height: 5,
+        hovering: false,
       },
-      yAxes: [
-        {
-          id: 'y1',
-          type: 'linear',
+      chart: {
+        type: DashboardWidgetChartType.Line,
+        xScale: {
+          id: "x",
+          type: DashboardWidgetChartScaleType.Time,
+          minEnforced: false,
+          maxEnforced: false,
         },
-      ],
+        yScales: [
+          {
+            id: "y",
+            type: DashboardWidgetChartScaleType.Linear,
+            minEnforced: false,
+            maxEnforced: false,
+          }
+        ],
+      },
     });
   }
 
   @Bound addText() {
-    this.items.push({
-      type: 'text',
+    this.addWidget({
       id: uuidv4(),
-      w: 2,
-      h: 4,
+      type: DashboardWidgetType.Text,
+      grid: {
+        xPos: 4,
+        yPos: 0,
+        width: 4,
+        height: 5,
+        hovering: false,
+      },
+      text: {
+        htmlContent: "<i>Text here</i>",
+      },
     });
+  }
+
+  private addWidget(widget: DashboardWidget) {
+    this.items.push(widget);
+    const gridWidget = this.getGridstackWidget(widget);
+    console.log('from', widget, 'to', gridWidget);
+    this.gridItems.push(gridWidget);
   }
 
   @Bound printWidgets() {
@@ -175,16 +220,30 @@ export class DashboardComponent implements OnInit {
   }
 
   private populateNodes(data: nodesCB) {
+    console.log(data);
+
     for (let node of data.nodes) {
       let item = this.items.find(e => e.id === node.id);
       if (!item)
         continue;
 
-      item.x = node.x;
-      item.y = node.y;
-      item.w = node.w;
-      item.h = node.h;
+      if (!item.grid) {
+        item.grid = {
+          xPos: 0,
+          yPos: 0,
+          width: 1,
+          height: 1,
+          hovering: false,
+        };
+      }
+
+      item.grid.xPos = node.x || 0;
+      item.grid.yPos = node.y || 0;
+      item.grid.width = node.w || 0;
+      item.grid.height = node.h || 0;
     }
+
+    this.gridItems = this.items.map(item => this.getGridstackWidget(item));
   }
 
   public lineChartData: ChartConfiguration['data'] = {

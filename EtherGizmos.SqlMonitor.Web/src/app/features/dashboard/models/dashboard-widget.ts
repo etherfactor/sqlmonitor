@@ -1,4 +1,5 @@
 import { FormBuilder } from "@angular/forms";
+import { GridStackWidget } from "gridstack";
 import { z } from "zod";
 import { FormFactoryMap, FormFunction, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 
@@ -109,18 +110,57 @@ const dashboardWidgetTextForm: FormFunction<DashboardWidgetText> = function ($fo
 }
 
 //==================================================
+// Grid configuration
+const DashboardWidgetGridZ = z.object({
+  xPos: z.number().int(),
+  yPos: z.number().int(),
+  width: z.number().int(),
+  height: z.number().int(),
+  hovering: z.boolean(),
+});
+
+type DashboardWidgetGrid = z.infer<typeof DashboardWidgetGridZ>;
+
+const dashboardWidgetGridFormFactory = formFactoryForModel(($form, model: DashboardWidgetGrid) => {
+  return <FormFactoryMap<DashboardWidgetGrid>>{
+    xPos: [model.xPos],
+    yPos: [model.yPos],
+    width: [model.width],
+    height: [model.height],
+    hovering: [model.hovering],
+  };
+});
+
+const dashboardWidgetGridForm: FormFunction<DashboardWidgetGrid> = function ($form: FormBuilder, model: DashboardWidgetGrid | undefined) {
+  if (!model)
+    return undefined!;
+
+  return dashboardWidgetGridFormFactory($form, model);
+}
+
+//==================================================
 // Full widget
 export const DashboardWidgetZ = z.object({
+  id: z.string().uuid(),
   type: z.nativeEnum(DashboardWidgetType),
-  chart: DashboardWidgetChartZ,
-  text: DashboardWidgetTextZ,
+  grid: DashboardWidgetGridZ,
+  chart: DashboardWidgetChartZ.optional(),
+  text: DashboardWidgetTextZ.optional(),
 });
 
 export type DashboardWidget = z.infer<typeof DashboardWidgetZ>;
 
+export interface GridstackDashboardWidget extends GridStackWidget {
+  type: DashboardWidgetType,
+  chart?: DashboardWidgetChart,
+  text?: DashboardWidgetText,
+}
+
 const dashboardWidgetFormFactory = formFactoryForModel(($form, model: DashboardWidget) => {
-  return <FormFactoryMap<DashboardWidget>>{
+  return <FormFactoryMap<DashboardWidget>> {
+    id: [model.id],
     type: [model.type],
+    grid: dashboardWidgetGridForm($form, model.grid),
     chart: dashboardWidgetChartForm($form, model.chart),
     text: dashboardWidgetTextForm($form, model.text),
   };
