@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Editing Text Widget
+  </h5>
+</div>
+<div class="modal-body">
+  <div *ngIf="widgetForm" [formGroup]="widgetForm.controls.text" class="container-fluid">
+    <!-- (onFocus)="focus($event)" (onNativeFocus)="nativeFocus($event)" (onEditorChanged)="changedEditor($event)" (onBlur)="blur($event)" (onNativeBlur)="nativeBlur($event)" (onEditorCreated)="created($event)" -->
+    <quill-editor [styles]="{height: '200px'}" formControlName="htmlContent"></quill-editor>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()">Cancel</button>
+  <button type="button" class="btn btn-danger" (click)="trySubmit()">Delete</button>
+</div>

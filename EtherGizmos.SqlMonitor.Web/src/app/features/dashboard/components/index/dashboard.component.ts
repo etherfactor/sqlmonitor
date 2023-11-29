@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { GridStackOptions } from 'gridstack';
+import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +12,8 @@ import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType, GridstackDashboardWidget } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
+import { QuillModule } from 'ngx-quill';
+import { EditTextWidgetModalComponent } from '../edit-text-widget-modal/edit-text-widget-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,6 +23,7 @@ import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget
     GridstackModule,
     NgbModalModule,
     NgChartsModule,
+    QuillModule,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -39,7 +42,7 @@ export class DashboardComponent implements OnInit {
   };
 
   items: DashboardWidget[] = [];
-  gridItems: GridstackDashboardWidget[] = [];
+  gridItems: { [key: string]: GridStackWidget } = {};
 
   constructor(
     $form: FormBuilder,
@@ -113,24 +116,24 @@ export class DashboardComponent implements OnInit {
     ]);
   }
 
-  getGridstackWidget(widget: DashboardWidget): GridstackDashboardWidget {
-    return <GridstackDashboardWidget> {
-      id: widget.id,
-      x: widget.grid?.xPos,
-      y: widget.grid?.yPos,
-      w: widget.grid?.width,
-      h: widget.grid?.height,
-      type: widget.type,
-      chart: widget.chart,
-      text: widget.text,
-    };
+  getGridstackWidget(widget: DashboardWidget): GridStackWidget {
+    let found = this.gridItems[widget.id];
+    if (!found) {
+      found = {
+        id: widget.id,
+        x: widget.grid?.xPos,
+        y: widget.grid?.yPos,
+        w: widget.grid?.width,
+        h: widget.grid?.height,
+      };
+
+      this.gridItems[widget.id] = found;
+    }
+
+    return found;
   }
 
-  findGridstackWidget(widget: DashboardWidget): GridstackDashboardWidget {
-    return this.gridItems.find(e => e.id == widget.id)!;
-  }
-
-  identify(index: number, widget: DashboardWidget) {
+  identifyWidget(index: number, widget: DashboardWidget) {
     return widget.id;
   }
 
@@ -184,9 +187,6 @@ export class DashboardComponent implements OnInit {
 
   private addWidget(widget: DashboardWidget) {
     this.items.push(widget);
-    const gridWidget = this.getGridstackWidget(widget);
-    console.log('from', widget, 'to', gridWidget);
-    this.gridItems.push(gridWidget);
   }
 
   @Bound printWidgets() {
@@ -241,9 +241,30 @@ export class DashboardComponent implements OnInit {
       item.grid.yPos = node.y || 0;
       item.grid.width = node.w || 0;
       item.grid.height = node.h || 0;
-    }
 
-    this.gridItems = this.items.map(item => this.getGridstackWidget(item));
+      let gridItem = this.getGridstackWidget(item);
+      gridItem.x = node.x;
+      gridItem.y = node.y;
+      gridItem.w = node.w;
+      gridItem.h = node.h;
+    }
+  }
+
+  editTextWidgetModal(item: DashboardWidget) {
+    const modal = this.$modal.open(EditTextWidgetModalComponent, { centered: true });
+    const modalInstance = <EditTextWidgetModalComponent>modal.componentInstance;
+    modalInstance.setWidget(item);
+
+    modal.result.then(
+      result => this.updateWidget(result),
+      cancel => { }
+    );
+  }
+
+  updateWidget(item: DashboardWidget) {
+    let index = this.items.findIndex(e => e.id == item.id);
+    if (index >= 0)
+      this.items[index] = item;
   }
 
   public lineChartData: ChartConfiguration['data'] = {

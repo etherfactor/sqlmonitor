@@ -1,10 +1,13 @@
-<gridstack [options]="gridOptions" (addedCB)="onChange($event)" (changeCB)="onChange($event)" (removedCB)="onRemove($event)">
-  <gridstack-item *ngFor="let item of items" [options]="findGridstackWidget(item)" (mouseenter)="item.grid.hovering = true" (mouseleave)="item.grid.hovering = false">
+<gridstack [options]="gridOptions" (addedCB)="onAdd($event)" (changeCB)="onChange($event)" (removedCB)="onRemove($event)">
+  <gridstack-item *ngFor="let item of items; trackBy: identifyWidget" [options]="getGridstackWidget(item)" (mouseenter)="item.grid.hovering = true" (mouseleave)="item.grid.hovering = false">
     <div class="position-relative w-100 h-100">
       <div class="dropdown">
-        <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!item.grid.hovering" role="button" data-bs-toggle="dropdown" aria-expanded="false"></div>
+        <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!item.grid.hovering" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"></div>
         <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
-          <li><a class="dropdown-item">Edit</a></li>
+          <ng-container [ngSwitch]="item.type">
+            <li *ngSwitchCase="'chart'"><a class="dropdown-item">Edit</a></li>
+            <li *ngSwitchCase="'text'"><a class="dropdown-item" (click)="editTextWidgetModal(item)">Edit</a></li>
+          </ng-container>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" (click)="deleteWidgetModal(item)">Remove</a></li>
         </ul>
