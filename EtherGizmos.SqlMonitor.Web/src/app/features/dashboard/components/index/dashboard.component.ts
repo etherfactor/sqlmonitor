@@ -6,14 +6,15 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
+import { QuillModule } from 'ngx-quill';
 import { v4 as uuidv4 } from 'uuid';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
-import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType, GridstackDashboardWidget } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
-import { QuillModule } from 'ngx-quill';
 import { EditTextWidgetModalComponent } from '../edit-text-widget-modal/edit-text-widget-modal.component';
+import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -180,7 +181,7 @@ export class DashboardComponent implements OnInit {
         hovering: false,
       },
       text: {
-        htmlContent: "<i>Text here</i>",
+        htmlContent: "Text here",
       },
     });
   }
@@ -250,8 +251,19 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  editChartWidgetModal(item: DashboardWidget) {
+    const modal = this.$modal.open(EditChartWidgetModalComponent, { centered: true, size: 'lg' });
+    const modalInstance = <EditChartWidgetModalComponent>modal.componentInstance;
+    modalInstance.setWidget(item);
+
+    modal.result.then(
+      result => this.updateWidget(result),
+      cancel => { }
+    );
+  }
+
   editTextWidgetModal(item: DashboardWidget) {
-    const modal = this.$modal.open(EditTextWidgetModalComponent, { centered: true });
+    const modal = this.$modal.open(EditTextWidgetModalComponent, { centered: true, size: 'lg' });
     const modalInstance = <EditTextWidgetModalComponent>modal.componentInstance;
     modalInstance.setWidget(item);
 

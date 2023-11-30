@@ -1,0 +1,37 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Editing Chart Widget
+  </h5>
+</div>
+<div class="modal-body">
+  <div *ngIf="widgetForm" [formGroup]="widgetForm.controls.chart" class="container-fluid">
+    <div class="row">
+      <div class="col-4">
+        <div class="floating-label">
+          <ng-select [items]="chartTypes"
+                     bindLabel="name"
+                     bindValue="value"
+                     placeholder="Test"></ng-select>
+        </div>
+      </div>
+      <div class="col-4">
+        <select class="form-select" aria-label="Default select example">
+          <option selected>Open this select menu</option>
+          <option value="1">One</option>
+          <option value="2">Two</option>
+          <option value="3">Three</option>
+        </select>
+      </div>
+      <div class="col-4">
+        <div class="floating-label">
+          <input id="test" class="form-control" placeholder=" " />
+          <label for="test">Test</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="trySubmit()">OK</button>
+</div>
