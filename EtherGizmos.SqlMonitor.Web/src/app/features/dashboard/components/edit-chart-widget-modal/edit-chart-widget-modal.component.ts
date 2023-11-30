@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
-import { DashboardWidget, DashboardWidgetChartType, dashboardWidgetForm } from '../../models/dashboard-widget';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
+import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetForm } from '../../models/dashboard-widget';
 
 @Component({
   selector: 'app-edit-chart-widget-modal',
@@ -28,6 +28,7 @@ export class EditChartWidgetModalComponent implements OnInit {
   widgetForm?: TypedFormGroup<DashboardWidget>;
 
   chartTypes: { value: DashboardWidgetChartType, name: string }[] = undefined!;
+  scaleTypes: { value: DashboardWidgetChartScaleType, name: string }[] = undefined!;
 
   constructor(
     $activeModal: NgbActiveModal,
@@ -39,13 +40,25 @@ export class EditChartWidgetModalComponent implements OnInit {
 
   ngOnInit() {
     this.chartTypes = [];
-    let values = Object.values(DashboardWidgetChartType);
+    const chartValues = Object.values(DashboardWidgetChartType);
     Object.keys(DashboardWidgetChartType).forEach((key, index) => {
-      if (values[index] !== DashboardWidgetChartType.Bar && values[index] !== DashboardWidgetChartType.Line)
+      if (chartValues[index] !== DashboardWidgetChartType.Bar && chartValues[index] !== DashboardWidgetChartType.Line)
         return;
 
       this.chartTypes.push({
-        value: values[index],
+        value: chartValues[index],
+        name: fromCamelCase(key),
+      });
+    });
+
+    this.scaleTypes = [];
+    const scaleValues = Object.values(DashboardWidgetChartScaleType);
+    Object.keys(DashboardWidgetChartScaleType).forEach((key, index) => {
+      if (scaleValues[index] !== DashboardWidgetChartScaleType.Linear && scaleValues[index] !== DashboardWidgetChartScaleType.Logarithmic)
+        return;
+
+      this.scaleTypes.push({
+        value: scaleValues[index],
         name: fromCamelCase(key),
       });
     });
