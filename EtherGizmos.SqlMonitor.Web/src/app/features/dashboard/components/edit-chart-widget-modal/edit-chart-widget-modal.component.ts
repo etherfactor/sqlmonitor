@@ -1,3 +1,4 @@
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -11,6 +12,8 @@ import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartTyp
   selector: 'app-edit-chart-widget-modal',
   standalone: true,
   imports: [
+    CdkDrag,
+    CdkDropList,
     CommonModule,
     NgSelectModule,
     ReactiveFormsModule,
@@ -27,8 +30,8 @@ export class EditChartWidgetModalComponent implements OnInit {
   widget?: DashboardWidget;
   widgetForm?: TypedFormGroup<DashboardWidget>;
 
-  chartTypes: { value: DashboardWidgetChartType, name: string }[] = undefined!;
-  scaleTypes: { value: DashboardWidgetChartScaleType, name: string }[] = undefined!;
+  chartTypes: { value: DashboardWidgetChartType, name: string }[] = [];
+  scaleTypes: { value: DashboardWidgetChartScaleType, name: string }[] = [];
 
   constructor(
     $activeModal: NgbActiveModal,
@@ -39,7 +42,6 @@ export class EditChartWidgetModalComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.chartTypes = [];
     const chartValues = Object.values(DashboardWidgetChartType);
     Object.keys(DashboardWidgetChartType).forEach((key, index) => {
       if (chartValues[index] !== DashboardWidgetChartType.Bar && chartValues[index] !== DashboardWidgetChartType.Line)
@@ -51,7 +53,6 @@ export class EditChartWidgetModalComponent implements OnInit {
       });
     });
 
-    this.scaleTypes = [];
     const scaleValues = Object.values(DashboardWidgetChartScaleType);
     Object.keys(DashboardWidgetChartScaleType).forEach((key, index) => {
       if (scaleValues[index] !== DashboardWidgetChartScaleType.Linear && scaleValues[index] !== DashboardWidgetChartScaleType.Logarithmic)

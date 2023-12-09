@@ -156,6 +156,7 @@ export class DashboardComponent implements OnInit {
           type: DashboardWidgetChartScaleType.Time,
           minEnforced: false,
           maxEnforced: false,
+          stacked: false,
         },
         yScales: [
           {
@@ -163,6 +164,7 @@ export class DashboardComponent implements OnInit {
             type: DashboardWidgetChartScaleType.Linear,
             minEnforced: false,
             maxEnforced: false,
+            stacked: false,
           }
         ],
       },

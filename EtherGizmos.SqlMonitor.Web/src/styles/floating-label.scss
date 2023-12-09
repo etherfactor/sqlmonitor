@@ -37,6 +37,7 @@
       transition: $transition-fast;
     }
 
+    &.ng-select-focused .ng-placeholder,
     &.ng-select-opened .ng-placeholder,
     &.ng-select-filtered .ng-placeholder,
     .ng-has-value .ng-placeholder {

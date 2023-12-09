@@ -6,55 +6,69 @@
 <div class="modal-body">
   <div *ngIf="widgetForm" [formGroup]="widgetForm.controls.chart" class="container-fluid">
     <div class="row">
-      <div class="col-12">
-        <h5>Y Scales</h5>
-      </div>
-    </div>
-    <div class="row">
       <div class="col-6">
-        <div class="floating-label mb-3">
-          <ng-select [items]="scaleTypes"
-                     bindLabel="name"
-                     bindValue="value"
-                     placeholder="Type"></ng-select>
-        </div>
+
       </div>
       <div class="col-6">
-        <div class="floating-label mb-3">
-          <input id="inputLabel" class="form-control" type="text" placeholder=" " />
-          <label for="inputLabel">Label</label>
+        <div class="row">
+          <div class="col-12">
+            <h5>Y Scales</h5>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="floating-label mb-3">
-          <input id="inputXMin" class="form-control" type="number" placeholder=" " />
-          <label for="inputXMin">Minimum Value</label>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="floating-label mb-3">
+              <ng-select [items]="scaleTypes"
+                         bindLabel="name"
+                         bindValue="value"
+                         placeholder="Type"></ng-select>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-check mt-2 mb-1">
-          <input id="checkXMinEnforced" class="form-check-input" type="checkbox">
-          <label for="checkXMinEnforced" class="form-check-label">
-            Enforced?
-          </label>
+        <div class="row">
+          <div class="col-12">
+            <div class="floating-label mb-3">
+              <input id="inputLabel" class="form-control" type="text" placeholder=" " />
+              <label for="inputLabel">Label</label>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="floating-label mb-3">
-          <input id="inputXMax" class="form-control" type="number" placeholder=" " />
-          <label for="inputXMax">Maximum Value</label>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="floating-label mb-3">
+              <input id="inputXMin" class="form-control" type="number" placeholder=" " />
+              <label for="inputXMin">Minimum Value</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check mt-2 mb-4">
+              <input id="checkXMinEnforced" class="form-check-input" type="checkbox">
+              <label for="checkXMinEnforced" class="form-check-label">
+                Enforced?
+              </label>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-check mt-2 mb-1">
-          <input id="checkXMaxEnforced" class="form-check-input" type="checkbox">
-          <label for="checkXMaxEnforced" class="form-check-label">
-            Enforced?
-          </label>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="floating-label mb-3">
+              <input id="inputXMax" class="form-control" type="number" placeholder=" " />
+              <label for="inputXMax">Maximum Value</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check mt-2 mb-4">
+              <input id="checkXMaxEnforced" class="form-check-input" type="checkbox">
+              <label for="checkXMaxEnforced" class="form-check-label">
+                Enforced?
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+
+          </div>
         </div>
       </div>
     </div>

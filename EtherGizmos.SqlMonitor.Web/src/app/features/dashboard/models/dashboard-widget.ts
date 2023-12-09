@@ -41,6 +41,7 @@ export const DashboardWidgetChartScaleZ = z.object({
   minEnforced: z.boolean().default(false),
   max: z.number().optional(),
   maxEnforced: z.boolean().default(false),
+  stacked: z.boolean().default(false),
 });
 
 export type DashboardWidgetChartScale = z.infer<typeof DashboardWidgetChartScaleZ>;
@@ -54,6 +55,7 @@ const dashboardWidgetChartScaleFormFactory = formFactoryForModel(($form, model: 
     minEnforced: [model.minEnforced],
     max: [model.max],
     maxEnforced: [model.maxEnforced],
+    stacked: [model.stacked],
   };
 });
 
