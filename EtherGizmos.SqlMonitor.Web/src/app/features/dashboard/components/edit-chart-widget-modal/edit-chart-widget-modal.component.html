@@ -135,19 +135,19 @@
       <div class="col-md-6">
         <div class="row">
           <div class="col-12">
-            <h5>Y Scales</h5>
+            <h5 class="mt-3" style="margin-bottom: -8px;">Y Scales</h5>
           </div>
         </div>
         <div class="row">
           <div class="col-12">
             <div class="d-flex justify-content-center">
-              <ngb-pagination [collectionSize]="1" [page]="1"></ngb-pagination>
+              <ngb-pagination class="mt-3" [collectionSize]="1" [page]="1"></ngb-pagination>
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
-            <div class="floating-label mb-3">
+            <div class="floating-label mt-3">
               <ng-select [items]="scaleTypes"
                          bindLabel="name"
                          bindValue="value"
@@ -157,7 +157,7 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <div class="floating-label mb-3">
+            <div class="floating-label mt-3">
               <input id="inputLabel" class="form-control" type="text" placeholder=" " />
               <label for="inputLabel">Label</label>
             </div>
@@ -165,13 +165,13 @@
         </div>
         <div class="row">
           <div class="col-md-6">
-            <div class="floating-label mb-3">
+            <div class="floating-label mt-3">
               <input id="inputXMin" class="form-control" type="number" placeholder=" " />
               <label for="inputXMin">Minimum Value</label>
             </div>
           </div>
           <div class="col-md-6">
-            <div class="form-check mt-2 mb-4">
+            <div class="form-check mt-4 mb-2">
               <input id="checkXMinEnforced" class="form-check-input" type="checkbox">
               <label for="checkXMinEnforced" class="form-check-label">
                 Enforced?
@@ -181,13 +181,13 @@
         </div>
         <div class="row">
           <div class="col-md-6">
-            <div class="floating-label mb-3">
+            <div class="floating-label mt-3">
               <input id="inputXMax" class="form-control" type="number" placeholder=" " />
               <label for="inputXMax">Maximum Value</label>
             </div>
           </div>
           <div class="col-md-6">
-            <div class="form-check mt-2 mb-4">
+            <div class="form-check mt-4 mb-2">
               <input id="checkXMaxEnforced" class="form-check-input" type="checkbox">
               <label for="checkXMaxEnforced" class="form-check-label">
                 Enforced?
