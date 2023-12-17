@@ -13,8 +13,8 @@ import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
-import { EditTextWidgetModalComponent } from '../edit-text-widget-modal/edit-text-widget-modal.component';
 import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
+import { EditTextWidgetModalComponent } from '../edit-text-widget-modal/edit-text-widget-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -151,8 +151,9 @@ export class DashboardComponent implements OnInit {
       },
       chart: {
         type: DashboardWidgetChartType.Line,
+        colors: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'],
         xScale: {
-          id: "x",
+          id: "X",
           type: DashboardWidgetChartScaleType.Time,
           minEnforced: false,
           maxEnforced: false,
@@ -160,7 +161,7 @@ export class DashboardComponent implements OnInit {
         },
         yScales: [
           {
-            id: "y",
+            id: "Y1",
             type: DashboardWidgetChartScaleType.Linear,
             minEnforced: false,
             maxEnforced: false,

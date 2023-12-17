@@ -1,0 +1,5 @@
+@import './_base.scss';
+
+.ng-invalid.ng-touched {
+  border-color: var(--bs-danger);
+}

@@ -1,15 +1,16 @@
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { NgbAccordionModule, NgbActiveModal, NgbDropdownModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ColorSketchModule } from 'ngx-color/sketch';
 import { InputColorPickerComponent } from '../../../../shared/components/input-color-picker/input-color-picker.component';
+import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
 import { ColorSet } from '../../models/color-set';
-import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetForm } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetChartScaleForm, dashboardWidgetForm } from '../../models/dashboard-widget';
 
 @Component({
   selector: 'app-edit-chart-widget-modal',
@@ -39,6 +40,8 @@ export class EditChartWidgetModalComponent implements OnInit {
   widget?: DashboardWidget;
   widgetForm?: TypedFormGroup<DashboardWidget>;
 
+  get chartForm() { return this.widgetForm?.controls?.chart; }
+
   chartTypes: { value: DashboardWidgetChartType, name: string }[] = [];
   scaleTypes: { value: DashboardWidgetChartScaleType, name: string }[] = [];
 
@@ -56,8 +59,10 @@ export class EditChartWidgetModalComponent implements OnInit {
       colors: ['#e60049', '#0bb4ff', '#50e991', '#e6d800', '#9b19f5', '#ffa300', '#dc0ab4', '#b3d4ff'],
     }
   ];
-  colorSet: ColorSet = this.colorSets[1];
+  colorSet: ColorSet = this.colorSets[0];
   colors: string[] = [...this.colorSet.colors];
+
+  newYScaleForm: FormControl<string> = undefined!;
 
   constructor(
     $activeModal: NgbActiveModal,
@@ -89,6 +94,15 @@ export class EditChartWidgetModalComponent implements OnInit {
         name: fromCamelCase(key),
       });
     });
+
+    this.newYScaleForm = this.$form.nonNullable.control<string>(
+      undefined!,
+      {
+        validators: [
+          Validators.required,
+          this.validateUniqueYScaleKey,
+        ]
+      });
   }
 
   setWidget(item: DashboardWidget) {
@@ -107,6 +121,57 @@ export class EditChartWidgetModalComponent implements OnInit {
 
   changeColorSet(colorSet?: ColorSet) {
     this.colorSet = colorSet ?? this.colorSets[0];
-    this.colors = [...this.colorSet.colors];
+    if (this.chartForm && this.chartForm.controls) {
+      for (let i = 0; i < this.colorSet.colors.length; i++) {
+        this.chartForm.controls.colors.setControl(i, this.$form.nonNullable.control(this.colorSet.colors[i]));
+      }
+    }
+  }
+
+  addYScale() {
+    if (!this.chartForm)
+      return;
+
+    if (!this.chartForm.controls)
+      return;
+
+    if (!this.newYScaleForm.valid) {
+      this.newYScaleForm.markAllAsTouched();
+      return;
+    }
+
+    const newYScaleKey = this.newYScaleForm.value;
+    this.chartForm.controls.yScales.push(dashboardWidgetChartScaleForm(this.$form, {
+      id: newYScaleKey,
+      type: DashboardWidgetChartScaleType.Linear,
+      minEnforced: false,
+      maxEnforced: false,
+      stacked: false,
+    }));
+
+    this.newYScaleForm = this.$form.nonNullable.control<string>(
+      undefined!,
+      {
+        validators: [
+          Validators.required,
+          this.validateUniqueYScaleKey,
+        ]
+      });
+  }
+
+  @Bound validateUniqueYScaleKey(control: FormControl<string>): ValidationErrors | null {
+    if (!this.chartForm)
+      return null;
+
+    if (!this.chartForm.controls)
+      return null;
+
+    for (const yScale of this.chartForm.controls.yScales.controls) {
+      if (control.value?.toLowerCase() === yScale.value.id?.toLowerCase()) {
+        return { error: true };
+      }
+    }
+
+    return null;
   }
 }

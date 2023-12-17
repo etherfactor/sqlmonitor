@@ -69,15 +69,17 @@ export const dashboardWidgetChartScaleForm: FormFunction<DashboardWidgetChartSca
 // Chart
 const DashboardWidgetChartZ = z.object({
   type: z.nativeEnum(DashboardWidgetChartType).optional(),
+  colors: z.array(z.string()),
   xScale: DashboardWidgetChartScaleZ,
   yScales: z.array(DashboardWidgetChartScaleZ),
 });
 
-type DashboardWidgetChart = z.infer<typeof DashboardWidgetChartZ>;
+export type DashboardWidgetChart = z.infer<typeof DashboardWidgetChartZ>;
 
 const dashboardWidgetChartFormFactory = formFactoryForModel(($form, model: DashboardWidgetChart) => {
   return <FormFactoryMap<DashboardWidgetChart>> {
     type: [model.type],
+    colors: $form.nonNullable.array(model.colors),
     xScale: dashboardWidgetChartScaleForm($form, model.xScale),
     yScales: $form.nonNullable.array(model.yScales.map(item => dashboardWidgetChartScaleForm($form, item))),
   };
