@@ -13,8 +13,16 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-12">
-
+          <div class="input-group mt-3" ngbDropdown placement="bottom-right">
+            <div class="input-group-text px-2" [ngStyle]="{ 'background-color': color }"></div>
+            <div class="floating-label">
+              <input type="text" class="form-control" value="#00acac" [disabled]="false" placeholder=" " />
+              <label>Series % 0</label>
+            </div>
+            <button class="btn btn-secondary" ngbDropdownToggle [disabled]="false" [ngStyle]="dynamicPickerStyle"><span class="bi bi-eyedropper"></span></button>
+            <div class="dropdown-menu dropdown-toggle w-250px" ngbDropdownMenu>
+              <color-sketch [color]="color" (onChangeComplete)="colorChanged($event)"></color-sketch>
+            </div>
           </div>
         </div>
       </div>
