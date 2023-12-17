@@ -1,3 +1,5 @@
+/// <reference types="@angular/localize" />
+
 import { CDK_DRAG_CONFIG } from '@angular/cdk/drag-drop';
 import { InjectionToken, Provider, enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';

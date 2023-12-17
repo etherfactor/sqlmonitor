@@ -1,9 +1,11 @@
 import { DateTime } from "luxon";
 import { z } from "zod";
-import { Guid } from "../types/guid";
+import { DateTimeZ, parseDateTime } from "../types/datetime/datetime";
+import { Guid, GuidZ, parseGuid } from "../types/guid/guid";
 import { FormFunction, formFactoryForModel } from "../utilities/form/form.util";
+import { maybe } from "../utilities/maybe/maybe";
 import { AggregateType } from "./aggregate-type";
-import { MetricSeverity, MetricSeverityDataZ, metricSeverityForm } from "./metric-severity";
+import { MetricSeverity, MetricSeverityConverter, MetricSeverityDataZ, MetricSeverityZ, metricSeverityForm } from "./metric-severity";
 
 export const MetricDataZ = z.object({
   id: z.string().uuid(),
@@ -19,6 +21,11 @@ export const MetricDataZ = z.object({
 
 export type MetricData = z.infer<typeof MetricDataZ>;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function expectType<T>(_: T) {
+  /* noop */
+}
+
 export type Metric = {
   id: Guid;
   createdAt?: DateTime;
@@ -27,9 +34,74 @@ export type Metric = {
   modifiedByUserId?: Guid;
   name: string;
   description?: string;
-  aggregateType?: AggregateType;
+  aggregateType: AggregateType;
   severities: MetricSeverity[];
 };
+
+export const MetricZ = z.object({
+  id: GuidZ,
+  createdAt: DateTimeZ.optional(),
+  createdByUserId: GuidZ.optional(),
+  modifiedAt: DateTimeZ.optional(),
+  modifiedByUserId: GuidZ.optional(),
+  name: z.string(),
+  description: z.string().optional(),
+  aggregateType: z.nativeEnum(AggregateType),
+  severities: z.lazy(() => z.array(MetricSeverityZ)),
+});
+
+expectType<Metric>({} as z.infer<typeof MetricZ>);
+expectType<z.infer<typeof MetricZ>>({} as Metric);
+
+export class MetricConverter {
+  static parse(input: unknown) {
+    const data = MetricDataZ.parse(input);
+    return this.fromData(data);
+  }
+
+  static fromData(input: MetricData): Metric {
+    return {
+      id: parseGuid(input.id),
+      createdAt: maybe(() => parseDateTime(input.created_at)),
+      createdByUserId: maybe(() => parseGuid(input.created_by_user_id)),
+      modifiedAt: maybe(() => parseDateTime(input.modified_at)),
+      modifiedByUserId: maybe(() => parseGuid(input.modified_by_user_id)),
+      name: input.name,
+      description: input.description ?? undefined,
+      aggregateType: input.aggregate_type,
+      severities: input.severities.map(item => MetricSeverityConverter.fromData(item)),
+    };
+  }
+
+  static toCreate(input: Partial<Metric>): MetricData {
+    const data = MetricZ.parse(input);
+    return {
+      id: data.id,
+      created_at: data.createdAt?.toISO(),
+      created_by_user_id: data.createdByUserId,
+      modified_at: data.modifiedAt?.toISO(),
+      modified_by_user_id: data.modifiedByUserId,
+      name: data.name,
+      description: data.description,
+      aggregate_type: data.aggregateType,
+      severities: data.severities.map(item => MetricSeverityConverter.toCreate(item)),
+    };
+  }
+
+  static toPatch(input: Partial<Metric>): Partial<MetricData> {
+    return {
+      id: input.id,
+      created_at: input.createdAt?.toISO(),
+      created_by_user_id: input.createdByUserId,
+      modified_at: input.modifiedAt?.toISO(),
+      modified_by_user_id: input.modifiedByUserId,
+      name: input.name,
+      description: input.description,
+      aggregate_type: input.aggregateType,
+      severities: input.severities?.map(item => MetricSeverityConverter.toCreate(item)),
+    };
+  }
+}
 
 const metricFormFactory = formFactoryForModel<Metric, { id: 'control', createdAt: 'control', createdByUserId: 'control', modifiedAt: 'control', modifiedByUserId: 'control' }>(($form, model) => {
   return {

@@ -2,7 +2,7 @@ import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbActiveModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
@@ -15,6 +15,8 @@ import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartTyp
     CdkDrag,
     CdkDropList,
     CommonModule,
+    NgbAccordionModule,
+    NgbPaginationModule,
     NgSelectModule,
     ReactiveFormsModule,
   ],
