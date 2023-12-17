@@ -1,0 +1,11 @@
+<div class="input-group mt-3" ngbDropdown placement="bottom-right">
+  <div class="input-group-text px-2" [ngStyle]="dynamicPreviewStyle"></div>
+  <div class="floating-label">
+    <input [id]="id" type="text" class="form-control" [(ngModel)]="value" [disabled]="disabled" placeholder=" " />
+    <label [for]="id">{{placeholder}}</label>
+  </div>
+  <button class="btn btn-secondary" ngbDropdownToggle [disabled]="disabled" [ngStyle]="dynamicPickerStyle"><span class="bi bi-eyedropper"></span></button>
+  <div class="dropdown-menu dropdown-toggle w-250px" ngbDropdownMenu>
+    <color-sketch [color]="value" (onChangeComplete)="colorChanged($event)"></color-sketch>
+  </div>
+</div>

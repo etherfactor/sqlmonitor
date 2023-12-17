@@ -4,9 +4,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { NgbAccordionModule, NgbActiveModal, NgbDropdownModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { darken, lighten, readableColor, readableColorIsBlack, toRgba } from 'color2k';
-import { ColorEvent } from 'ngx-color';
 import { ColorSketchModule } from 'ngx-color/sketch';
+import { InputColorPickerComponent } from '../../../../shared/components/input-color-picker/input-color-picker.component';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetForm } from '../../models/dashboard-widget';
@@ -19,6 +18,7 @@ import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartTyp
     CdkDropList,
     ColorSketchModule,
     CommonModule,
+    InputColorPickerComponent,
     NgbAccordionModule,
     NgbDropdownModule,
     NgbPaginationModule,
@@ -86,43 +86,5 @@ export class EditChartWidgetModalComponent implements OnInit {
     console.log(this.widgetForm.value);
 
     this.$activeModal.close(this.widgetForm.value);
-  }
-
-  get dynamicPickerStyle() {
-    const base = this.color;
-    const useLighten = !readableColorIsBlack(base);
-    const text = readableColor(base);
-
-    const hover = useLighten ? lighten(base, 0.05) : darken(base, 0.05);
-    const active = useLighten ? lighten(base, 0.075) : darken(base, 0.075);
-    const disabled = base;
-
-    const shadowRgba = toRgba(base);
-    const shadow = shadowRgba.substring(5, shadowRgba.length - 1)
-      .replace(/ /g, '')
-      .split(',')
-      .slice(0, 3)
-      .join(', ');
-
-    return {
-      '--bs-btn-color': text,
-      '--bs-btn-bg': base,
-      '--bs-btn-border-color': base,
-      '--bs-btn-hover-color': text,
-      '--bs-btn-hover-bg': hover,
-      '--bs-btn-hover-border-color': hover,
-      '--bs-btn-focus-shadow-rgb': shadow,
-      '--bs-btn-active-color': text,
-      '--bs-btn-active-bg': active,
-      '--bs-btn-active-border-color': active,
-      '--bs-btn-active-shadow': '',
-      '--bs-btn-disabled-color': text,
-      '--bs-btn-disabled-bg': disabled,
-      '--bs-btn-disabled-border-color': disabled,
-    };
-  }
-
-  colorChanged($event: ColorEvent) {
-    this.color = $event.color.hex;
   }
 }
