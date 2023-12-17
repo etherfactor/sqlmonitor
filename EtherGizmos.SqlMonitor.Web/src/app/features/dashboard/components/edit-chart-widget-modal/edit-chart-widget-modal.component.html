@@ -15,53 +15,53 @@
         <div class="row">
           <div class="col-12">
             <div class="floating-label mt-3">
-              <ng-select placeholder="Change colors">
+              <ng-select placeholder="Change colors" [(ngModel)]="colorSet" [ngModelOptions]="{ standalone:true }" (change)="changeColorSet($event)">
                 <ng-template ng-label-tmp let-item="item">
-                  <div class="container-fluid w-100">
-                    <div class="row">
-                      <div *ngFor="let color of item" class="col" style="height: 28px;" [ngStyle]="{ 'background-color': color }"></div>
-                    </div>
-                  </div>
+                  {{item.name}}
                 </ng-template>
                 <ng-template ng-option-tmp let-item="item">
                   <div class="container-fluid w-100">
                     <div class="row">
-                      <div *ngFor="let color of item" class="col" style="height: 30px;" [ngStyle]="{ 'background-color': color }"></div>
+                      <div class="col-12">
+                        {{item.name}}
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div *ngFor="let color of item.colors" class="col" style="height: 30px;" [ngStyle]="{ 'background-color': color }"></div>
                     </div>
                   </div>
                 </ng-template>
-                <ng-option [value]="['#8a3ffc','#33b1ff','#007d79','#ff7eb6','#fa4d56','#fff1f1','#6fdc8c','#4589ff']"></ng-option>
-                <ng-option [value]="['#e60049','#0bb4ff','#50e991','#e6d800','#9b19f5','#ffa300','#dc0ab4','#b3d4ff']"></ng-option>
+                <ng-option *ngFor="let colorSet of colorSets" [value]="colorSet"></ng-option>
               </ng-select>
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color1" placeholder="Series 1"></input-color-picker>
+            <input-color-picker id="color1" placeholder="Series 1" [(ngModel)]="colors[0]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color2" placeholder="Series 2"></input-color-picker>
+            <input-color-picker id="color2" placeholder="Series 2" [(ngModel)]="colors[1]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color3" placeholder="Series 3"></input-color-picker>
+            <input-color-picker id="color3" placeholder="Series 3" [(ngModel)]="colors[2]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color4" placeholder="Series 4"></input-color-picker>
+            <input-color-picker id="color4" placeholder="Series 4" [(ngModel)]="colors[3]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
         </div>
         <div class="row">
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color5" placeholder="Series 5"></input-color-picker>
+            <input-color-picker id="color5" placeholder="Series 5" [(ngModel)]="colors[4]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color6" placeholder="Series 6"></input-color-picker>
+            <input-color-picker id="color6" placeholder="Series 6" [(ngModel)]="colors[5]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color7" placeholder="Series 7"></input-color-picker>
+            <input-color-picker id="color7" placeholder="Series 7" [(ngModel)]="colors[6]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
           <div class="col-lg-3 col-md-6">
-            <input-color-picker id="color8" placeholder="Series 8"></input-color-picker>
+            <input-color-picker id="color8" placeholder="Series 8" [(ngModel)]="colors[7]" [ngModelOptions]="{ standalone:true }"></input-color-picker>
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@
               <button ngbAccordionButton style="padding: 8px 0.75rem;">Memory Utilization</button>
             </h2>
             <div ngbAccordionCollapse>
-              <div ngbAccordionBody class="pt-0" style="padding-left: 8px; padding-right: 8px;">
+              <div class="accordion-body pt-0" style="padding-left: 8px; padding-right: 8px;">
                 <!--<div class="floating-label">
                   <input type="text" readonly class="form-control-plaintext" id="metricName" value="Value" placeholder=" " />
                   <label for="metricName">Metric name</label>
@@ -111,18 +111,35 @@
                     <div class="col-12">
                       <div class="floating-label">
                         <ng-select class="mt-3" placeholder="Buckets">
+                          <ng-option>Aggregate</ng-option>
+                          <ng-option>Specific buckets</ng-option>
                           <ng-option>Display all</ng-option>
                           <ng-option>Display top N (current)</ng-option>
                           <ng-option>Display top N (average)</ng-option>
-                          <ng-option>Aggregate</ng-option>
                         </ng-select>
                       </div>
                     </div>
                   </div>
-                  <div class="row">
+                  <div *ngIf="1==1" class="row">
                     <div class="col-12">
                       <fieldset class="border rounded-2 p-3 mt-1">
-                        <legend class="float-none w-auto px-3" style="font-size: 1rem;">Color overrides</legend>
+                        <legend class="float-none w-auto px-3" style="font-size: 0.875rem; margin-bottom: -8px;">Buckets to include</legend>
+                        <div class="row">
+                          <div class="col-12">
+                            <button class="btn btn-primary w-100"><span class="bi bi-plus-square"></span> Add bucket</button>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col">
+                            <div class="floating-label mt-3">
+                              <input id="bucketName" class="form-control" type="text" placeholder=" " />
+                              <label for="bucketName">Bucket label</label>
+                            </div>
+                          </div>
+                          <div class="col-auto">
+                            <button class="btn btn-danger mt-3"><span class="bi bi-x-lg"></span></button>
+                          </div>
+                        </div>
                       </fieldset>
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { ControlValueAccessor, FormsModule } from '@angular/forms';
+import { Component, Input, forwardRef } from '@angular/core';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { darken, lighten, readableColor, readableColorIsBlack, toRgba } from 'color2k';
 import { ColorEvent } from 'ngx-color';
@@ -16,7 +16,14 @@ import { ColorSketchModule } from 'ngx-color/sketch';
     NgbDropdownModule,
   ],
   templateUrl: './input-color-picker.component.html',
-  styleUrl: './input-color-picker.component.scss'
+  styleUrl: './input-color-picker.component.scss',
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => InputColorPickerComponent),
+      multi: true
+    }
+  ]
 })
 export class InputColorPickerComponent implements ControlValueAccessor {
 
@@ -41,10 +48,12 @@ export class InputColorPickerComponent implements ControlValueAccessor {
   onTouched: () => void = () => { };
 
   writeValue(obj: unknown): void {
-    if (typeof obj === 'string') {
+    if (obj === null || obj === undefined) {
+      this.value = '#ffffff';
+    } else if (typeof obj === 'string') {
       this.value = obj;
     } else {
-      throw new Error(`Unexpected type of input '${typeof obj}'`);
+      throw new Error(`Unexpected type of input '${typeof obj}': ${obj}`);
     }
   }
 
