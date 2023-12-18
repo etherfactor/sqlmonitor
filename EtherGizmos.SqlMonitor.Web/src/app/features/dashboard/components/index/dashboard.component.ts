@@ -160,14 +160,15 @@ export class DashboardComponent implements OnInit {
           stacked: false,
         },
         yScales: [
-          {
-            id: "Y1",
-            type: DashboardWidgetChartScaleType.Linear,
-            minEnforced: false,
-            maxEnforced: false,
-            stacked: false,
-          }
+          //{
+          //  id: "Y1",
+          //  type: DashboardWidgetChartScaleType.Linear,
+          //  minEnforced: false,
+          //  maxEnforced: false,
+          //  stacked: false,
+          //}
         ],
+        metrics: [],
       },
     });
   }

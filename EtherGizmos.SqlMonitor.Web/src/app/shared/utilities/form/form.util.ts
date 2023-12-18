@@ -50,3 +50,8 @@ export type FormFunction<TModel, TModify extends FormConfig<TModel> = undefined>
   ($form: FormBuilder, model: TModel): TypedFormGroup<TModel, TModify>;
   ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel, TModify> | undefined;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function expectType<T>(_: T) {
+  /* noop */
+}

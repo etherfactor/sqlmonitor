@@ -1,4 +1,4 @@
-import { FormBuilder } from "@angular/forms";
+import { FormBuilder, Validators } from "@angular/forms";
 import { GridStackWidget } from "gridstack";
 import { z } from "zod";
 import { FormFactoryMap, FormFunction, formFactoryForModel } from "../../../shared/utilities/form/form.util";
@@ -27,6 +27,14 @@ export enum DashboardWidgetChartScaleType {
   Time = "time",
   TimeSeries = "timeseries",
   RadialLinear = "radialLinear",
+}
+
+export enum DashboardWidgetChartMetricBucketType {
+  Aggregate = "aggregate",
+  SpecificBuckets = "specify",
+  DisplayAll = "all",
+  DisplayTopNCurrent = "topNCurrent",
+  DisplayTopNRolling = "topNRolling",
 }
 
 //==================================================
@@ -66,12 +74,37 @@ export const dashboardWidgetChartScaleForm: FormFunction<DashboardWidgetChartSca
   return dashboardWidgetChartScaleFormFactory($form, model);
 };
 
+// Chart metric
+export const DashboardWidgetChartMetricZ = z.object({
+  metricId: z.string(),
+  bucketType: z.nativeEnum(DashboardWidgetChartMetricBucketType),
+  buckets: z.array(z.string()),
+});
+
+export type DashboardWidgetChartMetric = z.infer<typeof DashboardWidgetChartMetricZ>;
+
+const dashboardWidgetChartMetricFormFactory = formFactoryForModel<DashboardWidgetChartMetric>(($form, model) => {
+  return {
+    metricId: [model.metricId, Validators.required],
+    bucketType: [model.bucketType, Validators.required],
+    buckets: $form.nonNullable.array(model.buckets),
+  };
+});
+
+export const dashboardWidgetChartMetricForm: FormFunction<DashboardWidgetChartMetric> = function ($form, model) {
+  if (!model)
+    return undefined!;
+
+  return dashboardWidgetChartMetricFormFactory($form, model);
+};
+
 // Chart
 const DashboardWidgetChartZ = z.object({
   type: z.nativeEnum(DashboardWidgetChartType).optional(),
   colors: z.array(z.string()),
   xScale: DashboardWidgetChartScaleZ,
   yScales: z.array(DashboardWidgetChartScaleZ),
+  metrics: z.array(DashboardWidgetChartMetricZ),
 });
 
 export type DashboardWidgetChart = z.infer<typeof DashboardWidgetChartZ>;
@@ -82,6 +115,7 @@ const dashboardWidgetChartFormFactory = formFactoryForModel(($form, model: Dashb
     colors: $form.nonNullable.array(model.colors),
     xScale: dashboardWidgetChartScaleForm($form, model.xScale),
     yScales: $form.nonNullable.array(model.yScales.map(item => dashboardWidgetChartScaleForm($form, item))),
+    metrics: $form.nonNullable.array(model.metrics.map(item => dashboardWidgetChartMetricForm($form, item))),
   };
 });
 

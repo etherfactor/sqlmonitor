@@ -6,11 +6,14 @@ import { NgbAccordionModule, NgbActiveModal, NgbDropdownModule, NgbPaginationMod
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ColorSketchModule } from 'ngx-color/sketch';
 import { InputColorPickerComponent } from '../../../../shared/components/input-color-picker/input-color-picker.component';
+import { Metric } from '../../../../shared/models/metric';
+import { MetricService } from '../../../../shared/services/metric/metric.service';
+import { Guid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
 import { ColorSet } from '../../models/color-set';
-import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetChartScaleForm, dashboardWidgetForm } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartMetric, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetChartMetricForm, dashboardWidgetChartScaleForm, dashboardWidgetForm } from '../../models/dashboard-widget';
 
 @Component({
   selector: 'app-edit-chart-widget-modal',
@@ -34,6 +37,7 @@ import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartTyp
 export class EditChartWidgetModalComponent implements OnInit {
 
   private $form: FormBuilder;
+  private $metric: MetricService;
 
   $activeModal: NgbActiveModal;
 
@@ -63,13 +67,21 @@ export class EditChartWidgetModalComponent implements OnInit {
   colors: string[] = [...this.colorSet.colors];
 
   newYScaleForm: FormControl<string> = undefined!;
+  newMetricForm: FormControl<Guid> = undefined!;
+
+  metrics: Metric[] = [];
+
+  //Export enums
+  DashboardWidgetChartMetricBucketType = DashboardWidgetChartMetricBucketType;
 
   constructor(
     $activeModal: NgbActiveModal,
-    $form: FormBuilder
+    $form: FormBuilder,
+    $metric: MetricService,
   ) {
     this.$activeModal = $activeModal;
     this.$form = $form;
+    this.$metric = $metric;
   }
 
   ngOnInit() {
@@ -102,7 +114,21 @@ export class EditChartWidgetModalComponent implements OnInit {
           Validators.required,
           this.validateUniqueYScaleKey,
         ]
-      });
+      }
+    );
+
+    this.newMetricForm = this.$form.nonNullable.control<Guid>(
+      undefined!,
+      {
+        validators: [
+          Validators.required,
+        ]
+      }
+    );
+
+    this.$metric.search().subscribe(metrics => {
+      this.metrics = metrics;
+    });
   }
 
   setWidget(item: DashboardWidget) {
@@ -141,6 +167,9 @@ export class EditChartWidgetModalComponent implements OnInit {
     }
 
     const newYScaleKey = this.newYScaleForm.value;
+    if (!newYScaleKey)
+      return;
+
     this.chartForm.controls.yScales.push(dashboardWidgetChartScaleForm(this.$form, {
       id: newYScaleKey,
       type: DashboardWidgetChartScaleType.Linear,
@@ -157,6 +186,70 @@ export class EditChartWidgetModalComponent implements OnInit {
           this.validateUniqueYScaleKey,
         ]
       });
+  }
+
+  addMetric() {
+    if (!this.chartForm)
+      return;
+
+    if (!this.chartForm.controls)
+      return;
+
+    if (!this.newMetricForm.valid) {
+      this.newMetricForm.markAsTouched();
+      return;
+    }
+
+    const newMetricId = this.newMetricForm.value;
+    if (!newMetricId)
+      return;
+
+    this.chartForm.controls.metrics.push(dashboardWidgetChartMetricForm(this.$form, {
+      metricId: newMetricId,
+      bucketType: undefined!,
+      buckets: [undefined!],
+    }));
+
+    this.newMetricForm = this.$form.nonNullable.control<Guid>(
+      undefined!,
+      {
+        validators: [
+          Validators.required,
+        ]
+      }
+    );
+  }
+
+  addMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric>) {
+    if (!metricForm)
+      return;
+
+    if (!metricForm.controls)
+      return;
+
+    metricForm.controls.buckets.push(
+      this.$form.nonNullable.control<string>(
+        undefined!,
+        {
+          validators: [
+            Validators.required
+          ]
+        }
+      )
+    );
+  }
+
+  removeMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric>, index: number) {
+    if (!metricForm)
+      return;
+
+    if (!metricForm.controls)
+      return;
+
+    if (metricForm.controls.buckets.length <= 1)
+      return;
+
+    metricForm.controls.buckets.removeAt(index);
   }
 
   @Bound validateUniqueYScaleKey(control: FormControl<string>): ValidationErrors | null {

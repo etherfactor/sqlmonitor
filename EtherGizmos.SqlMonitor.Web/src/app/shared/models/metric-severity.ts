@@ -1,6 +1,5 @@
-import { toZod } from "tozod";
 import { z } from "zod";
-import { FormFactoryMap, FormFunction, formFactoryForModel } from "../utilities/form/form.util";
+import { FormFactoryMap, FormFunction, expectType, formFactoryForModel } from "../utilities/form/form.util";
 import { SeverityType } from "./severity-type";
 
 export const MetricSeverityDataZ = z.object({
@@ -17,11 +16,14 @@ export type MetricSeverity = {
   maximumValue?: number;
 };
 
-export const MetricSeverityZ: toZod<MetricSeverity> = z.object({
+export const MetricSeverityZ = z.object({
   severityType: z.number(),
   minimumValue: z.number().optional(),
   maximumValue: z.number().optional(),
 });
+
+expectType<MetricSeverity>({} as z.infer<typeof MetricSeverityZ>);
+expectType<z.infer<typeof MetricSeverityZ>>({} as MetricSeverity);
 
 export class MetricSeverityConverter {
   static parse(input: unknown) {

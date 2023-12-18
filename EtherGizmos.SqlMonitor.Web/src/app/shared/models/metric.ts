@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { z } from "zod";
 import { DateTimeZ, parseDateTime } from "../types/datetime/datetime";
 import { Guid, GuidZ, parseGuid } from "../types/guid/guid";
-import { FormFunction, formFactoryForModel } from "../utilities/form/form.util";
+import { FormFunction, expectType, formFactoryForModel } from "../utilities/form/form.util";
 import { maybe } from "../utilities/maybe/maybe";
 import { AggregateType } from "./aggregate-type";
 import { MetricSeverity, MetricSeverityConverter, MetricSeverityDataZ, MetricSeverityZ, metricSeverityForm } from "./metric-severity";
@@ -20,11 +20,6 @@ export const MetricDataZ = z.object({
 });
 
 export type MetricData = z.infer<typeof MetricDataZ>;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function expectType<T>(_: T) {
-  /* noop */
-}
 
 export type Metric = {
   id: Guid;

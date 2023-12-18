@@ -7,6 +7,7 @@ import { provideRouter } from '@angular/router';
 import { provideQuillConfig } from 'ngx-quill';
 import { AppComponent } from './app/app.component';
 import { APP_ROUTES } from './app/app.routes';
+import { provideMetricServiceMock } from './app/shared/services/metric/metric.service.mock';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -20,6 +21,7 @@ bootstrapApplication(
       provideRouter(APP_ROUTES),
       provideQuillConfig({}),
       provideSimpleConfig(CDK_DRAG_CONFIG, { zIndex: 1100 }),
+      provideMetricServiceMock(),
     ]
   })
   .catch(err => console.error(err));
