@@ -55,9 +55,9 @@ export const DashboardWidgetChartScaleZ = z.object({
 export type DashboardWidgetChartScale = z.infer<typeof DashboardWidgetChartScaleZ>;
 
 const dashboardWidgetChartScaleFormFactory = formFactoryForModel(($form, model: DashboardWidgetChartScale) => {
-  return <FormFactoryMap<DashboardWidgetChartScale>> {
-    id: [model.id],
-    type: [model.type],
+  return <FormFactoryMap<DashboardWidgetChartScale>>{
+    id: [model.id, Validators.required],
+    type: [model.type, Validators.required],
     label: [model.label],
     min: [model.min],
     minEnforced: [model.minEnforced],
@@ -77,8 +77,10 @@ export const dashboardWidgetChartScaleForm: FormFunction<DashboardWidgetChartSca
 // Chart metric
 export const DashboardWidgetChartMetricZ = z.object({
   metricId: z.string(),
+  yScaleId: z.string(),
   bucketType: z.nativeEnum(DashboardWidgetChartMetricBucketType),
   buckets: z.array(z.string()),
+  bucketTopN: z.number().optional(),
 });
 
 export type DashboardWidgetChartMetric = z.infer<typeof DashboardWidgetChartMetricZ>;
@@ -86,8 +88,10 @@ export type DashboardWidgetChartMetric = z.infer<typeof DashboardWidgetChartMetr
 const dashboardWidgetChartMetricFormFactory = formFactoryForModel<DashboardWidgetChartMetric>(($form, model) => {
   return {
     metricId: [model.metricId, Validators.required],
+    yScaleId: [model.yScaleId, Validators.required],
     bucketType: [model.bucketType, Validators.required],
     buckets: $form.nonNullable.array(model.buckets),
+    bucketTopN: [model.bucketTopN],
   };
 });
 
@@ -110,8 +114,8 @@ const DashboardWidgetChartZ = z.object({
 export type DashboardWidgetChart = z.infer<typeof DashboardWidgetChartZ>;
 
 const dashboardWidgetChartFormFactory = formFactoryForModel(($form, model: DashboardWidgetChart) => {
-  return <FormFactoryMap<DashboardWidgetChart>> {
-    type: [model.type],
+  return <FormFactoryMap<DashboardWidgetChart>>{
+    type: [model.type, Validators.required],
     colors: $form.nonNullable.array(model.colors),
     xScale: dashboardWidgetChartScaleForm($form, model.xScale),
     yScales: $form.nonNullable.array(model.yScales.map(item => dashboardWidgetChartScaleForm($form, item))),

@@ -13,7 +13,7 @@ import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
 import { ColorSet } from '../../models/color-set';
-import { DashboardWidget, DashboardWidgetChartMetric, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetChartMetricForm, dashboardWidgetChartScaleForm, dashboardWidgetForm } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartMetric, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScale, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetChartMetricForm, dashboardWidgetChartScaleForm, dashboardWidgetForm } from '../../models/dashboard-widget';
 
 @Component({
   selector: 'app-edit-chart-widget-modal',
@@ -70,6 +70,8 @@ export class EditChartWidgetModalComponent implements OnInit {
   newMetricForm: FormControl<Guid> = undefined!;
 
   metrics: Metric[] = [];
+
+  get currentYScales() { return this.chartForm?.value?.yScales ?? []; }
 
   //Export enums
   DashboardWidgetChartMetricBucketType = DashboardWidgetChartMetricBucketType;
@@ -140,6 +142,11 @@ export class EditChartWidgetModalComponent implements OnInit {
     if (!this.widgetForm)
       return;
 
+    if (this.widgetForm.invalid) {
+      this.widgetForm.markAllAsTouched();
+      return;
+    }
+
     console.log(this.widgetForm.value);
 
     this.$activeModal.close(this.widgetForm.value);
@@ -188,6 +195,26 @@ export class EditChartWidgetModalComponent implements OnInit {
       });
   }
 
+  removeYScale(scaleForm: TypedFormGroup<DashboardWidgetChartScale>, index: number) {
+    if (!scaleForm)
+      return;
+
+    if (!this.chartForm)
+      return;
+
+    if (!this.chartForm.controls)
+      return;
+
+    this.chartForm.controls.yScales.removeAt(index);
+
+    const yScaleId = scaleForm.value.id;
+    for (const metricForm of this.chartForm.controls.metrics.controls) {
+      if (yScaleId?.toLowerCase() === metricForm.value.yScaleId?.toLowerCase()) {
+        metricForm.controls.yScaleId.setValue(undefined);
+      }
+    }
+  }
+
   addMetric() {
     if (!this.chartForm)
       return;
@@ -206,8 +233,9 @@ export class EditChartWidgetModalComponent implements OnInit {
 
     this.chartForm.controls.metrics.push(dashboardWidgetChartMetricForm(this.$form, {
       metricId: newMetricId,
+      yScaleId: undefined!,
       bucketType: undefined!,
-      buckets: [undefined!],
+      buckets: [],
     }));
 
     this.newMetricForm = this.$form.nonNullable.control<Guid>(
@@ -218,6 +246,19 @@ export class EditChartWidgetModalComponent implements OnInit {
         ]
       }
     );
+  }
+
+  removeMetric(metricForm: TypedFormGroup<DashboardWidgetChartMetric>, index: number) {
+    if (!metricForm)
+      return;
+
+    if (!this.chartForm)
+      return;
+
+    if (!this.chartForm.controls)
+      return;
+
+    this.chartForm.controls.metrics.removeAt(index);
   }
 
   addMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric>) {
@@ -244,9 +285,6 @@ export class EditChartWidgetModalComponent implements OnInit {
       return;
 
     if (!metricForm.controls)
-      return;
-
-    if (metricForm.controls.buckets.length <= 1)
       return;
 
     metricForm.controls.buckets.removeAt(index);

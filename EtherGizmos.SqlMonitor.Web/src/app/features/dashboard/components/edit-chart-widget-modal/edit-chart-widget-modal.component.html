@@ -5,6 +5,8 @@
 </div>
 <div class="modal-body pt-0">
   <div *ngIf="widgetForm" [formGroup]="widgetForm.controls.chart" class="container-fluid">
+
+    <!-- Colors -->
     <div class="row">
       <div class="col-12">
         <div class="row">
@@ -45,132 +47,9 @@
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-6" *ngIf="chartForm && chartForm.controls">
-        <div class="row">
-          <div class="col-12">
-            <h5 class="mt-3" style="margin-bottom: -8px;">Metrics</h5>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <div class="floating-label mt-3">
-              <ng-select placeholder="Metric name" [formControl]="newMetricForm">
-                <ng-option *ngFor="let metric of metrics" [value]="metric.id">{{metric.name}}</ng-option>
-              </ng-select>
-            </div>
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-primary mt-3" (click)="addMetric()"><span class="bi bi-plus-lg"></span></button>
-          </div>
-        </div>
-        <div ngbAccordion class="mt-3" *ngFor="let metricForm of chartForm.controls.metrics.controls" [formGroup]="metricForm">
-          <div ngbAccordionItem>
-            <h2 ngbAccordionHeader>
-              <button ngbAccordionButton style="padding: 8px 0.75rem;">Memory Utilization</button>
-            </h2>
-            <div ngbAccordionCollapse>
-              <div class="accordion-body pt-0" style="padding-left: 8px; padding-right: 8px;">
-                <!--<div class="floating-label">
-                  <input type="text" readonly class="form-control-plaintext" id="metricName" value="Value" placeholder=" " />
-                  <label for="metricName">Metric name</label>
-                </div>-->
-                <div class="container-fluid">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="floating-label">
-                        <ng-select class="mt-3" placeholder="Y scale">
-                          <ng-option>Y1</ng-option>
-                          <ng-option>Y2</ng-option>
-                        </ng-select>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="floating-label mt-3">
-                        <ng-select formControlName="bucketType"
-                                   placeholder="Display buckets">
-                          <ng-option [value]="DashboardWidgetChartMetricBucketType.Aggregate">Aggregate</ng-option>
-                          <ng-option [value]="DashboardWidgetChartMetricBucketType.SpecificBuckets">Specific buckets</ng-option>
-                          <ng-option [value]="DashboardWidgetChartMetricBucketType.DisplayAll">Display all</ng-option>
-                          <ng-option [value]="DashboardWidgetChartMetricBucketType.DisplayTopNCurrent">Display top N (current)</ng-option>
-                          <ng-option [value]="DashboardWidgetChartMetricBucketType.DisplayTopNRolling">Display top N (rolling)</ng-option>
-                        </ng-select>
-                      </div>
-                    </div>
-                  </div>
-                  <div *ngIf="metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets" class="row">
-                    <div class="col-12">
-                      <fieldset class="border rounded-2 p-3 mt-1">
-                        <legend class="float-none w-auto px-3" style="font-size: 0.875rem; margin-bottom: -8px;">Buckets to include</legend>
-                        <div class="row">
-                          <div class="col-12">
-                            <button class="btn btn-primary w-100" (click)="addMetricBucket(metricForm)"><span class="bi bi-plus-square"></span> Add bucket</button>
-                          </div>
-                        </div>
-                        <div class="row" *ngFor="let bucketForm of metricForm.controls.buckets.controls; let i = index">
-                          <div class="col">
-                            <div class="floating-label mt-3">
-                              <input id="bucketName" class="form-control" type="text" [formControl]="bucketForm" placeholder=" " />
-                              <label for="bucketName">Bucket label</label>
-                            </div>
-                          </div>
-                          <div class="col-auto">
-                            <button class="btn btn-danger mt-3" (click)="removeMetricBucket(metricForm, i)"><span class="bi bi-x-lg"></span></button>
-                          </div>
-                        </div>
-                      </fieldset>
-                    </div>
-                  </div>
-                  <div *ngIf="metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling">
 
-                  </div>
-                  <div class="row">
-                    <div class="col">
-                      <button class="btn btn-primary w-100 mt-3"><span class="bi bi-arrow-bar-up"></span> Move</button>
-                    </div>
-                    <div class="col">
-                      <button class="btn btn-primary w-100 mt-3"><span class="bi bi-arrow-bar-down"></span> Move</button>
-                    </div>
-                    <div class="col">
-                      <button class="btn btn-danger w-100 mt-3"><span class="bi bi-trash"></span> Delete</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--
-        <div class="row">
-          <div class="col-12">
-            <div class="floating-label mb-3">
-              <ng-select placeholder="Metric">
-                <ng-option>Value</ng-option>
-              </ng-select>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="checkbox" id="switchEnable">
-              <label class="form-check-label" for="switchEnable">Enabled</label>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="floating-label mb-3">
-              <ng-select placeholder="">
-                <ng-option></ng-option>
-              </ng-select>
-            </div>
-          </div>
-        </div>
-        -->
-      </div>
+    <div class="row">
+      <!-- Y scales -->
       <div class="col-md-6" *ngIf="chartForm && chartForm.controls">
         <div class="row">
           <div class="col-12">
@@ -188,17 +67,13 @@
             <button class="btn btn-primary mt-3" (click)="addYScale()"><span class="bi bi-plus-lg"></span></button>
           </div>
         </div>
-        <div ngbAccordion class="mt-3" *ngFor="let scaleForm of chartForm.controls.yScales.controls" [formGroup]="scaleForm">
+        <div ngbAccordion class="mt-3" *ngFor="let scaleForm of chartForm.controls.yScales.controls; let scaleIndex = index" [formGroup]="scaleForm">
           <div ngbAccordionItem>
             <h2 ngbAccordionHeader>
               <button ngbAccordionButton style="padding: 8px 0.75rem;">{{scaleForm.value.id}}{{scaleForm.value.label ? ' - ' + scaleForm.value.label : ''}}</button>
             </h2>
             <div ngbAccordionCollapse>
               <div class="accordion-body pt-0" style="padding-left: 8px; padding-right: 8px;">
-                <!--<div class="floating-label">
-            <input type="text" readonly class="form-control-plaintext" id="metricName" value="Value" placeholder=" " />
-            <label for="metricName">Metric name</label>
-          </div>-->
                 <div class="container-fluid">
                   <div class="row">
                     <div class="col-md-12">
@@ -252,8 +127,14 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-12">
-
+                    <div class="col">
+                      <button class="btn btn-primary w-100 mt-3"><span class="bi bi-arrow-bar-up"></span> Move</button>
+                    </div>
+                    <div class="col">
+                      <button class="btn btn-primary w-100 mt-3"><span class="bi bi-arrow-bar-down"></span> Move</button>
+                    </div>
+                    <div class="col">
+                      <button class="btn btn-danger w-100 mt-3" (click)="removeYScale(scaleForm, scaleIndex)"><span class="bi bi-trash"></span> Delete</button>
                     </div>
                   </div>
                 </div>
@@ -262,10 +143,118 @@
           </div>
         </div>
       </div>
+
+      <!-- Metrics -->
+      <div class="col-md-6" *ngIf="chartForm && chartForm.controls">
+        <div class="row">
+          <div class="col-12">
+            <h5 class="mt-3" style="margin-bottom: -8px;">Metrics</h5>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="floating-label mt-3">
+              <ng-select placeholder="Metric name" [formControl]="newMetricForm">
+                <ng-option *ngFor="let metric of metrics" [value]="metric.id">{{metric.name}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-primary mt-3" (click)="addMetric()"><span class="bi bi-plus-lg"></span></button>
+          </div>
+        </div>
+        <div ngbAccordion class="mt-3" *ngFor="let metricForm of chartForm.controls.metrics.controls; let metricIndex = index" [formGroup]="metricForm">
+          <div ngbAccordionItem>
+            <h2 ngbAccordionHeader>
+              <button ngbAccordionButton style="padding: 8px 0.75rem;">Memory Utilization</button>
+            </h2>
+            <div ngbAccordionCollapse>
+              <div class="accordion-body pt-0" style="padding-left: 8px; padding-right: 8px;">
+                <div class="container-fluid">
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="floating-label">
+                        <ng-select class="mt-3" placeholder="Y scale" formControlName="yScaleId">
+                          <ng-option *ngFor="let yScale of currentYScales" [value]="yScale.id">{{yScale.id}}</ng-option>
+                        </ng-select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="floating-label mt-3">
+                        <ng-select formControlName="bucketType"
+                                   placeholder="Display buckets">
+                          <ng-option [value]="DashboardWidgetChartMetricBucketType.Aggregate">Aggregate</ng-option>
+                          <ng-option [value]="DashboardWidgetChartMetricBucketType.SpecificBuckets">Specific buckets</ng-option>
+                          <ng-option [value]="DashboardWidgetChartMetricBucketType.DisplayAll">Display all</ng-option>
+                          <ng-option [value]="DashboardWidgetChartMetricBucketType.DisplayTopNCurrent">Display top N (current)</ng-option>
+                          <ng-option [value]="DashboardWidgetChartMetricBucketType.DisplayTopNRolling">Display top N (rolling)</ng-option>
+                        </ng-select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" *ngIf="metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets">
+                    <div class="col-12">
+                      <fieldset class="border rounded-2 p-3 mt-1">
+                        <legend class="float-none w-auto px-3" style="font-size: 0.875rem; margin-bottom: -24px;">Buckets to include</legend>
+                        <div class="row">
+                          <div class="col-12">
+                            <div class="form-check mt-3">
+                              <input id="bucketIncludeBlank" class="form-check-input" type="checkbox" />
+                              <label for="bucketIncludeBlank" class="form-check-label">Include blank/unspecified bucket?</label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-12">
+                            <button class="btn btn-primary w-100 mt-3" (click)="addMetricBucket(metricForm)"><span class="bi bi-plus-square"></span> Add bucket</button>
+                          </div>
+                        </div>
+                        <div class="row" *ngFor="let bucketForm of metricForm.controls.buckets.controls; let i = index">
+                          <div class="col">
+                            <div class="floating-label mt-3">
+                              <input id="bucketName" class="form-control" type="text" [formControl]="bucketForm" placeholder=" " />
+                              <label for="bucketName">Bucket label</label>
+                            </div>
+                          </div>
+                          <div class="col-auto">
+                            <button class="btn btn-danger mt-3" (click)="removeMetricBucket(metricForm, i)"><span class="bi bi-x-lg"></span></button>
+                          </div>
+                        </div>
+                      </fieldset>
+                    </div>
+                  </div>
+                  <div class="row" *ngIf="metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling">
+                    <div class="col-12">
+                      <div class="floating-label mt-3">
+                        <input id="bucketTopN" class="form-control" type="number" formControlName="bucketTopN" min="1" placeholder=" " />
+                        <label for="bucketTopN">Top N</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <button class="btn btn-primary w-100 mt-3"><span class="bi bi-arrow-bar-up"></span> Move</button>
+                    </div>
+                    <div class="col">
+                      <button class="btn btn-primary w-100 mt-3"><span class="bi bi-arrow-bar-down"></span> Move</button>
+                    </div>
+                    <div class="col">
+                      <button class="btn btn-danger w-100 mt-3" (click)="removeMetric(metricForm, metricIndex)"><span class="bi bi-trash"></span> Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()">Cancel</button>
-  <button type="button" class="btn btn-primary" (click)="trySubmit()">OK</button>
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()"><span class="bi bi-x-lg"></span> Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="trySubmit()"><span class="bi bi-check-lg"></span> OK</button>
 </div>

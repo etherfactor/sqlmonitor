@@ -256,7 +256,7 @@ export class DashboardComponent implements OnInit {
   }
 
   editChartWidgetModal(item: DashboardWidget) {
-    const modal = this.$modal.open(EditChartWidgetModalComponent, { centered: true, size: 'lg' });
+    const modal = this.$modal.open(EditChartWidgetModalComponent, { centered: true, size: 'lg', backdrop: 'static', keyboard: false });
     const modalInstance = <EditChartWidgetModalComponent>modal.componentInstance;
     modalInstance.setWidget(item);
 
@@ -267,7 +267,7 @@ export class DashboardComponent implements OnInit {
   }
 
   editTextWidgetModal(item: DashboardWidget) {
-    const modal = this.$modal.open(EditTextWidgetModalComponent, { centered: true, size: 'lg' });
+    const modal = this.$modal.open(EditTextWidgetModalComponent, { centered: true, size: 'lg', backdrop: 'static', keyboard: false });
     const modalInstance = <EditTextWidgetModalComponent>modal.componentInstance;
     modalInstance.setWidget(item);
 
