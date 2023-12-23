@@ -1,7 +1,23 @@
 import { ControlConfig, FormArray, FormBuilder, FormControl, FormGroup, ɵElement } from "@angular/forms";
+import { DateTime, Duration } from "luxon";
+import { Guid } from "../../types/guid/guid";
 
-export function formFactoryForModel<TModel, TModify extends FormConfig<TModel> = undefined>(builder: ($form: FormBuilder, model: TModel) => Required<ControlConfigMap<TModel, TModify>>) {
-  const result: ($form: FormBuilder, model: TModel) => TypedFormGroup<TModel, TModify> = ($form: FormBuilder, model: TModel) => {
+export type DefaultControlTypes = DateTime | Duration | Guid;
+
+export function formFactoryForModelOld<TModel>(builder: ($form: FormBuilder, model: TModel) => Required<ControlConfigMap<TModel>>) {
+  const result: ($form: FormBuilder, model: TModel) => TypedFormGroup<TModel> = ($form: FormBuilder, model: TModel) => {
+    const config = builder($form, model);
+    return $form.nonNullable.group(config);
+  };
+
+  return result;
+}
+
+export function formFactoryForModel<TModel, TControlTypes = never>(builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel, TControlTypes>) {
+  const result: FormFunction<TModel, TControlTypes> = ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel, TControlTypes> => {
+    if (model === undefined || model === null)
+      return undefined!;
+
     const config = builder($form, model);
     return $form.nonNullable.group(config);
   };
@@ -11,44 +27,34 @@ export function formFactoryForModel<TModel, TModify extends FormConfig<TModel> =
 
 type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 
-export type FormConfig<TModel> = Partial<{ [K in keyof TModel]: 'control' | 'group' }> | undefined;
-
-type ControlConfigMap<TModel, TModify extends FormConfig<TModel> = undefined> = {
+type ControlConfigMap<TModel, TControlTypes = never> = Required<{
   [K in keyof TModel]:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   NonNullable<TModel[K]> extends Array<any> ? (
-    K extends keyof TModify ? (
-      TModify[K] extends 'control' ? ControlConfig<InferArrayType<TModel[K]>> :
-      TModify[K] extends 'group' ? TypedFormGroup<InferArrayType<TModel[K]>> :
-      undefined
+    InferArrayType<TModel[K]> extends (TControlTypes | undefined) ? (
+      FormArray<FormControl<InferArrayType<TModel[K]>>>
     ) :
     InferArrayType<TModel[K]> extends object ?
-    FormArray<TypedFormGroup<InferArrayType<TModel[K]>>> :
+    FormArray<TypedFormGroup<InferArrayType<TModel[K]>, TControlTypes>> :
     FormArray<FormControl<InferArrayType<TModel[K]>>>
   ) :
-  K extends keyof TModify ? (
-    TModify[K] extends 'control' ? ControlConfig<TModel[K]> :
-    TModify[K] extends 'group' ? TypedFormGroup<TModel[K]> :
-    undefined
+  TModel[K] extends (TControlTypes | undefined) ? (
+    ControlConfig<TModel[K]>
   ) :
-  NonNullable<TModel[K]> extends object ? TypedFormGroup<TModel[K]> :
+  NonNullable<TModel[K]> extends object ?
+  TypedFormGroup<TModel[K], TControlTypes> :
   ControlConfig<TModel[K]>;
-};
+}>;
 
-export type FormFactoryMap<TModel, TModify extends FormConfig<TModel> = undefined> = Required<ControlConfigMap<TModel, TModify>>;
+//export type FormFactoryMap<TModel> = Required<ControlConfigMap<TModel>>;
 
-export type TypedFormGroup<TModel, TModify extends FormConfig<TModel> = undefined> = FormGroup<{
-  [K in keyof Required<ControlConfigMap<TModel, TModify>>]: ɵElement<ControlConfigMap<TModel, TModify>[K], never>;
+export type TypedFormGroup<TModel, TControlTypes = never> = FormGroup<{
+  [K in keyof Required<ControlConfigMap<TModel, TControlTypes>>]: ɵElement<ControlConfigMap<TModel, TControlTypes>[K], never>;
 }>
 
-const f = new FormBuilder();
-f.nonNullable.array([f.nonNullable.group({
-  a:[1]
-})]);
-
-export type FormFunction<TModel, TModify extends FormConfig<TModel> = undefined> = {
-  ($form: FormBuilder, model: TModel): TypedFormGroup<TModel, TModify>;
-  ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel, TModify> | undefined;
+export type FormFunction<TModel, TControlTypes = never> = {
+  ($form: FormBuilder, model: TModel): TypedFormGroup<TModel, TControlTypes>;
+  ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel, TControlTypes> | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { z } from "zod";
 import { DateTimeZ, parseDateTime } from "../types/datetime/datetime";
 import { Guid, GuidZ, parseGuid } from "../types/guid/guid";
-import { FormFunction, expectType, formFactoryForModel } from "../utilities/form/form.util";
+import { DefaultControlTypes, expectType, formFactoryForModel } from "../utilities/form/form.util";
 import { maybe } from "../utilities/maybe/maybe";
 import { AggregateType } from "./aggregate-type";
 import { MetricSeverity, MetricSeverityConverter, MetricSeverityDataZ, MetricSeverityZ, metricSeverityForm } from "./metric-severity";
@@ -98,7 +98,7 @@ export class MetricConverter {
   }
 }
 
-const metricFormFactory = formFactoryForModel<Metric, { id: 'control', createdAt: 'control', createdByUserId: 'control', modifiedAt: 'control', modifiedByUserId: 'control' }>(($form, model) => {
+export const metricForm = formFactoryForModel<Metric, DefaultControlTypes>(($form, model) => {
   return {
     id: [model.id],
     createdAt: [model.createdAt],
@@ -111,10 +111,3 @@ const metricFormFactory = formFactoryForModel<Metric, { id: 'control', createdAt
     severities: $form.nonNullable.array(model.severities.map(item => metricSeverityForm($form, item))),
   };
 });
-
-export const metricForm: FormFunction<Metric, { id: 'control', createdAt: 'control', createdByUserId: 'control', modifiedAt: 'control', modifiedByUserId: 'control' }> = function ($form, model) {
-  if (!model)
-    return undefined!;
-
-  return metricFormFactory($form, model);
-}

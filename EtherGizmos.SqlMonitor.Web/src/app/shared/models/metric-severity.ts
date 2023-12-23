@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FormFactoryMap, FormFunction, expectType, formFactoryForModel } from "../utilities/form/form.util";
+import { DefaultControlTypes, expectType, formFactoryForModel } from "../utilities/form/form.util";
 import { SeverityType } from "./severity-type";
 
 export const MetricSeverityDataZ = z.object({
@@ -57,17 +57,10 @@ export class MetricSeverityConverter {
   }
 }
 
-const metricSeverityFormFactory = formFactoryForModel(($form, model: MetricSeverity) => {
-  return <FormFactoryMap<MetricSeverity>>{
+export const metricSeverityForm = formFactoryForModel<MetricSeverity, DefaultControlTypes>(($form, model) => {
+  return {
     severityType: [model.severityType],
     minimumValue: [model.minimumValue],
     maximumValue: [model.maximumValue],
   };
 });
-
-export const metricSeverityForm: FormFunction<MetricSeverity> = function ($form, model: MetricSeverity | undefined) {
-  if (!model)
-    return undefined!;
-
-  return metricSeverityFormFactory($form, model);
-}
