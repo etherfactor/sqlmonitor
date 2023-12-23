@@ -17,9 +17,9 @@
           <div style="flex-grow: 1; min-width: 0; min-height: 0;">
             <canvas baseChart
                     class="chart"
-                    [data]="lineChartData"
-                    [options]="lineChartOptions"
-                    [type]="lineChartType">
+                    [data]="getChartData(item)['data']"
+                    [options]="getChartData(item)['options']"
+                    [type]="getChartData(item)['type']">
             </canvas>
           </div>
         </div>

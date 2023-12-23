@@ -46,8 +46,6 @@ type ControlConfigMap<TModel, TControlTypes = never> = Required<{
   ControlConfig<TModel[K]>;
 }>;
 
-//export type FormFactoryMap<TModel> = Required<ControlConfigMap<TModel>>;
-
 export type TypedFormGroup<TModel, TControlTypes = never> = FormGroup<{
   [K in keyof Required<ControlConfigMap<TModel, TControlTypes>>]: ɵElement<ControlConfigMap<TModel, TControlTypes>[K], never>;
 }>

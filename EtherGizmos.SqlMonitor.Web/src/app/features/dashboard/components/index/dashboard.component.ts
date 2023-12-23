@@ -3,6 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, ChartType } from 'chart.js';
+import 'chartjs-adapter-luxon';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
@@ -283,6 +284,53 @@ export class DashboardComponent implements OnInit {
       this.items[index] = item;
   }
 
+  chartData: { [key: string]: ChartConfiguration } = {};
+  chartDataChanged: { [key: string]: boolean } = {};
+  chartDatasets: { [key: string]: ChartConfiguration['data']['datasets'] } = {};
+  getChartData(item: DashboardWidget) {
+    if (!item.chart)
+      throw new Error('Cannot generate a chart for a non-chart widget.');
+
+    if (!this.chartDataChanged[item.id] && this.chartData[item.id]) {
+      return this.chartData[item.id];
+    }
+
+    const datasets = this.chartDatasets[item.id] ?? [];
+    this.chartDatasets[item.id] = datasets;
+
+    const data: ChartConfiguration = {
+      type: 'line',
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            axis: 'x',
+            type: 'time',
+          },
+        },
+        plugins: {
+          legend: { display: true }
+        },
+      },
+      data: {
+        datasets: datasets,
+      },
+    };
+
+    for (const scale of item.chart.yScales) {
+      data.options!.scales![scale.id] = {
+        axis: 'y',
+        type: scale.type === DashboardWidgetChartScaleType.Linear ? 'linear' : 'logarithmic',
+      };
+    }
+
+    this.chartData[item.id] = data;
+    this.chartDataChanged[item.id] = false;
+
+    return data;
+  }
+
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
       {
@@ -400,3 +448,5 @@ export class DashboardComponent implements OnInit {
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 }
+
+type Test = { Guid: 'control' };

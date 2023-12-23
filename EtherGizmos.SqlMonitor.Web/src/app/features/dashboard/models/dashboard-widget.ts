@@ -1,7 +1,7 @@
-import { FormBuilder, Validators } from "@angular/forms";
+import { Validators } from "@angular/forms";
 import { GridStackWidget } from "gridstack";
 import { z } from "zod";
-import { FormFactoryMap, FormFunction, formFactoryForModel } from "../../../shared/utilities/form/form.util";
+import { DefaultControlTypes, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 
 //==================================================
 // Enums
@@ -54,8 +54,8 @@ export const DashboardWidgetChartScaleZ = z.object({
 
 export type DashboardWidgetChartScale = z.infer<typeof DashboardWidgetChartScaleZ>;
 
-const dashboardWidgetChartScaleFormFactory = formFactoryForModel(($form, model: DashboardWidgetChartScale) => {
-  return <FormFactoryMap<DashboardWidgetChartScale>>{
+export const dashboardWidgetChartScaleForm = formFactoryForModel<DashboardWidgetChartScale, DefaultControlTypes>(($form, model) => {
+  return {
     id: [model.id, Validators.required],
     type: [model.type, Validators.required],
     label: [model.label],
@@ -66,13 +66,6 @@ const dashboardWidgetChartScaleFormFactory = formFactoryForModel(($form, model: 
     stacked: [model.stacked],
   };
 });
-
-export const dashboardWidgetChartScaleForm: FormFunction<DashboardWidgetChartScale> = function ($form: FormBuilder, model: DashboardWidgetChartScale | undefined) {
-  if (!model)
-    return undefined!;
-
-  return dashboardWidgetChartScaleFormFactory($form, model);
-};
 
 // Chart metric
 export const DashboardWidgetChartMetricZ = z.object({
@@ -85,7 +78,7 @@ export const DashboardWidgetChartMetricZ = z.object({
 
 export type DashboardWidgetChartMetric = z.infer<typeof DashboardWidgetChartMetricZ>;
 
-const dashboardWidgetChartMetricFormFactory = formFactoryForModel<DashboardWidgetChartMetric>(($form, model) => {
+const dashboardWidgetChartMetricForm = formFactoryForModel<DashboardWidgetChartMetric, DefaultControlTypes>(($form, model) => {
   return {
     metricId: [model.metricId, Validators.required],
     yScaleId: [model.yScaleId, Validators.required],
@@ -94,13 +87,6 @@ const dashboardWidgetChartMetricFormFactory = formFactoryForModel<DashboardWidge
     bucketTopN: [model.bucketTopN],
   };
 });
-
-export const dashboardWidgetChartMetricForm: FormFunction<DashboardWidgetChartMetric> = function ($form, model) {
-  if (!model)
-    return undefined!;
-
-  return dashboardWidgetChartMetricFormFactory($form, model);
-};
 
 // Chart
 const DashboardWidgetChartZ = z.object({
@@ -113,8 +99,8 @@ const DashboardWidgetChartZ = z.object({
 
 export type DashboardWidgetChart = z.infer<typeof DashboardWidgetChartZ>;
 
-const dashboardWidgetChartFormFactory = formFactoryForModel(($form, model: DashboardWidgetChart) => {
-  return <FormFactoryMap<DashboardWidgetChart>>{
+const dashboardWidgetChartForm = formFactoryForModel<DashboardWidgetChart, DefaultControlTypes>(($form, model) => {
+  return {
     type: [model.type, Validators.required],
     colors: $form.nonNullable.array(model.colors),
     xScale: dashboardWidgetChartScaleForm($form, model.xScale),
@@ -122,13 +108,6 @@ const dashboardWidgetChartFormFactory = formFactoryForModel(($form, model: Dashb
     metrics: $form.nonNullable.array(model.metrics.map(item => dashboardWidgetChartMetricForm($form, item))),
   };
 });
-
-const dashboardWidgetChartForm: FormFunction<DashboardWidgetChart> = function ($form: FormBuilder, model: DashboardWidgetChart | undefined) {
-  if (!model)
-    return undefined!;
-
-  return dashboardWidgetChartFormFactory($form, model);
-}
 
 //==================================================
 // Text widget
@@ -138,18 +117,11 @@ const DashboardWidgetTextZ = z.object({
 
 type DashboardWidgetText = z.infer<typeof DashboardWidgetTextZ>;
 
-const dashboardWidgetTextFormFactory = formFactoryForModel(($form, model: DashboardWidgetText) => {
-  return <FormFactoryMap<DashboardWidgetText>> {
+const dashboardWidgetTextForm = formFactoryForModel<DashboardWidgetText, DefaultControlTypes>(($form, model) => {
+  return {
     htmlContent: [model.htmlContent],
   };
 });
-
-const dashboardWidgetTextForm: FormFunction<DashboardWidgetText> = function ($form: FormBuilder, model: DashboardWidgetText | undefined) {
-  if (!model)
-    return undefined!;
-
-  return dashboardWidgetTextFormFactory($form, model);
-}
 
 //==================================================
 // Grid configuration
@@ -163,8 +135,8 @@ const DashboardWidgetGridZ = z.object({
 
 type DashboardWidgetGrid = z.infer<typeof DashboardWidgetGridZ>;
 
-const dashboardWidgetGridFormFactory = formFactoryForModel(($form, model: DashboardWidgetGrid) => {
-  return <FormFactoryMap<DashboardWidgetGrid>>{
+const dashboardWidgetGridForm = formFactoryForModel<DashboardWidgetGrid, DefaultControlTypes>(($form, model) => {
+  return {
     xPos: [model.xPos],
     yPos: [model.yPos],
     width: [model.width],
@@ -172,13 +144,6 @@ const dashboardWidgetGridFormFactory = formFactoryForModel(($form, model: Dashbo
     hovering: [model.hovering],
   };
 });
-
-const dashboardWidgetGridForm: FormFunction<DashboardWidgetGrid> = function ($form: FormBuilder, model: DashboardWidgetGrid | undefined) {
-  if (!model)
-    return undefined!;
-
-  return dashboardWidgetGridFormFactory($form, model);
-}
 
 //==================================================
 // Full widget
@@ -198,19 +163,13 @@ export interface GridstackDashboardWidget extends GridStackWidget {
   text?: DashboardWidgetText,
 }
 
-const dashboardWidgetFormFactory = formFactoryForModel(($form, model: DashboardWidget) => {
-  return <FormFactoryMap<DashboardWidget>> {
+//ISSUE HERE
+export const dashboardWidgetForm = formFactoryForModel<DashboardWidget, DefaultControlTypes>(($form, model) => {
+  return {
     id: [model.id],
     type: [model.type],
     grid: dashboardWidgetGridForm($form, model.grid),
-    chart: dashboardWidgetChartForm($form, model.chart),
-    text: dashboardWidgetTextForm($form, model.text),
+    chart: dashboardWidgetChartForm($form, model.chart as DashboardWidgetChart),
+    text: dashboardWidgetTextForm($form, model.text as DashboardWidgetText),
   };
 });
-
-export const dashboardWidgetForm: FormFunction<DashboardWidget> = function ($form: FormBuilder, model: DashboardWidget | undefined) {
-  if (!model)
-    return undefined!;
-
-  return dashboardWidgetFormFactory($form, model);
-}
