@@ -163,13 +163,12 @@ export interface GridstackDashboardWidget extends GridStackWidget {
   text?: DashboardWidgetText,
 }
 
-//ISSUE HERE
 export const dashboardWidgetForm = formFactoryForModel<DashboardWidget, DefaultControlTypes>(($form, model) => {
   return {
     id: [model.id],
     type: [model.type],
     grid: dashboardWidgetGridForm($form, model.grid),
-    chart: dashboardWidgetChartForm($form, model.chart as DashboardWidgetChart),
-    text: dashboardWidgetTextForm($form, model.text as DashboardWidgetText),
+    chart: dashboardWidgetChartForm($form, model.chart),
+    text: dashboardWidgetTextForm($form, model.text),
   };
 });

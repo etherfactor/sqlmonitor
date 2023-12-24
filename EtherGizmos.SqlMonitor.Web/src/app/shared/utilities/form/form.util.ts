@@ -4,10 +4,12 @@ import { Guid } from "../../types/guid/guid";
 
 export type DefaultControlTypes = DateTime | Duration | Guid;
 
-export function formFactoryForModelOld<TModel>(builder: ($form: FormBuilder, model: TModel) => Required<ControlConfigMap<TModel>>) {
+export function formFactoryForModelOld<TModel>(builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel>) {
   const result: ($form: FormBuilder, model: TModel) => TypedFormGroup<TModel> = ($form: FormBuilder, model: TModel) => {
     const config = builder($form, model);
-    return $form.nonNullable.group(config);
+    const form = $form.nonNullable.group(config);
+
+    return form;
   };
 
   return result;
@@ -25,9 +27,14 @@ export function formFactoryForModel<TModel, TControlTypes = never>(builder: ($fo
   return result;
 }
 
+type RequiredIsh<TType> = { [K in keyof Required<TType>]: TType[K]; };
+
 type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 
-type ControlConfigMap<TModel, TControlTypes = never> = Required<{
+type NoUndefined<TType> = TType extends undefined ? never : TType;
+type IfUndefined<TType> = TType extends undefined ? undefined : never;
+
+type ControlConfigMap<TModel, TControlTypes = never> = RequiredIsh<{
   [K in keyof TModel]:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   NonNullable<TModel[K]> extends Array<any> ? (
@@ -35,19 +42,19 @@ type ControlConfigMap<TModel, TControlTypes = never> = Required<{
       FormArray<FormControl<InferArrayType<TModel[K]>>>
     ) :
     InferArrayType<TModel[K]> extends object ?
-    FormArray<TypedFormGroup<InferArrayType<TModel[K]>, TControlTypes>> :
+    FormArray<TypedFormGroup<NoUndefined<InferArrayType<TModel[K]>>, TControlTypes>> :
     FormArray<FormControl<InferArrayType<TModel[K]>>>
   ) :
   TModel[K] extends (TControlTypes | undefined) ? (
     ControlConfig<TModel[K]>
   ) :
   NonNullable<TModel[K]> extends object ?
-  TypedFormGroup<TModel[K], TControlTypes> :
+  TypedFormGroup<NoUndefined<TModel[K]>, TControlTypes> | IfUndefined<TModel[K]> :
   ControlConfig<TModel[K]>;
 }>;
 
 export type TypedFormGroup<TModel, TControlTypes = never> = FormGroup<{
-  [K in keyof Required<ControlConfigMap<TModel, TControlTypes>>]: ɵElement<ControlConfigMap<TModel, TControlTypes>[K], never>;
+  [K in keyof ControlConfigMap<TModel, TControlTypes>]: ɵElement<ControlConfigMap<TModel, TControlTypes>[K], never>;
 }>
 
 export type FormFunction<TModel, TControlTypes = never> = {
