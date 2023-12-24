@@ -78,7 +78,7 @@ export const DashboardWidgetChartMetricZ = z.object({
 
 export type DashboardWidgetChartMetric = z.infer<typeof DashboardWidgetChartMetricZ>;
 
-const dashboardWidgetChartMetricForm = formFactoryForModel<DashboardWidgetChartMetric, DefaultControlTypes>(($form, model) => {
+export const dashboardWidgetChartMetricForm = formFactoryForModel<DashboardWidgetChartMetric, DefaultControlTypes>(($form, model) => {
   return {
     metricId: [model.metricId, Validators.required],
     yScaleId: [model.yScaleId, Validators.required],
@@ -99,7 +99,7 @@ const DashboardWidgetChartZ = z.object({
 
 export type DashboardWidgetChart = z.infer<typeof DashboardWidgetChartZ>;
 
-const dashboardWidgetChartForm = formFactoryForModel<DashboardWidgetChart, DefaultControlTypes>(($form, model) => {
+export const dashboardWidgetChartForm = formFactoryForModel<DashboardWidgetChart, DefaultControlTypes>(($form, model) => {
   return {
     type: [model.type, Validators.required],
     colors: $form.nonNullable.array(model.colors),
@@ -117,7 +117,7 @@ const DashboardWidgetTextZ = z.object({
 
 type DashboardWidgetText = z.infer<typeof DashboardWidgetTextZ>;
 
-const dashboardWidgetTextForm = formFactoryForModel<DashboardWidgetText, DefaultControlTypes>(($form, model) => {
+export const dashboardWidgetTextForm = formFactoryForModel<DashboardWidgetText, DefaultControlTypes>(($form, model) => {
   return {
     htmlContent: [model.htmlContent],
   };
@@ -135,7 +135,7 @@ const DashboardWidgetGridZ = z.object({
 
 type DashboardWidgetGrid = z.infer<typeof DashboardWidgetGridZ>;
 
-const dashboardWidgetGridForm = formFactoryForModel<DashboardWidgetGrid, DefaultControlTypes>(($form, model) => {
+export const dashboardWidgetGridForm = formFactoryForModel<DashboardWidgetGrid, DefaultControlTypes>(($form, model) => {
   return {
     xPos: [model.xPos],
     yPos: [model.yPos],
