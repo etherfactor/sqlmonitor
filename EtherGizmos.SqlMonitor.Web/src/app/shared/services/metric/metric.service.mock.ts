@@ -15,7 +15,7 @@ class MockMetricService extends MetricService {
 
     this.metrics = [
       {
-        id: parseGuid(uuidv4()),
+        id: parseGuid('8b140817-ec33-4dc7-9c4f-4bf6d8098b3c'),
         name: 'Memory Utilization',
         aggregateType: AggregateType.Average,
         severities: [],

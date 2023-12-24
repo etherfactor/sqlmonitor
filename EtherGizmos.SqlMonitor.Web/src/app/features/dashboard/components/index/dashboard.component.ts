@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, ChartType } from 'chart.js';
@@ -8,8 +8,9 @@ import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { QuillModule } from 'ngx-quill';
+import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
-import { generateGuid } from '../../../../shared/types/guid/guid';
+import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
@@ -32,7 +33,9 @@ import { EditTextWidgetModalComponent } from '../edit-text-widget-modal/edit-tex
 })
 export class DashboardComponent implements OnInit {
 
+  private $cd: ChangeDetectorRef;
   private $form: FormBuilder;
+  private $metricData: MetricDataService;
   private $modal: NgbModal;
   private $navbarMenu: NavbarMenuService;
 
@@ -46,12 +49,18 @@ export class DashboardComponent implements OnInit {
   items: DashboardWidget[] = [];
   gridItems: { [key: string]: GridStackWidget } = {};
 
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
   constructor(
+    $cd: ChangeDetectorRef,
     $form: FormBuilder,
+    $metricData: MetricDataService,
     $modal: NgbModal,
     $navbarMenu: NavbarMenuService,
   ) {
+    this.$cd = $cd;
     this.$form = $form;
+    this.$metricData = $metricData;
     this.$modal = $modal;
     this.$navbarMenu = $navbarMenu;
   }
@@ -228,8 +237,8 @@ export class DashboardComponent implements OnInit {
   private populateNodes(data: nodesCB) {
     console.log(data);
 
-    for (let node of data.nodes) {
-      let item = this.items.find(e => e.id === node.id);
+    for (const node of data.nodes) {
+      const item = this.items.find(e => e.id === node.id);
       if (!item)
         continue;
 
@@ -248,7 +257,7 @@ export class DashboardComponent implements OnInit {
       item.grid.width = node.w || 0;
       item.grid.height = node.h || 0;
 
-      let gridItem = this.getGridstackWidget(item);
+      const gridItem = this.getGridstackWidget(item);
       gridItem.x = node.x;
       gridItem.y = node.y;
       gridItem.w = node.w;
@@ -262,7 +271,28 @@ export class DashboardComponent implements OnInit {
     modalInstance.setWidget(item);
 
     modal.result.then(
-      result => this.updateWidget(result),
+      (result: DashboardWidget) => {
+        this.updateWidget(result);
+
+        if (!result.chart)
+          return;
+
+        for (const chartMetric of result.chart.metrics) {
+          this.$metricData.watchMetricData(chartMetric.metricId).subscribe(data => {
+            const dataset = this.chartMetricDatasets[result.id];
+            console.log('received data', data);
+            dataset.push({
+              data: [
+                { x: data.eventTimeUtc.toUnixInteger(), y: data.value }
+              ]
+            });
+            this.chartData[result.id]['data'].datasets = [...dataset];
+            this.chartMetricDatasets[result.id] = [...dataset];
+            this.chartMetricDatasets = Object.assign({}, this.chartMetricDatasets);
+          });
+          console.log('subscribed to', chartMetric.metricId);
+        }
+      },
       cancel => { }
     );
   }
@@ -279,14 +309,14 @@ export class DashboardComponent implements OnInit {
   }
 
   updateWidget(item: DashboardWidget) {
-    let index = this.items.findIndex(e => e.id == item.id);
+    const index = this.items.findIndex(e => e.id == item.id);
     if (index >= 0)
       this.items[index] = item;
   }
 
-  chartData: { [key: string]: ChartConfiguration } = {};
-  chartDataChanged: { [key: string]: boolean } = {};
-  chartDatasets: { [key: string]: ChartConfiguration['data']['datasets'] } = {};
+  chartData: { [widgetId: Guid]: ChartConfiguration } = {};
+  chartDataChanged: { [widgetId: Guid]: boolean } = {};
+  chartMetricDatasets: { [widgetId: Guid]: ChartConfiguration['data']['datasets'] } = {};
   getChartData(item: DashboardWidget) {
     if (!item.chart)
       throw new Error('Cannot generate a chart for a non-chart widget.');
@@ -295,8 +325,8 @@ export class DashboardComponent implements OnInit {
       return this.chartData[item.id];
     }
 
-    const datasets = this.chartDatasets[item.id] ?? [];
-    this.chartDatasets[item.id] = datasets;
+    const datasets = this.chartMetricDatasets[item.id] ?? [];
+    this.chartMetricDatasets[item.id] = datasets;
 
     const data: ChartConfiguration = {
       type: 'line',
@@ -327,6 +357,8 @@ export class DashboardComponent implements OnInit {
 
     this.chartData[item.id] = data;
     this.chartDataChanged[item.id] = false;
+
+    console.log(data);
 
     return data;
   }
@@ -445,8 +477,4 @@ export class DashboardComponent implements OnInit {
   };
 
   public lineChartType: ChartType = 'line';
-
-  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 }
-
-type Test = { Guid: 'control' };

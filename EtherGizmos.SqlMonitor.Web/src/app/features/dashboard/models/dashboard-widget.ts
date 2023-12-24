@@ -71,7 +71,7 @@ export const dashboardWidgetChartScaleForm = formFactoryForModel<DashboardWidget
 // Chart metric
 export const DashboardWidgetChartMetricZ = z.object({
   id: GuidZ,
-  metricId: z.string(),
+  metricId: GuidZ,
   yScaleId: z.string(),
   bucketType: z.nativeEnum(DashboardWidgetChartMetricBucketType),
   buckets: z.array(z.string()),
