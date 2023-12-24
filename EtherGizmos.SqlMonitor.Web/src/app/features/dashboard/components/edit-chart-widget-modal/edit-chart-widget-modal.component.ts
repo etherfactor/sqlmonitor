@@ -8,9 +8,9 @@ import { ColorSketchModule } from 'ngx-color/sketch';
 import { InputColorPickerComponent } from '../../../../shared/components/input-color-picker/input-color-picker.component';
 import { Metric } from '../../../../shared/models/metric';
 import { MetricService } from '../../../../shared/services/metric/metric.service';
-import { Guid } from '../../../../shared/types/guid/guid';
+import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
-import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
+import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { fromCamelCase } from '../../../../shared/utilities/string/string.util';
 import { ColorSet } from '../../models/color-set';
 import { DashboardWidget, DashboardWidgetChartMetric, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScale, DashboardWidgetChartScaleType, DashboardWidgetChartType, dashboardWidgetChartMetricForm, dashboardWidgetChartScaleForm, dashboardWidgetForm } from '../../models/dashboard-widget';
@@ -42,7 +42,7 @@ export class EditChartWidgetModalComponent implements OnInit {
   $activeModal: NgbActiveModal;
 
   widget?: DashboardWidget;
-  widgetForm?: TypedFormGroup<DashboardWidget>;
+  widgetForm?: TypedFormGroup<DashboardWidget, DefaultControlTypes>;
 
   get chartForm() { return this.widgetForm?.controls?.chart; }
 
@@ -136,6 +136,11 @@ export class EditChartWidgetModalComponent implements OnInit {
   setWidget(item: DashboardWidget) {
     this.widget = item;
     this.widgetForm = dashboardWidgetForm(this.$form, item);
+
+    if (!this.chartForm)
+      return;
+
+    const test: TypedFormGroup<DashboardWidgetChartMetric, DefaultControlTypes> = this.chartForm.controls.metrics.controls[0];
   }
 
   trySubmit() {
@@ -232,6 +237,7 @@ export class EditChartWidgetModalComponent implements OnInit {
       return;
 
     this.chartForm.controls.metrics.push(dashboardWidgetChartMetricForm(this.$form, {
+      id: generateGuid(),
       metricId: newMetricId,
       yScaleId: undefined!,
       bucketType: undefined!,
@@ -248,7 +254,7 @@ export class EditChartWidgetModalComponent implements OnInit {
     );
   }
 
-  removeMetric(metricForm: TypedFormGroup<DashboardWidgetChartMetric>, index: number) {
+  removeMetric(metricForm: TypedFormGroup<DashboardWidgetChartMetric, DefaultControlTypes>, index: number) {
     if (!metricForm)
       return;
 
@@ -261,7 +267,7 @@ export class EditChartWidgetModalComponent implements OnInit {
     this.chartForm.controls.metrics.removeAt(index);
   }
 
-  addMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric>) {
+  addMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric, DefaultControlTypes>) {
     if (!metricForm)
       return;
 
@@ -280,7 +286,7 @@ export class EditChartWidgetModalComponent implements OnInit {
     );
   }
 
-  removeMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric>, index: number) {
+  removeMetricBucket(metricForm: TypedFormGroup<DashboardWidgetChartMetric, DefaultControlTypes>, index: number) {
     if (!metricForm)
       return;
 

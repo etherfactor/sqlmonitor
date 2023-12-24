@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { QuillModule } from 'ngx-quill';
-import { DashboardWidget, dashboardWidgetForm } from '../../models/dashboard-widget';
-import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { QuillModule } from 'ngx-quill';
+import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
+import { DashboardWidget, dashboardWidgetForm } from '../../models/dashboard-widget';
 
 @Component({
   selector: 'app-edit-text-widget-modal',
@@ -24,7 +24,7 @@ export class EditTextWidgetModalComponent {
   $activeModal: NgbActiveModal;
 
   widget?: DashboardWidget;
-  widgetForm?: TypedFormGroup<DashboardWidget>;
+  widgetForm?: TypedFormGroup<DashboardWidget, DefaultControlTypes>;
 
   constructor(
     $activeModal: NgbActiveModal,

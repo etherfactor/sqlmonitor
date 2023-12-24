@@ -8,8 +8,8 @@ import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { QuillModule } from 'ngx-quill';
-import { v4 as uuidv4 } from 'uuid';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
+import { generateGuid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
@@ -141,7 +141,7 @@ export class DashboardComponent implements OnInit {
 
   @Bound addChart() {
     this.addWidget({
-      id: uuidv4(),
+      id: generateGuid(),
       type: DashboardWidgetType.Chart,
       grid: {
         xPos: 4,
@@ -176,7 +176,7 @@ export class DashboardComponent implements OnInit {
 
   @Bound addText() {
     this.addWidget({
-      id: uuidv4(),
+      id: generateGuid(),
       type: DashboardWidgetType.Text,
       grid: {
         xPos: 4,

@@ -1,6 +1,7 @@
 import { Validators } from "@angular/forms";
 import { GridStackWidget } from "gridstack";
 import { z } from "zod";
+import { GuidZ } from "../../../shared/types/guid/guid";
 import { DefaultControlTypes, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 
 //==================================================
@@ -69,6 +70,7 @@ export const dashboardWidgetChartScaleForm = formFactoryForModel<DashboardWidget
 
 // Chart metric
 export const DashboardWidgetChartMetricZ = z.object({
+  id: GuidZ,
   metricId: z.string(),
   yScaleId: z.string(),
   bucketType: z.nativeEnum(DashboardWidgetChartMetricBucketType),
@@ -80,6 +82,7 @@ export type DashboardWidgetChartMetric = z.infer<typeof DashboardWidgetChartMetr
 
 export const dashboardWidgetChartMetricForm = formFactoryForModel<DashboardWidgetChartMetric, DefaultControlTypes>(($form, model) => {
   return {
+    id: [model.id, Validators.required],
     metricId: [model.metricId, Validators.required],
     yScaleId: [model.yScaleId, Validators.required],
     bucketType: [model.bucketType, Validators.required],
@@ -148,7 +151,7 @@ export const dashboardWidgetGridForm = formFactoryForModel<DashboardWidgetGrid, 
 //==================================================
 // Full widget
 export const DashboardWidgetZ = z.object({
-  id: z.string().uuid(),
+  id: GuidZ,
   type: z.nativeEnum(DashboardWidgetType),
   grid: DashboardWidgetGridZ,
   chart: DashboardWidgetChartZ.optional(),
