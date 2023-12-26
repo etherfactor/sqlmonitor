@@ -1,6 +1,12 @@
 <gridstack [options]="gridOptions" (addedCB)="onAdd($event)" (changeCB)="onChange($event)" (removedCB)="onRemove($event)">
   <gridstack-item *ngFor="let item of items; trackBy: identifyWidget" [options]="getGridstackWidget(item)" (mouseenter)="item.grid.hovering = true" (mouseleave)="item.grid.hovering = false">
-    <div class="position-relative w-100 h-100">
+    <ng-container [ngSwitch]="item.type">
+      <chart-widget *ngSwitchCase="'chart'"
+                    [config]="item"></chart-widget>
+      <text-widget *ngSwitchCase="'text'"
+                   [config]="item"></text-widget>
+    </ng-container>
+    <!--<div class="position-relative w-100 h-100">
       <div class="dropdown">
         <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!item.grid.hovering" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"></div>
         <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
@@ -27,6 +33,6 @@
           <div class="pt-2 pb-2 ps-2 pe-2" [innerHtml]="item.text?.htmlContent"></div>
         </div>
       </ng-container>
-    </div>
+    </div>-->
   </gridstack-item>
 </gridstack>

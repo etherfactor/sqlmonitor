@@ -14,19 +14,22 @@ import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
+import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
-import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
 import { EditTextWidgetModalComponent } from '../edit-text-widget-modal/edit-text-widget-modal.component';
+import { TextWidgetComponent } from '../text-widget/text-widget.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
+    ChartWidgetComponent,
     CommonModule,
     GridstackModule,
     NgbModalModule,
     NgChartsModule,
     QuillModule,
+    TextWidgetComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -265,40 +268,6 @@ export class DashboardComponent implements OnInit {
     }
   }
   
-  editChartWidgetModal(item: DashboardWidget) {
-    const modal = this.$modal.open(EditChartWidgetModalComponent, { centered: true, size: 'lg', backdrop: 'static', keyboard: false });
-    const modalInstance = <EditChartWidgetModalComponent>modal.componentInstance;
-    modalInstance.setWidget(item);
-
-    modal.result.then(
-      (result: DashboardWidget) => {
-        this.updateWidget(result);
-
-        if (!result.chart)
-          return;
-
-        for (const chartMetric of result.chart.metrics) {
-          const sub = this.$metricData.subscribe(chartMetric.metricId, undefined);
-          sub.data$.subscribe(data => {
-            console.log(data);
-            //const dataset = this.chartMetricDatasets[result.id];
-            //console.log('received data', data);
-            //dataset.push({
-            //  data: [
-            //    { x: data.eventTimeUtc.toUnixInteger(), y: data.value }
-            //  ]
-            //});
-            //this.chartData[result.id]['data'].datasets = [...dataset];
-            //this.chartMetricDatasets[result.id] = [...dataset];
-            //this.chartMetricDatasets = Object.assign({}, this.chartMetricDatasets);
-          });
-          console.log('subscribed to', chartMetric.metricId);
-        }
-      },
-      cancel => { }
-    );
-  }
-
   editTextWidgetModal(item: DashboardWidget) {
     const modal = this.$modal.open(EditTextWidgetModalComponent, { centered: true, size: 'lg', backdrop: 'static', keyboard: false });
     const modalInstance = <EditTextWidgetModalComponent>modal.componentInstance;
