@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, ChartType } from 'chart.js';
@@ -48,8 +48,8 @@ export class DashboardComponent implements OnInit {
 
   items: DashboardWidget[] = [];
   gridItems: { [key: string]: GridStackWidget } = {};
-
-  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+  
+  @ViewChildren(BaseChartDirective) charts: QueryList<BaseChartDirective> = undefined!;
 
   constructor(
     $cd: ChangeDetectorRef,
@@ -264,7 +264,7 @@ export class DashboardComponent implements OnInit {
       gridItem.h = node.h;
     }
   }
-
+  
   editChartWidgetModal(item: DashboardWidget) {
     const modal = this.$modal.open(EditChartWidgetModalComponent, { centered: true, size: 'lg', backdrop: 'static', keyboard: false });
     const modalInstance = <EditChartWidgetModalComponent>modal.componentInstance;
@@ -278,17 +278,19 @@ export class DashboardComponent implements OnInit {
           return;
 
         for (const chartMetric of result.chart.metrics) {
-          this.$metricData.watchMetricData(chartMetric.metricId).subscribe(data => {
-            const dataset = this.chartMetricDatasets[result.id];
-            console.log('received data', data);
-            dataset.push({
-              data: [
-                { x: data.eventTimeUtc.toUnixInteger(), y: data.value }
-              ]
-            });
-            this.chartData[result.id]['data'].datasets = [...dataset];
-            this.chartMetricDatasets[result.id] = [...dataset];
-            this.chartMetricDatasets = Object.assign({}, this.chartMetricDatasets);
+          const sub = this.$metricData.subscribe(chartMetric.metricId, undefined);
+          sub.data$.subscribe(data => {
+            console.log(data);
+            //const dataset = this.chartMetricDatasets[result.id];
+            //console.log('received data', data);
+            //dataset.push({
+            //  data: [
+            //    { x: data.eventTimeUtc.toUnixInteger(), y: data.value }
+            //  ]
+            //});
+            //this.chartData[result.id]['data'].datasets = [...dataset];
+            //this.chartMetricDatasets[result.id] = [...dataset];
+            //this.chartMetricDatasets = Object.assign({}, this.chartMetricDatasets);
           });
           console.log('subscribed to', chartMetric.metricId);
         }

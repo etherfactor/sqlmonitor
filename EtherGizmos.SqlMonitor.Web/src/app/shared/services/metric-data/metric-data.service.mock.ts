@@ -4,13 +4,16 @@ import { Observable, delay, of, repeat, switchMap } from "rxjs";
 import { MetricData } from "../../models/metric-data";
 import { SeverityType } from "../../models/severity-type";
 import { Guid, parseGuid } from "../../types/guid/guid";
+import { MetricDataCacheService } from "../metric-data-cache/metric-data-cache.service";
 import { MetricDataService } from "./metric-data.service";
 
 @Injectable({ providedIn: 'root' })
 class MockMetricDataService extends MetricDataService {
 
-  constructor() {
-    super();
+  constructor(
+    $metricDataCache: MetricDataCacheService,
+  ) {
+    super($metricDataCache);
   }
 
   watchMetricData(id: Guid): Observable<MetricData> {
@@ -35,6 +38,7 @@ class MockMetricDataService extends MetricDataService {
 export function provideMetricDataServiceMock(): Provider {
   return {
     provide: MetricDataService,
-    useFactory: () => new MockMetricDataService(),
+    useFactory: ($metricDataCache: MetricDataCacheService) => new MockMetricDataService($metricDataCache),
+    deps: [MetricDataCacheService],
   };
 }
