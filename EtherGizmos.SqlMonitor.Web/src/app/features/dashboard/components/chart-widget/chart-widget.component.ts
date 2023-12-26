@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { Guid } from '../../../../shared/types/guid/guid';
 import { DashboardWidget, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
+import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
 
 @Component({
@@ -27,12 +28,12 @@ export class ChartWidgetComponent implements OnInit {
   private subscriptions: Subscription[] = [];
 
   @Input({ required: true }) config: DashboardWidget = undefined!;
-  @Output() configChange = new EventEmitter<DashboardWidget>();
   chartType: ChartConfiguration['type'] = undefined!;
   chartOptions: ChartConfiguration['options'] = undefined!;
   chartData: ChartConfiguration['data'] = undefined!;
   chartDatasets: { [subscriptionId: Guid]: ChartConfiguration['data']['datasets'][0] } = {};
 
+  @Output() onUpdate = new EventEmitter<DashboardWidget>();
   @Output() onDelete = new EventEmitter<DashboardWidget>();
 
   @ViewChild(BaseChartDirective) baseChart: BaseChartDirective = undefined!;
@@ -59,7 +60,7 @@ export class ChartWidgetComponent implements OnInit {
         this.flushSubscriptions();
 
         this.updateWidget(result);
-        this.configChange.next(result);
+        this.onUpdate.next(result);
 
         if (!result.chart)
           return;
@@ -101,7 +102,10 @@ export class ChartWidgetComponent implements OnInit {
   }
 
   deleteWidget() {
-    this.onDelete.next(this.config);
+    this.$modal.open(DeleteWidgetModalComponent, { centered: true }).result.then(
+      close => this.onDelete.next(this.config),
+      cancel => { }
+    );
   }
 
   flushSubscriptions() {
