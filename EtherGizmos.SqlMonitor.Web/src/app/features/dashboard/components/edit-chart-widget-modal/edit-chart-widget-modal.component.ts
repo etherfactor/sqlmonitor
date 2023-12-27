@@ -311,4 +311,13 @@ export class EditChartWidgetModalComponent implements OnInit {
 
     return null;
   }
+
+  getMetric(metricId: Guid) {
+    const index = this.metrics.findIndex(e => e.id == metricId);
+    if (index >= 0) {
+      return this.metrics[index];
+    } else {
+      return undefined;
+    }
+  }
 }

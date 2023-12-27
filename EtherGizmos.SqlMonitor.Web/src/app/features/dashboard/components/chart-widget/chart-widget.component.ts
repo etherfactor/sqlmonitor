@@ -6,7 +6,7 @@ import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { Subscription } from 'rxjs';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { Guid } from '../../../../shared/types/guid/guid';
-import { DashboardWidget, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
 
@@ -31,7 +31,7 @@ export class ChartWidgetComponent implements OnInit {
   chartType: ChartConfiguration['type'] = undefined!;
   chartOptions: ChartConfiguration['options'] = undefined!;
   chartData: ChartConfiguration['data'] = undefined!;
-  chartDatasets: { [subscriptionId: Guid]: ChartConfiguration['data']['datasets'][0] } = {};
+  chartDatasets: { [datasetId: string]: ChartConfiguration['data']['datasets'][0] } = {};
 
   @Output() onUpdate = new EventEmitter<DashboardWidget>();
   @Output() onDelete = new EventEmitter<DashboardWidget>();
@@ -66,24 +66,18 @@ export class ChartWidgetComponent implements OnInit {
           return;
           
         for (const chartMetric of result.chart.metrics) {
-          const sub = this.$metricData.subscribe(chartMetric.metricId, undefined);
-          const rxjsSub = sub.data$.subscribe(data => {
-            if (!this.chartDatasets[result.id]) {
-              const temp = this.chartDatasets[result.id] = {
-                label: chartMetric.metricId,
-                xAxisID: 'x',
-                yAxisID: chartMetric.yScaleId,
-                data: [],
-              };
-              this.chartData.datasets.push(temp);
-            }
+          let chartMetricBuckets: (string | undefined)[] | undefined = undefined;
+          if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets && chartMetric.buckets.length > 0) {
+            chartMetricBuckets = chartMetric.buckets;
+          }
 
-            const dataset = this.chartDatasets[result.id];
-            dataset.data = [];
-            for (const datum of data) {
-              dataset.data.push({ x: datum.eventTimeUtc.toMillis(), y: datum.value });
-            }
-            
+          const sub = this.$metricData.subscribe(chartMetric.metricId, chartMetricBuckets);
+          const rxjsSub = sub.data$.subscribe(datum => {
+            const datasetId = this.getDatasetId(sub.id, datum.bucket);
+            const dataset = this.getDataset(datasetId, datum.metricId, chartMetric.yScaleId);
+
+            dataset.data.push({ x: datum.eventTimeUtc.toMillis(), y: datum.value });
+
             this.baseChart.update();
           });
           this.subscriptions.push(rxjsSub);
@@ -91,6 +85,27 @@ export class ChartWidgetComponent implements OnInit {
       },
       cancel => { }
     );
+  }
+
+  private getDatasetId(subscriptionId: Guid, bucket: string | undefined) {
+    return `${subscriptionId}|${bucket ?? ''}`;
+  }
+
+  private getDataset(datasetId: string, metricId: Guid, yScaleId: string): ChartConfiguration['data']['datasets'][0] {
+    if (this.chartDatasets[datasetId]) {
+      return this.chartDatasets[datasetId];
+    } else {
+      const dataset = {
+        label: metricId,
+        xAxisID: 'x',
+        yAxisID: yScaleId,
+        data: [],
+      };
+      this.chartData.datasets.push(dataset);
+      this.chartDatasets[datasetId] = dataset;
+
+      return dataset;
+    }
   }
 
   private updateWidget(newConfig: DashboardWidget) {

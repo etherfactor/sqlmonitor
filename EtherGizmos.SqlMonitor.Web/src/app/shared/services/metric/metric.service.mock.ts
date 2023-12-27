@@ -1,9 +1,8 @@
 import { Provider } from "@angular/core";
-import { Observable, of } from "rxjs";
-import { v4 as uuidv4 } from 'uuid';
+import { Observable, of, throwError } from "rxjs";
 import { AggregateType } from "../../models/aggregate-type";
 import { Metric } from "../../models/metric";
-import { parseGuid } from "../../types/guid/guid";
+import { Guid, parseGuid } from "../../types/guid/guid";
 import { MetricService } from "./metric.service";
 
 class MockMetricService extends MetricService {
@@ -27,6 +26,15 @@ class MockMetricService extends MetricService {
         severities: [],
       },
     ];
+  }
+
+  override get(id: Guid) {
+    const index = this.metrics.findIndex(e => e.id === id);
+    if (index >= 0) {
+      return of(this.metrics[index]);
+    }
+
+    return throwError(() => new Error('Metric not found.'));
   }
 
   override search(): Observable<Metric[]> {

@@ -166,7 +166,7 @@
         <div ngbAccordion class="mt-3" *ngFor="let metricForm of chartForm.controls.metrics.controls; let metricIndex = index" [formGroup]="metricForm">
           <div ngbAccordionItem>
             <h2 ngbAccordionHeader>
-              <button ngbAccordionButton style="padding: 8px 0.75rem;">Memory Utilization</button>
+              <button ngbAccordionButton style="padding: 8px 0.75rem;">{{getMetric(metricForm.value.metricId!)?.name}}</button>
             </h2>
             <div ngbAccordionCollapse>
               <div class="accordion-body pt-0" style="padding-left: 8px; padding-right: 8px;">

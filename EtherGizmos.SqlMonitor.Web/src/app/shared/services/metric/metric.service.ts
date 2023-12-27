@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Metric } from '../../models/metric';
+import { Guid } from '../../types/guid/guid';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +10,8 @@ import { Metric } from '../../models/metric';
 export abstract class MetricService {
 
   constructor() { }
+
+  abstract get(id: Guid): Observable<Metric>;
 
   abstract search(): Observable<Metric[]>;
 }

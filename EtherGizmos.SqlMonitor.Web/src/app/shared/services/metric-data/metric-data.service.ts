@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DateTime } from 'luxon';
-import { Observable, filter, map } from 'rxjs';
+import { Observable, filter, map, share } from 'rxjs';
 import { MetricData } from '../../models/metric-data';
 import { MetricSubscription } from '../../models/metric-subscription';
 import { SeverityType } from '../../models/severity-type';
@@ -31,15 +31,55 @@ export abstract class MetricDataService {
       const intervalMs = 1000;
 
       const intervalId = setInterval(() => {
-        for (const metricId of Object.keys(this.watches).map(item => parseGuid(item))) {
-          const randomValue = Math.random();
+        const allMetricIds = Object.keys(this.watches).map(item => parseGuid(item));
+        const distinctMetricIds = allMetricIds.filter((item, index) => allMetricIds.indexOf(item) === index);
+
+        for (const metricId of distinctMetricIds) {
+          const randomMultiplier = 1;
+
           observer.next({
             instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
             metricId: metricId,
             eventTimeUtc: DateTime.now(),
-            bucket: undefined,
+            bucket: 'A',
             severityType: SeverityType.Nominal,
-            value: randomValue,
+            value: Math.random() * randomMultiplier,
+          });
+
+          observer.next({
+            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
+            metricId: metricId,
+            eventTimeUtc: DateTime.now(),
+            bucket: 'B',
+            severityType: SeverityType.Nominal,
+            value: Math.random() * randomMultiplier,
+          });
+
+          observer.next({
+            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
+            metricId: metricId,
+            eventTimeUtc: DateTime.now(),
+            bucket: 'C',
+            severityType: SeverityType.Nominal,
+            value: Math.random() * randomMultiplier,
+          });
+
+          observer.next({
+            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
+            metricId: metricId,
+            eventTimeUtc: DateTime.now(),
+            bucket: 'D',
+            severityType: SeverityType.Nominal,
+            value: Math.random() * randomMultiplier,
+          });
+
+          observer.next({
+            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
+            metricId: metricId,
+            eventTimeUtc: DateTime.now(),
+            bucket: 'E',
+            severityType: SeverityType.Nominal,
+            value: Math.random() * randomMultiplier,
           });
         }
       }, intervalMs);
@@ -48,6 +88,11 @@ export abstract class MetricDataService {
         clearInterval(intervalId);
       };
     });
+
+    this.allMetrics$ = this.allMetrics$.pipe(
+      share()
+    );
+
     //return random values
     //then interval
     //then share
@@ -70,6 +115,7 @@ export abstract class MetricDataService {
   subscribe(metricId: Guid, buckets: (string | undefined)[] | undefined): MetricSubscription {
     const watchId = this.startWatch(metricId);
     const data$ = this.allMetrics$.pipe(
+      filter(data => data.metricId === metricId),
       filter(data => {
         if (!buckets)
           return true;
@@ -82,12 +128,12 @@ export abstract class MetricDataService {
 
         return false;
       }),
-      map(data => {
-        this.$metricDataCache.cache(data);
-        const cachedData = this.$metricDataCache.get(data.metricId, buckets);
+      //map(data => {
+      //  this.$metricDataCache.cache(data);
+      //  const cachedData = this.$metricDataCache.get(data.metricId, buckets);
 
-        return cachedData;
-      })
+      //  return cachedData;
+      //})
     );
 
     const subscription = new MetricSubscription(watchId, data$);
