@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DateTime } from 'luxon';
-import { Observable, filter, map, share } from 'rxjs';
+import { Observable, filter, share, tap } from 'rxjs';
 import { MetricData } from '../../models/metric-data';
 import { MetricSubscription } from '../../models/metric-subscription';
 import { SeverityType } from '../../models/severity-type';
@@ -14,10 +14,6 @@ import { MetricDataCacheService } from '../metric-data-cache/metric-data-cache.s
 export abstract class MetricDataService {
 
   private $metricDataCache: MetricDataCacheService;
-
-  //metrics: { [metricId: Guid]: MetricWatch } = {};
-
-  //subscriptions: { [key: Guid]: MetricDataSubscription } = {};
 
   watches: { [metricId: Guid]: Guid[] } = {};
   allMetrics$: Observable<MetricData>;
@@ -90,12 +86,9 @@ export abstract class MetricDataService {
     });
 
     this.allMetrics$ = this.allMetrics$.pipe(
+      tap(data => this.$metricDataCache.cache(data)),
       share()
     );
-
-    //return random values
-    //then interval
-    //then share
   }
 
   startWatch(metricId: Guid): Guid {
@@ -108,8 +101,18 @@ export abstract class MetricDataService {
     return watchId;
   }
 
-  endWatch(watchId: Guid): void {
+  endWatch(metricId: Guid, watchId: Guid): void {
+    this.watches[metricId] ??= [];
+    const metricWatches = this.watches[metricId];
 
+    const index = metricWatches.indexOf(watchId);
+    if (index >= 0) {
+      metricWatches.splice(index, 1);
+    }
+
+    if (metricWatches.length === 0) {
+      delete this.watches[metricId];
+    }
   }
 
   subscribe(metricId: Guid, buckets: (string | undefined)[] | undefined): MetricSubscription {
@@ -128,89 +131,14 @@ export abstract class MetricDataService {
 
         return false;
       }),
-      //map(data => {
-      //  this.$metricDataCache.cache(data);
-      //  const cachedData = this.$metricDataCache.get(data.metricId, buckets);
-
-      //  return cachedData;
-      //})
     );
 
-    const subscription = new MetricSubscription(watchId, data$);
+    const subscription = new MetricSubscription(this, watchId, metricId, data$);
 
     return subscription;
   }
 
   endAllWatches(): void {
-
+    this.watches = {};
   }
-
-  abstract watchMetricData(id: Guid): Observable<MetricData>;
-
-  //subscribe(metricId: Guid, bucket: string | undefined): MetricDataSubscription {
-  //  const watch = this.metrics[metricId] ?? {
-  //    data$: this.watchMetricData(metricId),
-  //    subscribers: []
-  //  };
-  //  this.metrics[metricId] = watch;
-
-  //  const input$ = watch.data$.pipe(
-  //    filter(data => data.bucket === bucket || bucket === undefined)
-  //  );
-
-  //  new Observable<string>()
-
-  //  const subscription = new MetricDataSubscription(
-  //    (self: MetricDataSubscription) => this.unsubscribe(self),
-  //    input$,
-  //    metricId,
-  //    bucket
-  //  );
-
-  //  return subscription;
-  //}
-
-  //@Bound private unsubscribe(subscription: MetricDataSubscription) {
-
-  //  //Remove the subscription
-  //  const index = this.metrics[subscription.metricId].subscribers.indexOf(subscription.id);
-  //  this.metrics[subscription.metricId].subscribers.splice(index, 1);
-  //}
 }
-
-//interface MetricWatch {
-//  data$: Observable<MetricData>;
-//  subscribers: Guid[];
-//}
-
-//export class MetricDataSubscription {
-
-//  id: Guid;
-
-//  private unsubscribeInner: (self: MetricDataSubscription) => void;
-
-//  allData: MetricData[] = [];
-//  data$: Observable<MetricData[]>;
-
-//  metricId: Guid;
-//  bucket?: string;
-
-//  constructor(unsubscribe: (self: MetricDataSubscription) => void, data$: Observable<MetricData>, metricId: Guid, bucket: string | undefined) {
-//    this.id = generateGuid();
-
-//    this.unsubscribeInner = unsubscribe;
-
-//    this.data$ = data$.pipe(
-//      switchMap(data => {
-//        this.allData.push(data);
-//        return of(this.allData);
-//      })
-//    );
-//    this.metricId = metricId;
-//    this.bucket = bucket;
-//  }
-
-//  unsubscribe() {
-//    this.unsubscribeInner(this);
-//  }
-//}

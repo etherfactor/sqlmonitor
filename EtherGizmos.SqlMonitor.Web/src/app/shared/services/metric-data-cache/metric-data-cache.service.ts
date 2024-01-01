@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { DateTime } from 'luxon';
+import { interval } from 'rxjs';
 import { MetricData } from '../../models/metric-data';
 import { Guid } from '../../types/guid/guid';
 
@@ -9,26 +11,19 @@ export class MetricDataCacheService {
 
   private caches: {
     [metricId: Guid]: {
-      [bucketId: string]: MetricData[]
+      [bucket: string]: MetricData[]
     }
   } = {};
 
-  constructor() { }
+  constructor() {
+    interval(15000).subscribe(() => this.purgeOldData());
+  }
 
   cache(data: MetricData): void {
     const metricCache = this.caches[data.metricId] ??= {};
     const bucketCache = metricCache[data.bucket ?? ''] ??= [];
 
     bucketCache.push(data);
-    //bucketCache.sort((a, b) => {
-    //  if (a.eventTimeUtc < b.eventTimeUtc)
-    //    return -1;
-
-    //  if (a.eventTimeUtc > b.eventTimeUtc)
-    //    return 1;
-
-    //  return 0;
-    //});
   }
 
   get(metricId: Guid, buckets: (string | undefined)[] | undefined): MetricData[] {
@@ -45,5 +40,24 @@ export class MetricDataCacheService {
     }
 
     return result;
+  }
+
+  private purgeOldData(): void {
+    const now = DateTime.utc();
+
+    for (const metricId of Object.keys(this.caches) as Guid[]) {
+      const metricCache = this.caches[metricId];
+
+      for (const bucket of Object.keys(metricCache)) {
+        const bucketCache = metricCache[bucket];
+
+        if (bucketCache) {
+          // Filter out data older than 1 hour
+          metricCache[bucket] = bucketCache.filter(data =>
+            now.diff(data.eventTimeUtc).as('minutes') <= 1
+          );
+        }
+      }
+    }
   }
 }
