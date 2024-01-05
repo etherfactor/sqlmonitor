@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DateTime } from 'luxon';
-import { interval } from 'rxjs';
+import { asyncScheduler, interval, observeOn } from 'rxjs';
 import { MetricData } from '../../models/metric-data';
 import { Guid } from '../../types/guid/guid';
 
@@ -16,7 +16,9 @@ export class MetricDataCacheService {
   } = {};
 
   constructor() {
-    interval(15000).subscribe(() => this.purgeOldData());
+    interval(15000).pipe(
+      observeOn(asyncScheduler),
+    ).subscribe(() => this.purgeOldData());
   }
 
   cache(data: MetricData): void {

@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration } from 'chart.js';
 import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
-import { Subscription } from 'rxjs';
+import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
 import { MetricSubscription } from '../../../../shared/models/metric-subscription';
 import { MetricDataCacheService } from '../../../../shared/services/metric-data-cache/metric-data-cache.service';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
@@ -23,7 +23,7 @@ import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-c
   templateUrl: './chart-widget.component.html',
   styleUrl: './chart-widget.component.scss'
 })
-export class ChartWidgetComponent implements OnInit {
+export class ChartWidgetComponent implements OnInit, OnDestroy {
 
   private $metricData: MetricDataService;
   private $metricDataCache: MetricDataCacheService;
@@ -31,6 +31,7 @@ export class ChartWidgetComponent implements OnInit {
 
   private metricSubscriptions: MetricSubscription[] = [];
   private rxjsSubscriptions: Subscription[] = [];
+  private purgeSubscription: Subscription;
 
   @Input({ required: true }) config: DashboardWidget = undefined!;
   chartType: ChartConfiguration['type'] = undefined!;
@@ -51,10 +52,19 @@ export class ChartWidgetComponent implements OnInit {
     this.$metricData = $metricData;
     this.$metricDataCache = $metricDataCache;
     this.$modal = $modal;
+
+    this.purgeSubscription = interval(1000).pipe(
+      observeOn(asyncScheduler),
+    ).subscribe(() => this.purgeOldData());
   }
 
   ngOnInit(): void {
     this.updateWidget(this.config);
+  }
+
+  ngOnDestroy(): void {
+    this.flushSubscriptions();
+    this.purgeSubscription.unsubscribe();
   }
 
   editWidget() {
@@ -131,13 +141,14 @@ export class ChartWidgetComponent implements OnInit {
       }
       this.baseChart.update();
 
-      const rxjsSub = sub.data$.subscribe(datum => {
+      const rxjsSub = sub.data$.pipe(
+        observeOn(asyncScheduler),
+      ).subscribe(datum => {
         const datasetId = this.getDatasetId(sub.id, datum.bucket);
         const dataset = this.getDataset(datasetId, datum.metricId, chartMetric.yScaleId);
 
-        dataset.data.push({ x: datum.eventTimeUtc.toMillis(), y: datum.value });
-
-        this.purgeOldData();
+        const datasetDatum = { x: datum.eventTimeUtc.toMillis(), y: datum.value };
+        dataset.data.push(datasetDatum);
 
         this.baseChart.update();
       });
@@ -269,8 +280,5 @@ export class ChartWidgetComponent implements OnInit {
         isPastLimit = true;
       } while (!isPastLimit);
     }
-
-    // Trigger chart update after purging data
-    this.baseChart.update();
   }
 }
