@@ -1,13 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, Point } from 'chart.js';
 import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
+import { AggregateType } from '../../../../shared/models/aggregate-type';
+import { Metric } from '../../../../shared/models/metric';
+import { MetricData } from '../../../../shared/models/metric-data';
 import { MetricSubscription } from '../../../../shared/models/metric-subscription';
 import { MetricDataCacheService } from '../../../../shared/services/metric-data-cache/metric-data-cache.service';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
+import { MetricService } from '../../../../shared/services/metric/metric.service';
 import { Guid } from '../../../../shared/types/guid/guid';
 import { DashboardWidget, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
@@ -25,6 +29,7 @@ import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-c
 })
 export class ChartWidgetComponent implements OnInit, OnDestroy {
 
+  private $metric: MetricService;
   private $metricData: MetricDataService;
   private $metricDataCache: MetricDataCacheService;
   private $modal: NgbModal;
@@ -38,6 +43,7 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   chartOptions: ChartConfiguration['options'] = undefined!;
   chartData: ChartConfiguration['data'] = undefined!;
   chartDatasets: { [datasetId: string]: ChartConfiguration['data']['datasets'][0] } = {};
+  chartAggregators: { [datasetId: string]: MetricAggregator } = {};
 
   @Output() onUpdate = new EventEmitter<DashboardWidget>();
   @Output() onDelete = new EventEmitter<DashboardWidget>();
@@ -45,10 +51,12 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) baseChart: BaseChartDirective = undefined!;
 
   constructor(
+    $metric: MetricService,
     $metricData: MetricDataService,
     $metricDataCache: MetricDataCacheService,
     $modal: NgbModal
   ) {
+    this.$metric = $metric;
     this.$metricData = $metricData;
     this.$metricDataCache = $metricDataCache;
     this.$modal = $modal;
@@ -87,12 +95,12 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     return `${subscriptionId}|${bucket ?? ''}`;
   }
 
-  private getDataset(datasetId: string, metricId: Guid, yScaleId: string): ChartConfiguration['data']['datasets'][0] {
+  private getDataset(datasetId: string, metric: Metric, yScaleId: string): ChartConfiguration['data']['datasets'][0] {
     if (this.chartDatasets[datasetId]) {
       return this.chartDatasets[datasetId];
     } else {
       const dataset = {
-        label: metricId,
+        label: metric.name,
         xAxisID: 'x',
         yAxisID: yScaleId,
         data: [],
@@ -104,56 +112,107 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
+  private getAggregator(datasetId: string, data: ChartConfiguration['data']['datasets'][0]['data'], aggregateType: AggregateType): MetricAggregator {
+    let aggregator = this.chartAggregators[datasetId];
+    if (!aggregator) {
+      switch (aggregateType) {
+        case (AggregateType.Average):
+          aggregator = new AverageMetricAggregator(data);
+          break;
+
+        case (AggregateType.Maximum):
+          aggregator = new MaximumMetricAggregator(data);
+          break;
+
+        case (AggregateType.Minimum):
+          aggregator = new MinimumMetricAggregator(data);
+          break;
+
+        case (AggregateType.StandardDeviation):
+          aggregator = new StandardDeviationMetricAggregator(data);
+          break;
+
+        case (AggregateType.Sum):
+          aggregator = new SumMetricAggregator(data);
+          break;
+
+        case (AggregateType.Variance):
+          aggregator = new VarianceMetricAggregator(data);
+          break;
+
+        default:
+          throw new Error('Unknown aggregator');
+      }
+    }
+    this.chartAggregators[datasetId] = aggregator;
+
+    return aggregator;
+  }
+
   private updateWidget(newConfig: DashboardWidget) {
     this.config = newConfig;
     this.createChartType();
     this.createChartOptions();
     this.createChartData();
     this.createChartDatasets();
+    this.createChartAggregators();
 
     if (!newConfig.chart)
       return;
 
     for (const chartMetric of newConfig.chart.metrics) {
-      let chartMetricBuckets: (string | undefined)[] | undefined = undefined;
-      if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets && chartMetric.buckets.length > 0) {
-        chartMetricBuckets = chartMetric.buckets;
-      }
+      this.$metric.get(chartMetric.metricId).subscribe(metric => {
+        let chartMetricBuckets: (string | undefined)[] | undefined = undefined;
+        if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets && chartMetric.buckets.length > 0) {
+          chartMetricBuckets = chartMetric.buckets;
+        }
 
-      const sub = this.$metricData.subscribe(chartMetric.metricId, chartMetricBuckets);
+        const sub = this.$metricData.subscribe(chartMetric.metricId, chartMetricBuckets);
 
-      const historyData = this.$metricDataCache.get(chartMetric.metricId, chartMetricBuckets);
-      historyData.sort((a, b) => {
-        if (a.eventTimeUtc < b.eventTimeUtc)
-          return -1;
+        const historyData = this.$metricDataCache.get(chartMetric.metricId, chartMetricBuckets);
+        historyData.sort((a, b) => {
+          if (a.eventTimeUtc < b.eventTimeUtc)
+            return -1;
 
-        if (a.eventTimeUtc > b.eventTimeUtc)
-          return 1;
+          if (a.eventTimeUtc > b.eventTimeUtc)
+            return 1;
 
-        return 0;
-      });
+          return 0;
+        });
 
-      for (const historyDatum of historyData) {
-        const datasetId = this.getDatasetId(sub.id, historyDatum.bucket);
-        const dataset = this.getDataset(datasetId, historyDatum.metricId, chartMetric.yScaleId);
+        for (const historyDatum of historyData) {
+          const datasetId = this.getDatasetId(sub.id, historyDatum.bucket);
+          const dataset = this.getDataset(datasetId, metric, chartMetric.yScaleId);
 
-        dataset.data.push({ x: historyDatum.eventTimeUtc.toMillis(), y: historyDatum.value });
-      }
-      this.baseChart.update();
-
-      const rxjsSub = sub.data$.pipe(
-        observeOn(asyncScheduler),
-      ).subscribe(datum => {
-        const datasetId = this.getDatasetId(sub.id, datum.bucket);
-        const dataset = this.getDataset(datasetId, datum.metricId, chartMetric.yScaleId);
-
-        const datasetDatum = { x: datum.eventTimeUtc.toMillis(), y: datum.value };
-        dataset.data.push(datasetDatum);
-
+          dataset.data.push({ x: historyDatum.eventTimeUtc.toMillis(), y: historyDatum.value });
+        }
         this.baseChart.update();
+
+        const rxjsSub = sub.data$.pipe(
+          observeOn(asyncScheduler),
+        ).subscribe(datum => {
+          if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayAll || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets
+            || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling) {
+            const datasetId = this.getDatasetId(sub.id, datum.bucket);
+            const dataset = this.getDataset(datasetId, metric, chartMetric.yScaleId);
+
+            const datasetDatum = { x: datum.eventTimeUtc.toMillis(), y: datum.value };
+            dataset.data.push(datasetDatum);
+          } else if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.Aggregate) {
+            const datasetId = this.getDatasetId(sub.id, undefined);
+            const dataset = this.getDataset(datasetId, metric, chartMetric.yScaleId);
+
+            const aggregator = this.getAggregator(datasetId, dataset.data, metric.aggregateType);
+            aggregator.addDatum(datum);
+          } else {
+            throw new Error('Unknown bucket type');
+          }
+
+          this.baseChart.update();
+        });
+        this.metricSubscriptions.push(sub);
+        this.rxjsSubscriptions.push(rxjsSub);
       });
-      this.metricSubscriptions.push(sub);
-      this.rxjsSubscriptions.push(rxjsSub);
     }
   }
 
@@ -247,11 +306,21 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     this.chartDatasets = {};
   }
 
+  createChartAggregators(): void {
+    this.chartAggregators = {};
+  }
+
   private purgeOldData(): void {
     const now = DateTime.utc();
 
     for (const datasetId of Object.keys(this.chartDatasets)) {
       const dataset = this.chartDatasets[datasetId];
+
+      if (!dataset.data)
+        continue;
+
+      if (dataset.data.length === 0)
+        continue;
 
       let isPastLimit = false;
       do {
@@ -279,6 +348,148 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
 
         isPastLimit = true;
       } while (!isPastLimit);
+    }
+  }
+}
+
+abstract class MetricAggregator {
+
+  data: ChartConfiguration['data']['datasets'][0]['data'];
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    this.data = data;
+  }
+
+  abstract addDatum(datum: MetricData): void;
+}
+
+class AverageMetricAggregator extends MetricAggregator {
+
+  aggregateData: { [key: number]: Point & { _ct: number } } = {};
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    super(data);
+  }
+
+  override addDatum(datum: MetricData): void {
+    const eventTime = datum.eventTimeUtc.toMillis();
+    let aggregateDatum = this.aggregateData[eventTime];
+    if (!aggregateDatum) {
+      aggregateDatum = { x: eventTime, y: datum.value, _ct: 1 };
+      this.aggregateData[eventTime] = aggregateDatum;
+      this.data.push(aggregateDatum);
+    } else {
+      aggregateDatum.y = (aggregateDatum.y * aggregateDatum._ct + datum.value) / (aggregateDatum._ct + 1);
+      aggregateDatum._ct++;
+    }
+  }
+}
+
+class MaximumMetricAggregator extends MetricAggregator {
+
+  aggregateData: { [key: number]: Point } = {};
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    super(data);
+  }
+
+  override addDatum(datum: MetricData): void {
+    const eventTime = datum.eventTimeUtc.toMillis();
+    let aggregateDatum = this.aggregateData[eventTime];
+    if (!aggregateDatum) {
+      aggregateDatum = { x: eventTime, y: datum.value };
+      this.aggregateData[eventTime] = aggregateDatum;
+      this.data.push(aggregateDatum);
+    } else {
+      aggregateDatum.y = Math.max(aggregateDatum.y, datum.value);
+    }
+  }
+}
+
+class MinimumMetricAggregator extends MetricAggregator {
+
+  aggregateData: { [key: number]: Point } = {};
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    super(data);
+  }
+
+  override addDatum(datum: MetricData): void {
+    const eventTime = datum.eventTimeUtc.toMillis();
+    let aggregateDatum = this.aggregateData[eventTime];
+    if (!aggregateDatum) {
+      aggregateDatum = { x: eventTime, y: datum.value };
+      this.aggregateData[eventTime] = aggregateDatum;
+      this.data.push(aggregateDatum);
+    } else {
+      aggregateDatum.y = Math.min(aggregateDatum.y, datum.value);
+    }
+  }
+}
+
+class StandardDeviationMetricAggregator extends MetricAggregator {
+
+  aggregateData: { [key: number]: Point & { _ct: number, _avg: number } } = {};
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    super(data);
+  }
+
+  override addDatum(datum: MetricData): void {
+    const eventTime = datum.eventTimeUtc.toMillis();
+    let aggregateDatum = this.aggregateData[eventTime];
+    if (!aggregateDatum) {
+      aggregateDatum = { x: eventTime, y: datum.value, _ct: 1, _avg: datum.value };
+      this.aggregateData[eventTime] = aggregateDatum;
+      this.data.push(aggregateDatum);
+    } else {
+      aggregateDatum.y = Math.sqrt((1 / (aggregateDatum._ct + 1)) * (aggregateDatum._ct * Math.pow(aggregateDatum.y, 2) + Math.pow(datum.value - aggregateDatum._avg, 2)));
+      aggregateDatum._avg = (aggregateDatum._avg * aggregateDatum._ct + datum.value) / (aggregateDatum._ct + 1);
+      aggregateDatum._ct++;
+    }
+  }
+}
+
+class SumMetricAggregator extends MetricAggregator {
+
+  aggregateData: { [key: number]: Point } = {};
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    super(data);
+  }
+
+  override addDatum(datum: MetricData): void {
+    const eventTime = datum.eventTimeUtc.toMillis();
+    let aggregateDatum = this.aggregateData[eventTime];
+    if (!aggregateDatum) {
+      aggregateDatum = { x: eventTime, y: datum.value };
+      this.aggregateData[eventTime] = aggregateDatum;
+      this.data.push(aggregateDatum);
+    } else {
+      aggregateDatum.y += datum.value;
+    }
+  }
+}
+
+class VarianceMetricAggregator extends MetricAggregator {
+
+  aggregateData: { [key: number]: Point & { _ct: number, _avg: number } } = {};
+
+  constructor(data: ChartConfiguration['data']['datasets'][0]['data']) {
+    super(data);
+  }
+
+  override addDatum(datum: MetricData): void {
+    const eventTime = datum.eventTimeUtc.toMillis();
+    let aggregateDatum = this.aggregateData[eventTime];
+    if (!aggregateDatum) {
+      aggregateDatum = { x: eventTime, y: datum.value, _ct: 1, _avg: datum.value };
+      this.aggregateData[eventTime] = aggregateDatum;
+      this.data.push(aggregateDatum);
+    } else {
+      aggregateDatum.y = (1 / (aggregateDatum._ct + 1)) * ((aggregateDatum._ct * aggregateDatum.y) + Math.pow(datum.value - aggregateDatum._avg, 2));
+      aggregateDatum._avg = (aggregateDatum._avg * aggregateDatum._ct + datum.value) / (aggregateDatum._ct + 1);
+      aggregateDatum._ct++;
     }
   }
 }

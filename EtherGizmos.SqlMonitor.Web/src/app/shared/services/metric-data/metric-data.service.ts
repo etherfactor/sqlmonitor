@@ -33,10 +33,11 @@ export abstract class MetricDataService {
         for (const metricId of distinctMetricIds) {
           const randomMultiplier = 1;
 
+          const now = DateTime.now();
           observer.next({
             instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
             metricId: metricId,
-            eventTimeUtc: DateTime.now(),
+            eventTimeUtc: now,
             bucket: 'A',
             severityType: SeverityType.Nominal,
             value: Math.random() * randomMultiplier,
@@ -45,7 +46,7 @@ export abstract class MetricDataService {
           observer.next({
             instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
             metricId: metricId,
-            eventTimeUtc: DateTime.now(),
+            eventTimeUtc: now,
             bucket: 'B',
             severityType: SeverityType.Nominal,
             value: Math.random() * randomMultiplier,
@@ -54,7 +55,7 @@ export abstract class MetricDataService {
           observer.next({
             instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
             metricId: metricId,
-            eventTimeUtc: DateTime.now(),
+            eventTimeUtc: now,
             bucket: 'C',
             severityType: SeverityType.Nominal,
             value: Math.random() * randomMultiplier,
@@ -63,7 +64,7 @@ export abstract class MetricDataService {
           observer.next({
             instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
             metricId: metricId,
-            eventTimeUtc: DateTime.now(),
+            eventTimeUtc: now,
             bucket: 'D',
             severityType: SeverityType.Nominal,
             value: Math.random() * randomMultiplier,
@@ -72,7 +73,7 @@ export abstract class MetricDataService {
           observer.next({
             instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
             metricId: metricId,
-            eventTimeUtc: DateTime.now(),
+            eventTimeUtc: now,
             bucket: 'E',
             severityType: SeverityType.Nominal,
             value: Math.random() * randomMultiplier,
