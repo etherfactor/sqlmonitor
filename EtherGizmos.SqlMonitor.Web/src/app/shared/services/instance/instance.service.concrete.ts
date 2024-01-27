@@ -1,11 +1,11 @@
 import { HttpClient } from "@angular/common/http";
 import { Provider } from "@angular/core";
 import { Observable } from "rxjs";
-import { Metric } from "../../models/metric";
+import { Instance } from "../../models/instance";
 import { Guid } from "../../types/guid/guid";
-import { MetricService } from "./metric.service";
+import { InstanceService } from "./instance.service";
 
-class ConcreteMetricService extends MetricService {
+class ConcreteInstanceService extends InstanceService {
 
   private $http: HttpClient;
 
@@ -16,21 +16,21 @@ class ConcreteMetricService extends MetricService {
     this.$http = $http;
   }
 
-  override get(id: Guid): Observable<Metric> {
+  override get(id: Guid): Observable<Instance> {
     throw new Error("Method not implemented.");
   }
 
-  override search(): Observable<Metric[]> {
+  override search(): Observable<Instance[]> {
     throw new Error("Method not implemented.");
   }
 }
 
-export function provideMetricService(): Provider {
+export function provideInstanceService(): Provider {
   return {
-    provide: MetricService,
+    provide: InstanceService,
     useFactory: (
       $http: HttpClient,
-    ) => new ConcreteMetricService(
+    ) => new ConcreteInstanceService(
       $http,
     )
   };

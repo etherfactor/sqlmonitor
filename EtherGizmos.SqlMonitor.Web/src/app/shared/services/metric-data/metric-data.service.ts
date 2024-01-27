@@ -18,6 +18,12 @@ export abstract class MetricDataService {
   watches: { [metricId: Guid]: Guid[] } = {};
   allMetrics$: Observable<MetricData>;
 
+  instanceIds: Guid[] = [
+    parseGuid('006db56a-d3b1-4c50-af8f-f19bb13f85ed'),
+    parseGuid('5d469831-4c01-487d-a19b-78bdd6c99798'),
+    parseGuid('d525a8e8-e06c-4351-9e5c-c29043521259'),
+  ];
+
   constructor(
     $metricDataCache: MetricDataCacheService
   ) {
@@ -30,54 +36,56 @@ export abstract class MetricDataService {
         const allMetricIds = Object.keys(this.watches).map(item => parseGuid(item));
         const distinctMetricIds = allMetricIds.filter((item, index) => allMetricIds.indexOf(item) === index);
 
-        for (const metricId of distinctMetricIds) {
-          const randomMultiplier = 1;
+        const now = DateTime.now();
+        for (const instanceId of this.instanceIds) {
+          for (const metricId of distinctMetricIds) {
+            const randomMultiplier = 1;
 
-          const now = DateTime.now();
-          observer.next({
-            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
-            metricId: metricId,
-            eventTimeUtc: now,
-            bucket: 'A',
-            severityType: SeverityType.Nominal,
-            value: Math.random() * randomMultiplier,
-          });
+            observer.next({
+              instanceId: instanceId,
+              metricId: metricId,
+              eventTimeUtc: now,
+              bucket: 'A',
+              severityType: SeverityType.Nominal,
+              value: Math.random() * randomMultiplier,
+            });
 
-          observer.next({
-            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
-            metricId: metricId,
-            eventTimeUtc: now,
-            bucket: 'B',
-            severityType: SeverityType.Nominal,
-            value: Math.random() * randomMultiplier,
-          });
+            observer.next({
+              instanceId: instanceId,
+              metricId: metricId,
+              eventTimeUtc: now,
+              bucket: 'B',
+              severityType: SeverityType.Nominal,
+              value: Math.random() * randomMultiplier,
+            });
 
-          observer.next({
-            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
-            metricId: metricId,
-            eventTimeUtc: now,
-            bucket: 'C',
-            severityType: SeverityType.Nominal,
-            value: Math.random() * randomMultiplier,
-          });
+            observer.next({
+              instanceId: instanceId,
+              metricId: metricId,
+              eventTimeUtc: now,
+              bucket: 'C',
+              severityType: SeverityType.Nominal,
+              value: Math.random() * randomMultiplier,
+            });
 
-          observer.next({
-            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
-            metricId: metricId,
-            eventTimeUtc: now,
-            bucket: 'D',
-            severityType: SeverityType.Nominal,
-            value: Math.random() * randomMultiplier,
-          });
+            observer.next({
+              instanceId: instanceId,
+              metricId: metricId,
+              eventTimeUtc: now,
+              bucket: 'D',
+              severityType: SeverityType.Nominal,
+              value: Math.random() * randomMultiplier,
+            });
 
-          observer.next({
-            instanceId: parseGuid('00000000-0000-0000-0000-000000000000'),
-            metricId: metricId,
-            eventTimeUtc: now,
-            bucket: 'E',
-            severityType: SeverityType.Nominal,
-            value: Math.random() * randomMultiplier,
-          });
+            observer.next({
+              instanceId: instanceId,
+              metricId: metricId,
+              eventTimeUtc: now,
+              bucket: 'E',
+              severityType: SeverityType.Nominal,
+              value: Math.random() * randomMultiplier,
+            });
+          }
         }
       }, intervalMs);
 

@@ -4,11 +4,13 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, Point } from 'chart.js';
 import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
-import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
+import { Observable, Subscription, asyncScheduler, first, interval, observeOn, shareReplay } from 'rxjs';
 import { AggregateType } from '../../../../shared/models/aggregate-type';
+import { Instance } from '../../../../shared/models/instance';
 import { Metric } from '../../../../shared/models/metric';
 import { MetricData } from '../../../../shared/models/metric-data';
 import { MetricSubscription } from '../../../../shared/models/metric-subscription';
+import { InstanceService } from '../../../../shared/services/instance/instance.service';
 import { MetricDataCacheService } from '../../../../shared/services/metric-data-cache/metric-data-cache.service';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { MetricService } from '../../../../shared/services/metric/metric.service';
@@ -29,6 +31,7 @@ import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-c
 })
 export class ChartWidgetComponent implements OnInit, OnDestroy {
 
+  private $instance: InstanceService;
   private $metric: MetricService;
   private $metricData: MetricDataService;
   private $metricDataCache: MetricDataCacheService;
@@ -45,17 +48,21 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   chartDatasets: { [datasetId: string]: ChartConfiguration['data']['datasets'][0] } = {};
   chartAggregators: { [datasetId: string]: MetricAggregator } = {};
 
+  instanceObservables: { [instanceId: Guid]: Observable<Instance> } = {};
+
   @Output() onUpdate = new EventEmitter<DashboardWidget>();
   @Output() onDelete = new EventEmitter<DashboardWidget>();
 
   @ViewChild(BaseChartDirective) baseChart: BaseChartDirective = undefined!;
 
   constructor(
+    $instance: InstanceService,
     $metric: MetricService,
     $metricData: MetricDataService,
     $metricDataCache: MetricDataCacheService,
     $modal: NgbModal
   ) {
+    this.$instance = $instance;
     this.$metric = $metric;
     this.$metricData = $metricData;
     this.$metricDataCache = $metricDataCache;
@@ -91,8 +98,8 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     );
   }
 
-  private getDatasetId(subscriptionId: Guid, bucket: string | undefined) {
-    return `${subscriptionId}|${bucket ?? ''}`;
+  private getDatasetId(subscriptionId: Guid, instanceId: Guid, bucket: string | undefined) {
+    return `${subscriptionId}|${instanceId}|${bucket ?? ''}`;
   }
 
   private getDataset(datasetId: string, label: string, yScaleId: string): ChartConfiguration['data']['datasets'][0] {
@@ -149,6 +156,13 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     return aggregator;
   }
 
+  private getInstanceObservable(instanceId: Guid): Observable<Instance> {
+    return this.instanceObservables[instanceId] ?? this.$instance.get(instanceId).pipe(
+      shareReplay({ bufferSize: 1, refCount: true }),
+      first(),
+    );
+  }
+
   private updateWidget(newConfig: DashboardWidget) {
     this.flushSubscriptions();
 
@@ -183,16 +197,21 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
         });
 
         for (const historyDatum of historyData) {
-          this.addData(chartMetric, metric, sub, historyDatum);
+          this.getInstanceObservable(historyDatum.instanceId).subscribe(instance => {
+            this.addData(chartMetric, sub, instance, metric, historyDatum);
+
+            this.baseChart.update();
+          });
         }
-        this.baseChart.update();
 
         const rxjsSub = sub.data$.pipe(
           observeOn(asyncScheduler),
         ).subscribe(datum => {
-          this.addData(chartMetric, metric, sub, datum);
+          this.getInstanceObservable(datum.instanceId).subscribe(instance => {
+            this.addData(chartMetric, sub, instance, metric, datum);
 
-          this.baseChart.update();
+            this.baseChart.update();
+          });
         });
         this.metricSubscriptions.push(sub);
         this.rxjsSubscriptions.push(rxjsSub);
@@ -200,17 +219,17 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
-  addData(chartMetric: DashboardWidgetChartMetric, metric: Metric, subscription: MetricSubscription, datum: MetricData) {
-    const label = this.getLabel(chartMetric, metric, datum);
+  addData(chartMetric: DashboardWidgetChartMetric, subscription: MetricSubscription, instance: Instance, metric: Metric, datum: MetricData) {
+    const label = this.getLabel(chartMetric, instance, metric, datum);
     if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayAll || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets
       || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling) {
-      const datasetId = this.getDatasetId(subscription.id, datum.bucket);
+      const datasetId = this.getDatasetId(subscription.id, datum.instanceId, datum.bucket);
       const dataset = this.getDataset(datasetId, label, chartMetric.yScaleId);
 
       const datasetDatum = { x: datum.eventTimeUtc.toMillis(), y: datum.value };
       dataset.data.push(datasetDatum);
     } else if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.Aggregate) {
-      const datasetId = this.getDatasetId(subscription.id, undefined);
+      const datasetId = this.getDatasetId(subscription.id, datum.instanceId, undefined);
       const dataset = this.getDataset(datasetId, label, chartMetric.yScaleId);
 
       const aggregateType = chartMetric.bucketAggregateType && chartMetric.bucketAggregateType !== AggregateType.Unknown
@@ -224,8 +243,8 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
-  getLabel(chartMetric: DashboardWidgetChartMetric, metric: Metric, datum: MetricData) {
-    let label = chartMetric.label ?? metric.name;
+  getLabel(chartMetric: DashboardWidgetChartMetric, instance: Instance, metric: Metric, datum: MetricData) {
+    let label = `[${instance.name}] ${chartMetric.label ?? metric.name}`;
 
     if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayAll || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets
       || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling) {
