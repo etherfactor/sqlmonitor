@@ -183,6 +183,14 @@
                   <div class="row">
                     <div class="col-12">
                       <div class="floating-label mt-3">
+                        <input id="inputMetricLabel" class="form-control" type="text" formControlName="label" placeholder=" " />
+                        <label for="inputMetricLabel">Label</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="floating-label mt-3">
                         <ng-select formControlName="bucketType"
                                    placeholder="Display buckets">
                           <ng-option [value]="DashboardWidgetChartMetricBucketType.Aggregate">Aggregate</ng-option>
@@ -223,6 +231,22 @@
                           </div>
                         </div>
                       </fieldset>
+                    </div>
+                  </div>
+                  <div class="row" *ngIf="metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.Aggregate">
+                    <div class="col-12">
+                      <div class="floating-label mt-3">
+                        <ng-select formControlName="bucketAggregateType"
+                                   placeholder="Aggregate type">
+                          <ng-option [value]="AggregateType.Unknown">(Metric default)</ng-option>
+                          <ng-option [value]="AggregateType.Average">Average</ng-option>
+                          <ng-option [value]="AggregateType.Maximum">Maximum</ng-option>
+                          <ng-option [value]="AggregateType.Minimum">Minimum</ng-option>
+                          <ng-option [value]="AggregateType.StandardDeviation">Standard deviation</ng-option>
+                          <ng-option [value]="AggregateType.Sum">Sum</ng-option>
+                          <ng-option [value]="AggregateType.Variance">Variance</ng-option>
+                        </ng-select>
+                      </div>
                     </div>
                   </div>
                   <div class="row" *ngIf="metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || metricForm.value.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling">

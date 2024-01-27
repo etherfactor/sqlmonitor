@@ -13,7 +13,7 @@ import { MetricDataCacheService } from '../../../../shared/services/metric-data-
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { MetricService } from '../../../../shared/services/metric/metric.service';
 import { Guid } from '../../../../shared/types/guid/guid';
-import { DashboardWidget, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
+import { DashboardWidget, DashboardWidgetChartMetric, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
 
@@ -95,12 +95,12 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     return `${subscriptionId}|${bucket ?? ''}`;
   }
 
-  private getDataset(datasetId: string, metric: Metric, yScaleId: string): ChartConfiguration['data']['datasets'][0] {
+  private getDataset(datasetId: string, label: string, yScaleId: string): ChartConfiguration['data']['datasets'][0] {
     if (this.chartDatasets[datasetId]) {
       return this.chartDatasets[datasetId];
     } else {
       const dataset = {
-        label: metric.name,
+        label: label,
         xAxisID: 'x',
         yAxisID: yScaleId,
         data: [],
@@ -150,6 +150,8 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   }
 
   private updateWidget(newConfig: DashboardWidget) {
+    this.flushSubscriptions();
+
     this.config = newConfig;
     this.createChartType();
     this.createChartOptions();
@@ -181,32 +183,14 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
         });
 
         for (const historyDatum of historyData) {
-          const datasetId = this.getDatasetId(sub.id, historyDatum.bucket);
-          const dataset = this.getDataset(datasetId, metric, chartMetric.yScaleId);
-
-          dataset.data.push({ x: historyDatum.eventTimeUtc.toMillis(), y: historyDatum.value });
+          this.addData(chartMetric, metric, sub, historyDatum);
         }
         this.baseChart.update();
 
         const rxjsSub = sub.data$.pipe(
           observeOn(asyncScheduler),
         ).subscribe(datum => {
-          if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayAll || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets
-            || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling) {
-            const datasetId = this.getDatasetId(sub.id, datum.bucket);
-            const dataset = this.getDataset(datasetId, metric, chartMetric.yScaleId);
-
-            const datasetDatum = { x: datum.eventTimeUtc.toMillis(), y: datum.value };
-            dataset.data.push(datasetDatum);
-          } else if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.Aggregate) {
-            const datasetId = this.getDatasetId(sub.id, undefined);
-            const dataset = this.getDataset(datasetId, metric, chartMetric.yScaleId);
-
-            const aggregator = this.getAggregator(datasetId, dataset.data, metric.aggregateType);
-            aggregator.addDatum(datum);
-          } else {
-            throw new Error('Unknown bucket type');
-          }
+          this.addData(chartMetric, metric, sub, datum);
 
           this.baseChart.update();
         });
@@ -214,6 +198,80 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
         this.rxjsSubscriptions.push(rxjsSub);
       });
     }
+  }
+
+  addData(chartMetric: DashboardWidgetChartMetric, metric: Metric, subscription: MetricSubscription, datum: MetricData) {
+    const label = this.getLabel(chartMetric, metric, datum);
+    if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayAll || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets
+      || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling) {
+      const datasetId = this.getDatasetId(subscription.id, datum.bucket);
+      const dataset = this.getDataset(datasetId, label, chartMetric.yScaleId);
+
+      const datasetDatum = { x: datum.eventTimeUtc.toMillis(), y: datum.value };
+      dataset.data.push(datasetDatum);
+    } else if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.Aggregate) {
+      const datasetId = this.getDatasetId(subscription.id, undefined);
+      const dataset = this.getDataset(datasetId, label, chartMetric.yScaleId);
+
+      const aggregateType = chartMetric.bucketAggregateType && chartMetric.bucketAggregateType !== AggregateType.Unknown
+        ? chartMetric.bucketAggregateType
+        : metric.aggregateType;
+
+      const aggregator = this.getAggregator(datasetId, dataset.data, aggregateType);
+      aggregator.addDatum(datum);
+    } else {
+      throw new Error('Unknown bucket type');
+    }
+  }
+
+  getLabel(chartMetric: DashboardWidgetChartMetric, metric: Metric, datum: MetricData) {
+    let label = chartMetric.label ?? metric.name;
+
+    if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayAll || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.SpecificBuckets
+      || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNCurrent || chartMetric.bucketType === DashboardWidgetChartMetricBucketType.DisplayTopNRolling) {
+
+      label += ` (${datum.bucket})`;
+
+    } else if (chartMetric.bucketType === DashboardWidgetChartMetricBucketType.Aggregate) {
+
+      const aggregateType = chartMetric.bucketAggregateType && chartMetric.bucketAggregateType !== AggregateType.Unknown
+        ? chartMetric.bucketAggregateType
+        : metric.aggregateType;
+
+      switch (aggregateType) {
+        case (AggregateType.Average):
+          label += ' (Avg)';
+          break;
+
+        case (AggregateType.Maximum):
+          label += ' (Max)';
+          break;
+
+        case (AggregateType.Minimum):
+          label += ' (Min)';
+          break;
+
+        case (AggregateType.StandardDeviation):
+          label += ' (StDev)';
+          break;
+
+        case (AggregateType.Sum):
+          label += ' (Sum)';
+          break;
+
+        case (AggregateType.Variance):
+          label += ' (Var)';
+          break;
+
+        default:
+          throw new Error('Unknown aggregate type ' + chartMetric.bucketAggregateType ?? metric.aggregateType);
+      }
+
+    } else {
+      throw new Error('Unknown bucket type');
+    }
+
+    return label;
   }
 
   deleteWidget() {

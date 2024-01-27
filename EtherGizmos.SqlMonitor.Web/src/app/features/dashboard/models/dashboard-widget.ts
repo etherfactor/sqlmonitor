@@ -1,6 +1,7 @@
 import { Validators } from "@angular/forms";
 import { GridStackWidget } from "gridstack";
 import { z } from "zod";
+import { AggregateType } from "../../../shared/models/aggregate-type";
 import { GuidZ } from "../../../shared/types/guid/guid";
 import { DefaultControlTypes, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 
@@ -73,7 +74,9 @@ export const DashboardWidgetChartMetricZ = z.object({
   id: GuidZ,
   metricId: GuidZ,
   yScaleId: z.string(),
+  label: z.string().optional(),
   bucketType: z.nativeEnum(DashboardWidgetChartMetricBucketType),
+  bucketAggregateType: z.nativeEnum(AggregateType),
   buckets: z.array(z.string()),
   bucketTopN: z.number().optional(),
 });
@@ -85,7 +88,9 @@ export const dashboardWidgetChartMetricForm = formFactoryForModel<DashboardWidge
     id: [model.id, Validators.required],
     metricId: [model.metricId, Validators.required],
     yScaleId: [model.yScaleId, Validators.required],
+    label: [model.label],
     bucketType: [model.bucketType, Validators.required],
+    bucketAggregateType: [model.bucketAggregateType],
     buckets: $form.nonNullable.array(model.buckets),
     bucketTopN: [model.bucketTopN],
   };

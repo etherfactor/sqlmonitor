@@ -6,6 +6,7 @@ import { NgbAccordionModule, NgbActiveModal, NgbDropdownModule, NgbPaginationMod
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ColorSketchModule } from 'ngx-color/sketch';
 import { InputColorPickerComponent } from '../../../../shared/components/input-color-picker/input-color-picker.component';
+import { AggregateType } from '../../../../shared/models/aggregate-type';
 import { Metric } from '../../../../shared/models/metric';
 import { MetricService } from '../../../../shared/services/metric/metric.service';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
@@ -74,6 +75,7 @@ export class EditChartWidgetModalComponent implements OnInit {
   get currentYScales() { return this.chartForm?.value?.yScales ?? []; }
 
   //Export enums
+  AggregateType = AggregateType;
   DashboardWidgetChartMetricBucketType = DashboardWidgetChartMetricBucketType;
 
   constructor(
@@ -241,6 +243,7 @@ export class EditChartWidgetModalComponent implements OnInit {
       metricId: newMetricId,
       yScaleId: undefined!,
       bucketType: undefined!,
+      bucketAggregateType: AggregateType.Unknown,
       buckets: [],
     }));
 
