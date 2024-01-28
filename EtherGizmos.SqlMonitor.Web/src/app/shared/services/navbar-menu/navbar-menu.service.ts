@@ -39,6 +39,7 @@ export interface NavbarMenuCallback {
 export interface NavbarMenuAction extends NavbarMenuCallback {
   label: string;
   icon?: string;
+  subActionSearch?: boolean;
   subActions?: NavbarMenuSubAction[];
 }
 

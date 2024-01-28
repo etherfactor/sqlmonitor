@@ -107,6 +107,53 @@ export class DashboardComponent implements OnInit {
         ]
       },
       {
+        icon: 'bi-pc-display',
+        label: 'All instances',
+      },
+      {
+        icon: 'bi-clock',
+        label: 'Last 1 minute',
+        subActionSearch: true,
+        subActions: [
+          {
+            label: 'Last 1 minute',
+          },
+          {
+            label: 'Last 5 minutes',
+          },
+          {
+            label: 'Last 15 minutes',
+          },
+          {
+            label: 'Last 1 hour',
+          },
+          {
+            label: 'Last 6 hours',
+          },
+          {
+            label: 'Last 12 hours',
+          },
+          {
+            label: 'Last 1 day',
+          },
+          {
+            label: 'Last 1 week',
+          },
+          {
+            label: 'Last 1 month',
+          },
+          {
+            label: 'Last 3 months',
+          },
+          {
+            label: 'Last 6 months',
+          },
+          {
+            label: 'Last 1 year',
+          },
+        ],
+      },
+      {
         icon: 'bi-three-dots',
         label: 'More',
         subActions: [

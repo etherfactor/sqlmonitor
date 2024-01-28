@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NavbarMenuBreadcrumb, NavbarMenuAction, NavbarMenuCallback, NavbarMenuService } from './shared/services/navbar-menu/navbar-menu.service';
+import { NavbarActionSearchDirective } from './shared/directives/navbar-action-search/navbar-action-search.directive';
+import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuService } from './shared/services/navbar-menu/navbar-menu.service';
 
 @Component({
   selector: 'app-root',
@@ -9,6 +10,7 @@ import { NavbarMenuBreadcrumb, NavbarMenuAction, NavbarMenuCallback, NavbarMenuS
   imports: [
     CommonModule,
     RouterModule,
+    NavbarActionSearchDirective,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
@@ -16,6 +18,8 @@ import { NavbarMenuBreadcrumb, NavbarMenuAction, NavbarMenuCallback, NavbarMenuS
 export class AppComponent implements OnInit {
 
   private $navbarMenu: NavbarMenuService;
+
+  @ViewChildren(NavbarActionSearchDirective) searchActions: QueryList<NavbarActionSearchDirective> = undefined!;
 
   title = 'EtherGizmos.SqlMonitor.Web';
   actions: NavbarMenuAction[] = [];
@@ -36,6 +40,12 @@ export class AppComponent implements OnInit {
   }
   
   performCallback(action: NavbarMenuCallback) {
+
+    const searchAction = this.searchActions.find(e => e.searchAction === action);
+    if (searchAction) {
+      searchAction.focus();
+    }
+
     action.callback?.();
   }
 }

@@ -33,12 +33,22 @@
       </ol>
     </nav>
     <ul class="navbar-nav flex-row d-none d-md-flex mb-lg-0" style="gap: 10px;">
-      <ng-container *ngFor="let action of actions">
+      <ng-container *ngFor="let action of actions; let ai = index">
         <ng-container *ngIf="action.subActions; else noSubActions">
           <li class="nav-item dropdown">
             <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</button>
             <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
-              <ng-container *ngFor="let subAction of action.subActions">
+              <ng-container *ngIf="action.subActionSearch">
+                <li>
+                  <div class="p-1">
+                    <div class="floating-label">
+                      <input [searchAction]="action" id="_subActionSearch{{ai}}" type="text" class="form-control" placeholder=" " />
+                      <label for="_subActionSearch{{ai}}">Search...</label>
+                    </div>
+                  </div>
+                </li>
+              </ng-container>
+              <ng-container *ngFor="let subAction of action.subActions; let sai = index">
                 <ng-container *ngIf="!subAction.divider; else subActionDivider">
                   <li><button class="dropdown-item" (click)="performCallback(subAction)"><span class="bi" [class]="subAction.icon"></span> {{subAction.label}}</button></li>
                 </ng-container>
