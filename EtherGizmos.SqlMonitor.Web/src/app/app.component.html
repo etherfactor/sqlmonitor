@@ -20,6 +20,7 @@
 
 <nav class="navbar navbar-sub bg-body-tertiary sticky-top" aria-expanded="true">
   <div class="container-fluid">
+
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
         <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
@@ -32,40 +33,19 @@
         </ng-container>
       </ol>
     </nav>
-    <ul class="navbar-nav flex-row d-none d-md-flex mb-lg-0" style="gap: 10px;">
-      <ng-container *ngFor="let action of actions; let ai = index">
-        <ng-container *ngIf="action.subActions; else noSubActions">
-          <li class="nav-item dropdown">
-            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</button>
-            <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
-              <ng-container *ngIf="action.subActionSearch">
-                <li>
-                  <div class="p-1">
-                    <div class="floating-label">
-                      <input [searchAction]="action" id="_subActionSearch{{ai}}" type="text" class="form-control" placeholder=" " />
-                      <label for="_subActionSearch{{ai}}">Search...</label>
-                    </div>
-                  </div>
-                </li>
-              </ng-container>
-              <ng-container *ngFor="let subAction of action.subActions; let sai = index">
-                <ng-container *ngIf="!subAction.divider; else subActionDivider">
-                  <li><button class="dropdown-item" (click)="performCallback(subAction)"><span class="bi" [class]="subAction.icon"></span> {{subAction.label}}</button></li>
-                </ng-container>
-                <ng-template #subActionDivider>
-                  <li><hr class="dropdown-divider"></li>
-                </ng-template>
-              </ng-container>
-            </ul>
-          </li>
-        </ng-container>
-        <ng-template #noSubActions>
-          <li class="nav-item">
-            <button class="nav-link" (click)="performCallback(action)"><span class="bi" [class]="action.icon"></span> {{action.label}}</button>
-          </li>
-        </ng-template>
-      </ng-container>
-    </ul>
+
+    <div class="d-none d-md-block">
+      <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
+    </div>
+
+  </div>
+
+  <div class="container-fluid flex-row-reverse">
+
+    <div class="d-md-none">
+      <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
+    </div>
+
   </div>
 </nav>
 
@@ -92,3 +72,50 @@
 </div>
 
 <router-outlet></router-outlet>
+
+<ng-template #navbarActions>
+  <ul class="navbar-nav flex-row d-flex mb-lg-0">
+    <ng-container *ngFor="let action of actions; let ai = index">
+      <ng-container *ngIf="action.subActions; else noSubActions">
+        <li class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)">
+            <span class="bi" [class]="action.icon"></span>
+            <span class="navbar-action-label"> {{action.label}}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
+            <ng-container *ngIf="action.subActionSearch">
+              <li>
+                <div class="p-1">
+                  <div class="floating-label">
+                    <input [searchAction]="action" id="_subActionSearch{{ai}}" type="text" class="form-control" placeholder=" " />
+                    <label for="_subActionSearch{{ai}}">Search...</label>
+                  </div>
+                </div>
+              </li>
+            </ng-container>
+            <ng-container *ngFor="let subAction of action.subActions; let sai = index">
+              <ng-container *ngIf="!subAction.divider; else subActionDivider">
+                <li>
+                  <button class="dropdown-item" (click)="performCallback(subAction)">
+                    <span class="bi" [class]="subAction.icon"></span> {{subAction.label}}
+                  </button>
+                </li>
+              </ng-container>
+              <ng-template #subActionDivider>
+                <li><hr class="dropdown-divider"></li>
+              </ng-template>
+            </ng-container>
+          </ul>
+        </li>
+      </ng-container>
+      <ng-template #noSubActions>
+        <li class="nav-item">
+          <button class="nav-link" (click)="performCallback(action)">
+            <span class="bi" [class]="action.icon"></span>
+            <span class="navbar-action-label"> {{action.label}}</span>
+          </button>
+        </li>
+      </ng-template>
+    </ng-container>
+  </ul>
+</ng-template>
