@@ -222,7 +222,7 @@ export class DashboardComponent implements OnInit {
   }
 
   @Bound selectTime() {
-    const modal = this.$modal.open(SelectTimeModalComponent, { centered: true });
+    const modal = this.$modal.open(SelectTimeModalComponent, { centered: true, backdrop: 'static', keyboard: false });
     const modalInstance = <SelectTimeModalComponent>modal.componentInstance;
     modalInstance.setTime({
       startTime: this.startTime,

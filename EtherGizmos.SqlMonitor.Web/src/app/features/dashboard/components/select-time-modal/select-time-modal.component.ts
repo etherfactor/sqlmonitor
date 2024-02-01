@@ -19,7 +19,7 @@ export class SelectTimeModalComponent {
 
   private $form: FormBuilder;
 
-  regex = /^\s*?t(?:\s*?(?<ASIGN>[+-])\s*?(?<AVALUE>\d+)\s*?(?<AUNIT>Y|M|w|d|h|m|s)(?:\s*?@\s*?(?<RTYPE>[SsEe])[Oo](?<RUNIT>Y|M|w|d|h|m|s))?)?\s*?$/;
+  regex = /^\s*?t(?:\s*?(?<ASIGN>[+-])\s*?(?<AVALUE>\d+)\s*?(?<AUNIT>Y|M|w|d|h|m|s))?(?:\s*?@\s*?(?<RTYPE>[SsEe])[Oo](?<RUNIT>Y|M|w|d|h|m|s))?\s*?$/;
   timeAbbreviations: { [key: string]: string } = {
     Y: 'year',
     M: 'month',
@@ -67,7 +67,7 @@ export class SelectTimeModalComponent {
     const roundUnit = regexResult.groups['RUNIT'];
 
     if (roundType && roundUnit) {
-      result = `the ${roundType === 's' ? 'start' : 'end'} of the ${this.timeAbbreviations[roundUnit]} ${result}`;
+      result = `the ${roundType.toLowerCase() === 's' ? 'start' : 'end'} of the ${this.timeAbbreviations[roundUnit]} ${result}`;
     }
 
     return result;
