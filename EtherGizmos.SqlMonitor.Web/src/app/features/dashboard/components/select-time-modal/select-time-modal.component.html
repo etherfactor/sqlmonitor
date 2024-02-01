@@ -1,0 +1,44 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Editing Default Time Range
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()"></button>
+</div>
+<div class="modal-body pt-0">
+  <div class="container-fluid">
+    <ng-container *ngIf="timeStartForm">
+      <div class="row">
+        <div class="col-12">
+          <div class="floating-label mt-3">
+            <input id="timeStart" class="form-control" type="text" [formControl]="timeStartForm" placeholder=" " />
+            <label for="timeStart">From</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          Interpretation: {{interpretTime(timeStartForm.value)}}
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="timeEndForm">
+      <div class="row">
+        <div class="col-12">
+          <div class="floating-label mt-3">
+            <input id="timeEnd" class="form-control" type="text" [formControl]="timeEndForm" placeholder=" " />
+            <label for="timeEnd">To</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          Interpretation: {{interpretTime(timeEndForm.value)}}
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()"><span class="bi bi-x-lg"></span> Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="trySubmit()"><span class="bi bi-check-lg"></span> OK</button>
+</div>

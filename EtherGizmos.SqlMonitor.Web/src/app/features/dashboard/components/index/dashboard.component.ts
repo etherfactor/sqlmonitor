@@ -14,6 +14,7 @@ import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
 import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
+import { SelectTimeModalComponent, TimeConfiguration } from '../select-time-modal/select-time-modal.component';
 import { TextWidgetComponent } from '../text-widget/text-widget.component';
 
 @Component({
@@ -46,6 +47,8 @@ export class DashboardComponent implements OnInit {
     cellHeight: 60,
   };
 
+  startTime: string = 't-1m';
+  endTime: string = 't';
   items: DashboardWidget[] = [];
   gridItems: { [key: string]: GridStackWidget } = {};
   
@@ -109,49 +112,12 @@ export class DashboardComponent implements OnInit {
       {
         icon: 'bi-pc-display',
         label: 'All instances',
+        callback: this.selectInstance,
       },
       {
         icon: 'bi-clock',
         label: 'Last 1 minute',
-        subActionSearch: true,
-        subActions: [
-          {
-            label: 'Last 1 minute',
-          },
-          {
-            label: 'Last 5 minutes',
-          },
-          {
-            label: 'Last 15 minutes',
-          },
-          {
-            label: 'Last 1 hour',
-          },
-          {
-            label: 'Last 6 hours',
-          },
-          {
-            label: 'Last 12 hours',
-          },
-          {
-            label: 'Last 1 day',
-          },
-          {
-            label: 'Last 1 week',
-          },
-          {
-            label: 'Last 1 month',
-          },
-          {
-            label: 'Last 3 months',
-          },
-          {
-            label: 'Last 6 months',
-          },
-          {
-            label: 'Last 1 year',
-          },
-        ],
+        callback: this.selectTime,
       },
       {
         icon: 'bi-three-dots',
@@ -249,6 +215,27 @@ export class DashboardComponent implements OnInit {
 
   private addWidget(widget: DashboardWidget) {
     this.items.push(widget);
+  }
+
+  @Bound selectInstance() {
+
+  }
+
+  @Bound selectTime() {
+    const modal = this.$modal.open(SelectTimeModalComponent, { centered: true });
+    const modalInstance = <SelectTimeModalComponent>modal.componentInstance;
+    modalInstance.setTime({
+      startTime: this.startTime,
+      endTime: this.endTime,
+    });
+
+    modal.result.then(
+      (result: TimeConfiguration) => {
+        this.startTime = result.startTime;
+        this.endTime = result.endTime;
+      },
+      cancel => { }
+    );
   }
 
   @Bound printWidgets() {
