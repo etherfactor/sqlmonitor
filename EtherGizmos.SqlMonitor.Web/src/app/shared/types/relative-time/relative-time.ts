@@ -232,7 +232,9 @@ export function getTimeRangeText(startInterpretation: RelativeTimeInterpretation
     }
   }
 
-  return `${evaluateRelativeTime(startInterpretation).toISO({ format: "basic" })} to ${evaluateRelativeTime(endInterpretation).toISO({ format: "basic" })}`;
+  const startTime = evaluateRelativeTime(startInterpretation);
+  const endTime = evaluateRelativeTime(endInterpretation)
+  return `${startTime.toLocaleString({ dateStyle: "short", timeStyle: "short" })} to ${endTime.toLocaleString({ dateStyle: "short", timeStyle: "short" })}`;
 }
 
 function isNow(interpretation: RelativeTimeInterpretation) {
