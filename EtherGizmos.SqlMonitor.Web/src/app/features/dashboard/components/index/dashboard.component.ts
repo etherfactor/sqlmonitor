@@ -10,6 +10,7 @@ import { QuillModule } from 'ngx-quill';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { generateGuid } from '../../../../shared/types/guid/guid';
+import { getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
@@ -233,6 +234,64 @@ export class DashboardComponent implements OnInit {
       (result: TimeConfiguration) => {
         this.startTime = result.startTime;
         this.endTime = result.endTime;
+
+        const interpretedStart = interpretRelativeTime(parseRelativeTime(this.startTime));
+        const interpretedEnd = interpretRelativeTime(parseRelativeTime(this.endTime));
+
+        this.$navbarMenu.setActions([
+          {
+            icon: 'bi-save',
+            label: 'Save',
+          },
+          {
+            icon: 'bi-x-square',
+            label: 'Cancel',
+          },
+          {
+            icon: 'bi-plus-square',
+            label: 'Add',
+            subActions: [
+              {
+                icon: 'bi-bar-chart',
+                label: 'Chart',
+                callback: this.addChart,
+              },
+              {
+                icon: 'bi-type',
+                label: 'Text',
+                callback: this.addText,
+              },
+            ]
+          },
+          {
+            icon: 'bi-pc-display',
+            label: 'All instances',
+            callback: this.selectInstance,
+          },
+          {
+            icon: 'bi-clock',
+            label: getTimeRangeText(interpretedStart, interpretedEnd),
+            callback: this.selectTime,
+          },
+          {
+            icon: 'bi-three-dots',
+            label: 'More',
+            subActions: [
+              {
+                icon: 'bi-printer',
+                label: 'Debug Dashboard',
+                callback: this.printWidgets,
+              },
+              {
+                divider: true,
+              },
+              {
+                icon: 'bi-trash',
+                label: 'Delete Dashboard (not impl.)',
+              },
+            ],
+          },
+        ]);
       },
       cancel => { }
     );

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { interpretRelativeTime, isRelativeTime, isRelativeTimeValidator } from '../../../../shared/types/relative-time/relative-time';
 
 @Component({
   selector: 'app-select-time-modal',
@@ -42,35 +43,15 @@ export class SelectTimeModalComponent {
   }
 
   setTime(config: TimeConfiguration) {
-    this.timeStartForm = this.$form.nonNullable.control(config.startTime);
-    this.timeEndForm = this.$form.nonNullable.control(config.endTime);
+    this.timeStartForm = this.$form.nonNullable.control(config.startTime, [Validators.required, isRelativeTimeValidator]);
+    this.timeEndForm = this.$form.nonNullable.control(config.endTime, [Validators.required, isRelativeTimeValidator]);
   }
 
-  interpretTime(value: string): string {
-    const regexResult = this.regex.exec(value);
-
-    if (!regexResult || !regexResult.groups)
+  getTimeLabel(value: string) {
+    if (!isRelativeTime(value))
       return 'Invalid syntax';
 
-    let result = 'now';
-
-    const addSign = regexResult.groups['ASIGN'];
-    const addValue = regexResult.groups['AVALUE'];
-    const addUnit = regexResult.groups['AUNIT'];
-
-    if (addSign && addValue && addUnit) {
-      result = `${addValue} ${this.timeAbbreviations[addUnit]}${addValue !== '1' ? 's' : ''}`;
-      result = `${result} ${addSign === '+' ? 'from now' : 'ago'}`;
-    }
-
-    const roundType = regexResult.groups['RTYPE'];
-    const roundUnit = regexResult.groups['RUNIT'];
-
-    if (roundType && roundUnit) {
-      result = `the ${roundType.toLowerCase() === 's' ? 'start' : 'end'} of the ${this.timeAbbreviations[roundUnit]} ${result}`;
-    }
-
-    return result;
+    return interpretRelativeTime(value).friendlyText;
   }
 
   trySubmit() {
@@ -81,17 +62,18 @@ export class SelectTimeModalComponent {
       return;
 
     const timeStartValue = this.timeStartForm.value;
-    if (this.interpretTime(timeStartValue) === 'Invalid syntax')
+    if (!isRelativeTime(timeStartValue))
       return;
 
     const timeEndValue = this.timeEndForm.value;
-    if (this.interpretTime(timeEndValue) === 'Invalid syntax')
+    if (!isRelativeTime(timeEndValue))
       return;
 
     const result: TimeConfiguration = {
       startTime: timeStartValue,
       endTime: timeEndValue,
     };
+
     this.$activeModal.close(result);
   }
 }

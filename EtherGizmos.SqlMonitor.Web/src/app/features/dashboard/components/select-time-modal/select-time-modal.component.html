@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    Editing Default Time Range
+    <span class="bi bi-clock"></span> Editing Default Time Range
   </h5>
   <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()"></button>
 </div>
@@ -17,7 +17,7 @@
       </div>
       <div class="row">
         <div class="col-12">
-          Interpretation: {{interpretTime(timeStartForm.value)}}
+          Interpretation: {{getTimeLabel(timeStartForm.value)}}
         </div>
       </div>
     </ng-container>
@@ -32,7 +32,7 @@
       </div>
       <div class="row">
         <div class="col-12">
-          Interpretation: {{interpretTime(timeEndForm.value)}}
+          Interpretation: {{getTimeLabel(timeEndForm.value)}}
         </div>
       </div>
       <div class="row">
