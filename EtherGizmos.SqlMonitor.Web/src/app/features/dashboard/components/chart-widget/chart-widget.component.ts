@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, Point } from 'chart.js';
 import { DateTime } from 'luxon';
@@ -29,7 +29,7 @@ import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-c
   templateUrl: './chart-widget.component.html',
   styleUrl: './chart-widget.component.scss'
 })
-export class ChartWidgetComponent implements OnInit, OnDestroy {
+export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   private $instance: InstanceService;
   private $metric: MetricService;
@@ -41,6 +41,7 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   private rxjsSubscriptions: Subscription[] = [];
   private purgeSubscription?: Subscription;
 
+  startTimeRetentionRevoke?: () => void;
   @Input({ required: true }) startTime: DateTime = undefined!;
   @Input({ required: true }) endTime: DateTime = undefined!;
 
@@ -88,7 +89,20 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     ).subscribe(() => this.baseChart.update());
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    const startTimeChanges = changes['startTime'];
+    if (startTimeChanges) {
+      this.startTimeRetentionRevoke?.();
+      this.startTimeRetentionRevoke = undefined;
+
+      if (startTimeChanges.currentValue !== undefined && startTimeChanges.currentValue !== null) {
+        this.startTimeRetentionRevoke = this.$metricDataCache.requestRetention(startTimeChanges.currentValue);
+      }
+    }
+  }
+
   ngOnDestroy(): void {
+    this.startTimeRetentionRevoke?.();
     this.flushSubscriptions();
     this.purgeSubscription?.unsubscribe();
     this.bufferSubjectSubscription?.unsubscribe();
@@ -346,6 +360,10 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
           },
         },
       },
+      ////Seems to cause some unknown error, TODO: figure the error out
+      //parsing: false,
+      //normalized: true,
+      animation: false,
       plugins: {
         legend: { display: true },
         decimation: {
