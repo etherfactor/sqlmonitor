@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { v4 as uuidv4 } from 'uuid';
 import { NavbarActionSearchDirective } from './shared/directives/navbar-action-search/navbar-action-search.directive';
-import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuService } from './shared/services/navbar-menu/navbar-menu.service';
+import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuService, NavbarMenuSubAction } from './shared/services/navbar-menu/navbar-menu.service';
 
 @Component({
   selector: 'app-root',
@@ -47,5 +48,13 @@ export class AppComponent implements OnInit {
     }
 
     action.callback?.();
+  }
+
+  identifyNavbarAction(_: number, action: NavbarMenuAction) {
+    return action.label;
+  }
+
+  identifyNavbarSubAction(_: number, action: NavbarMenuSubAction) {
+    return action.label ?? uuidv4();
   }
 }

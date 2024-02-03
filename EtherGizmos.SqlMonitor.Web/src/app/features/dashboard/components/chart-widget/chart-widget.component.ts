@@ -41,6 +41,9 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   private rxjsSubscriptions: Subscription[] = [];
   private purgeSubscription: Subscription;
 
+  @Input({ required: true }) startTime: DateTime = undefined!;
+  @Input({ required: true }) endTime: DateTime = undefined!;
+
   @Input({ required: true }) config: DashboardWidget = undefined!;
   chartType: ChartConfiguration['type'] = undefined!;
   chartOptions: ChartConfiguration['options'] = undefined!;
@@ -418,7 +421,7 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
           continue;
         }
 
-        if (now.diff(DateTime.fromMillis(datum.x)).as('minutes') > 1) {
+        if (datum.x < this.startTime.toMillis()) {
           dataset.data.shift();
           continue;
         }

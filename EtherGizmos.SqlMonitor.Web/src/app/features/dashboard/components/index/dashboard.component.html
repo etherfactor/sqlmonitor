@@ -3,6 +3,8 @@
     <ng-container [ngSwitch]="item.type">
       <chart-widget *ngSwitchCase="'chart'"
                     [config]="item"
+                    [startTime]="startTime"
+                    [endTime]="endTime"
                     (onUpdate)="updateWidget($event)"
                     (onDelete)="deleteWidget($event)"></chart-widget>
       <text-widget *ngSwitchCase="'text'"

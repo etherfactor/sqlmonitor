@@ -5,12 +5,14 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import 'chartjs-adapter-luxon';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
+import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { QuillModule } from 'ngx-quill';
+import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { generateGuid } from '../../../../shared/types/guid/guid';
-import { getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
+import { RelativeTime, RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
@@ -48,8 +50,16 @@ export class DashboardComponent implements OnInit {
     cellHeight: 60,
   };
 
-  startTime: string = 't-1m';
-  endTime: string = 't';
+  updateTimeSubscription?: Subscription;
+
+  startTimeText: RelativeTime = parseRelativeTime('t-1m');
+  startTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.startTimeText);
+  startTime: DateTime = evaluateRelativeTime(this.startTimeInterpretation);
+
+  endTimeText: RelativeTime = parseRelativeTime('t');
+  endTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.endTimeText);
+  endTime: DateTime = evaluateRelativeTime(this.endTimeInterpretation);
+
   items: DashboardWidget[] = [];
   gridItems: { [key: string]: GridStackWidget } = {};
   
@@ -70,6 +80,14 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
+    this.updateTimeSubscription = interval(1000).pipe(
+      observeOn(asyncScheduler),
+    ).subscribe(() => {
+      this.startTime = evaluateRelativeTime(this.startTimeInterpretation);
+      this.endTime = evaluateRelativeTime(this.endTimeInterpretation);
+    });
+
     this.$navbarMenu.setBreadcrumbs([
       {
         label: 'Home',
@@ -226,17 +244,20 @@ export class DashboardComponent implements OnInit {
     const modal = this.$modal.open(SelectTimeModalComponent, { centered: true, backdrop: 'static', keyboard: false });
     const modalInstance = <SelectTimeModalComponent>modal.componentInstance;
     modalInstance.setTime({
-      startTime: this.startTime,
-      endTime: this.endTime,
+      startTime: this.startTimeText,
+      endTime: this.endTimeText,
     });
 
     modal.result.then(
       (result: TimeConfiguration) => {
-        this.startTime = result.startTime;
-        this.endTime = result.endTime;
+        this.startTimeText = result.startTime;
+        this.startTimeInterpretation = interpretRelativeTime(this.startTimeText);
 
-        const interpretedStart = interpretRelativeTime(parseRelativeTime(this.startTime));
-        const interpretedEnd = interpretRelativeTime(parseRelativeTime(this.endTime));
+        this.endTimeText = result.endTime;
+        this.endTimeInterpretation = interpretRelativeTime(this.endTimeText);
+
+        const interpretedStart = interpretRelativeTime(parseRelativeTime(this.startTimeText));
+        const interpretedEnd = interpretRelativeTime(parseRelativeTime(this.endTimeText));
 
         this.$navbarMenu.setActions([
           {

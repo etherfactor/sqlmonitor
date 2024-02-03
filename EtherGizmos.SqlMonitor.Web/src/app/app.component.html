@@ -75,7 +75,7 @@
 
 <ng-template #navbarActions>
   <ul class="navbar-nav flex-row d-flex mb-lg-0">
-    <ng-container *ngFor="let action of actions; let ai = index">
+    <ng-container *ngFor="let action of actions; trackBy: identifyNavbarAction; let ai = index">
       <ng-container *ngIf="action.subActions; else noSubActions">
         <li class="nav-item dropdown">
           <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)">
@@ -93,7 +93,7 @@
                 </div>
               </li>
             </ng-container>
-            <ng-container *ngFor="let subAction of action.subActions; let sai = index">
+            <ng-container *ngFor="let subAction of action.subActions; trackBy: identifyNavbarSubAction; let sai = index">
               <ng-container *ngIf="!subAction.divider; else subActionDivider">
                 <li>
                   <button class="dropdown-item" (click)="performCallback(subAction)">

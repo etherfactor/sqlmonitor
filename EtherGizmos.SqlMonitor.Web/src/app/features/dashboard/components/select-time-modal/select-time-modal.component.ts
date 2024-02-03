@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { interpretRelativeTime, isRelativeTime, isRelativeTimeValidator } from '../../../../shared/types/relative-time/relative-time';
+import { RelativeTime, interpretRelativeTime, isRelativeTime, isRelativeTimeValidator } from '../../../../shared/types/relative-time/relative-time';
 
 @Component({
   selector: 'app-select-time-modal',
@@ -79,6 +79,6 @@ export class SelectTimeModalComponent {
 }
 
 export interface TimeConfiguration {
-  startTime: string;
-  endTime: string;
+  startTime: RelativeTime;
+  endTime: RelativeTime;
 }
