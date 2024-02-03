@@ -4,7 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, Point } from 'chart.js';
 import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
-import { Observable, Subscription, asyncScheduler, first, interval, observeOn, shareReplay } from 'rxjs';
+import { Observable, Subject, Subscription, asyncScheduler, bufferTime, filter, first, interval, observeOn, shareReplay } from 'rxjs';
 import { AggregateType } from '../../../../shared/models/aggregate-type';
 import { Instance } from '../../../../shared/models/instance';
 import { Metric } from '../../../../shared/models/metric';
@@ -39,7 +39,7 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
 
   private metricSubscriptions: MetricSubscription[] = [];
   private rxjsSubscriptions: Subscription[] = [];
-  private purgeSubscription: Subscription;
+  private purgeSubscription?: Subscription;
 
   @Input({ required: true }) startTime: DateTime = undefined!;
   @Input({ required: true }) endTime: DateTime = undefined!;
@@ -52,6 +52,9 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
   chartAggregators: { [datasetId: string]: MetricAggregator } = {};
 
   instanceObservables: { [instanceId: Guid]: Observable<Instance> } = {};
+
+  bufferSubject$ = new Subject<0>();
+  bufferSubjectSubscription?: Subscription;
 
   @Output() onUpdate = new EventEmitter<DashboardWidget>();
   @Output() onDelete = new EventEmitter<DashboardWidget>();
@@ -70,19 +73,25 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
     this.$metricData = $metricData;
     this.$metricDataCache = $metricDataCache;
     this.$modal = $modal;
-
-    this.purgeSubscription = interval(1000).pipe(
-      observeOn(asyncScheduler),
-    ).subscribe(() => this.purgeOldData());
   }
 
   ngOnInit(): void {
     this.updateWidget(this.config);
+
+    this.purgeSubscription = interval(1000).pipe(
+      observeOn(asyncScheduler),
+    ).subscribe(() => this.purgeOldData());
+
+    this.bufferSubjectSubscription = this.bufferSubject$.pipe(
+      bufferTime(250),
+      filter(array => array.length > 0),
+    ).subscribe(() => this.baseChart.update());
   }
 
   ngOnDestroy(): void {
     this.flushSubscriptions();
-    this.purgeSubscription.unsubscribe();
+    this.purgeSubscription?.unsubscribe();
+    this.bufferSubjectSubscription?.unsubscribe();
   }
 
   editWidget() {
@@ -203,7 +212,7 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
           this.getInstanceObservable(historyDatum.instanceId).subscribe(instance => {
             this.addData(chartMetric, sub, instance, metric, historyDatum);
 
-            this.baseChart.update();
+            this.bufferSubject$.next(0);
           });
         }
 
@@ -213,7 +222,7 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
           this.getInstanceObservable(datum.instanceId).subscribe(instance => {
             this.addData(chartMetric, sub, instance, metric, datum);
 
-            this.baseChart.update();
+            this.bufferSubject$.next(0);
           });
         });
         this.metricSubscriptions.push(sub);
@@ -341,7 +350,8 @@ export class ChartWidgetComponent implements OnInit, OnDestroy {
         legend: { display: true },
         decimation: {
           enabled: true,
-          algorithm: 'min-max',
+          algorithm: 'lttb',
+          samples: 120,
         },
       },
     };
