@@ -12,10 +12,11 @@ import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { generateGuid } from '../../../../shared/types/guid/guid';
-import { RelativeTime, RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
+import { RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
-import { TypedFormGroup } from '../../../../shared/utilities/form/form.util';
-import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../models/dashboard-widget';
+import { DefaultControlTypes, TypedFormGroup, getAllFormValues } from '../../../../shared/utilities/form/form.util';
+import { Dashboard, dashboardForm } from '../../models/dashboard';
+import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType, dashboardWidgetForm } from '../../models/dashboard-widget';
 import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
 import { SelectTimeModalComponent, TimeConfiguration } from '../select-time-modal/select-time-modal.component';
 import { TextWidgetComponent } from '../text-widget/text-widget.component';
@@ -43,8 +44,6 @@ export class DashboardComponent implements OnInit {
   private $modal: NgbModal;
   private $navbarMenu: NavbarMenuService;
 
-  private widgetForm?: TypedFormGroup<DashboardWidget>;
-
   gridOptions: GridStackOptions = {
     margin: 5,
     cellHeight: 60,
@@ -52,18 +51,19 @@ export class DashboardComponent implements OnInit {
 
   updateTimeSubscription?: Subscription;
 
-  startTimeText: RelativeTime = parseRelativeTime('t-1m');
-  startTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.startTimeText);
+  dashboardForm?: TypedFormGroup<Dashboard, DefaultControlTypes>;
+
+  startTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.dashboardForm?.value?.timeStart ?? parseRelativeTime('t-1m'));
   startTime: DateTime = evaluateRelativeTime(this.startTimeInterpretation);
 
-  endTimeText: RelativeTime = parseRelativeTime('t');
-  endTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.endTimeText);
+  endTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.dashboardForm?.value?.timeEnd ?? parseRelativeTime('t'));
   endTime: DateTime = evaluateRelativeTime(this.endTimeInterpretation);
 
-  items: DashboardWidget[] = [];
   gridItems: { [key: string]: GridStackWidget } = {};
   
   @ViewChildren(BaseChartDirective) charts: QueryList<BaseChartDirective> = undefined!;
+
+  getAllFormValues = getAllFormValues;
 
   constructor(
     $cd: ChangeDetectorRef,
@@ -80,6 +80,16 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
+    this.dashboardForm = dashboardForm(
+      this.$form,
+      {
+        id: undefined!,
+        timeStart: parseRelativeTime('t-1m'),
+        timeEnd: parseRelativeTime('t'),
+        items: [],
+      }
+    );
 
     this.updateTimeSubscription = interval(1000).pipe(
       observeOn(asyncScheduler),
@@ -232,8 +242,13 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private addWidget(widget: DashboardWidget) {
-    this.items.push(widget);
+  private addWidget(item: DashboardWidget) {
+    if (!this.dashboardForm)
+      return;
+
+    const form = dashboardWidgetForm(this.$form, item);
+    this.dashboardForm.controls.items.push(form);
+    this.dashboardForm.controls.items.markAsDirty();
   }
 
   @Bound selectInstance() {
@@ -244,20 +259,19 @@ export class DashboardComponent implements OnInit {
     const modal = this.$modal.open(SelectTimeModalComponent, { centered: true, backdrop: 'static', keyboard: false });
     const modalInstance = <SelectTimeModalComponent>modal.componentInstance;
     modalInstance.setTime({
-      startTime: this.startTimeText,
-      endTime: this.endTimeText,
+      startTime: this.dashboardForm ? this.dashboardForm.value.timeStart! : parseRelativeTime('t-1m'),
+      endTime: this.dashboardForm ? this.dashboardForm.value.timeEnd! : parseRelativeTime('t'),
     });
 
     modal.result.then(
       (result: TimeConfiguration) => {
-        this.startTimeText = result.startTime;
-        this.startTimeInterpretation = interpretRelativeTime(this.startTimeText);
+        if (this.dashboardForm) {
+          this.dashboardForm.controls.timeStart.setValue(result.startTime);
+          this.startTimeInterpretation = interpretRelativeTime(this.dashboardForm.value.timeStart!);
 
-        this.endTimeText = result.endTime;
-        this.endTimeInterpretation = interpretRelativeTime(this.endTimeText);
-
-        const interpretedStart = interpretRelativeTime(parseRelativeTime(this.startTimeText));
-        const interpretedEnd = interpretRelativeTime(parseRelativeTime(this.endTimeText));
+          this.dashboardForm.controls.timeEnd.setValue(result.endTime);
+          this.endTimeInterpretation = interpretRelativeTime(this.dashboardForm.value.timeEnd!);
+        }
 
         this.$navbarMenu.setActions([
           {
@@ -291,7 +305,7 @@ export class DashboardComponent implements OnInit {
           },
           {
             icon: 'bi-clock',
-            label: getTimeRangeText(interpretedStart, interpretedEnd),
+            label: getTimeRangeText(this.startTimeInterpretation, this.endTimeInterpretation),
             callback: this.selectTime,
           },
           {
@@ -319,20 +333,37 @@ export class DashboardComponent implements OnInit {
   }
 
   @Bound printWidgets() {
-    console.log(this.items);
+    console.log('items', this.dashboardForm?.value?.items);
   }
 
   updateWidget(item: DashboardWidget) {
-    const index = this.items.findIndex(e => e.id == item.id);
+    if (!this.dashboardForm)
+      return;
+
+    const form = dashboardWidgetForm(this.$form, item);
+
+    const index = this.dashboardForm.controls.items.controls.findIndex(e => e.value.id == item.id);
     if (index >= 0) {
-      this.items[index] = item;
+      this.dashboardForm.controls.items.removeAt(index);
+      this.dashboardForm.controls.items.insert(index, form);
+      this.dashboardForm.controls.items.markAsDirty();
     }
   }
 
   deleteWidget(item: DashboardWidget) {
+    if (!this.dashboardForm)
+      return;
+
+    let dirty: boolean = false;
+
     let index: number;
-    while ((index = this.items.indexOf(item)) !== -1) {
-      this.items.splice(index, 1);
+    while ((index = this.dashboardForm.controls.items.controls.findIndex(e => e.value.id == item.id)) !== -1) {
+      this.dashboardForm.controls.items.removeAt(index);
+      dirty = true;
+    }
+
+    if (dirty) {
+      this.dashboardForm.controls.items.markAsDirty();
     }
   }
   
@@ -351,8 +382,13 @@ export class DashboardComponent implements OnInit {
   private populateNodes(data: nodesCB) {
     console.log(data);
 
+    if (!this.dashboardForm)
+      return;
+
+    const items: DashboardWidget[] = getAllFormValues(this.dashboardForm).items;
+
     for (const node of data.nodes) {
-      const item = this.items.find(e => e.id === node.id);
+      const item = items.find(e => e.id === node.id);
       if (!item)
         continue;
 

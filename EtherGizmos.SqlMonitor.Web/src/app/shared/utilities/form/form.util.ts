@@ -1,8 +1,9 @@
 import { ControlConfig, FormArray, FormBuilder, FormControl, FormGroup, ɵElement } from "@angular/forms";
 import { DateTime, Duration } from "luxon";
 import { Guid } from "../../types/guid/guid";
+import { RelativeTime } from "../../types/relative-time/relative-time";
 
-export type DefaultControlTypes = DateTime | Duration | Guid;
+export type DefaultControlTypes = DateTime | Duration | Guid | RelativeTime;
 
 export function formFactoryForModelOld<TModel>(builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel>) {
   const result: ($form: FormBuilder, model: TModel) => TypedFormGroup<TModel> = ($form: FormBuilder, model: TModel) => {
@@ -65,4 +66,49 @@ export type FormFunction<TModel, TControlTypes = never> = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function expectType<T>(_: T) {
   /* noop */
+}
+
+export function getAllFormValues<TModel, TControlTypes = never>(form: TypedFormGroup<TModel, TControlTypes>): TModel {
+  if (form.invalid)
+    throw new Error('Form is not valid');
+
+  return form.getRawValue() as TModel;
+}
+
+export function getDirtyFormValues<TModel, TControlTypes = never>(form: TypedFormGroup<TModel, TControlTypes>): Partial<TModel> {
+  if (form.invalid)
+    throw new Error('Form is not valid');
+
+  //Initialize empty object
+  const dirtyValues = {} as Partial<TModel>;
+
+  Object.keys(form.controls).forEach((key) => {
+
+    const currentControl = form.controls[key as keyof typeof form.controls];
+
+    if (currentControl.dirty) {
+      //Check for nested controlGroups
+      if (isFormGroupLike(currentControl)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dirtyValues[key as keyof typeof dirtyValues] = getDirtyFormValues(currentControl as FormGroup) as any; //TypeScript typing is a bit finicky here, but we know this is a valid value
+      } else {
+        dirtyValues[key as keyof typeof dirtyValues] = currentControl.value;
+      }
+    }
+
+  });
+  return dirtyValues;
+}
+
+function isFormGroupLike(value: unknown):value is FormGroup {
+  if (value === undefined || value === null)
+    return false;
+
+  if (typeof value !== 'object')
+    return false;
+
+  if ('controls' in value)
+    return true;
+
+  return false;
 }

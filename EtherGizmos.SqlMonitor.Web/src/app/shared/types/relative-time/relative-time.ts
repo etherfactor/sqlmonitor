@@ -1,5 +1,6 @@
 import { ValidatorFn } from "@angular/forms";
 import { DateTime, DateTimeUnit } from "luxon";
+import { z } from "zod";
 
 export type RelativeTime = string & { __relativeTimeTag: true };
 
@@ -54,6 +55,10 @@ export function parseRelativeTime(value: unknown): RelativeTime {
 
   throw new Error(`Value ${value} is not a valid relative time.`);
 }
+
+export const RelativeTimeZ = z.custom<RelativeTime>(value => {
+  return isRelativeTime(value);
+});
 
 export function interpretRelativeTime(value: RelativeTime): RelativeTimeInterpretation {
 

@@ -1,11 +1,13 @@
 import { z } from "zod";
+import { GuidZ } from "../../../shared/types/guid/guid";
+import { RelativeTimeZ } from "../../../shared/types/relative-time/relative-time";
 import { DefaultControlTypes, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 import { DashboardWidgetZ, dashboardWidgetForm } from "./dashboard-widget";
 
 export const DashboardZ = z.object({
-  id: z.string().uuid(),
-  timeStart: z.string(),
-  timeEnd: z.string(),
+  id: GuidZ,
+  timeStart: RelativeTimeZ,
+  timeEnd: RelativeTimeZ,
   items: z.array(z.lazy(() => DashboardWidgetZ)),
 });
 

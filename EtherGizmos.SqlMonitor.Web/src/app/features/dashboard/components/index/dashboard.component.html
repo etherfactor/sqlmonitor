@@ -1,16 +1,18 @@
 <gridstack [options]="gridOptions" (addedCB)="onAdd($event)" (changeCB)="onChange($event)" (removedCB)="onRemove($event)">
-  <gridstack-item *ngFor="let item of items; trackBy: identifyWidget" [options]="getGridstackWidget(item)" (mouseenter)="item.grid.hovering = true" (mouseleave)="item.grid.hovering = false">
-    <ng-container [ngSwitch]="item.type">
-      <chart-widget *ngSwitchCase="'chart'"
-                    [config]="item"
-                    [startTime]="startTime"
-                    [endTime]="endTime"
-                    (onUpdate)="updateWidget($event)"
-                    (onDelete)="deleteWidget($event)"></chart-widget>
-      <text-widget *ngSwitchCase="'text'"
-                   [config]="item"
-                   (onUpdate)="updateWidget($event)"
-                   (onDelete)="deleteWidget($event)"></text-widget>
-    </ng-container>
-  </gridstack-item>
+  <ng-container *ngIf="dashboardForm">
+    <gridstack-item *ngFor="let item of getAllFormValues(dashboardForm).items; trackBy: identifyWidget" [options]="getGridstackWidget(item)" (mouseenter)="item.grid.hovering = true" (mouseleave)="item.grid.hovering = false">
+      <ng-container [ngSwitch]="item.type">
+        <chart-widget *ngSwitchCase="'chart'"
+                      [config]="item"
+                      [startTime]="startTime"
+                      [endTime]="endTime"
+                      (onUpdate)="updateWidget($event)"
+                      (onDelete)="deleteWidget($event)"></chart-widget>
+        <text-widget *ngSwitchCase="'text'"
+                     [config]="item"
+                     (onUpdate)="updateWidget($event)"
+                     (onDelete)="deleteWidget($event)"></text-widget>
+      </ng-container>
+    </gridstack-item>
+  </ng-container>
 </gridstack>
