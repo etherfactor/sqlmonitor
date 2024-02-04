@@ -1,6 +1,6 @@
-<div class="position-relative w-100 h-100">
+<div class="position-relative w-100 h-100" (mouseenter)="isHovering = true" (mouseleave)="isHovering = false">
   <div class="dropdown">
-    <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!config.grid.hovering" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"></div>
+    <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!isHovering" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"></div>
     <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
       <li><a class="dropdown-item" (click)="editWidget()">Edit</a></li>
       <li><hr class="dropdown-divider"></li>

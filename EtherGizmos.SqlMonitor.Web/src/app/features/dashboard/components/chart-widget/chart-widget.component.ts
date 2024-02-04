@@ -52,6 +52,8 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
   chartDatasets: { [datasetId: string]: ChartConfiguration['data']['datasets'][0] } = {};
   chartAggregators: { [datasetId: string]: MetricAggregator } = {};
 
+  isHovering: boolean = false;
+
   instanceObservables: { [instanceId: Guid]: Observable<Instance> } = {};
 
   bufferSubject$ = new Subject<0>();
