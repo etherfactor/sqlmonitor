@@ -18,9 +18,9 @@ import { DefaultControlTypes, TypedFormGroup, getAllFormValues } from '../../../
 import { Dashboard, dashboardForm } from '../../models/dashboard';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType, dashboardWidgetForm } from '../../models/dashboard-widget';
 import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
+import { SelectInstanceModalComponent } from '../select-instance-modal/select-instance-modal.component';
 import { SelectTimeModalComponent, TimeConfiguration } from '../select-time-modal/select-time-modal.component';
 import { TextWidgetComponent } from '../text-widget/text-widget.component';
-import { SelectInstanceModalComponent } from '../select-instance-modal/select-instance-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -60,6 +60,8 @@ export class DashboardComponent implements OnInit {
   endTimeInterpretation: RelativeTimeInterpretation = interpretRelativeTime(this.dashboardForm?.value?.timeEnd ?? parseRelativeTime('t'));
   endTime: DateTime = evaluateRelativeTime(this.endTimeInterpretation);
 
+  instanceFilters: Guid[] = [];
+
   gridItems: { [key: string]: GridStackWidget } = {};
   
   @ViewChildren(BaseChartDirective) charts: QueryList<BaseChartDirective> = undefined!;
@@ -88,6 +90,7 @@ export class DashboardComponent implements OnInit {
         id: undefined!,
         timeStart: parseRelativeTime('t-1m'),
         timeEnd: parseRelativeTime('t'),
+        instanceIds: [],
         items: [],
       }
     );
@@ -262,9 +265,21 @@ export class DashboardComponent implements OnInit {
   @Bound selectInstance() {
     const modal = this.$modal.open(SelectInstanceModalComponent, { centered: true, backdrop: 'static', keyboard: false });
     const modalInstance = <SelectInstanceModalComponent>modal.componentInstance;
+    modalInstance.setInstanceIds(this.dashboardForm ? this.dashboardForm.value.instanceIds! : this.instanceFilters);
 
     modal.result.then(
-      (result: Guid[]) => { },
+      (results: Guid[]) => {
+        if (this.dashboardForm) {
+          this.dashboardForm.controls.instanceIds.clear();
+          for (const result of results) {
+            this.dashboardForm.controls.instanceIds.push(this.$form.nonNullable.control(result));
+          }
+
+          this.instanceFilters = results;
+        }
+
+        this.updateActions();
+      },
       cancel => { }
     );
   }

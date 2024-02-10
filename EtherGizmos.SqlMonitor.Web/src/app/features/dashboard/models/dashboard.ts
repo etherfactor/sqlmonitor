@@ -8,6 +8,7 @@ export const DashboardZ = z.object({
   id: GuidZ,
   timeStart: RelativeTimeZ,
   timeEnd: RelativeTimeZ,
+  instanceIds: z.array(GuidZ),
   items: z.array(z.lazy(() => DashboardWidgetZ)),
 });
 
@@ -18,6 +19,7 @@ export const dashboardForm = formFactoryForModel<Dashboard, DefaultControlTypes>
     id: [model.id],
     timeStart: [model.timeStart],
     timeEnd: [model.timeEnd],
+    instanceIds: $form.nonNullable.array(model.instanceIds.map(item => $form.nonNullable.control(item))),
     items: $form.nonNullable.array(model.items.map(item => dashboardWidgetForm($form, item))),
   };
 });

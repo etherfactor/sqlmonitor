@@ -28,8 +28,9 @@ export class SelectInstanceModalComponent implements OnInit {
   page: number = 1;
   perPage: number = 10;
   isLoading: boolean = false;
-
   instances: Instance[] = [];
+
+  instanceIds: Guid[] = [];
   instanceIdForms: FormControl<Guid>[] = [];
   
   constructor(
@@ -44,6 +45,15 @@ export class SelectInstanceModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.searchInstances();
+  }
+
+  setInstanceIds(instanceIds: Guid[]) {
+    this.instanceIds = instanceIds;
+    this.initForm();
+  }
+
+  initForm() {
+    this.instanceIdForms = this.instanceIds.map(item => this.$form.nonNullable.control(item));
   }
 
   searchInstances() {
