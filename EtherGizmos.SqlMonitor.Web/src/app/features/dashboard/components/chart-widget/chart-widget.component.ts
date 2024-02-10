@@ -49,8 +49,8 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input({ required: true }) config: DashboardWidget = undefined!;
   chartType: ChartConfiguration['type'] = undefined!;
-  chartOptions: ChartConfiguration['options'] = undefined!;
-  chartData: ChartConfiguration['data'] = undefined!;
+  chartOptions: ChartConfiguration['options'] = {};
+  chartData: ChartConfiguration['data'] = { datasets: [] };
   chartDatasets: { [datasetId: string]: ChartConfiguration['data']['datasets'][0] } = {};
   chartAggregators: { [datasetId: string]: MetricAggregator } = {};
 
@@ -107,19 +107,14 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
     const instancesChanges = changes['instances'];
     if (instancesChanges) {
       const datasetIds = Object.keys(this.chartDatasets);
+
+      this.createChartData();
       for (const datasetId of datasetIds) {
         const dataset = this.chartDatasets[datasetId];
         const instanceId = parseGuid(datasetId.split('|')[1]);
-        const index = this.chartData.datasets.indexOf(dataset);
 
         if (instancesChanges.currentValue.length === 0 || instancesChanges.currentValue.indexOf(instanceId) >= 0) {
-          if (index < 0) {
             this.chartData.datasets.push(dataset);
-          }
-        } else {
-          if (index >= 0) {
-            this.chartData.datasets.splice(index, 1);
-          }
         }
       }
     }
