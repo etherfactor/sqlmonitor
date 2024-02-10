@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormControl } from '@angular/forms';
 import { NgbActiveModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Instance } from '../../../../shared/models/instance';
 import { IteratePipe } from '../../../../shared/pipes/iterate/iterate.pipe';
 import { InstanceService } from '../../../../shared/services/instance/instance.service';
+import { Guid } from '../../../../shared/types/guid/guid';
 
 @Component({
   selector: 'app-select-instance-modal',
@@ -29,7 +30,8 @@ export class SelectInstanceModalComponent implements OnInit {
   isLoading: boolean = false;
 
   instances: Instance[] = [];
-
+  instanceIdForms: FormControl<Guid>[] = [];
+  
   constructor(
     $activeModal: NgbActiveModal,
     $form: FormBuilder,
@@ -52,7 +54,32 @@ export class SelectInstanceModalComponent implements OnInit {
     });
   }
 
+  instanceIsSelected(instance: Instance) {
+    return this.instanceIdForms.findIndex(e => e.value === instance.id) >= 0;
+  }
+
+  selectInstanceEvent($event: Event, instance: Instance) {
+    if ($event.target && ($event.target as HTMLInputElement).checked) {
+      this.selectInstance(instance, true);
+    } else {
+      this.selectInstance(instance, false);
+    }
+  }
+
+  selectInstance(instance: Instance, selected: boolean) {
+    const index = this.instanceIdForms.findIndex(e => e.value === instance.id);
+    if (selected === true && index < 0) {
+      this.instanceIdForms.push(this.$form.nonNullable.control(instance.id));
+    } else if (selected === false && index >= 0) {
+      this.instanceIdForms.splice(index, 1);
+    }
+  }
+
   trySubmit() {
-    this.$activeModal.dismiss();
+    this.$activeModal.close(this.instanceIdForms.map(form => form.value));
+  }
+
+  stopPropagation($event: MouseEvent) {
+    $event.stopPropagation();
   }
 }

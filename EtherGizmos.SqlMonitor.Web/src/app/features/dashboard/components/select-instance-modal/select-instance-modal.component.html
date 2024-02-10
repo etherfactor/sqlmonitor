@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    <span class="bi bi-pc-display"></span> Editing Default Instance
+    <span class="bi bi-pc-display"></span> Editing Default Instances
   </h5>
   <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()"></button>
 </div>
@@ -38,8 +38,12 @@
             <tbody>
               <tr *ngFor="let i of perPage | iterate">
                 <ng-container *ngIf="instances[i] as instance; else blankRow">
-                  <td><input type="checkbox" class="form-check-input" /></td>
-                  <td>{{instance.name}}</td>
+                  <td (click)="selectInstance(instance, !instanceIsSelected(instance)); stopPropagation($event)">
+                    <input type="checkbox" class="form-check-input" [checked]="instanceIsSelected(instance)" (change)="selectInstanceEvent($event, instance)" (click)="stopPropagation($event)" />
+                  </td>
+                  <td (click)="selectInstance(instance, !instanceIsSelected(instance)); stopPropagation($event)">
+                    {{instance.name}}
+                  </td>
                 </ng-container>
               </tr>
             </tbody>
