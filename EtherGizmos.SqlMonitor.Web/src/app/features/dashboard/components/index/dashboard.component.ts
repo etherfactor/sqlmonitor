@@ -11,7 +11,7 @@ import { QuillModule } from 'ngx-quill';
 import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
-import { generateGuid } from '../../../../shared/types/guid/guid';
+import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { DefaultControlTypes, TypedFormGroup, getAllFormValues } from '../../../../shared/utilities/form/form.util';
@@ -20,6 +20,7 @@ import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartTyp
 import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
 import { SelectTimeModalComponent, TimeConfiguration } from '../select-time-modal/select-time-modal.component';
 import { TextWidgetComponent } from '../text-widget/text-widget.component';
+import { SelectInstanceModalComponent } from '../select-instance-modal/select-instance-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -98,6 +99,11 @@ export class DashboardComponent implements OnInit {
       this.endTime = evaluateRelativeTime(this.endTimeInterpretation);
     });
 
+    this.updateBreadcrumbs();
+    this.updateActions();
+  }
+
+  private updateBreadcrumbs() {
     this.$navbarMenu.setBreadcrumbs([
       {
         label: 'Home',
@@ -112,7 +118,9 @@ export class DashboardComponent implements OnInit {
         link: '/dashboards/123',
       },
     ]);
+  }
 
+  private updateActions() {
     this.$navbarMenu.setActions([
       {
         icon: 'bi-save',
@@ -145,7 +153,7 @@ export class DashboardComponent implements OnInit {
       },
       {
         icon: 'bi-clock',
-        label: 'Last 1 minute',
+        label: getTimeRangeText(this.startTimeInterpretation, this.endTimeInterpretation),
         callback: this.selectTime,
       },
       {
@@ -252,7 +260,13 @@ export class DashboardComponent implements OnInit {
   }
 
   @Bound selectInstance() {
+    const modal = this.$modal.open(SelectInstanceModalComponent, { centered: true, backdrop: 'static', keyboard: false });
+    const modalInstance = <SelectInstanceModalComponent>modal.componentInstance;
 
+    modal.result.then(
+      (result: Guid[]) => { },
+      cancel => { }
+    );
   }
 
   @Bound selectTime() {
@@ -273,60 +287,7 @@ export class DashboardComponent implements OnInit {
           this.endTimeInterpretation = interpretRelativeTime(this.dashboardForm.value.timeEnd!);
         }
 
-        this.$navbarMenu.setActions([
-          {
-            icon: 'bi-save',
-            label: 'Save',
-          },
-          {
-            icon: 'bi-x-square',
-            label: 'Cancel',
-          },
-          {
-            icon: 'bi-plus-square',
-            label: 'Add',
-            subActions: [
-              {
-                icon: 'bi-bar-chart',
-                label: 'Chart',
-                callback: this.addChart,
-              },
-              {
-                icon: 'bi-type',
-                label: 'Text',
-                callback: this.addText,
-              },
-            ]
-          },
-          {
-            icon: 'bi-pc-display',
-            label: 'All instances',
-            callback: this.selectInstance,
-          },
-          {
-            icon: 'bi-clock',
-            label: getTimeRangeText(this.startTimeInterpretation, this.endTimeInterpretation),
-            callback: this.selectTime,
-          },
-          {
-            icon: 'bi-three-dots',
-            label: 'More',
-            subActions: [
-              {
-                icon: 'bi-printer',
-                label: 'Debug Dashboard',
-                callback: this.printWidgets,
-              },
-              {
-                divider: true,
-              },
-              {
-                icon: 'bi-trash',
-                label: 'Delete Dashboard (not impl.)',
-              },
-            ],
-          },
-        ]);
+        this.updateActions();
       },
       cancel => { }
     );
