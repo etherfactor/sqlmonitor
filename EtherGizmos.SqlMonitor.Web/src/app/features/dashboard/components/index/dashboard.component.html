@@ -6,6 +6,7 @@
                       [config]="item"
                       [startTime]="startTime"
                       [endTime]="endTime"
+                      [instances]="instanceFilters"
                       (onUpdate)="updateWidget($event)"
                       (onDelete)="deleteWidget($event)"></chart-widget>
         <text-widget *ngSwitchCase="'text'"

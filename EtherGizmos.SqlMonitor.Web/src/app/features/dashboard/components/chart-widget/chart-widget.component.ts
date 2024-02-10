@@ -14,7 +14,7 @@ import { InstanceService } from '../../../../shared/services/instance/instance.s
 import { MetricDataCacheService } from '../../../../shared/services/metric-data-cache/metric-data-cache.service';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { MetricService } from '../../../../shared/services/metric/metric.service';
-import { Guid } from '../../../../shared/types/guid/guid';
+import { Guid, parseGuid } from '../../../../shared/types/guid/guid';
 import { DashboardWidget, DashboardWidgetChartMetric, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType } from '../../models/dashboard-widget';
 import { DeleteWidgetModalComponent } from '../delete-widget-modal/delete-widget-modal.component';
 import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-chart-widget-modal.component';
@@ -44,6 +44,8 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
   startTimeRetentionRevoke?: () => void;
   @Input({ required: true }) startTime: DateTime = undefined!;
   @Input({ required: true }) endTime: DateTime = undefined!;
+
+  @Input({ required: true }) instances: Guid[] = [];
 
   @Input({ required: true }) config: DashboardWidget = undefined!;
   chartType: ChartConfiguration['type'] = undefined!;
@@ -101,6 +103,26 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
         this.startTimeRetentionRevoke = this.$metricDataCache.requestRetention(startTimeChanges.currentValue);
       }
     }
+
+    const instancesChanges = changes['instances'];
+    if (instancesChanges) {
+      const datasetIds = Object.keys(this.chartDatasets);
+      for (const datasetId of datasetIds) {
+        const dataset = this.chartDatasets[datasetId];
+        const instanceId = parseGuid(datasetId.split('|')[1]);
+        const index = this.chartData.datasets.indexOf(dataset);
+
+        if (instancesChanges.currentValue.length === 0 || instancesChanges.currentValue.indexOf(instanceId) >= 0) {
+          if (index < 0) {
+            this.chartData.datasets.push(dataset);
+          }
+        } else {
+          if (index >= 0) {
+            this.chartData.datasets.splice(index, 1);
+          }
+        }
+      }
+    }
   }
 
   ngOnDestroy(): void {
@@ -140,8 +162,12 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
         yAxisID: yScaleId,
         data: [],
       };
-      this.chartData.datasets.push(dataset);
       this.chartDatasets[datasetId] = dataset;
+
+      const instanceId = parseGuid(datasetId.split('|')[1]);
+      if (this.instances.length === 0 || this.instances.indexOf(instanceId) >= 0) {
+        this.chartData.datasets.push(dataset);
+      }
 
       return dataset;
     }
