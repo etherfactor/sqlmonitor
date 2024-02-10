@@ -37,19 +37,19 @@ export interface NavbarMenuCallback {
 }
 
 export interface NavbarMenuAction extends NavbarMenuCallback {
-  label: string;
+  label: string | Observable<string>;
   icon?: string;
   subActionSearch?: boolean;
   subActions?: NavbarMenuSubAction[];
 }
 
 export interface NavbarMenuSubAction extends NavbarMenuCallback {
-  label?: string;
+  label?: string | Observable<string>;
   icon?: string;
   divider?: boolean;
 }
 
 export interface NavbarMenuBreadcrumb {
-  label: string;
+  label: string | Observable<string>;
   link: string;
 }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Observable, of } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { NavbarActionSearchDirective } from './shared/directives/navbar-action-search/navbar-action-search.directive';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuService, NavbarMenuSubAction } from './shared/services/navbar-menu/navbar-menu.service';
@@ -56,5 +57,15 @@ export class AppComponent implements OnInit {
 
   identifyNavbarSubAction(_: number, action: NavbarMenuSubAction) {
     return action.label ?? uuidv4();
+  }
+
+  getSafeLabel(label: string | Observable<string> | undefined): Observable<string> | undefined {
+    if (label === undefined || label === null) {
+      return undefined;
+    } else if (label instanceof Observable) {
+      return label;
+    } else {
+      return of(label);
+    }
   }
 }

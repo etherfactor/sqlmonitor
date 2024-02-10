@@ -8,7 +8,8 @@ import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { QuillModule } from 'ngx-quill';
-import { Subscription, asyncScheduler, interval, observeOn } from 'rxjs';
+import { Observable, Subscription, asyncScheduler, interval, map, observeOn, shareReplay } from 'rxjs';
+import { InstanceService } from '../../../../shared/services/instance/instance.service';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
@@ -41,6 +42,7 @@ export class DashboardComponent implements OnInit {
 
   private $cd: ChangeDetectorRef;
   private $form: FormBuilder;
+  private $instance: InstanceService;
   private $metricData: MetricDataService;
   private $modal: NgbModal;
   private $navbarMenu: NavbarMenuService;
@@ -71,12 +73,14 @@ export class DashboardComponent implements OnInit {
   constructor(
     $cd: ChangeDetectorRef,
     $form: FormBuilder,
+    $instance: InstanceService,
     $metricData: MetricDataService,
     $modal: NgbModal,
     $navbarMenu: NavbarMenuService,
   ) {
     this.$cd = $cd;
     this.$form = $form;
+    this.$instance = $instance;
     this.$metricData = $metricData;
     this.$modal = $modal;
     this.$navbarMenu = $navbarMenu;
@@ -151,7 +155,7 @@ export class DashboardComponent implements OnInit {
       },
       {
         icon: 'bi-pc-display',
-        label: 'All instances',
+        label: this.getInstanceActionName(),
         callback: this.selectInstance,
       },
       {
@@ -178,6 +182,24 @@ export class DashboardComponent implements OnInit {
         ],
       },
     ]);
+  }
+
+  getInstanceActionName(): string | Observable<string> {
+    if (this.dashboardForm) {
+      const count = this.dashboardForm.controls.instanceIds.controls.length;
+      if (count > 1) {
+        return `${count} instances`;
+      } else if (count == 0) {
+        return 'All instances';
+      } else {
+        return this.$instance.get(this.dashboardForm.controls.instanceIds.value[0]).pipe(
+          map(instance => instance.name),
+          shareReplay({ bufferSize: 1, refCount: false }),
+        );
+      }
+    } else {
+      return 'All instances';
+    }
   }
 
   getGridstackWidget(widget: DashboardWidget): GridStackWidget {

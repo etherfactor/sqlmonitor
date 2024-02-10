@@ -80,7 +80,7 @@
         <li class="nav-item dropdown">
           <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)">
             <span class="bi" [class]="action.icon"></span>
-            <span class="navbar-action-label"> {{action.label}}</span>
+            <span class="navbar-action-label"> {{getSafeLabel(action.label) | async}}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
             <ng-container *ngIf="action.subActionSearch">
@@ -97,7 +97,7 @@
               <ng-container *ngIf="!subAction.divider; else subActionDivider">
                 <li>
                   <button class="dropdown-item" (click)="performCallback(subAction)">
-                    <span class="bi" [class]="subAction.icon"></span> {{subAction.label}}
+                    <span class="bi" [class]="subAction.icon"></span> {{getSafeLabel(subAction.label) | async}}
                   </button>
                 </li>
               </ng-container>
@@ -112,7 +112,7 @@
         <li class="nav-item">
           <button class="nav-link" (click)="performCallback(action)">
             <span class="bi" [class]="action.icon"></span>
-            <span class="navbar-action-label"> {{action.label}}</span>
+            <span class="navbar-action-label"> {{getSafeLabel(action.label) | async}}</span>
           </button>
         </li>
       </ng-template>
