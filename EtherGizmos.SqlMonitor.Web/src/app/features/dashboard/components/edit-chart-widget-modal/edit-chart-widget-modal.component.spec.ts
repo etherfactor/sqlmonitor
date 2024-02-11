@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { provideMetricServiceMock } from '../../../../shared/services/metric/metric.service.mock';
 import { EditChartWidgetModalComponent } from './edit-chart-widget-modal.component';
 
 describe('EditChartWidgetModalComponent', () => {
@@ -8,7 +9,13 @@ describe('EditChartWidgetModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditChartWidgetModalComponent]
+      imports: [
+        EditChartWidgetModalComponent,
+      ],
+      providers: [
+        NgbActiveModal,
+        provideMetricServiceMock(),
+      ]
     })
     .compileComponents();
     

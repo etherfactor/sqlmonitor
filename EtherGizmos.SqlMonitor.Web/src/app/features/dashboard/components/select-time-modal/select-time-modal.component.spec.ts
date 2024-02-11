@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SelectTimeModalComponent } from './select-time-modal.component';
 
 describe('SelectTimeModalComponent', () => {
@@ -8,7 +8,12 @@ describe('SelectTimeModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectTimeModalComponent]
+      imports: [
+        SelectTimeModalComponent,
+      ],
+      providers: [
+        NgbActiveModal,
+      ]
     })
     .compileComponents();
     

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { DeleteWidgetModalComponent } from './delete-widget-modal.component';
 
 describe('DeleteWidgetModalComponent', () => {
@@ -8,7 +8,12 @@ describe('DeleteWidgetModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeleteWidgetModalComponent]
+      imports: [
+        DeleteWidgetModalComponent,
+      ],
+      providers: [
+        NgbActiveModal,
+      ]
     })
     .compileComponents();
     

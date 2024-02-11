@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { generateGuid } from '../../../../shared/types/guid/guid';
+import { DashboardWidgetType } from '../../models/dashboard-widget';
 import { TextWidgetComponent } from './text-widget.component';
 
 describe('TextWidgetComponent', () => {
@@ -14,6 +15,17 @@ describe('TextWidgetComponent', () => {
     
     fixture = TestBed.createComponent(TextWidgetComponent);
     component = fixture.componentInstance;
+    component.config = {
+      id: generateGuid(),
+      type: DashboardWidgetType.Text,
+      grid: {
+        xPos: 0,
+        yPos: 0,
+        width: 1,
+        height: 1,
+        hovering: false,
+      },
+    };
     fixture.detectChanges();
   });
 
