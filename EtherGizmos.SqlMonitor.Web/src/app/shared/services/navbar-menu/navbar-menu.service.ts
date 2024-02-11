@@ -51,5 +51,5 @@ export interface NavbarMenuSubAction extends NavbarMenuCallback {
 
 export interface NavbarMenuBreadcrumb {
   label: string | Observable<string>;
-  link: string;
+  link: string | Observable<string>;
 }

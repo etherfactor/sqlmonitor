@@ -11,7 +11,9 @@ export class NavbarActionSearchDirective {
 
   private $element: ElementRef;
 
-  constructor($element: ElementRef) {
+  constructor(
+    $element: ElementRef,
+  ) {
     this.$element = $element;
   }
 

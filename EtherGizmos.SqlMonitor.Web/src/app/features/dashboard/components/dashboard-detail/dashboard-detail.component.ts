@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import 'chartjs-adapter-luxon';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
@@ -8,11 +9,13 @@ import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { DateTime } from 'luxon';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { QuillModule } from 'ngx-quill';
-import { Observable, Subscription, asyncScheduler, interval, map, observeOn, shareReplay } from 'rxjs';
+import { Observable, Subscription, asyncScheduler, first, interval, map, observeOn, of, shareReplay } from 'rxjs';
+import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
+import { DashboardService } from '../../../../shared/services/dashboard/dashboard.service';
 import { InstanceService } from '../../../../shared/services/instance/instance.service';
 import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
-import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
+import { Guid, generateGuid, isGuid } from '../../../../shared/types/guid/guid';
 import { RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { DefaultControlTypes, TypedFormGroup, getAllFormValues } from '../../../../shared/utilities/form/form.util';
@@ -22,7 +25,6 @@ import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
 import { SelectInstanceModalComponent } from '../select-instance-modal/select-instance-modal.component';
 import { SelectTimeModalComponent, TimeConfiguration } from '../select-time-modal/select-time-modal.component';
 import { TextWidgetComponent } from '../text-widget/text-widget.component';
-import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -41,8 +43,10 @@ import { BodyContainerType, BodyService } from '../../../../shared/services/body
 })
 export class DashboardDetailComponent implements OnInit {
 
+  private readonly $activatedRoute: ActivatedRoute;
   private readonly $body: BodyService;
   private readonly $cd: ChangeDetectorRef;
+  private readonly $dashboard: DashboardService;
   private readonly $form: FormBuilder;
   private readonly $instance: InstanceService;
   private readonly $metricData: MetricDataService;
@@ -51,6 +55,7 @@ export class DashboardDetailComponent implements OnInit {
 
   isEditing: boolean = false;
 
+  dashboard$?: Observable<Dashboard>;
   dashboard?: Dashboard;
   dashboardForm?: TypedFormGroup<Dashboard, DefaultControlTypes>;
 
@@ -76,16 +81,20 @@ export class DashboardDetailComponent implements OnInit {
   getAllFormValues = getAllFormValues;
 
   constructor(
+    $activatedRoute: ActivatedRoute,
     $body: BodyService,
     $cd: ChangeDetectorRef,
+    $dashboard: DashboardService,
     $form: FormBuilder,
     $instance: InstanceService,
     $metricData: MetricDataService,
     $modal: NgbModal,
     $navbarMenu: NavbarMenuService,
   ) {
+    this.$activatedRoute = $activatedRoute;
     this.$body = $body;
     this.$cd = $cd;
+    this.$dashboard = $dashboard;
     this.$form = $form;
     this.$instance = $instance;
     this.$metricData = $metricData;
@@ -99,6 +108,7 @@ export class DashboardDetailComponent implements OnInit {
       this.$form,
       {
         id: undefined!,
+        name: 'Unnamed',
         timeStart: parseRelativeTime('t-1m'),
         timeEnd: parseRelativeTime('t'),
         instanceIds: [],
@@ -116,6 +126,46 @@ export class DashboardDetailComponent implements OnInit {
     this.$body.setContainer(BodyContainerType.Fluid);
     this.updateBreadcrumbs();
     this.updateActions();
+
+    let observable: Observable<Dashboard>;
+    if (this.$activatedRoute.snapshot.params['id']) {
+      const id = this.$activatedRoute.snapshot.params['id'];
+      if (isGuid(id)) {
+        observable = this.$dashboard.get(id);
+      } else {
+        throw new Error('Invalid id format');
+      }
+    } else {
+      observable = of({
+        id: generateGuid(),
+        name: 'Unnamed',
+        timeStart: parseRelativeTime('t-5m'),
+        timeEnd: parseRelativeTime('t'),
+        instanceIds: [],
+        items: [],
+      });
+    }
+
+    this.dashboard$ = observable.pipe(
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+
+    this.dashboard$.pipe(
+      first()
+    ).subscribe(dashboard => {
+      this.dashboard = dashboard;
+      this.initForm();
+    });
+  }
+
+  private initForm() {
+    this.dashboardForm = dashboardForm(this.$form, this.dashboard);
+    this.instanceFilters = this.dashboardForm?.value?.instanceIds ?? [];
+    this.startTimeInterpretation = interpretRelativeTime(this.dashboardForm?.value?.timeStart ?? parseRelativeTime('t-1m'));
+    this.endTimeInterpretation = interpretRelativeTime(this.dashboardForm?.value?.timeEnd ?? parseRelativeTime('t'));
+
+    this.updateBreadcrumbs();
+    this.updateActions();
   }
 
   private updateBreadcrumbs() {
@@ -129,8 +179,8 @@ export class DashboardDetailComponent implements OnInit {
         link: '/dashboards',
       },
       {
-        label: 'Test',
-        link: '/dashboards/123',
+        label: this.getDashboardBreadcrumbName(),
+        link: this.getDashboardBreadcrumbPath(),
       },
     ]);
   }
@@ -190,6 +240,26 @@ export class DashboardDetailComponent implements OnInit {
         ],
       },
     ]);
+  }
+
+  getDashboardBreadcrumbName() {
+    if (this.dashboard$) {
+      return this.dashboard$.pipe(
+        map(item => item.name),
+      );
+    } else {
+      return 'Unknown';
+    }
+  }
+
+  getDashboardBreadcrumbPath() {
+    if (this.dashboard$) {
+      return this.dashboard$.pipe(
+        map(item => `/dashboard/${item.id}`),
+      );
+    } else {
+      return '/dashboards';
+    }
   }
 
   getInstanceActionName(): string | Observable<string> {
@@ -339,7 +409,7 @@ export class DashboardDetailComponent implements OnInit {
   }
 
   @Bound printWidgets() {
-    console.log('items', this.dashboardForm?.value?.items);
+    console.log('dashboard', this.dashboardForm?.value);
   }
 
   updateWidget(item: DashboardWidget) {

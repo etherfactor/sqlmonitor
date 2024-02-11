@@ -6,6 +6,8 @@ import { DashboardWidgetZ, dashboardWidgetForm } from "./dashboard-widget";
 
 export const DashboardZ = z.object({
   id: GuidZ,
+  name: z.string(),
+  description: z.string().optional(),
   timeStart: RelativeTimeZ,
   timeEnd: RelativeTimeZ,
   instanceIds: z.array(GuidZ),
@@ -17,6 +19,8 @@ export type Dashboard = z.infer<typeof DashboardZ>;
 export const dashboardForm = formFactoryForModel<Dashboard, DefaultControlTypes>(($form, model) => {
   return {
     id: [model.id],
+    name: [model.name],
+    description: [model.description],
     timeStart: [model.timeStart],
     timeEnd: [model.timeEnd],
     instanceIds: $form.nonNullable.array(model.instanceIds.map(item => $form.nonNullable.control(item))),

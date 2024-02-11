@@ -72,7 +72,7 @@ export class AppComponent implements OnInit {
     return action.label ?? uuidv4();
   }
 
-  getSafeLabel(label: string | Observable<string> | undefined): Observable<string> | undefined {
+  safe(label: string | Observable<string> | undefined): Observable<string> | undefined {
     if (label === undefined || label === null) {
       return undefined;
     } else if (label instanceof Observable) {

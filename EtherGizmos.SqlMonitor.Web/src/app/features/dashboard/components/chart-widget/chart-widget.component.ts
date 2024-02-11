@@ -114,7 +114,7 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
         const instanceId = parseGuid(datasetId.split('|')[1]);
 
         if (instancesChanges.currentValue.length === 0 || instancesChanges.currentValue.indexOf(instanceId) >= 0) {
-            this.chartData.datasets.push(dataset);
+          this.chartData.datasets.push(dataset);
         }
       }
     }
