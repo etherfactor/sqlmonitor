@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, Provider } from "@angular/core";
 import { MetricDataService } from "./metric-data.service";
+import { MetricDataCacheService } from "../metric-data-cache/metric-data-cache.service";
 
 @Injectable({ providedIn: 'root' })
 class ConcreteMetricDataService extends MetricDataService {
@@ -9,8 +10,9 @@ class ConcreteMetricDataService extends MetricDataService {
 
   constructor(
     $http: HttpClient,
+    $metricDataCache: MetricDataCacheService,
   ) {
-    super();
+    super($metricDataCache);
     this.$http = $http;
   }
 }
@@ -20,8 +22,10 @@ export function provideMetricDataService(): Provider {
     provide: MetricDataService,
     useFactory: (
       $http: HttpClient,
+      $metricDataCache: MetricDataCacheService,
     ) => new ConcreteMetricDataService(
       $http,
+      $metricDataCache,
     )
   };
 }

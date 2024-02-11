@@ -6,7 +6,8 @@ describe('IteratePipe', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IteratePipe]
+      imports: [IteratePipe],
+      providers: [IteratePipe]
     })
     .compileComponents();
 

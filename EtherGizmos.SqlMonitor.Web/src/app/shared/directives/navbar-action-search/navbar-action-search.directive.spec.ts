@@ -19,6 +19,7 @@ describe('NavbarActionSearchDirective', () => {
     await TestBed.configureTestingModule({
       imports: [NavbarActionSearchDirective],
       providers: [
+        NavbarActionSearchDirective,
         provideElementRefMock(element),
       ]
     })
