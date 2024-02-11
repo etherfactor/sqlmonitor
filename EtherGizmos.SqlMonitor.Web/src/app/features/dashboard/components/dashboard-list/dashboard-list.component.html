@@ -1,5 +1,30 @@
 <div class="row">
-  <div class="col-12">
-
+  <div class="col-12 mt-3">
+    <!-- https://s3.amazonaws.com/cdn.freshdesk.com/data/helpdesk/attachments/production/9195922255/original/1m2aoVVJrAHQUcp2vVW2pOTWz5aNhQaNNA.png?1695741977 -->
+    root /
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-3" *ngFor="let i of 12 | iterate">
+    <div class="card mt-3">
+      <h5 class="card-header" style="border-bottom: revert;"><span class="bi bi-folder2-open"></span> Folder Title</h5>
+      <a class="stretched-link" style="cursor: pointer;" tabindex="0"></a>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12 mt-3">
+    <hr class="mt-2 mb-2" />
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-3" *ngFor="let i of 12 | iterate">
+    <div class="card mt-3">
+      <h5 class="card-header"><span class="bi bi-bar-chart-line"></span> Dashboard Title</h5>
+      <div class="card-body">
+        <p class="card-text mb-0">Dashboard description.</p>
+        <a class="stretched-link" style="cursor: pointer;" tabindex="0"></a>
+      </div>
+    </div>
   </div>
 </div>
