@@ -4,8 +4,8 @@
     <input [id]="id" type="text" class="form-control" [(ngModel)]="value" [disabled]="disabled" placeholder=" " />
     <label [for]="id">{{placeholder}}</label>
   </div>
-  <button class="btn btn-secondary" ngbDropdownToggle [disabled]="disabled" [ngStyle]="dynamicPickerStyle"><span class="bi bi-eyedropper"></span></button>
-  <div class="dropdown-menu dropdown-toggle w-250px" ngbDropdownMenu>
+  <button class="btn btn-secondary" ngbDropdownToggle [disabled]="disabled" [ngStyle]="dynamicPickerStyle" data-testid="color-picker-button"><span class="bi bi-eyedropper"></span></button>
+  <div class="dropdown-menu dropdown-toggle w-250px" ngbDropdownMenu data-testid="color-picker">
     <color-sketch [color]="value" (onChangeComplete)="colorChanged($event)"></color-sketch>
   </div>
 </div>
