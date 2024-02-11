@@ -19,7 +19,7 @@
 </nav>
 
 <nav class="navbar navbar-sub bg-body-tertiary sticky-top" aria-expanded="true">
-  <div class="container-fluid">
+  <div class="container-fluid h-100">
 
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
@@ -71,7 +71,9 @@
   </div>
 </div>
 
-<router-outlet></router-outlet>
+<div [class]="containerClass" style="min-height: calc(100vh - var(--navbar-height) - var(--navbar-sub-height))">
+  <router-outlet></router-outlet>
+</div>
 
 <ng-template #navbarActions>
   <ul class="navbar-nav flex-row d-flex mb-lg-0">

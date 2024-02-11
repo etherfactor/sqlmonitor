@@ -12,9 +12,16 @@
 @import '../node_modules/quill/dist/quill.snow.css';
 
 $navbar-height: 48px;
+$navbar-sub-height: 40px;
+$navbar-sub-height-m: 62px;
+
+:root {
+  --navbar-height: #{$navbar-height};
+  --navbar-sub-height: #{$navbar-sub-height};
+}
 
 .navbar {
-  height: $navbar-height;
+  height: var(--navbar-height);
   padding-top: 4px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--bs-border-color-translucent);
@@ -30,7 +37,7 @@ $navbar-height: 48px;
 
   &.navbar-sub {
     top: 0;
-    height: 40px;
+    height: var(--navbar-sub-height);
 
     .navbar-nav {
       gap: 10px;
@@ -42,15 +49,18 @@ $navbar-height: 48px;
     }
 
     &[aria-expanded="true"] {
-      top: $navbar-height;
+      top: var(--navbar-height);
     }
   }
 }
 
 @include media-breakpoint-down(sm) {
+  :root {
+    --navbar-sub-height: #{$navbar-sub-height-m};
+  }
+
   .navbar {
     &.navbar-sub {
-      height: 62px;
 
       .navbar-nav {
         gap: 15px;

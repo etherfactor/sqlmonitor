@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { NavbarActionSearchDirective } from './shared/directives/navbar-action-search/navbar-action-search.directive';
+import { BodyContainerType, BodyService } from './shared/services/body/body.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuService, NavbarMenuSubAction } from './shared/services/navbar-menu/navbar-menu.service';
 
 @Component({
@@ -19,19 +20,31 @@ import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuS
 })
 export class AppComponent implements OnInit {
 
-  private $navbarMenu: NavbarMenuService;
+  private readonly $body: BodyService;
+  private readonly $navbarMenu: NavbarMenuService;
 
   @ViewChildren(NavbarActionSearchDirective) searchActions: QueryList<NavbarActionSearchDirective> = undefined!;
 
   title = 'EtherGizmos.SqlMonitor.Web';
+
+  containerClass: string = BodyContainerType.Normal;
+
   actions: NavbarMenuAction[] = [];
   breadcrumbs: NavbarMenuBreadcrumb[] = [];
 
-  constructor($navbarMenu: NavbarMenuService) {
+  constructor(
+    $body: BodyService,
+    $navbarMenu: NavbarMenuService,
+  ) {
+    this.$body = $body;
     this.$navbarMenu = $navbarMenu;
   }
 
   ngOnInit(): void {
+    this.$body.containerClass$.subscribe(containerClass => {
+      this.containerClass = containerClass;
+    });
+
     this.$navbarMenu.actions$.subscribe(actions => {
       this.actions = actions;
     });
