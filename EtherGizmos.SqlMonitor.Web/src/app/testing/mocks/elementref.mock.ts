@@ -2,14 +2,14 @@ import { ElementRef, Provider } from "@angular/core";
 
 class MockElementRef extends ElementRef {
 
-  constructor() {
-    super({});
+  constructor(element?: unknown) {
+    super(element ?? {});
   }
 }
 
-export function provideMockElementRef(): Provider {
+export function provideElementRefMock(element?: unknown): Provider {
   return {
     provide: ElementRef,
-    useFactory: () => new MockElementRef(),
+    useFactory: () => new MockElementRef(element),
   };
 }
