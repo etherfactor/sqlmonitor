@@ -10,7 +10,7 @@ describe('IteratePipe', () => {
     })
     .compileComponents();
 
-    pipe = new IteratePipe();
+    pipe = TestBed.inject(IteratePipe);
   });
 
   it('should create an instance', () => {

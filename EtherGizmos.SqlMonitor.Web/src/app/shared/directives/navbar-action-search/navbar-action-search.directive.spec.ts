@@ -1,4 +1,3 @@
-import { ElementRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideElementRefMock } from '../../../testing/mocks/elementref.mock';
 import { NavbarActionSearchDirective } from './navbar-action-search.directive';
@@ -25,8 +24,7 @@ describe('NavbarActionSearchDirective', () => {
     })
     .compileComponents();
 
-    const $element = TestBed.inject(ElementRef);
-    directive = new NavbarActionSearchDirective($element);
+    directive = TestBed.inject(NavbarActionSearchDirective);
   });
 
   it('should create an instance', () => {
