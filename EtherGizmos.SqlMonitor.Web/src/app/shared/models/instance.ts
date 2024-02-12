@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DateTimeZ, parseDateTime } from "../types/datetime/datetime";
 import { Guid, GuidZ, parseGuid } from "../types/guid/guid";
 import { expectType } from "../utilities/form/form.util";
-import { maybe } from "../utilities/maybe/maybe";
+import { maybe } from "../utilities/maybe/maybe.util";
 
 export const InstanceDataZ = z.object({
   id: z.string().uuid(),

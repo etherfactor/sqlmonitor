@@ -5,17 +5,6 @@ import { RelativeTime } from "../../types/relative-time/relative-time";
 
 export type DefaultControlTypes = DateTime | Duration | Guid | RelativeTime;
 
-export function formFactoryForModelOld<TModel>(builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel>) {
-  const result: ($form: FormBuilder, model: TModel) => TypedFormGroup<TModel> = ($form: FormBuilder, model: TModel) => {
-    const config = builder($form, model);
-    const form = $form.nonNullable.group(config);
-
-    return form;
-  };
-
-  return result;
-}
-
 export function formFactoryForModel<TModel, TControlTypes = never>(builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel, TControlTypes>) {
   const result: FormFunction<TModel, TControlTypes> = ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel, TControlTypes> => {
     if (model === undefined || model === null)
@@ -95,20 +84,11 @@ export function getDirtyFormValues<TModel, TControlTypes = never>(form: TypedFor
         dirtyValues[key as keyof typeof dirtyValues] = currentControl.value;
       }
     }
-
   });
+
   return dirtyValues;
 }
 
-function isFormGroupLike(value: unknown):value is FormGroup {
-  if (value === undefined || value === null)
-    return false;
-
-  if (typeof value !== 'object')
-    return false;
-
-  if ('controls' in value)
-    return true;
-
-  return false;
+function isFormGroupLike(value: unknown): value is FormGroup {
+  return value instanceof FormGroup;
 }

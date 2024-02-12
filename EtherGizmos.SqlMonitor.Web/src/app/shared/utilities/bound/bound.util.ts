@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable prefer-rest-params */
+
 /**
  * Binds an instance method to the containing class to persist the lexical scope of 'this'.
  * @param target The target class or prototype; used by the TypeScript compiler (omit function call brackets to use as a decorator).
  * @param propKey The property key of the target method; used by the TypeScript compiler (omit function call brackets to use as a decorator).
- */
-export function Bound(target: Object, propKey: string | symbol): any {
-  var originalMethod = target[propKey as keyof Object] as Function;
+*/
+export function Bound(target: object, propKey: string | symbol): PropertyDescriptor {
+  const originalMethod = target[propKey as keyof object] as Function;
 
   // Ensure the above type-assertion is valid at runtime.
   if (typeof originalMethod !== "function") throw new TypeError("@Bound can only be used on methods.");
@@ -22,7 +25,9 @@ export function Bound(target: Object, propKey: string | symbol): any {
       get: function () {
         // Create bound override on object instance. This will hide the original method on the prototype, and instead yield a bound version from the
         // instance itself. The original method will no longer be accessible. Inside a getter, 'this' will refer to the instance.
-        var instance = this;
+
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const instance = this;
 
         Object.defineProperty(instance, propKey.toString(), {
           value: function () {
