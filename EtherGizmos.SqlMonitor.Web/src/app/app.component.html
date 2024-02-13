@@ -18,23 +18,23 @@
   </div>
 </nav>
 
-<nav class="navbar navbar-sub bg-body-tertiary sticky-top" aria-expanded="true">
+<nav class="navbar navbar-sub bg-body-tertiary sticky-top" aria-expanded="true" data-testid="navbar-sub">
   <div class="container-fluid h-100">
 
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb mb-0">
+      <ol class="breadcrumb mb-0" data-testid="breadcrumbs">
         <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
           <ng-container *ngIf="!last; else lastBreadcrumb">
-            <li class="breadcrumb-item"><a [routerLink]="safe(breadcrumb.link) | async">{{safe(breadcrumb.label) | async}}</a></li>
+            <li class="breadcrumb-item" data-testid="breadcrumb-item"><a [routerLink]="safe(breadcrumb.link) | async">{{safe(breadcrumb.label) | async}}</a></li>
           </ng-container>
           <ng-template #lastBreadcrumb>
-            <li class="breadcrumb-item active" [attr.aria-current]="breadcrumb.link">{{safe(breadcrumb.label) | async}}</li>
+            <li class="breadcrumb-item active" [attr.aria-current]="breadcrumb.link" data-testid="breadcrumb-item">{{safe(breadcrumb.label) | async}}</li>
           </ng-template>
         </ng-container>
       </ol>
     </nav>
 
-    <div class="d-none d-md-block">
+    <div class="d-none d-md-block" data-testid="actions">
       <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
     </div>
 
@@ -42,7 +42,7 @@
 
   <div class="container-fluid flex-row-reverse">
 
-    <div class="d-md-none">
+    <div class="d-md-none" data-testid="actions">
       <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
     </div>
 
@@ -71,7 +71,7 @@
   </div>
 </div>
 
-<div [class]="containerClass" style="min-height: calc(100vh - var(--navbar-height) - var(--navbar-sub-height))">
+<div [class]="containerClass" style="min-height: calc(100vh - var(--navbar-height) - var(--navbar-sub-height))" data-testid="body-container">
   <router-outlet></router-outlet>
 </div>
 
@@ -80,7 +80,7 @@
     <ng-container *ngFor="let action of actions; trackBy: identifyNavbarAction; let ai = index">
       <ng-container *ngIf="action.subActions; else noSubActions">
         <li class="nav-item dropdown">
-          <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)">
+          <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" (click)="performCallback(action)" data-testid="action-button">
             <span class="bi" [class]="action.icon"></span>
             <span class="navbar-action-label"> {{safe(action.label) | async}}</span>
           </button>
@@ -112,7 +112,7 @@
       </ng-container>
       <ng-template #noSubActions>
         <li class="nav-item">
-          <button class="nav-link" (click)="performCallback(action)">
+          <button class="nav-link" (click)="performCallback(action)" data-testid="action-button">
             <span class="bi" [class]="action.icon"></span>
             <span class="navbar-action-label"> {{safe(action.label) | async}}</span>
           </button>
