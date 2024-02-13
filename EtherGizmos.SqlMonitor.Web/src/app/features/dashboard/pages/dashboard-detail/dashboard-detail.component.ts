@@ -19,12 +19,12 @@ import { Guid, generateGuid, isGuid } from '../../../../shared/types/guid/guid';
 import { RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { DefaultControlTypes, TypedFormGroup, getAllFormValues } from '../../../../shared/utilities/form/form.util';
+import { ChartWidgetComponent } from '../../components/chart-widget/chart-widget.component';
+import { SelectInstanceModalComponent } from '../../components/select-instance-modal/select-instance-modal.component';
+import { SelectTimeModalComponent, TimeConfiguration } from '../../components/select-time-modal/select-time-modal.component';
+import { TextWidgetComponent } from '../../components/text-widget/text-widget.component';
 import { Dashboard, dashboardForm } from '../../models/dashboard';
 import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType, dashboardWidgetForm } from '../../models/dashboard-widget';
-import { ChartWidgetComponent } from '../chart-widget/chart-widget.component';
-import { SelectInstanceModalComponent } from '../select-instance-modal/select-instance-modal.component';
-import { SelectTimeModalComponent, TimeConfiguration } from '../select-time-modal/select-time-modal.component';
-import { TextWidgetComponent } from '../text-widget/text-widget.component';
 
 @Component({
   selector: 'app-dashboard',
