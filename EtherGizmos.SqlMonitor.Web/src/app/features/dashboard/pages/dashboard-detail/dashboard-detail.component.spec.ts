@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { APP_ROUTES } from '../../../../app.routes';
@@ -34,5 +35,17 @@ describe('DashboardDetailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should render dashboard', () => {
+    expect(fixture.routeDebugElement).toBeTruthy();
+    if (!fixture.routeDebugElement)
+      return;
+
+    const chartWidgets = fixture.routeDebugElement.queryAll(By.css('[data-testid="chart-widget"]'));
+    const textWidgets = fixture.routeDebugElement.queryAll(By.css('[data-testid="text-widget"]'));
+
+    expect(chartWidgets.length).toBe(1);
+    expect(textWidgets.length).toBe(0);
   });
 });

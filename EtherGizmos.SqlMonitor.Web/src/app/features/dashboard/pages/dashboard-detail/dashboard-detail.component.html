@@ -9,11 +9,13 @@
                         [endTime]="endTime"
                         [instances]="instanceFilters"
                         (onUpdate)="updateWidget($event)"
-                        (onDelete)="deleteWidget($event)"></chart-widget>
+                        (onDelete)="deleteWidget($event)"
+                        [attr.data-testid]="'chart-widget'"></chart-widget>
           <text-widget *ngSwitchCase="'text'"
                        [config]="item"
                        (onUpdate)="updateWidget($event)"
-                       (onDelete)="deleteWidget($event)"></text-widget>
+                       (onDelete)="deleteWidget($event)"
+                       [attr.data-testid]="'text-widget'"></text-widget>
         </ng-container>
       </gridstack-item>
     </ng-container>
