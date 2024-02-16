@@ -31,6 +31,7 @@ export class TextWidgetComponent implements OnInit {
 
   ngOnInit(): void {
     this.updateWidget(this.config);
+    console.log('updated widget', this.config);
   }
 
   editWidget() {

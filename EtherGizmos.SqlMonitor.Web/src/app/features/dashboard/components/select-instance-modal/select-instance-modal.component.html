@@ -2,7 +2,7 @@
   <h5 class="modal-title">
     <span class="bi bi-pc-display"></span> Editing Default Instances
   </h5>
-  <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()"></button>
+  <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()" data-testid="x-button"></button>
 </div>
 <div class="modal-body pt-0">
   <div class="container-fluid">
@@ -39,7 +39,7 @@
               <tr *ngFor="let i of perPage | iterate">
                 <ng-container *ngIf="instances[i] as instance; else blankRow">
                   <td (click)="selectInstance(instance, !instanceIsSelected(instance)); stopPropagation($event)">
-                    <input type="checkbox" class="form-check-input" [checked]="instanceIsSelected(instance)" (change)="selectInstanceEvent($event, instance)" (click)="stopPropagation($event)" />
+                    <input type="checkbox" class="form-check-input" [checked]="instanceIsSelected(instance)" (change)="selectInstanceEvent($event, instance)" (click)="stopPropagation($event)" data-testid="select-instance-checkbox" />
                   </td>
                   <td (click)="selectInstance(instance, !instanceIsSelected(instance)); stopPropagation($event)">
                     {{instance.name}}
@@ -78,8 +78,8 @@
   </div>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()"><span class="bi bi-x-lg"></span> Cancel</button>
-  <button type="button" class="btn btn-primary" (click)="trySubmit()"><span class="bi bi-check-lg"></span> OK</button>
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()" data-testid="cancel-button"><span class="bi bi-x-lg"></span> Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="trySubmit()" data-testid="ok-button"><span class="bi bi-check-lg"></span> OK</button>
 </div>
 
 <ng-template #blankRow>

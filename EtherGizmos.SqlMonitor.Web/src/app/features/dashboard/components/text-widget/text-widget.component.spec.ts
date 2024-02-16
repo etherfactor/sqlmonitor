@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { generateGuid } from '../../../../shared/types/guid/guid';
 import { DashboardWidgetType } from '../../models/dashboard-widget';
 import { TextWidgetComponent } from './text-widget.component';
@@ -25,11 +26,24 @@ describe('TextWidgetComponent', () => {
         height: 1,
         hovering: false,
       },
+      text: {
+        htmlContent: '<span>Content here</span><span>Content here</span>',
+      },
     };
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should render provided html', () => {
+    const textDiv = fixture.debugElement.query(By.css('[data-testid="text-div"]'));
+    expect(textDiv).toBeTruthy();
+
+    expect(textDiv.childNodes.length).toBe(2);
+
+    expect(textDiv.childNodes[0].nativeNode.nodeName).toBe('SPAN');
+    expect(textDiv.childNodes[1].nativeNode.nodeName).toBe('SPAN');
   });
 });

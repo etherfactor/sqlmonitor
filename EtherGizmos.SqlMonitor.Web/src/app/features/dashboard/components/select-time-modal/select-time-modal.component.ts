@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { RelativeTime, interpretRelativeTime, isRelativeTime, isRelativeTimeValidator } from '../../../../shared/types/relative-time/relative-time';
+import { RelativeTime, evaluateRelativeTime, interpretRelativeTime, isRelativeTime, isRelativeTimeValidator } from '../../../../shared/types/relative-time/relative-time';
 
 @Component({
   selector: 'app-select-time-modal',
@@ -43,8 +43,8 @@ export class SelectTimeModalComponent {
   }
 
   setTime(config: TimeConfiguration) {
-    this.timeStartForm = this.$form.nonNullable.control(config.startTime, [Validators.required, isRelativeTimeValidator]);
     this.timeEndForm = this.$form.nonNullable.control(config.endTime, [Validators.required, isRelativeTimeValidator]);
+    this.timeStartForm = this.$form.nonNullable.control(config.startTime, [Validators.required, isRelativeTimeValidator, isBefore(this.timeEndForm)]);
   }
 
   getTimeLabel(value: string) {
@@ -61,6 +61,12 @@ export class SelectTimeModalComponent {
     if (!this.timeEndForm)
       return;
 
+    if (this.timeStartForm.invalid || this.timeEndForm.invalid) {
+      this.timeStartForm.markAllAsTouched();
+      this.timeEndForm.markAllAsTouched();
+      return;
+    }
+
     const timeStartValue = this.timeStartForm.value;
     if (!isRelativeTime(timeStartValue))
       return;
@@ -76,6 +82,32 @@ export class SelectTimeModalComponent {
 
     this.$activeModal.close(result);
   }
+}
+
+function isBefore(otherControl: FormControl<string>) {
+  const validator: ValidatorFn = control => {
+    if (!control.value)
+      return null;
+
+    if (!isRelativeTime(control.value)) {
+      return { notRelativeTime: true };
+    }
+
+    if (!isRelativeTime(otherControl.value)) {
+      return { notRelativeTime: true };
+    }
+
+    const firstTime = evaluateRelativeTime(interpretRelativeTime(control.value));
+    const secondTime = evaluateRelativeTime(interpretRelativeTime(otherControl.value));
+
+    if (secondTime.diff(firstTime).toMillis() <= 500) {
+      return { notBeforeOtherTime: true };
+    }
+
+    return null;
+  };
+
+  return validator;
 }
 
 export interface TimeConfiguration {
