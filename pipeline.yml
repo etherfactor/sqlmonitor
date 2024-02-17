@@ -97,6 +97,13 @@ jobs:
       workingDir: '$(Build.Projects.Web)'
       customCommand: 'run test-headless'
 
+  - task: PublishTestResults@2
+    displayName: 'Publish Angular Tests'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TESTS-*.xml'
+      searchFolder: '$(EtherGizmos.SqlMonitor.Web)''
+
   - task: reportgenerator@5
     displayName: 'Combine Code Coverage'
     inputs:
