@@ -102,7 +102,7 @@ jobs:
     inputs:
       testResultsFormat: 'JUnit'
       testResultsFiles: '**/TESTS-*.xml'
-      searchFolder: '$(EtherGizmos.SqlMonitor.Web)''
+      searchFolder: '$(EtherGizmos.SqlMonitor.Web)'
 
   - task: reportgenerator@5
     displayName: 'Combine Code Coverage'
