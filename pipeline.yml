@@ -95,7 +95,7 @@ jobs:
     inputs:
       command: 'custom'
       workingDir: '$(Build.Projects.Web)'
-      customCommand: 'test-headless'
+      customCommand: 'run test-headless'
 
   - task: reportgenerator@5
     displayName: 'Combine Code Coverage'
