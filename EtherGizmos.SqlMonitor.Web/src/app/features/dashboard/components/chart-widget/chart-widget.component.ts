@@ -442,8 +442,6 @@ export class ChartWidgetComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private purgeOldData(): void {
-    const now = DateTime.utc();
-
     for (const datasetId of Object.keys(this.chartDatasets)) {
       const dataset = this.chartDatasets[datasetId];
 
@@ -494,7 +492,7 @@ abstract class MetricAggregator {
   abstract addDatum(datum: MetricData): void;
 }
 
-class AverageMetricAggregator extends MetricAggregator {
+export class AverageMetricAggregator extends MetricAggregator {
 
   aggregateData: { [key: number]: Point & { _ct: number } } = {};
 
@@ -516,7 +514,7 @@ class AverageMetricAggregator extends MetricAggregator {
   }
 }
 
-class MaximumMetricAggregator extends MetricAggregator {
+export class MaximumMetricAggregator extends MetricAggregator {
 
   aggregateData: { [key: number]: Point } = {};
 
@@ -537,7 +535,7 @@ class MaximumMetricAggregator extends MetricAggregator {
   }
 }
 
-class MinimumMetricAggregator extends MetricAggregator {
+export class MinimumMetricAggregator extends MetricAggregator {
 
   aggregateData: { [key: number]: Point } = {};
 
@@ -558,7 +556,7 @@ class MinimumMetricAggregator extends MetricAggregator {
   }
 }
 
-class StandardDeviationMetricAggregator extends MetricAggregator {
+export class StandardDeviationMetricAggregator extends MetricAggregator {
 
   aggregateData: { [key: number]: Point & { _ct: number, _avg: number } } = {};
 
@@ -570,18 +568,30 @@ class StandardDeviationMetricAggregator extends MetricAggregator {
     const eventTime = datum.eventTimeUtc.toMillis();
     let aggregateDatum = this.aggregateData[eventTime];
     if (!aggregateDatum) {
-      aggregateDatum = { x: eventTime, y: datum.value, _ct: 1, _avg: datum.value };
+      aggregateDatum = { x: eventTime, y: 0, _ct: 1, _avg: datum.value };
       this.aggregateData[eventTime] = aggregateDatum;
       this.data.push(aggregateDatum);
     } else {
-      aggregateDatum.y = Math.sqrt((1 / (aggregateDatum._ct + 1)) * (aggregateDatum._ct * Math.pow(aggregateDatum.y, 2) + Math.pow(datum.value - aggregateDatum._avg, 2)));
-      aggregateDatum._avg = (aggregateDatum._avg * aggregateDatum._ct + datum.value) / (aggregateDatum._ct + 1);
+      const oldCount = aggregateDatum._ct;
+      const newCount = aggregateDatum._ct + 1;
+
+      const oldAverage = aggregateDatum._avg;
+      const newAverage = (aggregateDatum._avg * aggregateDatum._ct + datum.value) / (newCount);
+
+      aggregateDatum.y = Math.sqrt(
+        (
+          (oldCount) * aggregateDatum.y * aggregateDatum.y +
+          (datum.value - newAverage) * (datum.value - oldAverage)
+        ) / (newCount)
+      );
+
+      aggregateDatum._avg = newAverage;
       aggregateDatum._ct++;
     }
   }
 }
 
-class SumMetricAggregator extends MetricAggregator {
+export class SumMetricAggregator extends MetricAggregator {
 
   aggregateData: { [key: number]: Point } = {};
 
@@ -602,7 +612,7 @@ class SumMetricAggregator extends MetricAggregator {
   }
 }
 
-class VarianceMetricAggregator extends MetricAggregator {
+export class VarianceMetricAggregator extends MetricAggregator {
 
   aggregateData: { [key: number]: Point & { _ct: number, _avg: number } } = {};
 
@@ -614,12 +624,24 @@ class VarianceMetricAggregator extends MetricAggregator {
     const eventTime = datum.eventTimeUtc.toMillis();
     let aggregateDatum = this.aggregateData[eventTime];
     if (!aggregateDatum) {
-      aggregateDatum = { x: eventTime, y: datum.value, _ct: 1, _avg: datum.value };
+      aggregateDatum = { x: eventTime, y: 0, _ct: 1, _avg: datum.value };
       this.aggregateData[eventTime] = aggregateDatum;
       this.data.push(aggregateDatum);
     } else {
-      aggregateDatum.y = (1 / (aggregateDatum._ct + 1)) * ((aggregateDatum._ct * aggregateDatum.y) + Math.pow(datum.value - aggregateDatum._avg, 2));
-      aggregateDatum._avg = (aggregateDatum._avg * aggregateDatum._ct + datum.value) / (aggregateDatum._ct + 1);
+      const oldCount = aggregateDatum._ct;
+      const newCount = aggregateDatum._ct + 1;
+
+      const oldAverage = aggregateDatum._avg;
+      const newAverage = (aggregateDatum._avg * aggregateDatum._ct + datum.value) / (newCount);
+
+      aggregateDatum.y = (
+        (
+          (oldCount) * aggregateDatum.y +
+          (datum.value - newAverage) * (datum.value - oldAverage)
+        ) / (newCount)
+      );
+
+      aggregateDatum._avg = newAverage;
       aggregateDatum._ct++;
     }
   }
