@@ -9,7 +9,8 @@
     "start:default": "ng serve --host 127.0.0.1 --port 4200 --ssl --ssl-cert $HOME/.aspnet/https/${npm_package_name}.pem --ssl-key $HOME/.aspnet/https/${npm_package_name}.key",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test-headless": "ng test --watch=false --browsers=ChromeHeadless --reporters=junit --code-coverage"
   },
   "private": true,
   "dependencies": {
@@ -62,6 +63,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
+    "karma-junit-reporter": "^2.0.1",
     "run-script-os": "^1.1.6",
     "typescript": "~5.2.2"
   }
