@@ -1,0 +1,57 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    <span class="bi bi-clock"></span> Editing Default Time Range
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()" data-testid="x-button"></button>
+</div>
+<div class="modal-body pt-0">
+  <div class="container-fluid">
+    <ng-container *ngIf="timeStartForm">
+      <div class="row">
+        <div class="col-12">
+          <div class="floating-label mt-3">
+            <input id="timeStart" class="form-control" type="text" [formControl]="timeStartForm" placeholder=" " data-testid="start-input" />
+            <label for="timeStart">From</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          Interpretation: {{getTimeLabel(timeStartForm.value)}}
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="timeEndForm">
+      <div class="row">
+        <div class="col-12">
+          <div class="floating-label mt-3">
+            <input id="timeEnd" class="form-control" type="text" [formControl]="timeEndForm" placeholder=" " data-testid="end-input" />
+            <label for="timeEnd">To</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          Interpretation: {{getTimeLabel(timeEndForm.value)}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mt-3">
+          Relative dates start with a t, representing the current time (now), and may either add (+) or remove (-) any
+          number of date units. Valid date units are year (Y), month (M), week (w), day (d), hour (h), minute (m), and
+          second (s).
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mt-3">
+          Additionally, the date can be rounded up or down to a specific unit by specifying either the start (&#64;soX) or the
+          end (&#64;eoX) of one of the above units, X.
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()" data-testid="cancel-button"><span class="bi bi-x-lg"></span> Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="trySubmit()" data-testid="ok-button"><span class="bi bi-check-lg"></span> OK</button>
+</div>

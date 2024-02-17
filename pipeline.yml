@@ -9,6 +9,8 @@ variables:
   GitVersion.Config: 'gitversion.yml'
   NuGet.Version: '6.x.x'
   Build.Projects: '**/*.csproj'
+  Build.Projects.Api: 'EtherGizmos.SqlMonitor.Api'
+  Build.Projects.Web: 'EtherGizmos.SqlMonitor.Web'
 
 jobs:
 - job: prepare
@@ -49,6 +51,12 @@ jobs:
     inputs:
       versionSpec: '$(NuGet.Version)'
 
+  - task: Npm@1
+    displayName: 'Install NPM Packages'
+    inputs:
+      command: 'ci'
+      workingDir: '$(Build.Projects.Web)'
+
   - task: DotNetCoreCLI@2
     displayName: 'Restore Projects'
     inputs:
@@ -72,15 +80,31 @@ jobs:
     displayName: 'Perform Unit Tests'
     inputs:
       command: 'test'
-      projects: '**/EtherGizmos.SqlMonitor.Api.UnitTests.csproj'
+      projects: '**/$(Build.Projects.Api).UnitTests.csproj'
       arguments: '--collect "XPlat Code Coverage"'
 
   - task: DotNetCoreCLI@2
     displayName: 'Perform Integration Tests'
     inputs:
       command: 'test'
-      projects: '**/EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj'
+      projects: '**/$(Build.Projects.Api).IntegrationTests.csproj'
       arguments: '--collect "XPlat Code Coverage"'
+
+  - task: Npm@1
+    displayName: 'Perform Angular Tests'
+    inputs:
+      command: 'custom'
+      workingDir: '$(Build.Projects.Web)'
+      customCommand: 'run test-headless'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish Angular Tests'
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TESTS-*.xml'
+      searchFolder: 
+      mergeTestResults: true
 
   - task: reportgenerator@5
     displayName: 'Combine Code Coverage'

@@ -5,7 +5,11 @@
   "projects": {
     "EtherGizmos.SqlMonitor.Web": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -23,9 +27,16 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "ngx-quill",
+              "quill"
+            ]
           },
           "configurations": {
             "production": {
@@ -64,10 +75,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "EtherGizmos.SqlMonitor.Web:build:production"
+              "buildTarget": "EtherGizmos.SqlMonitor.Web:build:production"
             },
             "development": {
-              "browserTarget": "EtherGizmos.SqlMonitor.Web:build:development"
+              "buildTarget": "EtherGizmos.SqlMonitor.Web:build:development"
             }
           },
           "defaultConfiguration": "development",
@@ -78,7 +89,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "EtherGizmos.SqlMonitor.Web:build"
+            "buildTarget": "EtherGizmos.SqlMonitor.Web:build"
           }
         },
         "test": {
@@ -93,9 +104,12 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ]
           }
         }
       }

@@ -1,0 +1,13 @@
+<div class="position-relative w-100 h-100">
+  <div class="dropdown">
+    <div class="ui-more-options-handle position-absolute bi bi-three-dots" style="right: 2px; top: -2px;" [hidden]="!config.grid.hovering" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"></div>
+    <ul class="dropdown-menu dropdown-menu-end" style="position: absolute;">
+      <li><a class="dropdown-item" (click)="editWidget()">Edit</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" (click)="deleteWidget()">Remove</a></li>
+    </ul>
+  </div>
+  <div class="w-100 h-100 ql-editor pt-0 pb-0 ps-0 pe-0" style="overflow-y: auto;">
+    <div class="pt-2 pb-2 ps-2 pe-2" [innerHtml]="config.text?.htmlContent" data-testid="text-div"></div>
+  </div>
+</div>

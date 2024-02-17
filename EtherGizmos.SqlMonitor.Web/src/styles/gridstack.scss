@@ -1,0 +1,60 @@
+@import './_base.scss';
+
+@import '../../node_modules/gridstack/dist/src/gridstack.scss';
+@import '../../node_modules/gridstack/dist/src/gridstack-extra.scss';
+
+.grid-stack > .grid-stack-item {
+  overflow: visible;
+
+  > .grid-stack-item-content {
+    @extend .bg-body-tertiary;
+    border: 1px solid var(--bs-border-color-translucent);
+    overflow: visible;
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  .ui-resizable-ne,
+  .ui-resizable-nw,
+  .ui-resizable-se,
+  .ui-resizable-sw {
+    @extend .bi;
+    @extend .bi-arrows;
+    background-image: unset;
+  }
+
+  > .ui-resizable-ne::before,
+  > .ui-resizable-nw::before,
+  > .ui-resizable-se::before,
+  > .ui-resizable-sw::before {
+    font-size: 1.25rem;
+  }
+
+  > .ui-resizable-ne {
+    @include vendor(transform, translate(0, 10px) rotate(-45deg));
+  }
+
+  > .ui-resizable-sw {
+    @include vendor(transform, rotate(-45deg));
+  }
+
+  > .ui-resizable-nw {
+    @include vendor(transform, translate(0, 10px) rotate(45deg));
+  }
+
+  > .ui-resizable-se {
+    @include vendor(transform, rotate(45deg));
+  }
+}
+
+.ui-resizable-handle {
+  color: white;
+  mix-blend-mode: difference;
+}
+
+.ui-more-options-handle {
+  color: white;
+  mix-blend-mode: difference;
+}

@@ -1,0 +1,15 @@
+@import './_base.scss';
+
+.ql-toolbar {
+  .ql-stroke {
+    stroke: var(--bs-body-color);
+  }
+
+  .ql-fill {
+    fill: var(--bs-body-color);
+  }
+
+  .ql-picker {
+    color: var(--bs-body-color);
+  }
+}
