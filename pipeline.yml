@@ -99,10 +99,12 @@ jobs:
 
   - task: PublishTestResults@2
     displayName: 'Publish Angular Tests'
+    condition: succeededOrFailed()
     inputs:
       testResultsFormat: 'JUnit'
       testResultsFiles: '**/TESTS-*.xml'
-      searchFolder: '$(EtherGizmos.SqlMonitor.Web)'
+      searchFolder: 
+      mergeTestResults: true
 
   - task: reportgenerator@5
     displayName: 'Combine Code Coverage'
