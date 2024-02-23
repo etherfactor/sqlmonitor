@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
@@ -11,14 +13,28 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class MetricSeverityDTO
 {
     [Required]
-    [Display(Name = "severity_type")]
     public SeverityTypeDTO? SeverityType { get; set; }
 
-    [Display(Name = "minimum_value")]
     public double? MinimumValue { get; set; }
 
-    [Display(Name = "maximum_value")]
     public double? MaximumValue { get; set; }
+}
+
+public class MetricSeverityDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var complex = builder.ComplexType<MetricSeverityDTO>();
+
+        complex.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            complex.EnumProperty(e => e.SeverityType);
+            complex.Property(e => e.MinimumValue);
+            complex.Property(e => e.MaximumValue);
+        }
+    }
 }
 
 public static class ForMetricSeverityDTO

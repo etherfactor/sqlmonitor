@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -10,19 +12,33 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class QueryMetricDTO
 {
     [Required]
-    [Display(Name = "metric_id")]
     public Guid? MetricId { get; set; }
 
     [Required]
-    [Display(Name = "value_expression")]
     public string? ValueExpression { get; set; }
 
-    [Display(Name = "severities")]
     public List<QueryMetricSeverityDTO> Severities { get; set; } = new List<QueryMetricSeverityDTO>();
 
     public Task EnsureValid(IQueryable<QueryMetric> records)
     {
         return Task.CompletedTask;
+    }
+}
+
+public class QueryMetricDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var complex = builder.ComplexType<QueryMetricDTO>();
+
+        complex.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            complex.Property(e => e.MetricId);
+            complex.Property(e => e.ValueExpression);
+            complex.CollectionProperty(e => e.Severities);
+        }
     }
 }
 

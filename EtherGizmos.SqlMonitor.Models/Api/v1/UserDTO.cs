@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -6,49 +8,36 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "User", GroupName = "users")]
 public class UserDTO
 {
     [Required]
-    [Display(Name = "id")]
     public Guid Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
     [Required]
-    [Display(Name = "username")]
     public string? Username { get; set; }
 
     [Required]
-    [Display(Name = "password")]
     public string? Password { get; set; }
 
-    [Display(Name = "email_address")]
     public string? EmailAddress { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
     [Required]
-    [Display(Name = "is_active")]
     public bool? IsActive { get; set; } = true;
 
     [Required]
-    [Display(Name = "is_administrator")]
     public bool? IsAdministrator { get; set; } = false;
 
-    [Display(Name = "last_login_at")]
     public DateTimeOffset? LastLoginAt { get; set; }
 
     public Task EnsureValid(IQueryable<User> records)
@@ -59,6 +48,38 @@ public class UserDTO
             records.EnsureUnique((e => e.EmailAddress, EmailAddress));
 
         return Task.CompletedTask;
+    }
+}
+
+public class UserDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<UserDTO>("users");
+        var entity = builder.EntityType<UserDTO>();
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Username);
+            entity.Property(e => e.Password);
+            entity.Property(e => e.EmailAddress);
+            entity.Property(e => e.Name);
+            entity.Property(e => e.IsActive);
+            entity.Property(e => e.IsActive);
+            entity.Property(e => e.IsAdministrator);
+            entity.Property(e => e.LastLoginAt);
+        }
     }
 }
 

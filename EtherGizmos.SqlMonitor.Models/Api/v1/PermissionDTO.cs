@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -10,30 +12,49 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class PermissionDTO
 {
     [Required]
-    [Display(Name = "id")]
     public string? Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "description")]
     public string? Description { get; set; }
 
-    [Display(Name = "securables")]
     public List<SecurableDTO> Securables { get; set; } = new List<SecurableDTO>();
+}
+
+public class PermissionDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<PermissionDTO>("permissions");
+        var entity = builder.EntityType<PermissionDTO>();
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.HasMany(e => e.Securables);
+        }
+    }
 }
 
 public static class ForPermissionDTO

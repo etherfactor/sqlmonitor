@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
@@ -42,6 +44,34 @@ public class MetricDTO
     public Task EnsureValid(IQueryable<Metric> records)
     {
         return Task.CompletedTask;
+    }
+}
+
+public class MetricDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<MetricDTO>("metrics");
+        var entity = builder.EntityType<MetricDTO>();
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.EnumProperty(e => e.AggregateType);
+            entity.CollectionProperty(e => e.Severities);
+        }
     }
 }
 

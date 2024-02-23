@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -6,34 +8,50 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "Securable", GroupName = "securables")]
 public class SecurableDTO
 {
     [Required]
-    [Display(Name = "id")]
     public string? Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "description")]
     public string? Description { get; set; }
 
-    [Display(Name = "permissions")]
     public List<PermissionDTO> Permissions { get; set; } = new List<PermissionDTO>();
+}
+
+public class SecurableDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<SecurableDTO>("securables");
+        var entity = builder.EntityType<SecurableDTO>();
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.HasMany(e => e.Permissions);
+        }
+    }
 }
 
 public static class ForSecurableDTO

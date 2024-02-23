@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -10,66 +12,85 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class QueryDTO
 {
     [Required]
-    [Display(Name = "id")]
     public Guid Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
-    [Display(Name = "system_id")]
     public Guid SystemId { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "description")]
     public string? Description { get; set; }
 
-    [Display(Name = "is_active")]
     public bool? IsActive { get; set; } = true;
 
     [Required]
-    [Display(Name = "sql_text")]
     public string? SqlText { get; set; }
 
     [Required]
-    [Display(Name = "run_frequency")]
     public TimeSpan? RunFrequency { get; set; }
 
-    [Display(Name = "last_run_at")]
     public DateTimeOffset? LastRunAt { get; set; }
 
-    [Display(Name = "timestamp_utc_expression")]
     public string? TimestampUtcExpression { get; set; }
 
-    [Display(Name = "bucket_expression")]
     public string? BucketExpression { get; set; }
 
-    [Display(Name = "metrics")]
     public List<QueryMetricDTO> Metrics { get; set; } = new List<QueryMetricDTO>();
 
-    [Display(Name = "instance_blacklists")]
     public List<QueryInstanceDTO> InstanceBlacklists { get; set; } = new List<QueryInstanceDTO>();
 
-    [Display(Name = "instance_whitelists")]
     public List<QueryInstanceDTO> InstanceWhitelists { get; set; } = new List<QueryInstanceDTO>();
 
-    [Display(Name = "instance_database_overrides")]
     public List<QueryInstanceDatabaseDTO> InstanceDatabaseOverrides { get; set; } = new List<QueryInstanceDatabaseDTO>();
 
     public Task EnsureValid(IQueryable<Query> records)
     {
         return Task.CompletedTask;
+    }
+}
+
+public class QueryDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<QueryDTO>("queries");
+        var entity = builder.EntityType<QueryDTO>();
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.SystemId);
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.Property(e => e.IsActive);
+            entity.Property(e => e.SqlText);
+            entity.Property(e => e.RunFrequency);
+            entity.Property(e => e.LastRunAt);
+            entity.Property(e => e.TimestampUtcExpression);
+            entity.Property(e => e.BucketExpression);
+            entity.CollectionProperty(e => e.Metrics);
+            entity.CollectionProperty(e => e.InstanceBlacklists);
+            entity.CollectionProperty(e => e.InstanceWhitelists);
+            entity.CollectionProperty(e => e.InstanceDatabaseOverrides);
+        }
     }
 }
 

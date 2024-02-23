@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -6,47 +8,65 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "Instance", GroupName = "instances")]
 public class InstanceDTO
 {
-    [Display(Name = "id")]
     public Guid Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "description")]
     public string? Description { get; set; }
 
-    [Display(Name = "is_active")]
     public bool? IsActive { get; set; } = true;
 
     [Required]
-    [Display(Name = "address")]
     public string? Address { get; set; }
 
-    [Display(Name = "port")]
     public short? Port { get; set; }
 
-    [Display(Name = "database")]
     public string? Database { get; set; }
 
     public Task EnsureValid(IQueryable<Instance> records)
     {
         return Task.CompletedTask;
+    }
+}
+
+public class InstanceDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<InstanceDTO>("instances");
+        var entity = builder.EntityType<InstanceDTO>();
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.Property(e => e.IsActive);
+            entity.Property(e => e.Address);
+            entity.Property(e => e.Port);
+            entity.Property(e => e.Database);
+        }
     }
 }
 

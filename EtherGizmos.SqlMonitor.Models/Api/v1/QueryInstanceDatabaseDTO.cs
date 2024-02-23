@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -10,15 +12,29 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class QueryInstanceDatabaseDTO
 {
     [Required]
-    [Display(Name = "instance_id")]
     public Guid? InstanceId { get; set; }
 
-    [Display(Name = "instance")]
     public InstanceDTO? Instance { get; set; }
 
     [Required]
-    [Display(Name = "database_override")]
     public string? DatabaseOverride { get; set; }
+}
+
+public class QueryInstanceDatabaseDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var complex = builder.ComplexType<QueryInstanceDatabaseDTO>();
+
+        complex.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            complex.Property(e => e.InstanceId);
+            complex.HasRequired(e => e.Instance);
+            complex.Property(e => e.DatabaseOverride);
+        }
+    }
 }
 
 public static class ForQueryInstanceDatabaseDTO

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
@@ -16,10 +17,9 @@ namespace EtherGizmos.SqlMonitor.Api.Controllers;
 /// <summary>
 /// Provides endpoints for <see cref="Query"/> records.
 /// </summary>
-[Route(BasePath)]
 public class QueriesController : ODataController
 {
-    private const string BasePath = "/api/v1/queries";
+    private const string BasePath = "api/v{version:apiVersion}/queries";
 
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
@@ -58,8 +58,8 @@ public class QueriesController : ODataController
     /// </summary>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpGet]
-    [Route(BasePath)]
+    [ApiVersion("0.1")]
+    [HttpGet(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<QueryDTO> queryOptions)
     {
         var finished = await Queries.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
@@ -72,8 +72,8 @@ public class QueriesController : ODataController
     /// <param name="id">The id of the record.</param>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpGet]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpGet(BasePath + "({id})")]
     public async Task<IActionResult> Get(Guid id, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
@@ -92,8 +92,8 @@ public class QueriesController : ODataController
     /// <param name="newRecord">The record to create.</param>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpPost]
-    [Route(BasePath)]
+    [ApiVersion("0.1")]
+    [HttpPost(BasePath)]
     public async Task<IActionResult> Create([FromBody] QueryDTO newRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
@@ -119,8 +119,8 @@ public class QueriesController : ODataController
     /// <param name="patchRecord">The delta patch to apply.</param>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpPatch]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpPatch(BasePath + "({id})")]
     public async Task<IActionResult> Update(Guid id, [FromBody] Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
@@ -153,8 +153,8 @@ public class QueriesController : ODataController
     /// </summary>
     /// <param name="id">The id of the record to delete.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpDelete]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpDelete(BasePath + "({id})")]
     public async Task<IActionResult> Delete(Guid id)
     {
         Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);

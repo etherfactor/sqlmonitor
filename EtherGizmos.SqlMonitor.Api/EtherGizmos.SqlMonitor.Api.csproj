@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.OData.ApiExplorer" Version="6.*" />
     <PackageReference Include="DistributedLock.Redis" Version="1.*" />
     <PackageReference Include="EtherGizmos.Extensions.DependencyInjection.ChildContainers" Version="0.1.0-ci.2" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
