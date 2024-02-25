@@ -26,18 +26,15 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
     {
         var optionsValue = _options.Value;
 
-        var builder = new SqlConnectionStringBuilder
-        {
-            DataSource = optionsValue.DataSource,
-            InitialCatalog = optionsValue.InitialCatalog,
-            TrustServerCertificate = optionsValue.TrustServerCertificate,
-            IntegratedSecurity = optionsValue.IntegratedSecurity
-        };
+        var builder = new SqlConnectionStringBuilder();
 
-        foreach (string key in optionsValue.AdditionalProperties.Keys)
+        foreach (string key in optionsValue.AllProperties.Keys)
         {
-            string value = optionsValue.AdditionalProperties[key];
-            builder.Add(key, value);
+            string? value = optionsValue.AllProperties[key];
+            if (value is not null)
+            {
+                builder.Add(key, value);
+            }
         }
 
         return builder.ConnectionString;

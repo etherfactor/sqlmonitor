@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Collections.Concurrent;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
@@ -29,49 +30,51 @@ public static class IServiceCollectionChildExtensions
     {
         //Add the factory that can produce child containers
         @this.TryAddSingleton<ChildServiceProviderFactory>();
+        //@this.TryAddSingleton<ChildServiceProviderSingletonSourceResolver>();
+        //@this.TryAddScoped<ChildServiceProviderScopedSourceResolver>();
 
         //Produce the next child container id
         var childContainerId = GetChildContainerId();
 
         //Construct a builder for the child container
         var childServices = new ServiceCollection();
-        var builder = new ChildContainerBuilder(childContainerId, @this, childServices);
+        var builder = new ChildContainerBuilder(childContainerId, @this, childServices, configureChild);
 
-        //Create a scoped service container
-        @this.AddSingleton<ChildServiceProviderSingletonSource>(parentProvider =>
-        {
-            var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
+        ////Create a scoped service container
+        //@this.AddSingleton<ChildServiceProviderSingletonSource>(parentProvider =>
+        //{
+        //    var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
 
-            //Add the child container to the factory
-            configureChild(childServices, parentProvider);
-            factory.AddServiceProvider(childContainerId, childServices, builder.Imports);
+        //    //Add the child container to the factory
+        //    factory.TryAddServiceCollection(childContainerId, childServices, builder.ConfigureChild, builder.Imports);
+        //    factory.GetSingletonServiceProvider(childContainerId, parentProvider);
 
-            //Pull the generated singleton container out of the factory
-            var childProvider = factory.GetSingletonServiceProvider(childContainerId, parentProvider);
+        //    //Pull the generated singleton container out of the factory
+        //    var childProvider = factory.GetSingletonServiceProvider(childContainerId, parentProvider);
 
-            //Create a reference to the singleton child container and add it to the parent
-            var source = new ChildServiceProviderSingletonSource(childContainerId);
-            source.SetProvider(childProvider);
+        //    //Create a reference to the singleton child container and add it to the parent
+        //    var source = new ChildServiceProviderSingletonSource(childContainerId);
+        //    source.SetProvider(childProvider);
 
-            return source;
-        });
+        //    return source;
+        //});
 
-        @this.AddScoped<ChildServiceProviderScopedSource>(parentProvider =>
-        {
-            //Generating the singleton source configures the factory
-            parentProvider.GetRequiredService<ChildServiceProviderSingletonSource>();
+        //@this.AddScoped<ChildServiceProviderScopedSource>(parentProvider =>
+        //{
+        //    //Generating the singleton source configures the factory
+        //    parentProvider.GetRequiredService<ChildServiceProviderSingletonSource>();
 
-            var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
+        //    var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
 
-            //Pull the generated scoped container out of the factory
-            var childProvider = factory.GetScopedServiceProvider(childContainerId, parentProvider);
+        //    //Pull the generated scoped container out of the factory
+        //    var childProvider = factory.GetScopedServiceProvider(childContainerId, parentProvider);
 
-            //Create a reference to the scoped child container and add it to the parent
-            var source = new ChildServiceProviderScopedSource(childContainerId);
-            source.SetProvider(childProvider);
+        //    //Create a reference to the scoped child container and add it to the parent
+        //    var source = new ChildServiceProviderScopedSource(childContainerId);
+        //    source.SetProvider(childProvider);
 
-            return source;
-        });
+        //    return source;
+        //});
 
         return builder;
     }
@@ -136,32 +139,37 @@ public static class IServiceCollectionChildExtensions
 
         private readonly IServiceCollection _parentServices;
         private readonly IServiceCollection _childServices;
+        private readonly Action<IServiceCollection, IServiceProvider> _configureChild;
         private readonly List<(Type ServiceType, ServiceLifetime Lifetime)> _childImports = new();
 
+        public Action<IServiceCollection, IServiceProvider> ConfigureChild => _configureChild;
         public List<(Type ServiceType, ServiceLifetime Lifetime)> Imports => _childImports;
 
         public ChildContainerBuilder(
             Guid childContainerId,
             IServiceCollection parentServices,
-            IServiceCollection childServices)
+            IServiceCollection childServices,
+            Action<IServiceCollection, IServiceProvider> configureChild)
         {
             _childContainerId = childContainerId;
             _parentServices = parentServices;
             _childServices = childServices;
+            _configureChild = configureChild;
         }
 
         IChildContainerBuilder IChildContainerBuilder.ForwardScoped<TService>()
         {
-            _parentServices.AddScoped((Func<IServiceProvider, TService>)(services =>
+            _parentServices.AddScoped<TService>(services =>
             {
-                var source = services.GetServices<ChildServiceProviderScopedSource>()
-                    .Single(e => e.Id == _childContainerId);
+                var factory = services.GetRequiredService<ChildServiceProviderFactory>();
 
-                var thisServiceProvider = source.ChildProvider;
-                var service = ServiceProviderServiceExtensions.GetRequiredService<TService>(thisServiceProvider);
+                factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
+                var thisServiceProvider = factory.GetScopedServiceProvider(_childContainerId, services);
+
+                var service = thisServiceProvider.GetRequiredService<TService>();
 
                 return service;
-            }));
+            });
 
             return this;
         }
@@ -170,10 +178,11 @@ public static class IServiceCollectionChildExtensions
         {
             _parentServices.AddSingleton<TService>(services =>
             {
-                var source = services.GetServices<ChildServiceProviderSingletonSource>()
-                    .Single(e => e.Id == _childContainerId);
+                var factory = services.GetRequiredService<ChildServiceProviderFactory>();
 
-                var thisServiceProvider = source.ChildProvider;
+                factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
+                var thisServiceProvider = factory.GetSingletonServiceProvider(_childContainerId, services);
+
                 var service = thisServiceProvider.GetRequiredService<TService>();
 
                 return service;
@@ -186,10 +195,11 @@ public static class IServiceCollectionChildExtensions
         {
             _parentServices.AddTransient<TService>(services =>
             {
-                var allSources = services.GetServices<ChildServiceProviderSingletonSource>();
-                var thisSource = allSources.Single(e => e.Id == _childContainerId);
+                var factory = services.GetRequiredService<ChildServiceProviderFactory>();
 
-                var thisServiceProvider = thisSource.ChildProvider;
+                factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
+                var thisServiceProvider = factory.GetSingletonServiceProvider(_childContainerId, services);
+
                 var service = thisServiceProvider.GetRequiredService<TService>();
 
                 return service;
@@ -233,39 +243,56 @@ public static class IServiceCollectionChildExtensions
     /// </summary>
     private class ChildServiceProviderFactory
     {
-        private readonly Dictionary<Guid, IServiceProvider> _childProviders = new();
+        private readonly IServiceProvider _parentRootProvider;
+        private readonly ConcurrentDictionary<Guid, IServiceProvider> _childProviders = new();
 
-        public void AddServiceProvider(
+        public ChildServiceProviderFactory(
+            IServiceProvider parentRootProvider)
+        {
+            _parentRootProvider = parentRootProvider;
+        }
+
+        public void TryAddServiceCollection(
             Guid id,
-            IServiceCollection services,
+            IServiceCollection childServices,
+            Action<IServiceCollection, IServiceProvider> configureChild,
             List<(Type ServiceType, ServiceLifetime Lifetime)> imports)
         {
-            services.AddSingleton<ParentServiceProviderSingletonSource>();
-            services.AddScoped<ParentServiceProviderScopedSource>();
-
-            foreach (var import in imports)
-            {
-                ServiceDescriptor descriptor;
-                if (import.Lifetime == ServiceLifetime.Scoped)
+            //Attempt to build and add the provider
+            _childProviders.AddOrUpdate(
+                id,
+                id =>
                 {
-                    descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
-                        childProvider.GetRequiredService<ParentServiceProviderScopedSource>()
-                            .ParentProvider
-                            .GetRequiredService(import.ServiceType),
-                        import.Lifetime);
-                }
-                else
-                {
-                    descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
-                        childProvider.GetRequiredService<ParentServiceProviderSingletonSource>()
-                            .ParentProvider
-                            .GetRequiredService(import.ServiceType),
-                        import.Lifetime);
-                }
-                services.Add(descriptor);
-            }
+                    childServices.AddSingleton<ParentServiceProviderSingletonSource>();
+                    childServices.AddScoped<ParentServiceProviderScopedSource>();
 
-            _childProviders.Add(id, services.BuildServiceProvider());
+                    configureChild(childServices, _parentRootProvider);
+
+                    foreach (var import in imports)
+                    {
+                        ServiceDescriptor descriptor;
+                        if (import.Lifetime == ServiceLifetime.Scoped)
+                        {
+                            descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
+                                childProvider.GetRequiredService<ParentServiceProviderScopedSource>()
+                                    .ParentProvider
+                                    .GetRequiredService(import.ServiceType),
+                                import.Lifetime);
+                        }
+                        else
+                        {
+                            descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
+                                childProvider.GetRequiredService<ParentServiceProviderSingletonSource>()
+                                    .ParentProvider
+                                    .GetRequiredService(import.ServiceType),
+                                import.Lifetime);
+                        }
+                        childServices.Add(descriptor);
+                    }
+
+                    return childServices.BuildServiceProvider();
+                },
+                (_, old) => old);
         }
 
         /// <summary>
@@ -329,6 +356,70 @@ public static class IServiceCollectionChildExtensions
         public void SetProvider(IServiceProvider parentProvider)
         {
             _parentProvider = parentProvider;
+        }
+    }
+
+    private class ChildServiceProviderSingletonSourceResolver
+    {
+        private readonly ChildServiceProviderFactory _factory;
+        private readonly IServiceProvider _parentProvider;
+        private readonly ConcurrentDictionary<Guid, ChildServiceProviderSingletonSource> _sources = new();
+
+        public ChildServiceProviderSingletonSourceResolver(
+            ChildServiceProviderFactory factory,
+            IServiceProvider parentProvider)
+        {
+            _factory = factory;
+            _parentProvider = parentProvider;
+        }
+
+        public ChildServiceProviderSingletonSource ResolveFor(Guid id)
+        {
+            var result = _sources.AddOrUpdate(
+                id,
+                id =>
+                {
+                    var provider = new ChildServiceProviderSingletonSource(id);
+
+                    var childProvider = _factory.GetSingletonServiceProvider(id, _parentProvider);
+                    provider.SetProvider(childProvider);
+
+                    return provider;
+                },
+                (_, old) => old);
+            return result;
+        }
+    }
+
+    private class ChildServiceProviderScopedSourceResolver
+    {
+        private readonly ChildServiceProviderFactory _factory;
+        private readonly IServiceProvider _parentProvider;
+        private readonly ConcurrentDictionary<Guid, ChildServiceProviderScopedSource> _sources = new();
+
+        public ChildServiceProviderScopedSourceResolver(
+            ChildServiceProviderFactory factory,
+            IServiceProvider parentProvider)
+        {
+            _factory = factory;
+            _parentProvider = parentProvider;
+        }
+
+        public ChildServiceProviderScopedSource ResolveFor(Guid id)
+        {
+            var result = _sources.AddOrUpdate(
+                id,
+                id =>
+                {
+                    var provider = new ChildServiceProviderScopedSource(id);
+
+                    var childProvider = _factory.GetSingletonServiceProvider(id, _parentProvider);
+                    provider.SetProvider(childProvider);
+
+                    return provider;
+                },
+                (_, old) => old);
+            return result;
         }
     }
 

@@ -4,21 +4,23 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 
 public class SqlServerOptions
 {
-    public string DataSource { get; set; } = null!;
+    public Dictionary<string, string?> AllProperties { get; set; } = new();
 
-    public string InitialCatalog { get; set; } = null!;
+    private string? GetProperty(string name)
+    {
+        if (AllProperties.TryGetValue(name, out string? value))
+        {
+            return value;
+        }
 
-    public bool TrustServerCertificate { get; set; }
-
-    public bool IntegratedSecurity { get; set; }
-
-    public Dictionary<string, string> AdditionalProperties { get; set; } = new();
+        return null;
+    }
 
     public void AssertValid(string rootPath)
     {
-        if (DataSource is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, e => e.DataSource);
-        if (InitialCatalog is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, e => e.InitialCatalog);
+        if (GetProperty("Data Source") is null && GetProperty("Server") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Data Source", typeof(string));
+        if (GetProperty("Initial Catalog") is null && GetProperty("Database") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Initial Catalog", typeof(string));
     }
 }

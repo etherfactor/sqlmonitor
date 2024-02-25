@@ -86,8 +86,12 @@ builder.Services
     {
         var path = "Connections:SqlServer";
 
-        conf.GetSection(path)
-            .Bind(opt);
+        var section = conf.GetSection(path);
+
+        section.Bind(opt);
+        opt.AllProperties = section.GetChildren()
+            .Where(e => !typeof(SqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
+            .ToDictionary(e => e.Key, e => e.Value);
 
         if (usage.Value.Database == DatabaseType.SqlServer)
         {
@@ -163,6 +167,7 @@ builder.Services
             childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>(); 
         }
     })
+    .ImportSingleton<IOptions<SqlServerOptions>>()
     .ForwardTransient<IDatabaseConnectionProvider>();
 
 builder.Services

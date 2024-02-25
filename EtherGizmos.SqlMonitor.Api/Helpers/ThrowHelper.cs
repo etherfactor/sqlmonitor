@@ -10,7 +10,13 @@ internal static class ThrowHelper
     internal static void ForMissingConfiguration<TOptions, TProperty>(string rootPath, TOptions options, Expression<Func<TOptions, TProperty>> propertyExpression)
     {
         var propertyName = propertyExpression.GetMemberName();
-        throw new InvalidOperationException($"The property at configuration path '{rootPath}:{propertyName}' of type '{typeof(TProperty)}' must be specified.");
+        ForMissingConfiguration(rootPath, options, propertyName, typeof(TProperty));
+    }
+
+    [DoesNotReturn]
+    internal static void ForMissingConfiguration<TOptions>(string rootPath, TOptions options, string propertyName, Type propertyType)
+    {
+        throw new InvalidOperationException($"The property at configuration path '{rootPath}:{propertyName}' of type '{propertyType}' must be specified.");
     }
 
     [DoesNotReturn]
