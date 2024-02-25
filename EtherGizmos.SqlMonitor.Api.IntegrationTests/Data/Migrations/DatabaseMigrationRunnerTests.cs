@@ -23,7 +23,7 @@ internal class DatabaseMigrationRunnerTests
             .AddInMemoryCollection(options)
             .Build();
 
-        var connectionProvider = new DatabaseConnectionProvider(config);
+        var connectionProvider = new SqlServerDatabaseConnectionProvider(config);
         var connectionString = connectionProvider.GetConnectionStringForMaster();
 
         using var connection = new SqlConnection(connectionString);

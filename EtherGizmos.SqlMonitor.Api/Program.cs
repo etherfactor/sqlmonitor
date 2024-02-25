@@ -13,6 +13,8 @@ using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
+using EtherGizmos.SqlMonitor.Database;
+using FluentMigrator.Runner;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +81,21 @@ builder.Services
     });
 
 builder.Services
+    .AddOptions<SqlServerOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:SqlServer";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        if (usage.Value.Database == DatabaseType.SqlServer)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
     .AddSerilog(Log.Logger);
 
 builder.Services.AddAuthentication();
@@ -104,10 +121,11 @@ builder.Services.AddSwaggerGen();
 builder.Services
     .AddDbContext<DatabaseContext>((services, opt) =>
     {
-        var options = builder.Configuration.GetSection("Connections:Use")
-            .Get<UsageOptions>() ?? new UsageOptions();
+        var usageOptions = services
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
 
-        if (options.Database == DatabaseType.SqlServer)
+        if (usageOptions.Database == DatabaseType.SqlServer)
         {
             var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
 
@@ -118,12 +136,11 @@ builder.Services
         }
         else
         {
-            throw new InvalidOperationException(string.Format("Unknown database type: {0}", options.Database));
+            throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
         }
 
         opt.UseLazyLoadingProxies(true);
     })
-    .AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>()
     .AddScoped<ISaveService, SaveService>()
     .AddScoped<IInstanceService, InstanceService>()
     .AddScoped<IInstanceMetricBySecondService, InstanceMetricBySecondService>()
@@ -133,6 +150,78 @@ builder.Services
     .AddScoped<IQueryService, QueryService>()
     .AddScoped<ISecurableService, SecurableService>()
     .AddScoped<IUserService, UserService>();
+
+builder.Services
+    .AddChildContainer((childServices, parentServices) =>
+    {
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
+
+        if (usageOptions.Database == DatabaseType.SqlServer)
+        {
+            childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>(); 
+        }
+    })
+    .ForwardTransient<IDatabaseConnectionProvider>();
+
+builder.Services
+    .AddChildContainer((childServices, parentServices) =>
+    {
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
+
+        var connectionProvider = parentServices.GetRequiredService<IDatabaseConnectionProvider>();
+
+        childServices.AddFluentMigratorCore()
+            .ConfigureRunner(opt =>
+            {
+                if (usageOptions.Database == DatabaseType.SqlServer)
+                {
+                    opt.AddSqlServer()
+                        .WithGlobalConnectionString(connectionProvider.GetConnectionString())
+                        .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
+                        .WithVersionTable(new CustomVersionTableMetadata());
+                }
+                else
+                {
+                    throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
+                }
+            });
+    })
+    .ForwardTransient<IMigrationRunner>();
+
+builder.Services
+    .AddChildContainer((childServices, parentServices) =>
+    {
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
+
+        childServices.AddCaching(opt =>
+        {
+            if (usageOptions.Cache == CacheType.InMemory)
+            {
+                opt.UsingInMemory();
+            }
+            else if (usageOptions.Cache == CacheType.Redis)
+            {
+                var redisOptions = parentServices
+                    .GetRequiredService<IOptions<RedisOptions>>()
+                    .Value;
+
+                opt.UsingRedis(redisOptions);
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
+            }
+        });
+
+        childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+    })
+    .ForwardCaching();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>
@@ -214,37 +303,6 @@ builder.Services
         });
     })
     .ForwardMassTransit();
-
-builder.Services
-    .AddChildContainer((childServices, parentServices) =>
-    {
-        var usageOptions = parentServices
-            .GetRequiredService<IOptions<UsageOptions>>()
-            .Value;
-
-        childServices.AddCaching(opt =>
-        {
-            if (usageOptions.Cache == CacheType.InMemory)
-            {
-                opt.UsingInMemory();
-            }
-            else if (usageOptions.Cache == CacheType.Redis)
-            {
-                var redisOptions = parentServices
-                    .GetRequiredService<IOptions<RedisOptions>>()
-                    .Value;
-
-                opt.UsingRedis(redisOptions);
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
-            }
-        });
-
-        childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
-    })
-    .ForwardCaching();
 
 builder.Services.AddMapper();
 

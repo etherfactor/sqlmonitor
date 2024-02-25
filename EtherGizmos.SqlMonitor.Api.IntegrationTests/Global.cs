@@ -35,7 +35,7 @@ internal static class Global
 
         var config = configBuilder.Build();
 
-        ConnectionProvider = new DatabaseConnectionProvider(config);
+        ConnectionProvider = new SqlServerDatabaseConnectionProvider(config);
 
         //Connection string for master will be used to create a new database for each test
         string connectionString = ConnectionProvider.GetConnectionStringForMaster();

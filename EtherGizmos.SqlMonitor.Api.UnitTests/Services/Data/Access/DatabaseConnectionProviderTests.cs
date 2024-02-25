@@ -5,7 +5,7 @@ namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Data.Access;
 
 internal class DatabaseConnectionProviderTests
 {
-    private DatabaseConnectionProvider? ConnectionProvider { get; set; }
+    private SqlServerDatabaseConnectionProvider? ConnectionProvider { get; set; }
 
     [SetUp]
     public void SetUp()
@@ -24,7 +24,7 @@ internal class DatabaseConnectionProviderTests
             .AddInMemoryCollection(configData)
             .Build();
 
-        ConnectionProvider = new DatabaseConnectionProvider(config);
+        ConnectionProvider = new SqlServerDatabaseConnectionProvider(config);
 
         Assert.Throws<InvalidOperationException>(() =>
         {
@@ -47,7 +47,7 @@ internal class DatabaseConnectionProviderTests
             .AddInMemoryCollection(configData)
             .Build();
 
-        ConnectionProvider = new DatabaseConnectionProvider(config);
+        ConnectionProvider = new SqlServerDatabaseConnectionProvider(config);
 
         var connection = ConnectionProvider.GetConnectionString();
 
