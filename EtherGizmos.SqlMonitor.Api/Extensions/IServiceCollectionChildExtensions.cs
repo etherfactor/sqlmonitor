@@ -28,7 +28,7 @@ public static class IServiceCollectionChildExtensions
     /// <param name="this">Itself.</param>
     /// <param name="configureChild">The child configuration.</param>
     /// <returns>Itself.</returns>
-    public static ISingletonChildContainerBuilder AddChildContainer(this IServiceCollection @this, Action<IServiceCollection, IServiceProvider> configureChild)
+    public static IChildContainerBuilder AddChildContainer(this IServiceCollection @this, Action<IServiceCollection, IServiceProvider> configureChild)
     {
         //Produce the next child container id
         var childContainerId = GetChildContainerId();
@@ -45,12 +45,23 @@ public static class IServiceCollectionChildExtensions
         });
 
         //Create a scoped service container
-        @this.AddSingleton(parentProvider =>
+        @this.AddSingleton<ChildServiceProviderSingletonSource>(parentProvider =>
         {
             var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
-            var childProvider = factory.GetServiceProvider(parentProvider);
+            var childProvider = factory.GetSingletonServiceProvider(parentProvider);
 
-            var source = new ChildServiceProviderSource();
+            var source = new ChildServiceProviderSingletonSource();
+            source.SetProvider(childProvider);
+
+            return source;
+        });
+
+        @this.AddScoped<ChildServiceProviderScopedSource>(parentProvider =>
+        {
+            var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
+            var childProvider = factory.GetScopedServiceProvider(parentProvider);
+
+            var source = new ChildServiceProviderScopedSource();
             source.SetProvider(childProvider);
 
             return source;
@@ -101,72 +112,58 @@ public static class IServiceCollectionChildExtensions
     /// <summary>
     /// Provides methods to pass services back and forth between a parent and a child service container. Does not initialize any scopes.
     /// </summary>
-    public interface ISingletonChildContainerBuilder
-    {
-        /// <summary>
-        /// Forwards a singleton service from the child container back to the parent.
-        /// </summary>
-        /// <typeparam name="TService">The type of service being forwarded.</typeparam>
-        /// <returns>The builder.</returns>
-        ISingletonChildContainerBuilder ForwardSingleton<TService>() where TService : class;
-
-        /// <summary>
-        /// Forwards a transient service from the child container back to the parent.
-        /// </summary>
-        /// <typeparam name="TService">The type of service being forwarded.</typeparam>
-        /// <returns>The builder.</returns>
-        ISingletonChildContainerBuilder ForwardTransient<TService>() where TService : class;
-
-        /// <summary>
-        /// Imports a singleton service from the parent container into the child.
-        /// </summary>
-        /// <typeparam name="TService">The type of service being imported.</typeparam>
-        /// <returns>The builder.</returns>
-        ISingletonChildContainerBuilder ImportSingleton<TService>() where TService : class;
-
-        /// <summary>
-        /// Imports a transient service from the parent container into the child.
-        /// </summary>
-        /// <typeparam name="TService">The type of service being imported.</typeparam>
-        /// <returns>The builder.</returns>
-        ISingletonChildContainerBuilder ImportTransient<TService>() where TService : class;
-    }
-
-    /// <summary>
-    /// Provides methods to pass services back and forth between a parent and a child service container. Initializes a new scope for each parent scope.
-    /// </summary>
-    public interface IScopedChildContainerBuilder
+    public interface IChildContainerBuilder
     {
         /// <summary>
         /// Forwards a scoped service from the child container back to the parent.
         /// </summary>
         /// <typeparam name="TService">The type of service being forwarded.</typeparam>
         /// <returns>The builder.</returns>
-        IScopedChildContainerBuilder ForwardScoped<TService>() where TService : class;
+        IChildContainerBuilder ForwardScoped<TService>() where TService : class;
+
+        /// <summary>
+        /// Forwards a singleton service from the child container back to the parent.
+        /// </summary>
+        /// <typeparam name="TService">The type of service being forwarded.</typeparam>
+        /// <returns>The builder.</returns>
+        IChildContainerBuilder ForwardSingleton<TService>() where TService : class;
+
+        /// <summary>
+        /// Forwards a transient service from the child container back to the parent.
+        /// </summary>
+        /// <typeparam name="TService">The type of service being forwarded.</typeparam>
+        /// <returns>The builder.</returns>
+        IChildContainerBuilder ForwardTransient<TService>() where TService : class;
+
+        /// <summary>
+        /// Imports logging from the parent container into the child.
+        /// </summary>
+        /// <returns>The builder.</returns>
+        IChildContainerBuilder ImportLogging();
 
         /// <summary>
         /// Imports a scoped service from the parent container into the child.
         /// </summary>
         /// <typeparam name="TService">The type of service being imported.</typeparam>
         /// <returns>The builder.</returns>
-        IScopedChildContainerBuilder ImportScoped<TService>() where TService : class;
+        IChildContainerBuilder ImportScoped<TService>() where TService : class;
 
         /// <summary>
         /// Imports a singleton service from the parent container into the child.
         /// </summary>
         /// <typeparam name="TService">The type of service being imported.</typeparam>
         /// <returns>The builder.</returns>
-        ISingletonChildContainerBuilder ImportSingleton<TService>() where TService : class;
+        IChildContainerBuilder ImportSingleton<TService>() where TService : class;
 
         /// <summary>
         /// Imports a transient service from the parent container into the child.
         /// </summary>
         /// <typeparam name="TService">The type of service being imported.</typeparam>
         /// <returns>The builder.</returns>
-        ISingletonChildContainerBuilder ImportTransient<TService>() where TService : class;
+        IChildContainerBuilder ImportTransient<TService>() where TService : class;
     }
 
-    private class ChildContainerBuilder : ISingletonChildContainerBuilder, IScopedChildContainerBuilder
+    private class ChildContainerBuilder : IChildContainerBuilder
     {
         private readonly bool _isScoped;
 
@@ -194,27 +191,39 @@ public static class IServiceCollectionChildExtensions
         /// <returns>The child service provider factory.</returns>
         public ChildServiceProviderFactory CreateFactory(IServiceProvider parentProvider)
         {
-            _childServices.AddScoped<ParentServiceProviderSource>();
+            _childServices.AddSingleton<ParentServiceProviderSingletonSource>();
+            _childServices.AddScoped<ParentServiceProviderScopedSource>();
 
             foreach (var import in _childImports)
             {
-                var descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
-                    childProvider.GetRequiredService<ParentServiceProviderSource>()
-                        .ParentProvider
-                        .GetRequiredService(import.ServiceType),
-                    import.Lifetime);
-
+                ServiceDescriptor descriptor;
+                if (import.Lifetime == ServiceLifetime.Scoped)
+                {
+                    descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
+                        childProvider.GetRequiredService<ParentServiceProviderScopedSource>()
+                            .ParentProvider
+                            .GetRequiredService(import.ServiceType),
+                        import.Lifetime);
+                }
+                else
+                {
+                    descriptor = ServiceDescriptor.Describe(import.ServiceType, childProvider =>
+                        childProvider.GetRequiredService<ParentServiceProviderSingletonSource>()
+                            .ParentProvider
+                            .GetRequiredService(import.ServiceType),
+                        import.Lifetime);
+                }
                 _childServices.Add(descriptor);
             }
 
             return new ChildServiceProviderFactory(_childServices);
         }
 
-        IScopedChildContainerBuilder IScopedChildContainerBuilder.ForwardScoped<TService>()
+        IChildContainerBuilder IChildContainerBuilder.ForwardScoped<TService>()
         {
             _parentServices.AddScoped<TService>(services =>
             {
-                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSource>>();
+                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderScopedSource>>();
                 var thisSource = allSources.ElementAt(_childContainerId);
 
                 var thisServiceProvider = thisSource.ChildProvider;
@@ -226,11 +235,11 @@ public static class IServiceCollectionChildExtensions
             return this;
         }
 
-        ISingletonChildContainerBuilder ISingletonChildContainerBuilder.ForwardSingleton<TService>()
+        IChildContainerBuilder IChildContainerBuilder.ForwardSingleton<TService>()
         {
             _parentServices.AddSingleton<TService>(services =>
             {
-                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSource>>();
+                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSingletonSource>>();
                 var thisSource = allSources.ElementAt(_childContainerId);
 
                 var thisServiceProvider = thisSource.ChildProvider;
@@ -242,11 +251,11 @@ public static class IServiceCollectionChildExtensions
             return this;
         }
 
-        ISingletonChildContainerBuilder ISingletonChildContainerBuilder.ForwardTransient<TService>()
+        IChildContainerBuilder IChildContainerBuilder.ForwardTransient<TService>()
         {
             _parentServices.AddTransient<TService>(services =>
             {
-                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSource>>();
+                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSingletonSource>>();
                 var thisSource = allSources.ElementAt(_childContainerId);
 
                 var thisServiceProvider = thisSource.ChildProvider;
@@ -258,35 +267,29 @@ public static class IServiceCollectionChildExtensions
             return this;
         }
 
-        IScopedChildContainerBuilder IScopedChildContainerBuilder.ImportScoped<TService>()
+        IChildContainerBuilder IChildContainerBuilder.ImportLogging()
+        {
+            _childImports.Add((typeof(ILoggerFactory), ServiceLifetime.Singleton));
+            _childServices.AddSingleton(typeof(ILogger<>), typeof(LoggerForward<>));
+
+            return this;
+        }
+
+        IChildContainerBuilder IChildContainerBuilder.ImportScoped<TService>()
         {
             _childImports.Add((typeof(TService), ServiceLifetime.Scoped));
 
             return this;
         }
 
-        ISingletonChildContainerBuilder IScopedChildContainerBuilder.ImportSingleton<TService>()
+        IChildContainerBuilder IChildContainerBuilder.ImportSingleton<TService>()
         {
             _childImports.Add((typeof(TService), ServiceLifetime.Singleton));
 
             return this;
         }
 
-        ISingletonChildContainerBuilder ISingletonChildContainerBuilder.ImportSingleton<TService>()
-        {
-            _childImports.Add((typeof(TService), ServiceLifetime.Singleton));
-
-            return this;
-        }
-
-        ISingletonChildContainerBuilder IScopedChildContainerBuilder.ImportTransient<TService>()
-        {
-            _childImports.Add((typeof(TService), ServiceLifetime.Transient));
-
-            return this;
-        }
-
-        ISingletonChildContainerBuilder ISingletonChildContainerBuilder.ImportTransient<TService>()
+        IChildContainerBuilder IChildContainerBuilder.ImportTransient<TService>()
         {
             _childImports.Add((typeof(TService), ServiceLifetime.Transient));
 
@@ -313,7 +316,7 @@ public static class IServiceCollectionChildExtensions
         /// Produces a scoped service provider.
         /// </summary>
         /// <returns></returns>
-        public IServiceProvider GetServiceProvider(IServiceProvider parentProvider)
+        public IServiceProvider GetScopedServiceProvider(IServiceProvider parentProvider)
         {
             _childProvider ??= _childServices.BuildServiceProvider();
 
@@ -321,14 +324,33 @@ public static class IServiceCollectionChildExtensions
                 .CreateScope()
                 .ServiceProvider;
 
-            var parentProviderSource = scope.GetRequiredService<ParentServiceProviderSource>();
-            parentProviderSource.SetProvider(parentProvider);
+            var parentProviderSingletonSource = scope.GetRequiredService<ParentServiceProviderSingletonSource>();
+            parentProviderSingletonSource.SetProvider(parentProvider);
+
+            var parentProviderScopedSource = scope.GetRequiredService<ParentServiceProviderScopedSource>();
+            parentProviderScopedSource.SetProvider(parentProvider);
+
+            return scope;
+        }
+
+        /// <summary>
+        /// Produces a scoped service provider.
+        /// </summary>
+        /// <returns></returns>
+        public IServiceProvider GetSingletonServiceProvider(IServiceProvider parentProvider)
+        {
+            _childProvider ??= _childServices.BuildServiceProvider();
+
+            var scope = _childProvider;
+
+            var parentProviderSingletonSource = scope.GetRequiredService<ParentServiceProviderSingletonSource>();
+            parentProviderSingletonSource.SetProvider(parentProvider);
 
             return scope;
         }
     }
 
-    private class ParentServiceProviderSource
+    private class ParentServiceProviderSingletonSource
     {
         private IServiceProvider? _parentProvider;
 
@@ -341,7 +363,20 @@ public static class IServiceCollectionChildExtensions
         }
     }
 
-    private class ChildServiceProviderSource
+    private class ParentServiceProviderScopedSource
+    {
+        private IServiceProvider? _parentProvider;
+
+        public IServiceProvider ParentProvider => _parentProvider
+            ?? throw new InvalidOperationException("No parent provider was specified");
+
+        public void SetProvider(IServiceProvider parentProvider)
+        {
+            _parentProvider = parentProvider;
+        }
+    }
+
+    private class ChildServiceProviderSingletonSource
     {
         private IServiceProvider? _childProvider;
 
@@ -351,6 +386,44 @@ public static class IServiceCollectionChildExtensions
         public void SetProvider(IServiceProvider childProvider)
         {
             _childProvider = childProvider;
+        }
+    }
+
+    private class ChildServiceProviderScopedSource
+    {
+        private IServiceProvider? _childProvider;
+
+        public IServiceProvider ChildProvider => _childProvider
+            ?? throw new InvalidOperationException("No child provider was specified");
+
+        public void SetProvider(IServiceProvider childProvider)
+        {
+            _childProvider = childProvider;
+        }
+    }
+
+    private class LoggerForward<T> : ILogger<T>
+    {
+        private readonly ILogger _logger;
+
+        public LoggerForward(ILoggerFactory loggerFactory)
+        {
+            _logger = loggerFactory.CreateLogger<T>();
+        }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return _logger.BeginScope(state);
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return _logger.IsEnabled(logLevel);
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            _logger.Log(logLevel, eventId, state, exception, formatter);
         }
     }
 }
