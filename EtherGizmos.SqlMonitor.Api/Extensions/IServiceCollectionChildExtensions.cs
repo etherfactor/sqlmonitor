@@ -30,8 +30,6 @@ public static class IServiceCollectionChildExtensions
     {
         //Add the factory that can produce child containers
         @this.TryAddSingleton<ChildServiceProviderFactory>();
-        //@this.TryAddSingleton<ChildServiceProviderSingletonSourceResolver>();
-        //@this.TryAddScoped<ChildServiceProviderScopedSourceResolver>();
 
         //Produce the next child container id
         var childContainerId = GetChildContainerId();
@@ -39,42 +37,6 @@ public static class IServiceCollectionChildExtensions
         //Construct a builder for the child container
         var childServices = new ServiceCollection();
         var builder = new ChildContainerBuilder(childContainerId, @this, childServices, configureChild);
-
-        ////Create a scoped service container
-        //@this.AddSingleton<ChildServiceProviderSingletonSource>(parentProvider =>
-        //{
-        //    var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
-
-        //    //Add the child container to the factory
-        //    factory.TryAddServiceCollection(childContainerId, childServices, builder.ConfigureChild, builder.Imports);
-        //    factory.GetSingletonServiceProvider(childContainerId, parentProvider);
-
-        //    //Pull the generated singleton container out of the factory
-        //    var childProvider = factory.GetSingletonServiceProvider(childContainerId, parentProvider);
-
-        //    //Create a reference to the singleton child container and add it to the parent
-        //    var source = new ChildServiceProviderSingletonSource(childContainerId);
-        //    source.SetProvider(childProvider);
-
-        //    return source;
-        //});
-
-        //@this.AddScoped<ChildServiceProviderScopedSource>(parentProvider =>
-        //{
-        //    //Generating the singleton source configures the factory
-        //    parentProvider.GetRequiredService<ChildServiceProviderSingletonSource>();
-
-        //    var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
-
-        //    //Pull the generated scoped container out of the factory
-        //    var childProvider = factory.GetScopedServiceProvider(childContainerId, parentProvider);
-
-        //    //Create a reference to the scoped child container and add it to the parent
-        //    var source = new ChildServiceProviderScopedSource(childContainerId);
-        //    source.SetProvider(childProvider);
-
-        //    return source;
-        //});
 
         return builder;
     }
@@ -356,110 +318,6 @@ public static class IServiceCollectionChildExtensions
         public void SetProvider(IServiceProvider parentProvider)
         {
             _parentProvider = parentProvider;
-        }
-    }
-
-    private class ChildServiceProviderSingletonSourceResolver
-    {
-        private readonly ChildServiceProviderFactory _factory;
-        private readonly IServiceProvider _parentProvider;
-        private readonly ConcurrentDictionary<Guid, ChildServiceProviderSingletonSource> _sources = new();
-
-        public ChildServiceProviderSingletonSourceResolver(
-            ChildServiceProviderFactory factory,
-            IServiceProvider parentProvider)
-        {
-            _factory = factory;
-            _parentProvider = parentProvider;
-        }
-
-        public ChildServiceProviderSingletonSource ResolveFor(Guid id)
-        {
-            var result = _sources.AddOrUpdate(
-                id,
-                id =>
-                {
-                    var provider = new ChildServiceProviderSingletonSource(id);
-
-                    var childProvider = _factory.GetSingletonServiceProvider(id, _parentProvider);
-                    provider.SetProvider(childProvider);
-
-                    return provider;
-                },
-                (_, old) => old);
-            return result;
-        }
-    }
-
-    private class ChildServiceProviderScopedSourceResolver
-    {
-        private readonly ChildServiceProviderFactory _factory;
-        private readonly IServiceProvider _parentProvider;
-        private readonly ConcurrentDictionary<Guid, ChildServiceProviderScopedSource> _sources = new();
-
-        public ChildServiceProviderScopedSourceResolver(
-            ChildServiceProviderFactory factory,
-            IServiceProvider parentProvider)
-        {
-            _factory = factory;
-            _parentProvider = parentProvider;
-        }
-
-        public ChildServiceProviderScopedSource ResolveFor(Guid id)
-        {
-            var result = _sources.AddOrUpdate(
-                id,
-                id =>
-                {
-                    var provider = new ChildServiceProviderScopedSource(id);
-
-                    var childProvider = _factory.GetSingletonServiceProvider(id, _parentProvider);
-                    provider.SetProvider(childProvider);
-
-                    return provider;
-                },
-                (_, old) => old);
-            return result;
-        }
-    }
-
-    private class ChildServiceProviderSingletonSource
-    {
-        public Guid Id { get; }
-
-        private IServiceProvider? _childProvider;
-
-        public IServiceProvider ChildProvider => _childProvider
-            ?? throw new InvalidOperationException("No child provider was specified");
-
-        public ChildServiceProviderSingletonSource(Guid id)
-        {
-            Id = id;
-        }
-
-        public void SetProvider(IServiceProvider childProvider)
-        {
-            _childProvider = childProvider;
-        }
-    }
-
-    private class ChildServiceProviderScopedSource
-    {
-        public Guid Id { get; }
-
-        private IServiceProvider? _childProvider;
-
-        public IServiceProvider ChildProvider => _childProvider
-            ?? throw new InvalidOperationException("No child provider was specified");
-
-        public ChildServiceProviderScopedSource(Guid id)
-        {
-            Id = id;
-        }
-
-        public void SetProvider(IServiceProvider childProvider)
-        {
-            _childProvider = childProvider;
         }
     }
 
