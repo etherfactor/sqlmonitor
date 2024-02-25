@@ -6,17 +6,12 @@
 public static class IServiceCollectionChildExtensions
 {
     /// <summary>
-    /// The previous child container id.
-    /// </summary>
-    private static int _childContainerId = -1;
-
-    /// <summary>
     /// Gets the next child container id.
     /// </summary>
     /// <returns>The next child container id.</returns>
-    private static int GetChildContainerId()
+    private static Guid GetChildContainerId()
     {
-        var childContainerId = Interlocked.Increment(ref _childContainerId);
+        var childContainerId = Guid.NewGuid();
         return childContainerId;
     }
 
@@ -35,7 +30,7 @@ public static class IServiceCollectionChildExtensions
 
         //Construct a builder for the child container
         var childServices = new ServiceCollection();
-        var builder = new ChildContainerBuilder(false, @this, childServices, childContainerId);
+        var builder = new ChildContainerBuilder(childContainerId, @this, childServices);
 
         //Add a singleton factory producing child service containers
         @this.AddSingleton(parentProvider =>
@@ -47,10 +42,12 @@ public static class IServiceCollectionChildExtensions
         //Create a scoped service container
         @this.AddSingleton<ChildServiceProviderSingletonSource>(parentProvider =>
         {
-            var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
+            var factory = parentProvider.GetServices<ChildServiceProviderFactory>()
+                .Single(e => e.Id == childContainerId);
+
             var childProvider = factory.GetSingletonServiceProvider(parentProvider);
 
-            var source = new ChildServiceProviderSingletonSource();
+            var source = new ChildServiceProviderSingletonSource(childContainerId);
             source.SetProvider(childProvider);
 
             return source;
@@ -58,10 +55,12 @@ public static class IServiceCollectionChildExtensions
 
         @this.AddScoped<ChildServiceProviderScopedSource>(parentProvider =>
         {
-            var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
+            var factory = parentProvider.GetServices<ChildServiceProviderFactory>()
+                .Single(e => e.Id == childContainerId);
+
             var childProvider = factory.GetScopedServiceProvider(parentProvider);
 
-            var source = new ChildServiceProviderScopedSource();
+            var source = new ChildServiceProviderScopedSource(childContainerId);
             source.SetProvider(childProvider);
 
             return source;
@@ -69,45 +68,6 @@ public static class IServiceCollectionChildExtensions
 
         return builder;
     }
-
-    ///// <summary>
-    ///// Adds a child container to the current service collection. Child containers exist on their own, with their own
-    ///// services. Services from the parent container can be imported into the child container, and services added to the
-    ///// child container can be forwarded back to the parent container.
-    ///// </summary>
-    ///// <param name="this">Itself.</param>
-    ///// <param name="configureChild">The child configuration.</param>
-    ///// <returns>Itself.</returns>
-    //public static IScopedChildContainerBuilder AddScopedChildContainer(this IServiceCollection @this, Action<IServiceCollection, IServiceProvider> configureChild)
-    //{
-    //    //Produce the next child container id
-    //    var childContainerId = GetChildContainerId();
-
-    //    //Construct a builder for the child container
-    //    var childServices = new ServiceCollection();
-    //    var builder = new ChildContainerBuilder(true, @this, childServices, childContainerId);
-
-    //    //Add a singleton factory producing child service containers
-    //    @this.AddScoped(parentProvider =>
-    //    {
-    //        configureChild(childServices, parentProvider);
-    //        return builder.CreateFactory(parentProvider);
-    //    });
-
-    //    //Create a scoped service container
-    //    @this.AddScoped(parentProvider =>
-    //    {
-    //        var factory = parentProvider.GetRequiredService<ChildServiceProviderFactory>();
-    //        var childProvider = factory.GetServiceProvider(parentProvider);
-
-    //        var source = new ChildServiceProviderSource();
-    //        source.SetProvider(childProvider);
-
-    //        return source;
-    //    });
-
-    //    return builder;
-    //}
 
     /// <summary>
     /// Provides methods to pass services back and forth between a parent and a child service container. Does not initialize any scopes.
@@ -165,23 +125,20 @@ public static class IServiceCollectionChildExtensions
 
     private class ChildContainerBuilder : IChildContainerBuilder
     {
-        private readonly bool _isScoped;
+        private readonly Guid _childContainerId;
 
         private readonly IServiceCollection _parentServices;
         private readonly IServiceCollection _childServices;
-        private readonly int _childContainerId;
-        private readonly List<(Type ServiceType, ServiceLifetime Lifetime)> _childImports = new List<(Type ServiceType, ServiceLifetime Lifetime)>();
+        private readonly List<(Type ServiceType, ServiceLifetime Lifetime)> _childImports = new();
 
         public ChildContainerBuilder(
-            bool isScoped,
+            Guid childContainerId,
             IServiceCollection parentServices,
-            IServiceCollection childServices,
-            int childContainerId)
+            IServiceCollection childServices)
         {
-            _isScoped = isScoped;
+            _childContainerId = childContainerId;
             _parentServices = parentServices;
             _childServices = childServices;
-            _childContainerId = childContainerId;
         }
 
         /// <summary>
@@ -216,21 +173,21 @@ public static class IServiceCollectionChildExtensions
                 _childServices.Add(descriptor);
             }
 
-            return new ChildServiceProviderFactory(_childServices);
+            return new ChildServiceProviderFactory(_childContainerId, _childServices);
         }
 
         IChildContainerBuilder IChildContainerBuilder.ForwardScoped<TService>()
         {
-            _parentServices.AddScoped<TService>(services =>
+            _parentServices.AddScoped((Func<IServiceProvider, TService>)(services =>
             {
-                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderScopedSource>>();
-                var thisSource = allSources.ElementAt(_childContainerId);
+                var source = services.GetServices<ChildServiceProviderScopedSource>()
+                    .Single(e => e.Id == _childContainerId);
 
-                var thisServiceProvider = thisSource.ChildProvider;
-                var service = thisServiceProvider.GetRequiredService<TService>();
+                var thisServiceProvider = source.ChildProvider;
+                var service = ServiceProviderServiceExtensions.GetRequiredService<TService>(thisServiceProvider);
 
                 return service;
-            });
+            }));
 
             return this;
         }
@@ -239,10 +196,10 @@ public static class IServiceCollectionChildExtensions
         {
             _parentServices.AddSingleton<TService>(services =>
             {
-                var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSingletonSource>>();
-                var thisSource = allSources.ElementAt(_childContainerId);
+                var source = services.GetServices<ChildServiceProviderSingletonSource>()
+                    .Single(e => e.Id == _childContainerId);
 
-                var thisServiceProvider = thisSource.ChildProvider;
+                var thisServiceProvider = source.ChildProvider;
                 var service = thisServiceProvider.GetRequiredService<TService>();
 
                 return service;
@@ -256,7 +213,7 @@ public static class IServiceCollectionChildExtensions
             _parentServices.AddTransient<TService>(services =>
             {
                 var allSources = services.GetRequiredService<IEnumerable<ChildServiceProviderSingletonSource>>();
-                var thisSource = allSources.ElementAt(_childContainerId);
+                var thisSource = allSources.Single(e => e.Id == _childContainerId);
 
                 var thisServiceProvider = thisSource.ChildProvider;
                 var service = thisServiceProvider.GetRequiredService<TService>();
@@ -302,14 +259,18 @@ public static class IServiceCollectionChildExtensions
     /// </summary>
     private class ChildServiceProviderFactory
     {
-        private readonly IServiceCollection _childServices;
+        public Guid Id { get; }
 
-        private IServiceProvider? _childProvider;
+        private readonly IServiceCollection _childServices;
+        private readonly IServiceProvider _childProvider;
 
         public ChildServiceProviderFactory(
+            Guid id,
             IServiceCollection childServices)
         {
+            Id = id;
             _childServices = childServices;
+            _childProvider = _childServices.BuildServiceProvider();
         }
 
         /// <summary>
@@ -318,8 +279,6 @@ public static class IServiceCollectionChildExtensions
         /// <returns></returns>
         public IServiceProvider GetScopedServiceProvider(IServiceProvider parentProvider)
         {
-            _childProvider ??= _childServices.BuildServiceProvider();
-
             var scope = _childProvider!
                 .CreateScope()
                 .ServiceProvider;
@@ -339,8 +298,6 @@ public static class IServiceCollectionChildExtensions
         /// <returns></returns>
         public IServiceProvider GetSingletonServiceProvider(IServiceProvider parentProvider)
         {
-            _childProvider ??= _childServices.BuildServiceProvider();
-
             var scope = _childProvider;
 
             var parentProviderSingletonSource = scope.GetRequiredService<ParentServiceProviderSingletonSource>();
@@ -378,10 +335,17 @@ public static class IServiceCollectionChildExtensions
 
     private class ChildServiceProviderSingletonSource
     {
+        public Guid Id { get; }
+
         private IServiceProvider? _childProvider;
 
         public IServiceProvider ChildProvider => _childProvider
             ?? throw new InvalidOperationException("No child provider was specified");
+
+        public ChildServiceProviderSingletonSource(Guid id)
+        {
+            Id = id;
+        }
 
         public void SetProvider(IServiceProvider childProvider)
         {
@@ -391,10 +355,17 @@ public static class IServiceCollectionChildExtensions
 
     private class ChildServiceProviderScopedSource
     {
+        public Guid Id { get; }
+
         private IServiceProvider? _childProvider;
 
         public IServiceProvider ChildProvider => _childProvider
             ?? throw new InvalidOperationException("No child provider was specified");
+
+        public ChildServiceProviderScopedSource(Guid id)
+        {
+            Id = id;
+        }
 
         public void SetProvider(IServiceProvider childProvider)
         {

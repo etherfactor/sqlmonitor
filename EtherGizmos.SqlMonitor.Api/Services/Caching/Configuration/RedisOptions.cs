@@ -5,6 +5,8 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
 
 public class RedisOptions
 {
+    public string? Username { get; set; }
+
     public string? Password { get; set; }
 
     public List<HostAddressOptions> Hosts { get; set; } = new List<HostAddressOptions>();

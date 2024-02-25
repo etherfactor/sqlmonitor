@@ -13,11 +13,4 @@ internal class CachingConfigurator : ICachingConfigurator
     {
         _serviceCollection = serviceCollection;
     }
-
-    public ICachingConfigurator UsingCache<TDistributedRecordCache>()
-        where TDistributedRecordCache : class, IDistributedRecordCache
-    {
-        _serviceCollection.AddSingleton<IDistributedRecordCache, TDistributedRecordCache>();
-        return this;
-    }
 }

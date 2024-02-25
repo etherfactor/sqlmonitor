@@ -135,106 +135,116 @@ builder.Services
     .AddScoped<IUserService, UserService>();
 
 builder.Services
-    .AddMassTransit(opt =>
+    .AddChildContainer((childServices, parentServices) =>
     {
-        var options = builder.Configuration.GetSection("Connections:Use")
-            .Get<UsageOptions>() ?? new UsageOptions();
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
 
-        opt.AddConsumer<RunQueryConsumer>();
-
-        if (options.MessageBroker == MessageBrokerType.InMemory)
+        childServices.AddMassTransit(opt =>
         {
-            opt.UsingInMemory((context, conf) =>
+            if (usageOptions.MessageBroker == MessageBrokerType.InMemory)
             {
-                conf.Host();
-
-                conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
+                opt.UsingInMemory((context, conf) =>
                 {
-                    opt.Consumer<RunQueryConsumer>(context);
-                });
+                    conf.Host();
 
-                //TODO: Configure in-memory retry and other options
-            });
-        }
-        else if (options.MessageBroker == MessageBrokerType.RabbitMQ)
-        {
-            var rabbitMQOptions = builder.Configuration.GetSection("Connections:RabbitMQ")
-                .Get<RabbitMQOptions>() ?? new RabbitMQOptions();
-
-            opt.UsingRabbitMq((context, conf) =>
-            {
-                string useHost;
-                if (rabbitMQOptions.Hosts.Count == 1)
-                {
-                    var host = rabbitMQOptions.Hosts.Single();
-                    useHost = host.Address;
-                    if (rabbitMQOptions.Hosts.Single().Port != Constants.RabbitMQ.Port)
-                        useHost = $"{useHost}:{host.Port}";
-                }
-                else if (rabbitMQOptions.Hosts.Count > 1)
-                {
-                    useHost = "cluster";
-                }
-                else
-                {
-                    throw new InvalidOperationException("Must specify at least one RabbitMQ endpoint.");
-                }
-
-                conf.Host(useHost, opt =>
-                {
-                    opt.Username(rabbitMQOptions.Username);
-                    opt.Password(rabbitMQOptions.Password);
-
-                    if (rabbitMQOptions.Hosts.Count > 1)
+                    conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
                     {
-                        opt.UseCluster(conf =>
-                        {
-                            foreach (var node in rabbitMQOptions.Hosts)
-                            {
-                                var useNode = node.Address;
-                                if (node.Port != Constants.RabbitMQ.Port)
-                                    useNode = $"{useNode}:{node.Port}";
+                        opt.Consumer<RunQueryConsumer>(context);
+                    });
 
-                                conf.Node(useNode);
-                            }
-                        });
-                    }
+                    //TODO: Configure in-memory retry and other options
                 });
+            }
+            else if (usageOptions.MessageBroker == MessageBrokerType.RabbitMQ)
+            {
+                var rabbitMQOptions = parentServices
+                    .GetRequiredService<IOptions<RabbitMQOptions>>()
+                    .Value;
 
-                conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
+                opt.UsingRabbitMq((context, conf) =>
                 {
-                    opt.Consumer<RunQueryConsumer>(context);
-                });
+                    string useHost;
+                    if (rabbitMQOptions.Hosts.Count == 1)
+                    {
+                        var host = rabbitMQOptions.Hosts.Single();
+                        useHost = host.Address;
+                        if (rabbitMQOptions.Hosts.Single().Port != Constants.RabbitMQ.Port)
+                            useHost = $"{useHost}:{host.Port}";
+                    }
+                    else
+                    {
+                        useHost = "cluster";
+                    }
 
-                //TODO: Configure retry
-            });
-        }
-        else
-        {
-            throw new InvalidOperationException(string.Format("Unknown message broker type: {0}", options.MessageBroker));
-        }
-    });
+                    conf.Host(useHost, opt =>
+                    {
+                        opt.Username(rabbitMQOptions.Username);
+                        opt.Password(rabbitMQOptions.Password);
+
+                        if (rabbitMQOptions.Hosts.Count > 1)
+                        {
+                            opt.UseCluster(conf =>
+                            {
+                                foreach (var node in rabbitMQOptions.Hosts)
+                                {
+                                    var useNode = node.Address;
+                                    if (node.Port != Constants.RabbitMQ.Port)
+                                        useNode = $"{useNode}:{node.Port}";
+
+                                    conf.Node(useNode);
+                                }
+                            });
+                        }
+                    });
+
+                    conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
+                    {
+                        opt.Consumer<RunQueryConsumer>(context);
+                    });
+
+                    //TODO: Configure retry
+                });
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("Unknown message broker type: {0}", usageOptions.MessageBroker));
+            }
+        });
+    })
+    .ForwardMassTransit();
 
 builder.Services
-    .AddCaching(opt =>
+    .AddChildContainer((childServices, parentServices) =>
     {
-        var options = builder.Configuration.GetSection("Connections:Use")
-            .Get<UsageOptions>() ?? new UsageOptions();
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
 
-        if (options.Cache == CacheType.Redis)
+        childServices.AddCaching(opt =>
         {
-            opt.UsingRedis(builder.Configuration.GetSection("Connections:Redis"));
-        }
-        else if (options.Cache == CacheType.InMemory)
-        {
-            opt.UsingInMemory();
-        }
-        else
-        {
-            throw new InvalidOperationException(string.Format("Unknown cache type: {0}", options.Cache));
-        }
+            if (usageOptions.Cache == CacheType.InMemory)
+            {
+                opt.UsingInMemory();
+            }
+            else if (usageOptions.Cache == CacheType.Redis)
+            {
+                var redisOptions = parentServices
+                    .GetRequiredService<IOptions<RedisOptions>>()
+                    .Value;
+
+                opt.UsingRedis(redisOptions);
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
+            }
+        });
+
+        childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
     })
-    .AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+    .ForwardCaching();
 
 builder.Services.AddMapper();
 
