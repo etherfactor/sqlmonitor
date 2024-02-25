@@ -16,6 +16,7 @@ using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,48 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services
     .AddOptions();
+
+builder.Services
+    .AddOptions<UsageOptions>()
+    .Configure<IConfiguration>((opt, conf) =>
+    {
+        var path = "Connections:Use";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        opt.AssertValid(path);
+    });
+
+builder.Services
+    .AddOptions<RabbitMQOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:RabbitMQ";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        if (usage.Value.MessageBroker == MessageBrokerType.RabbitMQ)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
+    .AddOptions<RedisOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:Redis";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        if (usage.Value.Cache == CacheType.Redis)
+        {
+            opt.AssertValid(path);
+        }
+    });
 
 builder.Services
     .AddSerilog(Log.Logger);
@@ -121,13 +164,14 @@ builder.Services
             opt.UsingRabbitMq((context, conf) =>
             {
                 string useHost;
-                if (rabbitMQOptions.EndPoints?.Length == 1)
+                if (rabbitMQOptions.Hosts.Count == 1)
                 {
-                    useHost = rabbitMQOptions.EndPoints.Single().Host;
-                    if (rabbitMQOptions.Port != Constants.RabbitMQ.Port)
-                        useHost = $"{useHost}:{rabbitMQOptions.Port}";
+                    var host = rabbitMQOptions.Hosts.Single();
+                    useHost = host.Address;
+                    if (rabbitMQOptions.Hosts.Single().Port != Constants.RabbitMQ.Port)
+                        useHost = $"{useHost}:{host.Port}";
                 }
-                else if (rabbitMQOptions.EndPoints?.Length > 1)
+                else if (rabbitMQOptions.Hosts.Count > 1)
                 {
                     useHost = "cluster";
                 }
@@ -141,13 +185,13 @@ builder.Services
                     opt.Username(rabbitMQOptions.Username);
                     opt.Password(rabbitMQOptions.Password);
 
-                    if (rabbitMQOptions.EndPoints?.Length > 1)
+                    if (rabbitMQOptions.Hosts.Count > 1)
                     {
                         opt.UseCluster(conf =>
                         {
-                            foreach (var node in rabbitMQOptions.EndPoints)
+                            foreach (var node in rabbitMQOptions.Hosts)
                             {
-                                var useNode = node.Host;
+                                var useNode = node.Address;
                                 if (node.Port != Constants.RabbitMQ.Port)
                                     useNode = $"{useNode}:{node.Port}";
 
