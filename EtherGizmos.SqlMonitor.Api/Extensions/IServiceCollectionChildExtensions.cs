@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
@@ -104,6 +105,12 @@ public static class IServiceCollectionChildExtensions
         private readonly Action<IServiceCollection, IServiceProvider> _configureChild;
         private readonly List<(Type ServiceType, ServiceLifetime Lifetime)> _childImports = new();
 
+        /// <summary>
+        /// Keep track of dependency chains on a per-thread basis. If we end up back in this container, resolving the same
+        /// type, there's a dependency chain, and the user needs to be notified.
+        /// </summary>
+        private readonly ThreadLocal<HashSet<Type>> _resolutionStack = new(() => new());
+
         public Action<IServiceCollection, IServiceProvider> ConfigureChild => _configureChild;
         public List<(Type ServiceType, ServiceLifetime Lifetime)> Imports => _childImports;
 
@@ -123,14 +130,29 @@ public static class IServiceCollectionChildExtensions
         {
             _parentServices.AddScoped<TService>(services =>
             {
-                var factory = services.GetRequiredService<ChildServiceProviderFactory>();
+                AssertNoCycle<TService>();
+                AddToStack<TService>();
 
-                factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
-                var thisServiceProvider = factory.GetScopedServiceProvider(_childContainerId, services);
+                try
+                {
+                    var factory = services.GetRequiredService<ChildServiceProviderFactory>();
 
-                var service = thisServiceProvider.GetRequiredService<TService>();
+                    factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
+                    var thisServiceProvider = factory.GetScopedServiceProvider(_childContainerId, services);
 
-                return service;
+                    var service = thisServiceProvider.GetRequiredService<TService>();
+
+                    return service;
+                }
+                catch (CircularDependencyException ex)
+                {
+                    ex.PrependAndThrow(typeof(TService));
+                    throw;
+                }
+                finally
+                {
+                    RemoveFromStack<TService>();
+                }
             });
 
             return this;
@@ -140,14 +162,29 @@ public static class IServiceCollectionChildExtensions
         {
             _parentServices.AddSingleton<TService>(services =>
             {
-                var factory = services.GetRequiredService<ChildServiceProviderFactory>();
+                AssertNoCycle<TService>();
+                AddToStack<TService>();
 
-                factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
-                var thisServiceProvider = factory.GetSingletonServiceProvider(_childContainerId, services);
+                try
+                {
+                    var factory = services.GetRequiredService<ChildServiceProviderFactory>();
 
-                var service = thisServiceProvider.GetRequiredService<TService>();
+                    factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
+                    var thisServiceProvider = factory.GetSingletonServiceProvider(_childContainerId, services);
 
-                return service;
+                    var service = thisServiceProvider.GetRequiredService<TService>();
+
+                    return service;
+                }
+                catch (CircularDependencyException ex)
+                {
+                    ex.PrependAndThrow(typeof(TService));
+                    throw;
+                }
+                finally
+                {
+                    RemoveFromStack<TService>();
+                }
             });
 
             return this;
@@ -157,14 +194,29 @@ public static class IServiceCollectionChildExtensions
         {
             _parentServices.AddTransient<TService>(services =>
             {
-                var factory = services.GetRequiredService<ChildServiceProviderFactory>();
+                AssertNoCycle<TService>();
+                AddToStack<TService>();
 
-                factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
-                var thisServiceProvider = factory.GetSingletonServiceProvider(_childContainerId, services);
+                try
+                {
+                    var factory = services.GetRequiredService<ChildServiceProviderFactory>();
 
-                var service = thisServiceProvider.GetRequiredService<TService>();
+                    factory.TryAddServiceCollection(_childContainerId, _childServices, _configureChild, _childImports);
+                    var thisServiceProvider = factory.GetSingletonServiceProvider(_childContainerId, services);
 
-                return service;
+                    var service = thisServiceProvider.GetRequiredService<TService>();
+
+                    return service;
+                }
+                catch (CircularDependencyException ex)
+                {
+                    ex.PrependAndThrow(typeof(TService));
+                    throw;
+                }
+                finally
+                {
+                    RemoveFromStack<TService>();
+                }
             });
 
             return this;
@@ -197,6 +249,69 @@ public static class IServiceCollectionChildExtensions
             _childImports.Add((typeof(TService), ServiceLifetime.Transient));
 
             return this;
+        }
+
+        private void AddToStack<TService>()
+        {
+            _resolutionStack.Value!.Add(typeof(TService));
+        }
+
+        private void RemoveFromStack<TService>()
+        {
+            _resolutionStack.Value!.Remove(typeof(TService));
+        }
+
+        private void AssertNoCycle<TService>()
+        {
+            var stack = _resolutionStack.Value!;
+            if (stack.Contains(typeof(TService)))
+            {
+                throw new CircularDependencyException(typeof(TService));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Thrown when a circular reference is found while resolving services from child containers during runtime.
+    /// </summary>
+    public class CircularDependencyException : Exception
+    {
+        private readonly IEnumerable<Type> _dependencyChain;
+
+        /// <summary>
+        /// The failing dependency chain.
+        /// </summary>
+        public IEnumerable<Type> DependencyChain => _dependencyChain;
+
+        internal CircularDependencyException(Type failingDependency) : base(GenerateMessage(failingDependency.Yield()))
+        {
+            _dependencyChain = failingDependency.Yield();
+        }
+
+        private CircularDependencyException(IEnumerable<Type> dependencyChain, CircularDependencyException innerException) : base(GenerateMessage(dependencyChain), innerException)
+        {
+            _dependencyChain = dependencyChain;
+        }
+
+        private static string GenerateMessage(IEnumerable<Type> dependencyChain)
+        {
+            //The chain is complete if there are at least 2 elements that complete a cycle
+            if (dependencyChain.Skip(1).Any() && dependencyChain.First() == dependencyChain.Last())
+            {
+                return "Encountered a circular dependency. Service chain resolved as follows:" + Environment.NewLine +
+                    string.Join(" -> ", dependencyChain);
+            }
+            else
+            {
+                return "Dependency chain unwrapping in progress... it is advised not to catch these exceptions. Tail of circular dependency chain is as follows:" + Environment.NewLine +
+                    string.Join(" -> ", dependencyChain);
+            }
+        }
+
+        [DoesNotReturn]
+        internal void PrependAndThrow(Type failingParentDependency)
+        {
+            throw new CircularDependencyException(_dependencyChain.Prepend(failingParentDependency), this);
         }
     }
 
