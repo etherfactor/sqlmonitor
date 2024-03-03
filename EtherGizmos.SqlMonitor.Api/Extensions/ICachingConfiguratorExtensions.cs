@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
 using Medallion.Threading;
@@ -98,7 +99,7 @@ public static class ICachingConfiguratorExtensions
     /// </summary>
     /// <param name="this">Itself.</param>
     /// <returns>Itself.</returns>
-    public static IServiceCollectionChildExtensions.IChildContainerBuilder ForwardCaching(this IServiceCollectionChildExtensions.IChildContainerBuilder @this)
+    public static IChildContainerBuilder ForwardCaching(this IChildContainerBuilder @this)
     {
         @this.ForwardSingleton<IDistributedRecordCache>();
         @this.ForwardSingleton<IRedisHelperFactory>();

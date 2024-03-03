@@ -1,3 +1,4 @@
+using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
@@ -164,7 +165,7 @@ builder.Services
 
         if (usageOptions.Database == DatabaseType.SqlServer)
         {
-            childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>(); 
+            childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
         }
     })
     .ImportSingleton<IOptions<SqlServerOptions>>()
@@ -308,6 +309,31 @@ builder.Services
         });
     })
     .ForwardMassTransit();
+
+builder.Services
+    .AddOptions<ConfigurationOptions>().Configure<IServiceProvider>((options, provider) =>
+    {
+        var configuration = provider.GetRequiredService<IConfiguration>();
+        var section = configuration.GetSection("Connections:Redis");
+
+        section.Bind(options);
+    });
+
+builder.Services
+    .AddChildContainer((childCollection, parentServices) =>
+    {
+        childCollection.AddSingleton<IConnectionMultiplexer>(_ =>
+        {
+            var options = parentServices.GetRequiredService<IOptions<ConfigurationOptions>>();
+            var value = options.Value;
+            value.EndPoints.Add("192.168.1.5", 6379);
+
+            RedisConnectionMultiplexer.Initialize(value);
+            return RedisConnectionMultiplexer.Instance;
+        });
+    })
+    .ImportSingleton<IOptionsSnapshot<ConfigurationOptions>>()
+    .ForwardSingleton<IConnectionMultiplexer>();
 
 builder.Services.AddMapper();
 

@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using MassTransit;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
@@ -9,7 +10,7 @@ public static class IBusConfiguratorExtensions
     /// </summary>
     /// <param name="this">Itself.</param>
     /// <returns>Itself.</returns>
-    public static IServiceCollectionChildExtensions.IChildContainerBuilder ForwardMassTransit(this IServiceCollectionChildExtensions.IChildContainerBuilder @this)
+    public static IChildContainerBuilder ForwardMassTransit(this IChildContainerBuilder @this)
     {
         @this.ForwardScoped<ISendEndpointProvider>();
 
