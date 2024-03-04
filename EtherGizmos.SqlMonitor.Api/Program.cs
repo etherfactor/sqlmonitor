@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -195,8 +196,10 @@ builder.Services
                     throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
                 }
             });
+
+        childServices.AddSingleton<IMigrationManager, MigrationManager>();
     })
-    .ForwardTransient<IMigrationRunner>();
+    .ForwardSingleton<IMigrationManager>();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>
@@ -354,15 +357,6 @@ builder.Services.AddCors(opt =>
 // Add Middleware
 
 var app = builder.Build();
-
-var serviceProvider = app.Services
-    .CreateScope()
-    .ServiceProvider;
-
-var connectionProvider = serviceProvider.GetRequiredService<IDatabaseConnectionProvider>();
-
-//Perform the database migration
-DatabaseMigrationRunner.PerformMigration(connectionProvider);
 
 //Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

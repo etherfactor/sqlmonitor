@@ -1,8 +1,12 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: ExcludeFromCodeCoverage]
@@ -35,7 +39,37 @@ internal static class Global
 
         var config = configBuilder.Build();
 
-        ConnectionProvider = new SqlServerDatabaseConnectionProvider(config);
+        //Build settings into a service collection
+        var serviceCollection = new ServiceCollection();
+
+        serviceCollection.AddSingleton<IConfiguration>(config);
+        serviceCollection
+            .AddOptions<SqlServerOptions>()
+            .Configure<IConfiguration>((opt, conf) =>
+            {
+                var path = "Connections:SqlServer";
+
+                var section = conf.GetSection(path);
+
+                section.Bind(opt);
+                opt.AllProperties = section.GetChildren()
+                    .Where(e => !typeof(SqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
+                    .ToDictionary(e => e.Key, e => e.Value);
+
+                opt.AssertValid(path);
+            });
+
+        serviceCollection
+            .AddChildContainer((childServices, parentServices) =>
+            {
+                childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
+            })
+            .ImportSingleton<IOptions<SqlServerOptions>>()
+            .ForwardTransient<IDatabaseConnectionProvider>();
+
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        ConnectionProvider = serviceProvider.GetRequiredService<IDatabaseConnectionProvider>();
 
         //Connection string for master will be used to create a new database for each test
         string connectionString = ConnectionProvider.GetConnectionStringForMaster();
