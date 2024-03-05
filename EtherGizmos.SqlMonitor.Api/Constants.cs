@@ -31,4 +31,15 @@ public static class Constants
         /// </summary>
         public const short Port = 5672;
     }
+
+    /// <summary>
+    /// Constants used for Redis.
+    /// </summary>
+    public static class Redis
+    {
+        /// <summary>
+        /// The default Redis port.
+        /// </summary>
+        public const short Port = 6379;
+    }
 }

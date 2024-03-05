@@ -139,6 +139,8 @@ builder.Services
             {
                 conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
+
+            opt.EnableSensitiveDataLogging();
         }
         else
         {
@@ -181,7 +183,9 @@ builder.Services
 
         var connectionProvider = parentServices.GetRequiredService<IDatabaseConnectionProvider>();
 
-        childServices.AddFluentMigratorCore()
+        childServices
+            .AddLogging(opt => opt.AddFluentMigratorConsole())
+            .AddFluentMigratorCore()
             .ConfigureRunner(opt =>
             {
                 if (usageOptions.Database == DatabaseType.SqlServer)
@@ -199,6 +203,7 @@ builder.Services
 
         childServices.AddSingleton<IMigrationManager, MigrationManager>();
     })
+    .ImportLogging()
     .ForwardSingleton<IMigrationManager>();
 
 builder.Services
@@ -241,6 +246,8 @@ builder.Services
 
         childServices.AddMassTransit(opt =>
         {
+            opt.AddConsumersFromNamespaceContaining<RootOfNamespace>();
+
             if (usageOptions.MessageBroker == MessageBrokerType.InMemory)
             {
                 opt.UsingInMemory((context, conf) =>
@@ -267,9 +274,11 @@ builder.Services
                     if (rabbitMQOptions.Hosts.Count == 1)
                     {
                         var host = rabbitMQOptions.Hosts.Single();
+
                         useHost = host.Address;
-                        if (rabbitMQOptions.Hosts.Single().Port != Constants.RabbitMQ.Port)
-                            useHost = $"{useHost}:{host.Port}";
+                        var usePort = host.Port != 0 ? host.Port : Constants.RabbitMQ.Port;
+
+                        useHost = $"{useHost}:{usePort}";
                     }
                     else
                     {
@@ -288,8 +297,7 @@ builder.Services
                                 foreach (var node in rabbitMQOptions.Hosts)
                                 {
                                     var useNode = node.Address;
-                                    if (node.Port != Constants.RabbitMQ.Port)
-                                        useNode = $"{useNode}:{node.Port}";
+                                    var usePort = node.Port != 0 ? node.Port : Constants.RabbitMQ.Port;
 
                                     conf.Node(useNode);
                                 }
@@ -311,31 +319,29 @@ builder.Services
             }
         });
     })
+    .ImportSingleton<IDistributedRecordCache>()
+    .ImportScoped<IInstanceMetricBySecondService>()
+    .ImportScoped<IMetricBucketService>()
+    .ImportScoped<ISaveService>()
+    .ImportLogging()
     .ForwardMassTransit();
-
-builder.Services
-    .AddOptions<ConfigurationOptions>().Configure<IServiceProvider>((options, provider) =>
-    {
-        var configuration = provider.GetRequiredService<IConfiguration>();
-        var section = configuration.GetSection("Connections:Redis");
-
-        section.Bind(options);
-    });
 
 builder.Services
     .AddChildContainer((childCollection, parentServices) =>
     {
+        var redisOptions = parentServices
+            .GetRequiredService<IOptions<RedisOptions>>()
+            .Value;
+
         childCollection.AddSingleton<IConnectionMultiplexer>(_ =>
         {
-            var options = parentServices.GetRequiredService<IOptions<ConfigurationOptions>>();
-            var value = options.Value;
-            value.EndPoints.Add("192.168.1.5", 6379);
+            var internalValue = redisOptions.ToStackExchangeRedisOptions();
 
-            RedisConnectionMultiplexer.Initialize(value);
+            RedisConnectionMultiplexer.Initialize(internalValue);
             return RedisConnectionMultiplexer.Instance;
         });
     })
-    .ImportSingleton<IOptionsSnapshot<ConfigurationOptions>>()
+    .ImportSingleton<IOptions<ConfigurationOptions>>()
     .ForwardSingleton<IConnectionMultiplexer>();
 
 builder.Services.AddMapper();

@@ -59,7 +59,7 @@ public class RunQueryConsumer : IConsumer<RunQuery>
         }
 
         //Create a service scope for this run
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope(); //the act of creating a scope here causes the parent scope to not exist, as this is only defined when the parent scope prompts a child scope to generate
         var provider = scope.ServiceProvider;
 
         //Pull out the necessary services

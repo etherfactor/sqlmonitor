@@ -12,6 +12,7 @@ public static class IBusConfiguratorExtensions
     /// <returns>Itself.</returns>
     public static IChildContainerBuilder ForwardMassTransit(this IChildContainerBuilder @this)
     {
+        @this.ForwardSingleton<IHostedService>();
         @this.ForwardScoped<ISendEndpointProvider>();
 
         return @this;
