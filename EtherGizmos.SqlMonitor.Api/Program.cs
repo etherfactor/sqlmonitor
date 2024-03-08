@@ -1,3 +1,4 @@
+using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.OData.Metadata;
@@ -13,10 +14,14 @@ using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
+using EtherGizmos.SqlMonitor.Database;
+using FluentMigrator.Runner;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +39,67 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services
     .AddOptions();
+
+builder.Services
+    .AddOptions<UsageOptions>()
+    .Configure<IConfiguration>((opt, conf) =>
+    {
+        var path = "Connections:Use";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        opt.AssertValid(path);
+    });
+
+builder.Services
+    .AddOptions<RabbitMQOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:RabbitMQ";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        if (usage.Value.MessageBroker == MessageBrokerType.RabbitMQ)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
+    .AddOptions<RedisOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:Redis";
+
+        conf.GetSection(path)
+            .Bind(opt);
+
+        if (usage.Value.Cache == CacheType.Redis)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
+    .AddOptions<SqlServerOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:SqlServer";
+
+        var section = conf.GetSection(path);
+
+        section.Bind(opt);
+        opt.AllProperties = section.GetChildren()
+            .Where(e => !typeof(SqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
+            .ToDictionary(e => e.Key, e => e.Value);
+
+        if (usage.Value.Database == DatabaseType.SqlServer)
+        {
+            opt.AssertValid(path);
+        }
+    });
 
 builder.Services
     .AddSerilog(Log.Logger);
@@ -61,26 +127,33 @@ builder.Services.AddSwaggerGen();
 builder.Services
     .AddDbContext<DatabaseContext>((services, opt) =>
     {
-        var options = builder.Configuration.GetSection("Connections:Use")
-            .Get<UsageOptions>() ?? new UsageOptions();
+        var usageOptions = services
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
 
-        if (options.Database == DatabaseType.SqlServer)
+        var loggerFactory = services
+            .GetRequiredService<ILoggerFactory>();
+
+        if (usageOptions.Database == DatabaseType.SqlServer)
         {
             var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+
+            opt.UseLoggerFactory(loggerFactory);
 
             opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
             {
                 conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
+
+            opt.EnableSensitiveDataLogging();
         }
         else
         {
-            throw new InvalidOperationException(string.Format("Unknown database type: {0}", options.Database));
+            throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
         }
 
         opt.UseLazyLoadingProxies(true);
     })
-    .AddTransient<IDatabaseConnectionProvider, DatabaseConnectionProvider>()
     .AddScoped<ISaveService, SaveService>()
     .AddScoped<IInstanceService, InstanceService>()
     .AddScoped<IInstanceMetricBySecondService, InstanceMetricBySecondService>()
@@ -92,105 +165,190 @@ builder.Services
     .AddScoped<IUserService, UserService>();
 
 builder.Services
-    .AddMassTransit(opt =>
+    .AddChildContainer((childServices, parentServices) =>
     {
-        var options = builder.Configuration.GetSection("Connections:Use")
-            .Get<UsageOptions>() ?? new UsageOptions();
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
 
-        opt.AddConsumer<RunQueryConsumer>();
-
-        if (options.MessageBroker == MessageBrokerType.InMemory)
+        if (usageOptions.Database == DatabaseType.SqlServer)
         {
-            opt.UsingInMemory((context, conf) =>
-            {
-                conf.Host();
-
-                conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
-                {
-                    opt.Consumer<RunQueryConsumer>(context);
-                });
-
-                //TODO: Configure in-memory retry and other options
-            });
+            childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
         }
-        else if (options.MessageBroker == MessageBrokerType.RabbitMQ)
-        {
-            var rabbitMQOptions = builder.Configuration.GetSection("Connections:RabbitMQ")
-                .Get<RabbitMQOptions>() ?? new RabbitMQOptions();
+    })
+    .ImportSingleton<IOptions<SqlServerOptions>>()
+    .ForwardTransient<IDatabaseConnectionProvider>();
 
-            opt.UsingRabbitMq((context, conf) =>
+builder.Services
+    .AddChildContainer((childServices, parentServices) =>
+    {
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
+
+        var connectionProvider = parentServices.GetRequiredService<IDatabaseConnectionProvider>();
+
+        childServices
+            .AddLogging(opt => opt.AddFluentMigratorConsole())
+            .AddFluentMigratorCore()
+            .ConfigureRunner(opt =>
             {
-                string useHost;
-                if (rabbitMQOptions.EndPoints?.Length == 1)
+                if (usageOptions.Database == DatabaseType.SqlServer)
                 {
-                    useHost = rabbitMQOptions.EndPoints.Single().Host;
-                    if (rabbitMQOptions.Port != Constants.RabbitMQ.Port)
-                        useHost = $"{useHost}:{rabbitMQOptions.Port}";
-                }
-                else if (rabbitMQOptions.EndPoints?.Length > 1)
-                {
-                    useHost = "cluster";
+                    opt.AddSqlServer()
+                        .WithGlobalConnectionString(connectionProvider.GetConnectionString())
+                        .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
+                        .WithVersionTable(new CustomVersionTableMetadata());
                 }
                 else
                 {
-                    throw new InvalidOperationException("Must specify at least one RabbitMQ endpoint.");
+                    throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
                 }
-
-                conf.Host(useHost, opt =>
-                {
-                    opt.Username(rabbitMQOptions.Username);
-                    opt.Password(rabbitMQOptions.Password);
-
-                    if (rabbitMQOptions.EndPoints?.Length > 1)
-                    {
-                        opt.UseCluster(conf =>
-                        {
-                            foreach (var node in rabbitMQOptions.EndPoints)
-                            {
-                                var useNode = node.Host;
-                                if (node.Port != Constants.RabbitMQ.Port)
-                                    useNode = $"{useNode}:{node.Port}";
-
-                                conf.Node(useNode);
-                            }
-                        });
-                    }
-                });
-
-                conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
-                {
-                    opt.Consumer<RunQueryConsumer>(context);
-                });
-
-                //TODO: Configure retry
             });
-        }
-        else
-        {
-            throw new InvalidOperationException(string.Format("Unknown message broker type: {0}", options.MessageBroker));
-        }
-    });
+
+        childServices.AddSingleton<IMigrationManager, MigrationManager>();
+    })
+    .ImportLogging()
+    .ForwardSingleton<IMigrationManager>();
 
 builder.Services
-    .AddCaching(opt =>
+    .AddChildContainer((childServices, parentServices) =>
     {
-        var options = builder.Configuration.GetSection("Connections:Use")
-            .Get<UsageOptions>() ?? new UsageOptions();
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
 
-        if (options.Cache == CacheType.Redis)
+        childServices.AddCaching(opt =>
         {
-            opt.UsingRedis(builder.Configuration.GetSection("Connections:Redis"));
-        }
-        else if (options.Cache == CacheType.InMemory)
-        {
-            opt.UsingInMemory();
-        }
-        else
-        {
-            throw new InvalidOperationException(string.Format("Unknown cache type: {0}", options.Cache));
-        }
+            if (usageOptions.Cache == CacheType.InMemory)
+            {
+                opt.UsingInMemory();
+            }
+            else if (usageOptions.Cache == CacheType.Redis)
+            {
+                var redisOptions = parentServices
+                    .GetRequiredService<IOptions<RedisOptions>>()
+                    .Value;
+
+                opt.UsingRedis(redisOptions);
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
+            }
+        });
+
+        childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
     })
-    .AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+    .ImportLogging()
+    .ForwardCaching();
+
+builder.Services
+    .AddChildContainer((childServices, parentServices) =>
+    {
+        var usageOptions = parentServices
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
+
+        childServices.AddMassTransit(opt =>
+        {
+            opt.AddConsumersFromNamespaceContaining<RootOfNamespace>();
+
+            if (usageOptions.MessageBroker == MessageBrokerType.InMemory)
+            {
+                opt.UsingInMemory((context, conf) =>
+                {
+                    conf.Host();
+
+                    conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
+                    {
+                        opt.Consumer<RunQueryConsumer>(context);
+                    });
+
+                    //TODO: Configure in-memory retry and other options
+                });
+            }
+            else if (usageOptions.MessageBroker == MessageBrokerType.RabbitMQ)
+            {
+                var rabbitMQOptions = parentServices
+                    .GetRequiredService<IOptions<RabbitMQOptions>>()
+                    .Value;
+
+                opt.UsingRabbitMq((context, conf) =>
+                {
+                    string useHost;
+                    if (rabbitMQOptions.Hosts.Count == 1)
+                    {
+                        var host = rabbitMQOptions.Hosts.Single();
+
+                        useHost = host.Address;
+                        var usePort = host.Port != 0 ? host.Port : Constants.RabbitMQ.Port;
+
+                        useHost = $"{useHost}:{usePort}";
+                    }
+                    else
+                    {
+                        useHost = "cluster";
+                    }
+
+                    conf.Host(useHost, opt =>
+                    {
+                        opt.Username(rabbitMQOptions.Username);
+                        opt.Password(rabbitMQOptions.Password);
+
+                        if (rabbitMQOptions.Hosts.Count > 1)
+                        {
+                            opt.UseCluster(conf =>
+                            {
+                                foreach (var node in rabbitMQOptions.Hosts)
+                                {
+                                    var useNode = node.Address;
+                                    var usePort = node.Port != 0 ? node.Port : Constants.RabbitMQ.Port;
+
+                                    conf.Node(useNode);
+                                }
+                            });
+                        }
+                    });
+
+                    conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
+                    {
+                        opt.Consumer<RunQueryConsumer>(context);
+                    });
+
+                    //TODO: Configure retry
+                });
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("Unknown message broker type: {0}", usageOptions.MessageBroker));
+            }
+        });
+    })
+    .ImportSingleton<IDistributedRecordCache>()
+    .ImportScoped<IInstanceMetricBySecondService>()
+    .ImportScoped<IMetricBucketService>()
+    .ImportScoped<ISaveService>()
+    .ImportLogging()
+    .ForwardMassTransit();
+
+builder.Services
+    .AddChildContainer((childCollection, parentServices) =>
+    {
+        var redisOptions = parentServices
+            .GetRequiredService<IOptions<RedisOptions>>()
+            .Value;
+
+        childCollection.AddSingleton<IConnectionMultiplexer>(_ =>
+        {
+            var internalValue = redisOptions.ToStackExchangeRedisOptions();
+
+            RedisConnectionMultiplexer.Initialize(internalValue);
+            return RedisConnectionMultiplexer.Instance;
+        });
+    })
+    .ImportSingleton<IOptions<ConfigurationOptions>>()
+    .ForwardSingleton<IConnectionMultiplexer>();
 
 builder.Services.AddMapper();
 
@@ -211,15 +369,6 @@ builder.Services.AddCors(opt =>
 // Add Middleware
 
 var app = builder.Build();
-
-var serviceProvider = app.Services
-    .CreateScope()
-    .ServiceProvider;
-
-var connectionProvider = serviceProvider.GetRequiredService<IDatabaseConnectionProvider>();
-
-//Perform the database migration
-DatabaseMigrationRunner.PerformMigration(connectionProvider);
 
 //Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

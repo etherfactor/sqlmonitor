@@ -5,6 +5,7 @@ using EtherGizmos.SqlMonitor.Models.Extensions;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
@@ -33,7 +34,8 @@ internal class InMemoryCacheEntitySet<TEntity> : ICacheEntitySet<TEntity>
         var id = helper.GetEntitySetEntityKey(entity).ToString();
 
         //Forcefully detach the entity from any contexts
-        var addEntity = JsonSerializer.Deserialize<TEntity>(JsonSerializer.Serialize(entity))!;
+        var jsonOptions = new JsonSerializerOptions() { ReferenceHandler = ReferenceHandler.Preserve };
+        var addEntity = JsonSerializer.Deserialize<TEntity>(JsonSerializer.Serialize(entity, jsonOptions), jsonOptions)!;
         if (!_entities.ContainsKey(id))
         {
             _entities.Add(id, addEntity);

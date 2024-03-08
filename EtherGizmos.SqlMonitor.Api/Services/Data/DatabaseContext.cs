@@ -1,4 +1,5 @@
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -59,8 +60,10 @@ public class DatabaseContext : DbContext
     /// of the options.
     /// </summary>
     /// <param name="options">The options for this context.</param>
-    public DatabaseContext(DbContextOptions options) : base(options)
+    /// <param name="migrationManager">Manages database migrations.</param>
+    public DatabaseContext(DbContextOptions options, IMigrationManager migrationManager) : base(options)
     {
+        migrationManager.EnsureMigrated();
     }
 
     /// <summary>
@@ -68,8 +71,10 @@ public class DatabaseContext : DbContext
     /// <see cref="DbContext.OnConfiguring(DbContextOptionsBuilder)"/> method will be called to configure the database (and
     /// other options) to be used for this context.
     /// </summary>
-    protected DatabaseContext() : base()
+    /// <param name="migrationManager">Manages database migrations.</param>
+    protected DatabaseContext(IMigrationManager migrationManager) : base()
     {
+        migrationManager.EnsureMigrated();
     }
 
     /// <inheritdoc/>

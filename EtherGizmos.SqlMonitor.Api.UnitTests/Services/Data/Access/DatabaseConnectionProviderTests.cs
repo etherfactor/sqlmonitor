@@ -1,11 +1,13 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
-using Microsoft.Extensions.Configuration;
+using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
+using Microsoft.Extensions.Options;
+using Moq;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Data.Access;
 
 internal class DatabaseConnectionProviderTests
 {
-    private DatabaseConnectionProvider? ConnectionProvider { get; set; }
+    private SqlServerDatabaseConnectionProvider? ConnectionProvider { get; set; }
 
     [SetUp]
     public void SetUp()
@@ -13,41 +15,27 @@ internal class DatabaseConnectionProviderTests
     }
 
     [Test]
-    public void GetConnectionString_NotInJson_ThrowsInvalidOperationException()
-    {
-        var configData = new Dictionary<string, string?>()
-        {
-            //Intentionally empty
-        };
-
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(configData)
-            .Build();
-
-        ConnectionProvider = new DatabaseConnectionProvider(config);
-
-        Assert.Throws<InvalidOperationException>(() =>
-        {
-            ConnectionProvider.GetConnectionString();
-        });
-    }
-
-    [Test]
     public void GetConnectionString_InJson_ReturnsConnectionString()
     {
         var configData = new Dictionary<string, string?>()
         {
-            { "Connections:SqlServer:Data Source", "(mssqllocaldb)\\localhost" },
-            { "Connections:SqlServer:Initial Catalog", "database" },
-            { "Connections:SqlServer:Integrated Security", "true" },
-            { "Connections:SqlServer:Application Name", "Unit Test" }
+            { "Data Source", "(mssqllocaldb)\\localhost" },
+            { "Initial Catalog", "database" },
+            { "Integrated Security", "true" },
+            { "Application Name", "Unit Test" }
         };
 
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(configData)
-            .Build();
+        var optionsMock = new Mock<IOptions<SqlServerOptions>>();
+        optionsMock.Setup(@interface =>
+            @interface.Value)
+            .Returns(new SqlServerOptions()
+            {
+                AllProperties = configData
+            });
 
-        ConnectionProvider = new DatabaseConnectionProvider(config);
+        var options = optionsMock.Object;
+
+        ConnectionProvider = new SqlServerDatabaseConnectionProvider(options);
 
         var connection = ConnectionProvider.GetConnectionString();
 

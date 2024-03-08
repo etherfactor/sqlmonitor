@@ -1,14 +1,51 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
 using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Configuration;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
 public static class ICachingConfiguratorExtensions
 {
+    /// <summary>
+    /// Adds distributed caching to the service collection. Requires additional calls to <paramref name="configure"/>
+    /// to add the cache.
+    /// </summary>
+    /// <param name="this">Itself.</param>
+    /// <param name="configure">The action to configure the cache.</param>
+    /// <returns>Itself.</returns>
+    public static IServiceCollection AddCaching(this IServiceCollection @this, Action<ICachingConfigurator> configure)
+    {
+        var configurator = new CachingConfigurator(@this);
+
+        configure(configurator);
+
+        return @this;
+    }
+
+    /// <summary>
+    /// Adds a generic cache.
+    /// </summary>
+    /// <typeparam name="TDistributedRecordCache">The type of cache.</typeparam>
+    /// <param name="this">Itself.</param>
+    /// <returns>Itself.</returns>
+    public static ICachingConfigurator UsingCache<TDistributedRecordCache>(
+        this ICachingConfigurator @this)
+        where TDistributedRecordCache : class, IDistributedRecordCache
+    {
+        @this.Services.AddSingleton<IDistributedRecordCache, TDistributedRecordCache>();
+
+        return @this;
+    }
+
+    /// <summary>
+    /// Adds an in-memory cache.
+    /// </summary>
+    /// <param name="this">Itself.</param>
+    /// <returns>Itself.</returns>
     public static ICachingConfigurator UsingInMemory(
         this ICachingConfigurator @this)
     {
@@ -17,19 +54,26 @@ public static class ICachingConfiguratorExtensions
         return @this;
     }
 
+    /// <summary>
+    /// Adds a Redis cache.
+    /// </summary>
+    /// <param name="this">Itself.</param>
+    /// <param name="redisOptions">The options to configure Redis.</param>
+    /// <returns>Itself.</returns>
     public static ICachingConfigurator UsingRedis(
         this ICachingConfigurator @this,
-        IConfigurationSection section)
+        RedisOptions redisOptions)
     {
         //Prepare Redis options
-        var options = new ConfigurationOptions();
-        section.Bind(options);
-
-        var endpoints = section.GetSection("EndPoints").Get<RedisHost[]>()
-            ?? Array.Empty<RedisHost>();
-        foreach (var endpoint in endpoints)
+        var options = new ConfigurationOptions()
         {
-            options.EndPoints.Add(endpoint.Host, endpoint.Port);
+            User = redisOptions.Username,
+            Password = redisOptions.Password,
+        };
+
+        foreach (var endpoint in redisOptions.Hosts)
+        {
+            options.EndPoints.Add(endpoint.Address, endpoint.Port);
         }
 
         //Initialize the multiplexer and add it to the collection
@@ -46,6 +90,19 @@ public static class ICachingConfiguratorExtensions
             var multiplexer = services.GetRequiredService<IConnectionMultiplexer>();
             return new RedisDistributedSynchronizationProvider(multiplexer.GetDatabase());
         });
+
+        return @this;
+    }
+
+    /// <summary>
+    /// Forwards the cache services to the parent container.
+    /// </summary>
+    /// <param name="this">Itself.</param>
+    /// <returns>Itself.</returns>
+    public static IChildContainerBuilder ForwardCaching(this IChildContainerBuilder @this)
+    {
+        @this.ForwardSingleton<IDistributedRecordCache>();
+        @this.ForwardSingleton<IRedisHelperFactory>();
 
         return @this;
     }
