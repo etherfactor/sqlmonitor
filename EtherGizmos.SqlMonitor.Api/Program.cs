@@ -131,9 +131,14 @@ builder.Services
             .GetRequiredService<IOptions<UsageOptions>>()
             .Value;
 
+        var loggerFactory = services
+            .GetRequiredService<ILoggerFactory>();
+
         if (usageOptions.Database == DatabaseType.SqlServer)
         {
             var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+
+            opt.UseLoggerFactory(loggerFactory);
 
             opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
             {
@@ -235,6 +240,7 @@ builder.Services
 
         childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
     })
+    .ImportLogging()
     .ForwardCaching();
 
 builder.Services
