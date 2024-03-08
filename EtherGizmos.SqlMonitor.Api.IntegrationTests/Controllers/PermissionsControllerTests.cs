@@ -15,7 +15,7 @@ internal class PermissionsControllerTests : IntegrationTestBase
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await Client.GetAsync("https://localhost:7200/api/v1/permissions");
+        var response = await Client.GetAsync("https://localhost:7200/api/v0.1/permissions");
 
         Assert.Multiple(() =>
         {

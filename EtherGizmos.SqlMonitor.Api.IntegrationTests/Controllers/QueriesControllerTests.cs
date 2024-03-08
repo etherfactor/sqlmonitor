@@ -16,7 +16,7 @@ internal class QueriesControllerTests : IntegrationTestBase
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await Client.GetAsync("https://localhost:7200/api/v1/queries");
+        var response = await Client.GetAsync("https://localhost:7200/api/v0.1/queries");
 
         Assert.Multiple(() =>
         {
@@ -32,11 +32,11 @@ internal class QueriesControllerTests : IntegrationTestBase
         var body = new
         {
             name = "Test",
-            sql_text = "select 1",
-            run_frequency = "PT5M"
+            sqlText = "select 1",
+            runFrequency = "PT5M"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/queries", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/queries", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -57,7 +57,7 @@ internal class QueriesControllerTests : IntegrationTestBase
             name = "New Test"
         };
 
-        var response = await Client.PatchAsync($"https://localhost:7200/api/v1/queries({recordId})", body.AsJsonContent());
+        var response = await Client.PatchAsync($"https://localhost:7200/api/v0.1/queries({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -73,11 +73,11 @@ internal class QueriesControllerTests : IntegrationTestBase
         var body = new
         {
             name = "Test",
-            sql_text = "select 1",
-            run_frequency = "PT5M"
+            sqlText = "select 1",
+            runFrequency = "PT5M"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/queries", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/queries", body.AsJsonContent());
 
         Assert.Multiple(() =>
         {

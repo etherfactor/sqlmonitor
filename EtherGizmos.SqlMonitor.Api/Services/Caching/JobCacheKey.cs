@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;

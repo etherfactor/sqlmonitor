@@ -1,12 +1,17 @@
-﻿using EtherGizmos.SqlMonitor.Api.Controllers;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Models;
 using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 
@@ -68,5 +73,24 @@ internal static class Global
 
         var builder = new SqlConnectionStringBuilder(connectionString);
         return builder.InitialCatalog;
+    }
+
+    internal static IEdmModel GenerateEdmModel(this ApiVersion @this)
+    {
+        var builder = new ODataConventionModelBuilder();
+
+        var configurations = typeof(ApiVersions).Assembly.GetTypes()
+            .Where(e => e.IsAssignableTo(typeof(IModelConfiguration)));
+
+        foreach (var configuration in configurations)
+        {
+            var instance = Activator.CreateInstance(configuration) as IModelConfiguration;
+            if (instance is null)
+                continue;
+
+            instance.Apply(builder, @this, "api/v{version:apiVersion}");
+        }
+
+        return builder.GetEdmModel();
     }
 }

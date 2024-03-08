@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
+using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 using EtherGizmos.SqlMonitor.Models.Database;
@@ -74,12 +74,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "");
@@ -105,12 +105,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             $"$filter=id eq {_metricId}");
@@ -136,12 +136,12 @@ internal class MetricsControllerTests
     //[Test]
     //public async Task Search_IsValid_WithExpand_Returns200Ok()
     //{
-    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var model = ApiVersions.V0_1.GenerateEdmModel();;
     //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
     //        model,
     //        "GET",
     //        "https://localhost:7200",
-    //        "api/v1",
+    //        "api/v0.1",
     //        "metrics",
     //        "",
     //        "$expand=...");
@@ -167,12 +167,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$select=id");
@@ -198,12 +198,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$orderby=name");
@@ -229,12 +229,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$top=1");
@@ -260,12 +260,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$skip=1");
@@ -291,12 +291,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$count=true");
@@ -324,12 +324,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = new Guid();
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "");
@@ -357,12 +357,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "");
@@ -390,12 +390,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "$filter=id eq 'CREATE'");
@@ -411,12 +411,12 @@ internal class MetricsControllerTests
     //{
     //    Guid recordId = RecordId;
 
-    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var model = ApiVersions.V0_1.GenerateEdmModel();;
     //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
     //        model,
     //        "GET",
     //        "https://localhost:7200",
-    //        "api/v1",
+    //        "api/v0.1",
     //        "metrics",
     //        $"('{recordId}')",
     //        "$expand=...");
@@ -444,12 +444,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "$select=id");
@@ -477,12 +477,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "$orderby=id");
@@ -498,12 +498,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "$top=1");
@@ -519,12 +519,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "$skip=1");
@@ -540,12 +540,12 @@ internal class MetricsControllerTests
     {
         Guid recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"('{recordId}')",
             "$count=true");
@@ -559,12 +559,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Create_IsValid_Returns201Created()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "POST",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "");
@@ -596,12 +596,12 @@ internal class MetricsControllerTests
     [Test]
     public void Create_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             $"$filter=id eq {_metricId}");
@@ -621,12 +621,12 @@ internal class MetricsControllerTests
     [Test]
     public async Task Create_IsValid_WithSelect_Returns201Created()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$select=id");
@@ -658,12 +658,12 @@ internal class MetricsControllerTests
     [Test]
     public void Create_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$orderby=id");
@@ -683,12 +683,12 @@ internal class MetricsControllerTests
     [Test]
     public void Create_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$top=1");
@@ -708,12 +708,12 @@ internal class MetricsControllerTests
     [Test]
     public void Create_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$skip=1");
@@ -733,12 +733,12 @@ internal class MetricsControllerTests
     [Test]
     public void Create_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             "",
             "$count=true");
@@ -760,12 +760,12 @@ internal class MetricsControllerTests
     {
         var recordId = Guid.NewGuid();
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "PATCH",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             "");
@@ -796,12 +796,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "POST",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             "");
@@ -832,12 +832,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             $"$filter=id eq {_metricId}");
@@ -856,12 +856,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             "$select=id");
@@ -892,12 +892,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({_metricId})",
             "$orderby=id");
@@ -916,12 +916,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             "$top=1");
@@ -940,12 +940,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             "$skip=1");
@@ -964,12 +964,12 @@ internal class MetricsControllerTests
     {
         var recordId = _metricId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MetricDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "metrics",
             $"({recordId})",
             "$count=true");

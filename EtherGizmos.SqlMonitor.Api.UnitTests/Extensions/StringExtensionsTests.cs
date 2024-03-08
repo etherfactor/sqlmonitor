@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 

@@ -1,5 +1,6 @@
 using Castle.DynamicProxy;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Annotations;
 using StackExchange.Redis;

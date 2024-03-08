@@ -16,7 +16,7 @@ internal class InstancesControllerTests : IntegrationTestBase
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await Client.GetAsync("https://localhost:7200/api/v1/instances");
+        var response = await Client.GetAsync("https://localhost:7200/api/v0.1/instances");
 
         Assert.Multiple(() =>
         {
@@ -35,7 +35,7 @@ internal class InstancesControllerTests : IntegrationTestBase
             address = "localhost"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/instances", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/instances", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -56,7 +56,7 @@ internal class InstancesControllerTests : IntegrationTestBase
             name = "New Test"
         };
 
-        var response = await Client.PatchAsync($"https://localhost:7200/api/v1/instances({recordId})", body.AsJsonContent());
+        var response = await Client.PatchAsync($"https://localhost:7200/api/v0.1/instances({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -75,7 +75,7 @@ internal class InstancesControllerTests : IntegrationTestBase
             address = "localhost"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/instances", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/instances", body.AsJsonContent());
 
         Assert.Multiple(() =>
         {

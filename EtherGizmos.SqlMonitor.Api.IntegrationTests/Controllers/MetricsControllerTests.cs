@@ -16,7 +16,7 @@ internal class MetricsControllerTests : IntegrationTestBase
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await Client.GetAsync("https://localhost:7200/api/v1/metrics");
+        var response = await Client.GetAsync("https://localhost:7200/api/v0.1/metrics");
 
         Assert.Multiple(() =>
         {
@@ -32,10 +32,10 @@ internal class MetricsControllerTests : IntegrationTestBase
         var body = new
         {
             name = "Test",
-            aggregate_type = "Average"
+            aggregateType = "Average"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/metrics", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/metrics", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -56,7 +56,7 @@ internal class MetricsControllerTests : IntegrationTestBase
             name = "New Test"
         };
 
-        var response = await Client.PatchAsync($"https://localhost:7200/api/v1/metrics({recordId})", body.AsJsonContent());
+        var response = await Client.PatchAsync($"https://localhost:7200/api/v0.1/metrics({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -72,10 +72,10 @@ internal class MetricsControllerTests : IntegrationTestBase
         var body = new
         {
             name = "Test",
-            aggregate_type = "Average"
+            aggregateType = "Average"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/metrics", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/metrics", body.AsJsonContent());
 
         Assert.Multiple(() =>
         {

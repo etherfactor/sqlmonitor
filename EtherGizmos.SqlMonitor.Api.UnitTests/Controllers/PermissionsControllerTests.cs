@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
+using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Exceptions;
@@ -63,12 +63,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "");
@@ -94,12 +94,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$filter=id eq 'CREATE'");
@@ -125,12 +125,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithExpand_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$expand=securables");
@@ -156,12 +156,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$select=id");
@@ -187,12 +187,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$orderby=name");
@@ -218,12 +218,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$top=1");
@@ -249,12 +249,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$skip=1");
@@ -280,12 +280,12 @@ internal class PermissionsControllerTests
     [Test]
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             "",
             "$count=true");
@@ -313,12 +313,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "INVALID";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "");
@@ -346,12 +346,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "");
@@ -379,12 +379,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$filter=id eq 'CREATE'");
@@ -400,12 +400,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$expand=securables");
@@ -433,12 +433,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$select=id");
@@ -466,12 +466,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$orderby=id");
@@ -487,12 +487,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$top=1");
@@ -508,12 +508,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$skip=1");
@@ -529,12 +529,12 @@ internal class PermissionsControllerTests
     {
         string recordId = "CREATE";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<PermissionDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "permissions",
             $"('{recordId}')",
             "$count=true");

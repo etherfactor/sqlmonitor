@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
+using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Exceptions;
@@ -94,12 +94,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "");
@@ -125,12 +125,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             $"$filter=id eq {RecordId}");
@@ -156,12 +156,12 @@ internal class QueriesControllerTests
     //[Test]
     //public async Task Search_IsValid_WithExpand_Returns200Ok()
     //{
-    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var model = ApiVersions.V0_1.GenerateEdmModel();;
     //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
     //        model,
     //        "GET",
     //        "https://localhost:7200",
-    //        "api/v1",
+    //        "api/v0.1",
     //        "queries",
     //        "",
     //        "$expand=...");
@@ -187,12 +187,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$select=id");
@@ -218,12 +218,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$orderby=name");
@@ -249,12 +249,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$top=1");
@@ -280,12 +280,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$skip=1");
@@ -311,12 +311,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$count=true");
@@ -344,12 +344,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = new Guid();
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "");
@@ -377,12 +377,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "");
@@ -410,12 +410,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "$filter=id eq 'CREATE'");
@@ -431,12 +431,12 @@ internal class QueriesControllerTests
     //{
     //    Guid recordId = RecordId;
 
-    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var model = ApiVersions.V0_1.GenerateEdmModel();;
     //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
     //        model,
     //        "GET",
     //        "https://localhost:7200",
-    //        "api/v1",
+    //        "api/v0.1",
     //        "queries",
     //        $"('{recordId}')",
     //        "$expand=...");
@@ -464,12 +464,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "$select=id");
@@ -497,12 +497,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "$orderby=id");
@@ -518,12 +518,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "$top=1");
@@ -539,12 +539,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "$skip=1");
@@ -560,12 +560,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "$count=true");
@@ -579,12 +579,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Create_IsValid_Returns201Created()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "POST",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "");
@@ -617,12 +617,12 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             $"$filter=id eq {RecordId}");
@@ -643,12 +643,12 @@ internal class QueriesControllerTests
     //[Test]
     //public async Task Create_IsValid_WithExpand_Returns200Ok()
     //{
-    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var model = ApiVersions.V0_1.GenerateEdmModel();;
     //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
     //        model,
     //        "GET",
     //        "https://localhost:7200",
-    //        "api/v1",
+    //        "api/v0.1",
     //        "queries",
     //        "",
     //        "$expand=...");
@@ -681,12 +681,12 @@ internal class QueriesControllerTests
     [Test]
     public async Task Create_IsValid_WithSelect_Returns201Created()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$select=id");
@@ -719,12 +719,12 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$orderby=id");
@@ -745,12 +745,12 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$top=1");
@@ -771,12 +771,12 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$skip=1");
@@ -797,12 +797,12 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             "",
             "$count=true");
@@ -825,12 +825,12 @@ internal class QueriesControllerTests
     {
         var recordId = Guid.NewGuid();
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "PATCH",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             "");
@@ -861,12 +861,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "POST",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             "");
@@ -897,12 +897,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             $"$filter=id eq {RecordId}");
@@ -921,12 +921,12 @@ internal class QueriesControllerTests
     //{
     //    var recordId = RecordId;
 
-    //    var model = ODataModel.GetEdmModel(1.0m);
+    //    var model = ApiVersions.V0_1.GenerateEdmModel();;
     //    var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
     //        model,
     //        "GET",
     //        "https://localhost:7200",
-    //        "api/v1",
+    //        "api/v0.1",
     //        "queries",
     //        $"({recordId})",
     //        "$expand=...");
@@ -957,12 +957,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             "$select=id");
@@ -993,12 +993,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({RecordId})",
             "$orderby=id");
@@ -1017,12 +1017,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             "$top=1");
@@ -1041,12 +1041,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             "$skip=1");
@@ -1065,12 +1065,12 @@ internal class QueriesControllerTests
     {
         var recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"({recordId})",
             "$count=true");
@@ -1089,12 +1089,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = new Guid();
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "DELETE",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "");
@@ -1122,12 +1122,12 @@ internal class QueriesControllerTests
     {
         Guid recordId = RecordId;
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "DELETE",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "queries",
             $"('{recordId}')",
             "");

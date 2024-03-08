@@ -16,7 +16,7 @@ internal class UsersControllerTests : IntegrationTestBase
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await Client.GetAsync("https://localhost:7200/api/v1/users");
+        var response = await Client.GetAsync("https://localhost:7200/api/v0.1/users");
 
         Assert.Multiple(() =>
         {
@@ -36,7 +36,7 @@ internal class UsersControllerTests : IntegrationTestBase
             name = "User Name"
         };
 
-        var response = await Client.PostAsync("https://localhost:7200/api/v1/users", body.AsJsonContent());
+        var response = await Client.PostAsync("https://localhost:7200/api/v0.1/users", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {

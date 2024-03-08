@@ -17,5 +17,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.0" />
     <PackageReference Include="Microsoft.OData.Core" Version="7.17.0" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj" />
+  </ItemGroup>
 
 </Project>
