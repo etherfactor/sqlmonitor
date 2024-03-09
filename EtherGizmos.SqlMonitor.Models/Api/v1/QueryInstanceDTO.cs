@@ -23,6 +23,9 @@ public class QueryInstanceDTOConfiguration : IModelConfiguration
     {
         var complex = builder.ComplexType<QueryInstanceDTO>();
 
+        complex.Namespace = "EtherGizmos.PerformancePulse";
+        complex.Name = complex.Name.Replace("DTO", "");
+
         complex.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -56,15 +59,6 @@ public static class ForQueryInstanceDTO
         fromDtoW.IgnoreAllMembers();
         fromDtoW.MapMember(dest => dest.InstanceId, src => src.InstanceId);
         fromDtoW.MapMember(dest => dest.Instance, src => src.Instance);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddQueryInstance(this ODataModelBuilder @this)
-    {
-        var complex = @this.ComplexTypeWithAnnotations<QueryInstanceDTO>();
-        complex.PropertyWithAnnotations(e => e.InstanceId);
-        complex.HasRequiredWithAnnotations(e => e.Instance);
 
         return @this;
     }

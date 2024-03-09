@@ -47,6 +47,9 @@ public class InstanceDTOConfiguration : IModelConfiguration
         var entitySet = builder.EntitySet<InstanceDTO>("instances");
         var entity = builder.EntityType<InstanceDTO>();
 
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
         entity.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -105,29 +108,6 @@ public static class ForInstanceDTO
         fromDto.MapMember(dest => dest.Address, src => src.Address);
         fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.Database, src => src.Database);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddInstance(this ODataModelBuilder @this)
-    {
-        var entitySet = @this.EntitySetWithAnnotations<InstanceDTO>();
-
-        var entity = @this.EntityTypeWithAnnotations<InstanceDTO>();
-        entity.HasKey(e => e.Id);
-        entity.PropertyWithAnnotations(e => e.Id);
-        /* Begin Audit */
-        entity.PropertyWithAnnotations(e => e.CreatedAt);
-        entity.PropertyWithAnnotations(e => e.CreatedByUserId);
-        entity.PropertyWithAnnotations(e => e.ModifiedAt);
-        entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
-        /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.Name);
-        entity.PropertyWithAnnotations(e => e.Description);
-        entity.PropertyWithAnnotations(e => e.IsActive);
-        entity.PropertyWithAnnotations(e => e.Address);
-        entity.PropertyWithAnnotations(e => e.Port);
-        entity.PropertyWithAnnotations(e => e.Database);
 
         return @this;
     }

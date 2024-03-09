@@ -36,6 +36,9 @@ public class SecurableDTOConfiguration : IModelConfiguration
         var entitySet = builder.EntitySet<SecurableDTO>("securables");
         var entity = builder.EntityType<SecurableDTO>();
 
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
         entity.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -82,27 +85,6 @@ public static class ForSecurableDTO
         /*  End Audit  */
         fromDto.MapMember(dest => dest.Name, src => src.Name);
         fromDto.MapMember(dest => dest.Description, src => src.Description);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddSecurable(this ODataModelBuilder @this)
-    {
-        var entitySet = @this.EntitySetWithAnnotations<SecurableDTO>();
-
-        var entity = @this.EntityTypeWithAnnotations<SecurableDTO>();
-        entity.HasKey(e => e.Id);
-        entity.PropertyWithAnnotations(e => e.Id);
-        /* Begin Audit */
-        entity.PropertyWithAnnotations(e => e.CreatedAt);
-        entity.PropertyWithAnnotations(e => e.CreatedByUserId);
-        entity.PropertyWithAnnotations(e => e.ModifiedAt);
-        entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
-        /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.Name);
-        entity.PropertyWithAnnotations(e => e.Description);
-
-        entity.HasManyWithAnnotations(e => e.Permissions);
 
         return @this;
     }

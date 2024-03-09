@@ -58,6 +58,9 @@ public class UserDTOConfiguration : IModelConfiguration
         var entitySet = builder.EntitySet<UserDTO>("users");
         var entity = builder.EntityType<UserDTO>();
 
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
         entity.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -121,30 +124,6 @@ public static class ForUserDTO
         fromDto.MapMember(dest => dest.IsActive, src => src.IsActive);
         fromDto.MapMember(dest => dest.IsAdministrator, src => src.IsAdministrator);
         fromDto.MapMember(dest => dest.LastLoginAtUtc, src => src.LastLoginAt);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddUser(this ODataModelBuilder @this)
-    {
-        var entitySet = @this.EntitySetWithAnnotations<UserDTO>();
-
-        var entity = @this.EntityTypeWithAnnotations<UserDTO>();
-        entity.HasKey(e => e.Id);
-        entity.PropertyWithAnnotations(e => e.Id);
-        /* Begin Audit */
-        entity.PropertyWithAnnotations(e => e.CreatedAt);
-        entity.PropertyWithAnnotations(e => e.CreatedByUserId);
-        entity.PropertyWithAnnotations(e => e.ModifiedAt);
-        entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
-        /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.Username);
-        entity.PropertyWithAnnotations(e => e.Password);
-        entity.PropertyWithAnnotations(e => e.EmailAddress);
-        entity.PropertyWithAnnotations(e => e.Name);
-        entity.PropertyWithAnnotations(e => e.IsActive);
-        entity.PropertyWithAnnotations(e => e.IsAdministrator);
-        entity.PropertyWithAnnotations(e => e.LastLoginAt);
 
         return @this;
     }

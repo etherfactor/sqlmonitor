@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using Microsoft.OData.ModelBuilder;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
@@ -10,20 +11,26 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 [EnumDisplay(Name = "SeverityType")]
 public enum SeverityTypeDTO
 {
-    [Display(Name = "Unknown")]
     Unknown = -1,
-
-    [Display(Name = "Critical")]
     Critical = 4,
-
-    [Display(Name = "Error")]
     Error = 3,
-
-    [Display(Name = "Nominal")]
     Nominal = 1,
-
-    [Display(Name = "Warning")]
     Warning = 2,
+}
+
+public class SeverityTypeDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var enumeration = builder.EnumType<SeverityTypeDTO>();
+
+        enumeration.Namespace = "EtherGizmos.PerformancePulse";
+        enumeration.Name = enumeration.Name.Replace("DTO", "");
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+        }
+    }
 }
 
 public static class ForSeverityTypeDTO
@@ -73,18 +80,6 @@ public static class ForSeverityTypeDTO
 
         var fromDtoNull = @this.CreateMap<SeverityTypeDTO?, SeverityType?>();
         fromDtoNull.ConvertUsing(_fromDtoNull);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddSeverityType(this ODataModelBuilder @this)
-    {
-        var enumType = @this.EnumType/*WithAnnotations*/<SeverityTypeDTO>();
-        enumType.Member/*WithAnnotations*/(SeverityTypeDTO.Unknown);
-        enumType.Member/*WithAnnotations*/(SeverityTypeDTO.Critical);
-        enumType.Member/*WithAnnotations*/(SeverityTypeDTO.Error);
-        enumType.Member/*WithAnnotations*/(SeverityTypeDTO.Nominal);
-        enumType.Member/*WithAnnotations*/(SeverityTypeDTO.Warning);
 
         return @this;
     }

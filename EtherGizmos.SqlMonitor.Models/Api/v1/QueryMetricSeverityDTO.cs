@@ -26,6 +26,9 @@ public class QueryMetricSeverityDTOConfiguration : IModelConfiguration
     {
         var complex = builder.ComplexType<QueryMetricSeverityDTO>();
 
+        complex.Namespace = "EtherGizmos.PerformancePulse";
+        complex.Name = complex.Name.Replace("DTO", "");
+
         complex.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -52,16 +55,6 @@ public static class ForQueryMetricSeverityDTO
         fromDto.MapMember(dest => dest.SeverityType, src => src.SeverityType);
         fromDto.MapMember(dest => dest.MinimumExpression, src => src.MinimumExpression);
         fromDto.MapMember(dest => dest.MaximumExpression, src => src.MaximumExpression);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddQueryMetricSeverity(this ODataModelBuilder @this)
-    {
-        var complex = @this.ComplexType<QueryMetricSeverityDTO>();
-        complex.EnumPropertyWithAnnotations(e => e.SeverityType);
-        complex.PropertyWithAnnotations(e => e.MinimumExpression);
-        complex.PropertyWithAnnotations(e => e.MaximumExpression);
 
         return @this;
     }

@@ -26,6 +26,9 @@ public class MetricSeverityDTOConfiguration : IModelConfiguration
     {
         var complex = builder.ComplexType<MetricSeverityDTO>();
 
+        complex.Namespace = "EtherGizmos.PerformancePulse";
+        complex.Name = complex.Name.Replace("DTO", "");
+
         complex.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -52,16 +55,6 @@ public static class ForMetricSeverityDTO
         fromDto.MapMember(dest => dest.SeverityType, src => src.SeverityType);
         fromDto.MapMember(dest => dest.MinimumValue, src => src.MinimumValue);
         fromDto.MapMember(dest => dest.MaximumValue, src => src.MaximumValue);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddMetricSeverity(this ODataModelBuilder @this)
-    {
-        var complex = @this.ComplexTypeWithAnnotations<MetricSeverityDTO>();
-        complex.EnumPropertyWithAnnotations(e => e.SeverityType);
-        complex.PropertyWithAnnotations(e => e.MinimumValue);
-        complex.PropertyWithAnnotations(e => e.MaximumValue);
 
         return @this;
     }

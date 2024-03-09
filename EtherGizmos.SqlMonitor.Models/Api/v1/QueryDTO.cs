@@ -64,6 +64,9 @@ public class QueryDTOConfiguration : IModelConfiguration
         var entitySet = builder.EntitySet<QueryDTO>("queries");
         var entity = builder.EntityType<QueryDTO>();
 
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
         entity.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -143,36 +146,6 @@ public static class ForQueryDTO
         fromDto.MapMember(dest => dest.InstanceBlacklists, src => src.InstanceBlacklists);
         fromDto.MapMember(dest => dest.InstanceWhitelists, src => src.InstanceWhitelists);
         fromDto.MapMember(dest => dest.InstanceDatabaseOverrides, src => src.InstanceDatabaseOverrides);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddQuery(this ODataModelBuilder @this)
-    {
-        var entitySet = @this.EntitySetWithAnnotations<QueryDTO>();
-
-        var entity = @this.EntityTypeWithAnnotations<QueryDTO>();
-        entity.HasKey(e => e.Id);
-        entity.PropertyWithAnnotations(e => e.Id);
-        /* Begin Audit */
-        entity.PropertyWithAnnotations(e => e.CreatedAt);
-        entity.PropertyWithAnnotations(e => e.CreatedByUserId);
-        entity.PropertyWithAnnotations(e => e.ModifiedAt);
-        entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
-        /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.SystemId);
-        entity.PropertyWithAnnotations(e => e.Name);
-        entity.PropertyWithAnnotations(e => e.Description);
-        entity.PropertyWithAnnotations(e => e.IsActive);
-        entity.PropertyWithAnnotations(e => e.SqlText);
-        entity.PropertyWithAnnotations(e => e.RunFrequency);
-        entity.PropertyWithAnnotations(e => e.LastRunAt);
-        entity.PropertyWithAnnotations(e => e.TimestampUtcExpression);
-        entity.PropertyWithAnnotations(e => e.BucketExpression);
-        entity.CollectionPropertyWithAnnotations(e => e.Metrics);
-        entity.CollectionPropertyWithAnnotations(e => e.InstanceBlacklists);
-        entity.CollectionPropertyWithAnnotations(e => e.InstanceWhitelists);
-        entity.CollectionPropertyWithAnnotations(e => e.InstanceDatabaseOverrides);
 
         return @this;
     }

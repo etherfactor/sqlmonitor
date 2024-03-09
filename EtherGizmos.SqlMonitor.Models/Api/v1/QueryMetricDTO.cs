@@ -31,6 +31,9 @@ public class QueryMetricDTOConfiguration : IModelConfiguration
     {
         var complex = builder.ComplexType<QueryMetricDTO>();
 
+        complex.Namespace = "EtherGizmos.PerformancePulse";
+        complex.Name = complex.Name.Replace("DTO", "");
+
         complex.IgnoreAll();
 
         if (apiVersion >= ApiVersions.V0_1)
@@ -57,16 +60,6 @@ public static class ForQueryMetricDTO
         fromDto.MapMember(dest => dest.MetricId, src => src.MetricId);
         fromDto.MapMember(dest => dest.ValueExpression, src => src.ValueExpression);
         fromDto.MapMember(dest => dest.Severities, src => src.Severities);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddQueryMetric(this ODataModelBuilder @this)
-    {
-        var complex = @this.ComplexType<QueryMetricDTO>();
-        complex.PropertyWithAnnotations(e => e.MetricId);
-        complex.PropertyWithAnnotations(e => e.ValueExpression);
-        complex.CollectionPropertyWithAnnotations(e => e.Severities);
 
         return @this;
     }

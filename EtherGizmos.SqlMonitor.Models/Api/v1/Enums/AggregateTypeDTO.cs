@@ -1,35 +1,36 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Models.Annotations;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using Microsoft.OData.ModelBuilder;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 
-[EnumDisplay(Name = "AggregateType")]
 public enum AggregateTypeDTO
 {
-    [Display(Name = "Unknown")]
     Unknown = -1,
-
-    [Display(Name = "Average")]
     Average = 1,
-
-    [Display(Name = "Maximum")]
     Maximum = 2,
-
-    [Display(Name = "Minimum")]
     Minimum = 3,
-
-    [Display(Name = "StandardDeviation")]
     StandardDeviation = 4,
-
-    [Display(Name = "Sum")]
     Sum = 5,
-
-    [Display(Name = "Variance")]
     Variance = 6,
+}
+
+public class AggregateTypeDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var enumeration = builder.EnumType<AggregateTypeDTO>();
+
+        enumeration.Namespace = "EtherGizmos.PerformancePulse";
+        enumeration.Name = enumeration.Name.Replace("DTO", "");
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+        }
+    }
 }
 
 public static class ForAggregateTypeDTO
@@ -87,20 +88,6 @@ public static class ForAggregateTypeDTO
 
         var fromDtoNull = @this.CreateMap<AggregateTypeDTO?, AggregateType?>();
         fromDtoNull.ConvertUsing(_fromDtoNull);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddAggregateType(this ODataModelBuilder @this)
-    {
-        var enumType = @this.EnumType/*WithAnnotations*/<AggregateTypeDTO>();
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.Unknown);
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.Average);
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.Maximum);
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.Minimum);
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.StandardDeviation);
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.Sum);
-        enumType.Member/*WithAnnotations*/(AggregateTypeDTO.Variance);
 
         return @this;
     }

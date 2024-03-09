@@ -9,36 +9,26 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "Metric", GroupName = "metrics")]
 public class MetricDTO
 {
-    [Display(Name = "id")]
     public Guid Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "description")]
     public string? Description { get; set; }
 
     [Required]
-    [Display(Name = "aggregate_type")]
     public AggregateTypeDTO? AggregateType { get; set; }
 
-    [Display(Name = "severities")]
     public List<MetricSeverityDTO> Severities { get; set; } = new List<MetricSeverityDTO>();
 
     public Task EnsureValid(IQueryable<Metric> records)
@@ -53,6 +43,9 @@ public class MetricDTOConfiguration : IModelConfiguration
     {
         var entitySet = builder.EntitySet<MetricDTO>("metrics");
         var entity = builder.EntityType<MetricDTO>();
+
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
 
         entity.IgnoreAll();
 
@@ -106,27 +99,6 @@ public static class ForMetricDTO
         fromDto.MapMember(dest => dest.Description, src => src.Description);
         fromDto.MapMember(dest => dest.AggregateType, src => src.AggregateType);
         fromDto.MapMember(dest => dest.Severities, src => src.Severities);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddMetric(this ODataModelBuilder @this)
-    {
-        var entitySet = @this.EntitySetWithAnnotations<MetricDTO>();
-
-        var entity = @this.EntityTypeWithAnnotations<MetricDTO>();
-        entity.HasKey(e => e.Id);
-        entity.PropertyWithAnnotations(e => e.Id);
-        /* Begin Audit */
-        entity.PropertyWithAnnotations(e => e.CreatedAt);
-        entity.PropertyWithAnnotations(e => e.CreatedByUserId);
-        entity.PropertyWithAnnotations(e => e.ModifiedAt);
-        entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
-        /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.Name);
-        entity.PropertyWithAnnotations(e => e.Description);
-        entity.EnumPropertyWithAnnotations(e => e.AggregateType);
-        entity.CollectionPropertyWithAnnotations(e => e.Severities);
 
         return @this;
     }
