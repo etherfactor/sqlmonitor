@@ -1,8 +1,7 @@
-﻿using EtherGizmos.SqlMonitor.Models.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Models.Extensions;
 using EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Models.OData.Errors;
 
@@ -20,8 +19,7 @@ public class ODataRecordNotFoundErrorDetail<T> : ODataErrorDetailBase
     /// <param name="value">The value of that key that failed to find a record.</param>
     public ODataRecordNotFoundErrorDetail(string code, Expression<Func<T, object?>> selector, object? value)
         : base(codeProvider: () => code,
-            targetProvider: () => selector.GetPropertyInfo().GetCustomAttribute<DisplayAttribute>()?.Name
-                ?? throw new InvalidOperationException(string.Format("The type {0} must be annotated with a {1}.", typeof(T), nameof(DisplayAttribute))),
+            targetProvider: () => selector.GetPropertyInfo().Name.ToCamelCase(),
             messageProvider: () => string.Format("Non-existent key value: {0}", value))
     {
     }

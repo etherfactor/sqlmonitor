@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
+using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Exceptions;
@@ -53,12 +53,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "");
@@ -84,12 +84,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$filter=id eq 'QUERY'");
@@ -115,12 +115,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithExpand_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$expand=permissions");
@@ -146,12 +146,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$select=id");
@@ -177,12 +177,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$orderby=name");
@@ -208,12 +208,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$top=1");
@@ -239,12 +239,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$skip=1");
@@ -270,12 +270,12 @@ internal class SecurablesControllerTests
     [Test]
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             "",
             "$count=true");
@@ -303,12 +303,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "INVALID";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "");
@@ -336,12 +336,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "");
@@ -369,12 +369,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$filter=id eq 'QUERY'");
@@ -390,12 +390,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$expand=permissions");
@@ -423,12 +423,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$select=id");
@@ -456,12 +456,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$orderby=name");
@@ -477,12 +477,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$top=1");
@@ -498,12 +498,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$skip=1");
@@ -519,12 +519,12 @@ internal class SecurablesControllerTests
     {
         string recordId = "QUERY";
 
-        var model = ODataModel.GetEdmModel(1.0m);
+        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<SecurableDTO>(
             model,
             "GET",
             "https://localhost:7200",
-            "api/v1",
+            "api/v0.1",
             "securables",
             $"('{recordId}')",
             "$count=true");

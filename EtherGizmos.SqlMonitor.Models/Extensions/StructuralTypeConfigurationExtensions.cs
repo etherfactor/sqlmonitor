@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Api.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Helpers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.ComponentModel.DataAnnotations;
@@ -12,6 +13,31 @@ namespace EtherGizmos.SqlMonitor.Models.Extensions;
 /// </summary>
 internal static class StructuralTypeConfigurationExtensions
 {
+    public static void IgnoreAll<TModel>(this StructuralTypeConfiguration<TModel> @this)
+        where TModel : class
+    {
+        var method = typeof(StructuralTypeConfigurationExtensions)
+            .GetMethod(
+                nameof(IgnoreProperty),
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+
+        if (method is null)
+            throw new InvalidOperationException($"Unable to locate {nameof(IgnoreProperty)}");
+
+        foreach (var property in typeof(TModel).GetProperties())
+        {
+            var genericMethod = method.MakeGenericMethod(typeof(TModel), property.PropertyType);
+            genericMethod.Invoke(null, [@this, property]);
+        }
+    }
+
+    private static void IgnoreProperty<TModel, TProperty>(StructuralTypeConfiguration<TModel> entity, PropertyInfo property)
+        where TModel : class
+    {
+        var expression = ExpressionHelper.GetPropertyExpression<TModel, TProperty>(property);
+        entity.Ignore(expression);
+    }
+
     /// <summary>
     /// Adds audit properties to an entity, reading from annotations.
     /// </summary>

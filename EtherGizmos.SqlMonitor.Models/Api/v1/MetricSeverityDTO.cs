@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
@@ -11,14 +13,31 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class MetricSeverityDTO
 {
     [Required]
-    [Display(Name = "severity_type")]
     public SeverityTypeDTO? SeverityType { get; set; }
 
-    [Display(Name = "minimum_value")]
     public double? MinimumValue { get; set; }
 
-    [Display(Name = "maximum_value")]
     public double? MaximumValue { get; set; }
+}
+
+public class MetricSeverityDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var complex = builder.ComplexType<MetricSeverityDTO>();
+
+        complex.Namespace = "EtherGizmos.PerformancePulse";
+        complex.Name = complex.Name.Replace("DTO", "");
+
+        complex.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            complex.EnumProperty(e => e.SeverityType);
+            complex.Property(e => e.MinimumValue);
+            complex.Property(e => e.MaximumValue);
+        }
+    }
 }
 
 public static class ForMetricSeverityDTO
@@ -36,16 +55,6 @@ public static class ForMetricSeverityDTO
         fromDto.MapMember(dest => dest.SeverityType, src => src.SeverityType);
         fromDto.MapMember(dest => dest.MinimumValue, src => src.MinimumValue);
         fromDto.MapMember(dest => dest.MaximumValue, src => src.MaximumValue);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddMetricSeverity(this ODataModelBuilder @this)
-    {
-        var complex = @this.ComplexTypeWithAnnotations<MetricSeverityDTO>();
-        complex.EnumPropertyWithAnnotations(e => e.SeverityType);
-        complex.PropertyWithAnnotations(e => e.MinimumValue);
-        complex.PropertyWithAnnotations(e => e.MaximumValue);
 
         return @this;
     }

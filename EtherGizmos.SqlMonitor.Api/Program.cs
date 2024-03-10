@@ -1,7 +1,6 @@
 using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.OData.Metadata;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
@@ -15,6 +14,7 @@ using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using EtherGizmos.SqlMonitor.Database;
+using EtherGizmos.SqlMonitor.Models;
 using FluentMigrator.Runner;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog;
 using StackExchange.Redis;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,14 +116,36 @@ builder.Services
     })
     .AddOData(opt =>
     {
-        opt.AddRouteComponents("/api/v1", ODataModel.GetEdmModel(1.0m));
     })
     .AddMvcOptions(opt =>
     {
         opt.ModelMetadataDetailsProviders.Add(new AttributeDisplayMetadataProvider());
     });
 
-builder.Services.AddSwaggerGen();
+builder.Services
+    .AddApiVersioning(opt =>
+    {
+        opt.ReportApiVersions = true;
+        opt.DefaultApiVersion = ApiVersions.V0_1;
+        //opt.ApiVersionReader = new UrlSegmentApiVersionReader();
+    })
+    .AddOData(opt =>
+    {
+        opt.AddRouteComponents("api/v{version:apiVersion}");
+    })
+    .AddODataApiExplorer(opt =>
+    {
+        opt.GroupNameFormat = "'v'VVV";
+        opt.SubstituteApiVersionInUrl = true;
+    });
+
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services
+    .AddSwaggerGen(opt =>
+    {
+        //Add a custom operation filter which sets default values
+        opt.OperationFilter<SwaggerDefaultValues>();
+    });
 
 builder.Services
     .AddDbContext<DatabaseContext>((services, opt) =>
@@ -353,7 +376,7 @@ builder.Services
 builder.Services.AddMapper();
 
 builder.Services.AddHostedService<CacheLoadService>();
-builder.Services.AddHostedService<EnqueueMonitorQueriesService>();
+//builder.Services.AddHostedService<EnqueueMonitorQueriesService>();
 
 builder.Services.AddCors(opt =>
     {
@@ -386,7 +409,19 @@ app.UseCors("All");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app
+        .UseSwaggerUI(opt =>
+        {
+            var descriptions = app.DescribeApiVersions();
+
+            // build a swagger endpoint for each discovered API version
+            foreach (var description in descriptions)
+            {
+                var url = $"/swagger/{description.GroupName}/swagger.json";
+                var name = description.GroupName.ToUpperInvariant();
+                opt.SwaggerEndpoint(url, name);
+            }
+        });
     app.UseODataRouteDebug();
 }
 

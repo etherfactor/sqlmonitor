@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -6,47 +8,68 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-[Display(Name = "Instance", GroupName = "instances")]
 public class InstanceDTO
 {
-    [Display(Name = "id")]
     public Guid Id { get; set; }
 
-    [Display(Name = "created_at")]
     public DateTimeOffset? CreatedAt { get; set; }
 
-    [Display(Name = "created_by_user_id")]
     public Guid? CreatedByUserId { get; set; }
 
-    [Display(Name = "modified_at")]
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    [Display(Name = "modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
     [Required]
-    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "description")]
     public string? Description { get; set; }
 
-    [Display(Name = "is_active")]
     public bool? IsActive { get; set; } = true;
 
     [Required]
-    [Display(Name = "address")]
     public string? Address { get; set; }
 
-    [Display(Name = "port")]
     public short? Port { get; set; }
 
-    [Display(Name = "database")]
     public string? Database { get; set; }
 
     public Task EnsureValid(IQueryable<Instance> records)
     {
         return Task.CompletedTask;
+    }
+}
+
+public class InstanceDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<InstanceDTO>("instances");
+        var entity = builder.EntityType<InstanceDTO>();
+
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.Property(e => e.IsActive);
+            entity.Property(e => e.Address);
+            entity.Property(e => e.Port);
+            entity.Property(e => e.Database);
+        }
     }
 }
 
@@ -85,29 +108,6 @@ public static class ForInstanceDTO
         fromDto.MapMember(dest => dest.Address, src => src.Address);
         fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.Database, src => src.Database);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddInstance(this ODataModelBuilder @this)
-    {
-        var entitySet = @this.EntitySetWithAnnotations<InstanceDTO>();
-
-        var entity = @this.EntityTypeWithAnnotations<InstanceDTO>();
-        entity.HasKey(e => e.Id);
-        entity.PropertyWithAnnotations(e => e.Id);
-        /* Begin Audit */
-        entity.PropertyWithAnnotations(e => e.CreatedAt);
-        entity.PropertyWithAnnotations(e => e.CreatedByUserId);
-        entity.PropertyWithAnnotations(e => e.ModifiedAt);
-        entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
-        /*  End Audit  */
-        entity.PropertyWithAnnotations(e => e.Name);
-        entity.PropertyWithAnnotations(e => e.Description);
-        entity.PropertyWithAnnotations(e => e.IsActive);
-        entity.PropertyWithAnnotations(e => e.Address);
-        entity.PropertyWithAnnotations(e => e.Port);
-        entity.PropertyWithAnnotations(e => e.Database);
 
         return @this;
     }

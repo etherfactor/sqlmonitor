@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Controllers.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
@@ -14,10 +15,9 @@ namespace EtherGizmos.SqlMonitor.Api.Controllers;
 /// <summary>
 /// Provides endpoints for <see cref="Securable"/> records.
 /// </summary>
-[Route(BasePath)]
 public class SecurablesController : ExtendedODataController
 {
-    private const string BasePath = "/api/v1/securables";
+    private const string BasePath = "api/v{version:apiVersion}/securables";
 
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
@@ -49,8 +49,8 @@ public class SecurablesController : ExtendedODataController
     /// </summary>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpGet]
-    [Route(BasePath)]
+    [ApiVersion("0.1")]
+    [HttpGet(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<SecurableDTO> queryOptions)
     {
         var finished = await Securables.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
@@ -63,8 +63,8 @@ public class SecurablesController : ExtendedODataController
     /// <param name="id">The id of the record.</param>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpGet]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpGet(BasePath + "({id})")]
     public async Task<IActionResult> Get(string id, ODataQueryOptions<SecurableDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();

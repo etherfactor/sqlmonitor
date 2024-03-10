@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
@@ -10,15 +12,32 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 public class QueryInstanceDatabaseDTO
 {
     [Required]
-    [Display(Name = "instance_id")]
     public Guid? InstanceId { get; set; }
 
-    [Display(Name = "instance")]
     public InstanceDTO? Instance { get; set; }
 
     [Required]
-    [Display(Name = "database_override")]
     public string? DatabaseOverride { get; set; }
+}
+
+public class QueryInstanceDatabaseDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var complex = builder.ComplexType<QueryInstanceDatabaseDTO>();
+
+        complex.Namespace = "EtherGizmos.PerformancePulse";
+        complex.Name = complex.Name.Replace("DTO", "");
+
+        complex.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            complex.Property(e => e.InstanceId);
+            complex.HasRequired(e => e.Instance);
+            complex.Property(e => e.DatabaseOverride);
+        }
+    }
 }
 
 public static class ForQueryInstanceDatabaseDTO
@@ -36,16 +55,6 @@ public static class ForQueryInstanceDatabaseDTO
         fromDto.MapMember(dest => dest.InstanceId, src => src.InstanceId);
         fromDto.MapMember(dest => dest.Instance, src => src.Instance);
         fromDto.MapMember(dest => dest.DatabaseOverride, src => src.DatabaseOverride);
-
-        return @this;
-    }
-
-    public static ODataModelBuilder AddQueryInstanceDatabase(this ODataModelBuilder @this)
-    {
-        var complex = @this.ComplexTypeWithAnnotations<QueryInstanceDatabaseDTO>();
-        complex.PropertyWithAnnotations(e => e.InstanceId);
-        complex.HasRequiredWithAnnotations(e => e.Instance);
-        complex.PropertyWithAnnotations(e => e.DatabaseOverride);
 
         return @this;
     }

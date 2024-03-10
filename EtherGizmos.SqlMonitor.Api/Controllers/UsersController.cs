@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
@@ -12,10 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EtherGizmos.SqlMonitor.Api.Controllers;
 
-[Route(BasePath)]
 public class UsersController : ODataController
 {
-    private const string BasePath = "/api/v1/users";
+    private const string BasePath = "api/v{version:apiVersion}/users";
 
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
@@ -51,8 +51,8 @@ public class UsersController : ODataController
     /// </summary>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpGet]
-    [Route(BasePath)]
+    [ApiVersion("0.1")]
+    [HttpGet(BasePath)]
     public async Task<IActionResult> Search(ODataQueryOptions<UserDTO> queryOptions)
     {
         var finished = await Users.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
@@ -65,8 +65,8 @@ public class UsersController : ODataController
     /// <param name="id">The id of the record.</param>
     /// <param name="queryOptions">The query options to use.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpGet]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpGet(BasePath + "({id})")]
     public async Task<IActionResult> Get(Guid id, ODataQueryOptions<UserDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
@@ -79,8 +79,8 @@ public class UsersController : ODataController
         return Ok(finished);
     }
 
-    [HttpPost]
-    [Route(BasePath)]
+    [ApiVersion("0.1")]
+    [HttpPost(BasePath)]
     public async Task<IActionResult> Create([FromBody] UserDTO record, ODataQueryOptions<UserDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
@@ -98,8 +98,8 @@ public class UsersController : ODataController
         return Created(finished);
     }
 
-    [HttpPatch]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpPatch(BasePath + "({id})")]
     public async Task<IActionResult> Update(Guid id, [FromBody] Delta<UserDTO> patchRecord, ODataQueryOptions<UserDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
@@ -131,8 +131,8 @@ public class UsersController : ODataController
     /// </summary>
     /// <param name="id">The id of the record to delete.</param>
     /// <returns>An awaitable task.</returns>
-    [HttpDelete]
-    [Route(BasePath + "({id})")]
+    [ApiVersion("0.1")]
+    [HttpDelete(BasePath + "({id})")]
     public async Task<IActionResult> Delete(Guid id)
     {
         User? record = await Users.SingleOrDefaultAsync(e => e.Id == id);

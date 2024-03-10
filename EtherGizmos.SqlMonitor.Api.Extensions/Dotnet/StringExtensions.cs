@@ -1,13 +1,30 @@
 ﻿using System.Globalization;
 using System.Text;
+using System.Text.Json;
 
-namespace EtherGizmos.SqlMonitor.Api.Extensions;
+namespace EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 
 /// <summary>
 /// Provides extension methods for <see cref="string"/>.
 /// </summary>
 public static class StringExtensions
 {
+    /// <summary>
+    /// Converts a string to camel case.
+    /// </summary>
+    /// <param name="this">The string to convert.</param>
+    /// <returns>The string in camel case.</returns>
+    public static string ToCamelCase(this string @this)
+    {
+        if (@this is null)
+            throw new ArgumentNullException(nameof(@this));
+
+        if (@this.Trim() == "")
+            return @this;
+
+        return JsonNamingPolicy.CamelCase.ConvertName(@this);
+    }
+
     /// <summary>
     /// Converts a string to snake case.
     /// </summary>
