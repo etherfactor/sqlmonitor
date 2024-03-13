@@ -8,10 +8,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-public class SecurableDTO
+public class MonitoredSystemDTO
 {
-    [Required]
-    public string? Id { get; set; }
+    public Guid Id { get; set; }
 
     public DateTimeOffset? CreatedAt { get; set; }
 
@@ -26,15 +25,18 @@ public class SecurableDTO
 
     public string? Description { get; set; }
 
-    public List<PermissionDTO> Permissions { get; set; } = new List<PermissionDTO>();
+    public Task EnsureValid(IQueryable<MonitoredSystem> records)
+    {
+        return Task.CompletedTask;
+    }
 }
 
-public class SecurableDTOConfiguration : IModelConfiguration
+public class MonitoredSystemDTOConfiguration : IModelConfiguration
 {
     public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
     {
-        var entitySet = builder.EntitySet<SecurableDTO>("securables");
-        var entity = builder.EntityType<SecurableDTO>();
+        var entitySet = builder.EntitySet<MonitoredSystemDTO>("monitoredSystems");
+        var entity = builder.EntityType<MonitoredSystemDTO>();
 
         entity.Namespace = "EtherGizmos.PerformancePulse";
         entity.Name = entity.Name.Replace("DTO", "");
@@ -43,6 +45,8 @@ public class SecurableDTOConfiguration : IModelConfiguration
 
         if (apiVersion >= ApiVersions.V0_1)
         {
+            entity.HasKey(e => e.Id);
+
             entity.Property(e => e.Id);
             /* Begin Audit */
             entity.Property(e => e.CreatedAt);
@@ -52,16 +56,15 @@ public class SecurableDTOConfiguration : IModelConfiguration
             /*  End Audit  */
             entity.Property(e => e.Name);
             entity.Property(e => e.Description);
-            entity.HasMany(e => e.Permissions);
         }
     }
 }
 
-public static class ForSecurableDTO
+public static class ForMonitoredSystemDTO
 {
-    public static IProfileExpression AddSecurable(this IProfileExpression @this)
+    public static IProfileExpression AddMonitoredSystem(this IProfileExpression @this)
     {
-        var toDto = @this.CreateMap<Securable, SecurableDTO>();
+        var toDto = @this.CreateMap<MonitoredSystem, MonitoredSystemDTO>();
         toDto.IgnoreAllMembers();
         toDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */
@@ -72,9 +75,8 @@ public static class ForSecurableDTO
         /*  End Audit  */
         toDto.MapMember(dest => dest.Name, src => src.Name);
         toDto.MapMember(dest => dest.Description, src => src.Description);
-        toDto.MapMember(dest => dest.Permissions, src => src.Permissions, opt => opt.ExplicitExpansion());
 
-        var fromDto = @this.CreateMap<SecurableDTO, Securable>();
+        var fromDto = @this.CreateMap<MonitoredSystemDTO, MonitoredSystem>();
         fromDto.IgnoreAllMembers();
         fromDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */

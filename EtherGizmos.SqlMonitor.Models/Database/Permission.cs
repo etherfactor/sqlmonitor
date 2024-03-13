@@ -15,8 +15,6 @@ public class Permission : Auditable
     [Column("description")]
     public virtual string? Description { get; set; }
 
-    public virtual List<Securable> Securables { get; set; } = new List<Securable>();
-
     /// <summary>
     /// Not intended for direct use.
     /// </summary>

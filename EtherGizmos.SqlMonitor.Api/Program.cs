@@ -182,6 +182,7 @@ builder.Services
     .AddScoped<IInstanceMetricBySecondService, InstanceMetricBySecondService>()
     .AddScoped<IMetricBucketService, MetricBucketService>()
     .AddScoped<IMetricService, MetricService>()
+    .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
     .AddScoped<IPermissionService, PermissionService>()
     .AddScoped<IQueryService, QueryService>()
     .AddScoped<ISecurableService, SecurableService>()

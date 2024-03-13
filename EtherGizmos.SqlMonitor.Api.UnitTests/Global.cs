@@ -34,9 +34,9 @@ internal static class Global
 
         services.AddScoped<InstancesController>();
         services.AddScoped<MetricsController>();
+        services.AddScoped<MonitoredSystemsController>();
         services.AddScoped<PermissionsController>();
         services.AddScoped<QueriesController>();
-        services.AddScoped<SecurablesController>();
         services.AddScoped<UsersController>();
 
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
@@ -46,6 +46,7 @@ internal static class Global
 
         services.AddSingleton<IInstanceService>(provider => provider.GetRequiredService<Mock<IInstanceService>>().Object);
         services.AddSingleton<IMetricService>(provider => provider.GetRequiredService<Mock<IMetricService>>().Object);
+        services.AddSingleton<IMonitoredSystemService>(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);
         services.AddSingleton<IPermissionService>(provider => provider.GetRequiredService<Mock<IPermissionService>>().Object);
         services.AddSingleton<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
         services.AddSingleton<ISecurableService>(provider => provider.GetRequiredService<Mock<ISecurableService>>().Object);

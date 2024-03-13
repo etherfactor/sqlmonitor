@@ -35,6 +35,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<Metric> Metrics { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="MonitoredSystem"/> records, in 'dbo.monitored
+    /// </summary>
+    public virtual DbSet<MonitoredSystem> MonitoredSystems { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Permission"/> records, in 'dbo.permissions'.
     /// </summary>
     public virtual DbSet<Permission> Permissions { get; set; }
@@ -218,6 +223,20 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.MaximumValue);
         });
 
+        modelBuilder.Entity<MonitoredSystem>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.SecurableId);
+        });
+
         modelBuilder.Entity<Permission>(entity =>
         {
             entity.ToTableWithAnnotations();
@@ -228,10 +247,6 @@ public class DatabaseContext : DbContext
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
-
-            entity.HasMany(e => e.Securables)
-                .WithMany(e => e.Permissions)
-                .UsingEntity<SecurablePermission>();
         });
 
         modelBuilder.Entity<Principal>(entity =>
@@ -359,24 +374,7 @@ public class DatabaseContext : DbContext
             entity.HasKey(e => e.Id);
 
             entity.PropertyWithAnnotations(e => e.Id);
-            entity.AuditPropertiesWithAnnotations();
-            entity.PropertyWithAnnotations(e => e.Name);
-            entity.PropertyWithAnnotations(e => e.Description);
-
-            entity.HasMany(e => e.Permissions)
-                .WithMany(e => e.Securables)
-                .UsingEntity<SecurablePermission>();
-        });
-
-        modelBuilder.Entity<SecurablePermission>(entity =>
-        {
-            entity.ToTableWithAnnotations();
-
-            entity.HasKey(e => new { e.SecurableId, e.PermissionId });
-
-            entity.PropertyWithAnnotations(e => e.SecurableId);
-            entity.PropertyWithAnnotations(e => e.PermissionId);
-            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Type);
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -435,5 +433,13 @@ public class DatabaseContext : DbContext
         modelBuilder.AddGlobalValueConverter(new ValueConverter<SeverityType?, string?>(
             app => SeverityTypeConverter.ToStringOrDefault(app),
             db => SeverityTypeConverter.FromStringOrDefault(db)));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<SecurableType, int>(
+            app => SecurableTypeConverter.ToInteger(app),
+            db => SecurableTypeConverter.FromInteger(db)));
+
+        modelBuilder.AddGlobalValueConverter(new ValueConverter<SecurableType?, int?>(
+            app => SecurableTypeConverter.ToIntegerOrDefault(app),
+            db => SecurableTypeConverter.FromIntegerOrDefault(db)));
     }
 }

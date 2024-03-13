@@ -18,14 +18,5 @@ public class Migration001_CreatePermissionTables : AutoReversingMigration
             .WithAuditColumns()
             .WithColumn("name").AsAnsiString(100).NotNullable()
             .WithColumn("description").AsAnsiString(200).Nullable();
-
-        /*
-         * Create [dbo].[securable_permissions]
-         *  - valid combinations of securables and permissions
-         */
-        Create.Table("securable_permissions")
-            .WithColumn("securable_id").AsAnsiString(20).PrimaryKey()
-            .WithColumn("permission_id").AsAnsiString(20).PrimaryKey()
-            .WithAuditColumns();
     }
 }

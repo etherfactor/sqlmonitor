@@ -28,13 +28,13 @@ public static class IServiceCollectionExtensions
                 opt.AddInstance();
                 opt.AddMetric();
                 opt.AddMetricSeverity();
+                opt.AddMonitoredSystem();
                 opt.AddQueryInstance();
                 opt.AddQueryInstanceDatabase();
                 opt.AddQueryMetric();
                 opt.AddQueryMetricSeverity();
                 opt.AddPermission();
                 opt.AddQuery();
-                opt.AddSecurable();
                 opt.AddUser();
             });
 

@@ -26,8 +26,6 @@ public class PermissionDTO
     public string? Name { get; set; }
 
     public string? Description { get; set; }
-
-    public List<SecurableDTO> Securables { get; set; } = new List<SecurableDTO>();
 }
 
 public class PermissionDTOConfiguration : IModelConfiguration
@@ -55,7 +53,6 @@ public class PermissionDTOConfiguration : IModelConfiguration
             /*  End Audit  */
             entity.Property(e => e.Name);
             entity.Property(e => e.Description);
-            entity.HasMany(e => e.Securables);
         }
     }
 }
@@ -75,7 +72,6 @@ public static class ForPermissionDTO
         /*  End Audit  */
         toDto.MapMember(dest => dest.Name, src => src.Name);
         toDto.MapMember(dest => dest.Description, src => src.Description);
-        toDto.MapMember(dest => dest.Securables, src => src.Securables, opt => opt.ExplicitExpansion());
 
         var fromDto = @this.CreateMap<PermissionDTO, Permission>();
         fromDto.IgnoreAllMembers();
