@@ -14,7 +14,7 @@ public class Migration002_AddMonitoredSystems : AutoReversingMigration
          *  - systems being monitored for metrics, alongside resources and environments
          */
         Create.Table("monitored_systems")
-            .WithColumn("monitored_system_id").AsGuid().PrimaryKey()
+            .WithColumn("monitored_system_id").AsGuid().PrimaryKey().WithDefault(SystemMethods.NewGuid)
             .WithAuditColumns()
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable()

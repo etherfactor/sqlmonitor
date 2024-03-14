@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +10,7 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class MonitoredSystem : Auditable
 {
     [Column("monitored_system_id")]
-    [Key]
+    [Key, SqlDefaultValue]
     public virtual Guid Id { get; set; }
 
     [Column("name")]

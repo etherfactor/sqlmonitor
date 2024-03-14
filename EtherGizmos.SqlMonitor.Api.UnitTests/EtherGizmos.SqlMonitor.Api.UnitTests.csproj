@@ -24,4 +24,8 @@
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Messaging\" />
+  </ItemGroup>
+
 </Project>
