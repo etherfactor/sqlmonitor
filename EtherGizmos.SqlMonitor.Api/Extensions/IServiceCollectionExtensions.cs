@@ -22,6 +22,7 @@ public static class IServiceCollectionExtensions
                 //Add enums
 
                 //Add entities
+                opt.AddMonitoredResource();
                 opt.AddMonitoredSystem();
             });
 

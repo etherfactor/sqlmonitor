@@ -15,13 +15,13 @@ using System.Net;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Controllers;
 
-internal class MonitoredSystemsControllerTests
+internal class MonitoredResourcesControllerTests
 {
     private IServiceProvider _provider;
 
-    private MonitoredSystemsController _controller;
+    private MonitoredResourcesController _controller;
 
-    private List<MonitoredSystem> _data;
+    private List<MonitoredResource> _data;
 
     private readonly Guid _recordId = Guid.NewGuid();
 
@@ -29,8 +29,8 @@ internal class MonitoredSystemsControllerTests
     public void SetUp()
     {
         _provider = Global.CreateScope();
-        _controller = _provider.GetRequiredService<MonitoredSystemsController>();
-        _data = new List<MonitoredSystem>()
+        _controller = _provider.GetRequiredService<MonitoredResourcesController>();
+        _data = new List<MonitoredResource>()
         {
             new()
             {
@@ -64,7 +64,7 @@ internal class MonitoredSystemsControllerTests
 
         var mockData = _data.AsQueryable().BuildMock();
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Setup(service => service.GetQueryable()).Returns(mockData);
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -75,12 +75,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "");
 
@@ -92,10 +92,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredSystemDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredResourceDTO>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -106,12 +106,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             $"$filter=id eq {_recordId}");
 
@@ -123,10 +123,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredSystemDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredResourceDTO>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -137,12 +137,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$select=id");
 
@@ -157,7 +157,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<IEnumerable<ISelectExpandWrapper>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -168,12 +168,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$orderby=name");
 
@@ -185,10 +185,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredSystemDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredResourceDTO>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -199,12 +199,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$top=1");
 
@@ -216,10 +216,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredSystemDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredResourceDTO>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -230,12 +230,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$skip=1");
 
@@ -247,10 +247,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredSystemDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredResourceDTO>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -261,12 +261,12 @@ internal class MonitoredSystemsControllerTests
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$count=true");
 
@@ -278,10 +278,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredSystemDTO>>());
+            Assert.That(content, Is.AssignableTo<IEnumerable<MonitoredResourceDTO>>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -294,12 +294,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = new Guid();
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "");
 
@@ -314,7 +314,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<ODataError>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -327,12 +327,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "");
 
@@ -344,10 +344,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<MonitoredSystemDTO>());
+            Assert.That(content, Is.AssignableTo<MonitoredResourceDTO>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -360,12 +360,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "$filter=id eq 00000000-0000-0000-0000-000000000000");
 
@@ -381,12 +381,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "$select=id");
 
@@ -401,7 +401,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -414,12 +414,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "$orderby=id");
 
@@ -435,12 +435,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "$top=1");
 
@@ -456,12 +456,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "$skip=1");
 
@@ -477,12 +477,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "$count=true");
 
@@ -496,16 +496,16 @@ internal class MonitoredSystemsControllerTests
     public async Task Create_IsValid_Returns201Created()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel();
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "POST",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -518,10 +518,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(content, Is.AssignableTo<MonitoredSystemDTO>());
+            Assert.That(content, Is.AssignableTo<MonitoredResourceDTO>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -532,16 +532,16 @@ internal class MonitoredSystemsControllerTests
     public void Create_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             $"$filter=id eq {_recordId}");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -556,16 +556,16 @@ internal class MonitoredSystemsControllerTests
     public async Task Create_IsValid_WithSelect_Returns201Created()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$select=id");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -581,7 +581,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -592,16 +592,16 @@ internal class MonitoredSystemsControllerTests
     public void Create_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$orderby=id");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -616,16 +616,16 @@ internal class MonitoredSystemsControllerTests
     public void Create_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$top=1");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -640,16 +640,16 @@ internal class MonitoredSystemsControllerTests
     public void Create_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$skip=1");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -664,16 +664,16 @@ internal class MonitoredSystemsControllerTests
     public void Create_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             "",
             "$count=true");
 
-        var record = new MonitoredSystemDTO()
+        var record = new MonitoredResourceDTO()
         {
             Name = "Test",
         };
@@ -690,17 +690,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = Guid.NewGuid();
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "PATCH",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             "");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         var result = await _controller.Update(recordId, record, queryOptions);
         var status = result.GetStatusCode();
@@ -713,7 +713,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<ODataError>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -726,17 +726,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "POST",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             "");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         var result = await _controller.Update(recordId, record, queryOptions);
         var status = result.GetStatusCode();
@@ -746,10 +746,10 @@ internal class MonitoredSystemsControllerTests
         {
             Assert.That(result, Is.Not.Null);
             Assert.That(status, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(content, Is.AssignableTo<MonitoredSystemDTO>());
+            Assert.That(content, Is.AssignableTo<MonitoredResourceDTO>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -762,17 +762,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             $"$filter=id eq {_recordId}");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -786,17 +786,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             "$select=id");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         var result = await _controller.Update(recordId, record, queryOptions);
         var status = result.GetStatusCode();
@@ -809,7 +809,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<ISelectExpandWrapper>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -822,17 +822,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({_recordId})",
             "$orderby=id");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -846,17 +846,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             "$top=1");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -870,17 +870,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             "$skip=1");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -894,17 +894,17 @@ internal class MonitoredSystemsControllerTests
         var recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "GET",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"({recordId})",
             "$count=true");
 
-        var record = new Delta<MonitoredSystemDTO>();
-        record.TrySetPropertyValue(nameof(MonitoredSystemDTO.Name), "New Name");
+        var record = new Delta<MonitoredResourceDTO>();
+        record.TrySetPropertyValue(nameof(MonitoredResourceDTO.Name), "New Name");
 
         Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
         {
@@ -918,12 +918,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = new Guid();
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "DELETE",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "");
 
@@ -938,7 +938,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.AssignableTo<ODataError>());
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
@@ -951,12 +951,12 @@ internal class MonitoredSystemsControllerTests
         Guid recordId = _recordId;
 
         var model = ApiVersions.V0_1.GenerateEdmModel(); ;
-        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredSystemDTO>(
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredResourceDTO>(
             model,
             "DELETE",
             "https://localhost:7200",
             "api/v0.1",
-            "monitoredSystems",
+            "monitoredResources",
             $"('{recordId}')",
             "");
 
@@ -971,7 +971,7 @@ internal class MonitoredSystemsControllerTests
             Assert.That(content, Is.Null);
         });
 
-        var mockServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
         mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();

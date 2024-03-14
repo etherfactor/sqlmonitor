@@ -6,10 +6,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
-[Table("monitored_systems")]
-public class MonitoredSystem : Auditable
+[Table("monitored_resources")]
+public class MonitoredResource : Auditable
 {
-    [Column("monitored_system_id")]
+    [Column("monitored_resource_id")]
     [Key, SqlDefaultValue]
     public virtual Guid Id { get; set; }
 
@@ -30,17 +30,17 @@ public class MonitoredSystem : Auditable
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }
 
-    public virtual Securable Securable { get; set; } = new Securable() { Type = SecurableType.MonitoredSystem };
+    public virtual Securable Securable { get; set; } = new Securable() { Type = SecurableType.MonitoredResource };
 
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
-    public MonitoredSystem()
+    public MonitoredResource()
     {
         Name = null!;
     }
 
-    public Task EnsureValid(IQueryable<MonitoredSystem> records)
+    public Task EnsureValid(IQueryable<MonitoredResource> records)
     {
         return Task.CompletedTask;
     }
