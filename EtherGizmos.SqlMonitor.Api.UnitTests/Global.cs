@@ -32,6 +32,7 @@ internal static class Global
         services.AddSingleton<ILogger>(o => o.GetRequiredService<Mock<ILogger>>().Object);
         services.AddSingleton(typeof(ILogger<>), typeof(ProxyLogger<>));
 
+        services.AddScoped<MonitoredEnvironmentsController>();
         services.AddScoped<MonitoredResourcesController>();
         services.AddScoped<MonitoredSystemsController>();
 
@@ -40,6 +41,7 @@ internal static class Global
 
         services.AddSingleton<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
+        services.AddSingleton<IMonitoredEnvironmentService>(provider => provider.GetRequiredService<Mock<IMonitoredEnvironmentService>>().Object);
         services.AddSingleton<IMonitoredResourceService>(provider => provider.GetRequiredService<Mock<IMonitoredResourceService>>().Object);
         services.AddSingleton<IMonitoredSystemService>(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);
 

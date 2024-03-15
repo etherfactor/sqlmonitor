@@ -4,9 +4,9 @@ using EtherGizmos.SqlMonitor.Models.Database;
 namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 
 /// <summary>
-/// Provides access to <see cref="MonitoredResource"/> records.
+/// Provides access to <see cref="MonitoredEnvironment"/> records.
 /// </summary>
-public class MonitoredResourceService : IMonitoredResourceService
+public class MonitoredEnvironmentService : IMonitoredEnvironmentService
 {
     private readonly DatabaseContext _context;
 
@@ -14,26 +14,26 @@ public class MonitoredResourceService : IMonitoredResourceService
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public MonitoredResourceService(DatabaseContext context)
+    public MonitoredEnvironmentService(DatabaseContext context)
     {
         _context = context;
     }
 
     /// <inheritdoc/>
-    public void Add(MonitoredResource record)
+    public void Add(MonitoredEnvironment record)
     {
-        if (!_context.MonitoredResources.Contains(record))
-            _context.MonitoredResources.Add(record);
+        if (!_context.MonitoredEnvironments.Contains(record))
+            _context.MonitoredEnvironments.Add(record);
     }
 
     /// <inheritdoc/>
-    public IQueryable<MonitoredResource> GetQueryable()
+    public IQueryable<MonitoredEnvironment> GetQueryable()
     {
-        return _context.MonitoredResources;
+        return _context.MonitoredEnvironments;
     }
 
     /// <inheritdoc/>
-    public void Remove(MonitoredResource record)
+    public void Remove(MonitoredEnvironment record)
     {
         record.IsSoftDeleted = true;
     }

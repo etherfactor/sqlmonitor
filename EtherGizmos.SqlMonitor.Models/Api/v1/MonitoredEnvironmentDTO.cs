@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
-public class MonitoredResourceDTO
+public class MonitoredEnvironmentDTO
 {
     public Guid Id { get; set; }
 
@@ -27,18 +27,18 @@ public class MonitoredResourceDTO
 
     public bool? IsActive { get; set; }
 
-    public Task EnsureValid(IQueryable<MonitoredResource> records)
+    public Task EnsureValid(IQueryable<MonitoredEnvironment> records)
     {
         return Task.CompletedTask;
     }
 }
 
-public class MonitoredResourceDTOConfiguration : IModelConfiguration
+public class MonitoredEnvironmentDTOConfiguration : IModelConfiguration
 {
     public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
     {
-        var entitySet = builder.EntitySet<MonitoredResourceDTO>("monitoredResources");
-        var entity = builder.EntityType<MonitoredResourceDTO>();
+        var entitySet = builder.EntitySet<MonitoredEnvironmentDTO>("monitoredEnvironments");
+        var entity = builder.EntityType<MonitoredEnvironmentDTO>();
 
         entity.Namespace = "EtherGizmos.PerformancePulse";
         entity.Name = entity.Name.Replace("DTO", "");
@@ -63,11 +63,11 @@ public class MonitoredResourceDTOConfiguration : IModelConfiguration
     }
 }
 
-public static class ForMonitoredResourceDTO
+public static class ForMonitoredEnvironmentDTO
 {
-    public static IProfileExpression AddMonitoredResource(this IProfileExpression @this)
+    public static IProfileExpression AddMonitoredEnvironment(this IProfileExpression @this)
     {
-        var toDto = @this.CreateMap<MonitoredResource, MonitoredResourceDTO>();
+        var toDto = @this.CreateMap<MonitoredEnvironment, MonitoredEnvironmentDTO>();
         toDto.IgnoreAllMembers();
         toDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */
@@ -80,7 +80,7 @@ public static class ForMonitoredResourceDTO
         toDto.MapMember(dest => dest.Description, src => src.Description);
         toDto.MapMember(dest => dest.IsActive, src => src.IsActive);
 
-        var fromDto = @this.CreateMap<MonitoredResourceDTO, MonitoredResource>();
+        var fromDto = @this.CreateMap<MonitoredEnvironmentDTO, MonitoredEnvironment>();
         fromDto.IgnoreAllMembers();
         fromDto.MapMember(dest => dest.Id, src => src.Id);
         /* Begin Audit */

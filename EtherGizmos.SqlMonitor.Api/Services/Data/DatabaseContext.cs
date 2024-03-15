@@ -15,6 +15,11 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 public class DatabaseContext : DbContext
 {
     /// <summary>
+    /// Provides access to <see cref="MonitoredEnvironment"/> records, in 'dbo.monitored_environments'.
+    /// </summary>
+    public virtual DbSet<MonitoredEnvironment> MonitoredEnvironments { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="MonitoredResource"/> records, in 'dbo.monitored_resources'.
     /// </summary>
     public virtual DbSet<MonitoredResource> MonitoredResources { get; set; }
@@ -52,6 +57,20 @@ public class DatabaseContext : DbContext
     {
         //**********************************************************
         // Add Entities
+
+        modelBuilder.Entity<MonitoredEnvironment>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.SecurableId);
+        });
 
         modelBuilder.Entity<MonitoredResource>(entity =>
         {
