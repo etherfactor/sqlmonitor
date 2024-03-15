@@ -1,18 +1,19 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using StackExchange.Redis;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Caching;
 
 internal class RedisHelperTests
 {
     private IServiceProvider _serviceProvider;
-    private IRedisHelper<Query> _helper;
+    private IRedisHelper<CacheTester> _helper;
 
-    private readonly Guid _queryId = Guid.NewGuid();
+    private readonly Guid _CacheTesterId = Guid.NewGuid();
     private readonly Guid _metricId = Guid.NewGuid();
 
     [SetUp]
@@ -21,7 +22,7 @@ internal class RedisHelperTests
         _serviceProvider = Global.CreateScope();
 
         _helper = _serviceProvider.GetRequiredService<IRedisHelperFactory>()
-            .CreateHelper<Query>();
+            .CreateHelper<CacheTester>();
     }
 
     [Test]
@@ -37,36 +38,22 @@ internal class RedisHelperTests
             .Returns(new Mock<ITransaction>().Object);
         var database = databaseMock.Object;
 
-        var query = new Query()
+        var CacheTester = new CacheTester()
         {
-            Id = _queryId,
-            Name = "Test Query",
-            SqlText = "select 1 as [value];",
-            Metrics = new List<QueryMetric>()
-            {
-                new QueryMetric()
-                {
-                    QueryId = _queryId,
-                    MetricId = _metricId,
-                    Metric = new Metric()
-                    {
-                        Id = _metricId,
-                        Name = "Test Metric"
-                    }
-                }
-            }
+            Id = _CacheTesterId,
+            Name = "Test Cache Tester",
         };
 
         //Act
-        _helper.AppendAddAction(database, transaction, query);
+        _helper.AppendAddAction(database, transaction, CacheTester);
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.HashSetAsync($"sqlpulse:$$table:queries:%22{_queryId}%22", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
+            @interface.HashSetAsync($"sqlpulse:$$table:cache_entities:%22{_CacheTesterId}%22", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
 
         transactionMock.Verify(@interface =>
-            @interface.SortedSetAddAsync($"sqlpulse:$$table:queries:$$primary", $"%22{_queryId}%22", 0, It.IsAny<SortedSetWhen>(), It.IsAny<CommandFlags>()),
+            @interface.SortedSetAddAsync($"sqlpulse:$$table:cache_entities:$$primary", $"%22{_CacheTesterId}%22", 0, It.IsAny<SortedSetWhen>(), It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -84,11 +71,11 @@ internal class RedisHelperTests
         var database = databaseMock.Object;
 
         //Act
-        _helper.AppendDeleteAction(database, transaction, new EntityCacheKey<Query>("some_query"));
+        _helper.AppendDeleteAction(database, transaction, new EntityCacheKey<CacheTester>("some_cache_tester"));
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.KeyDeleteAsync($"sqlpulse:$$entity:some_query", It.IsAny<CommandFlags>()),
+            @interface.KeyDeleteAsync($"sqlpulse:$$entity:some_cache_tester", It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -114,7 +101,7 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.SortAsync($"sqlpulse:$$table:queries:$$primary", It.IsAny<long>(), It.IsAny<long>(), It.IsAny<Order>(), It.IsAny<SortType>(), "nosort", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
+            @interface.SortAsync($"sqlpulse:$$table:cache_entities:$$primary", It.IsAny<long>(), It.IsAny<long>(), It.IsAny<Order>(), It.IsAny<SortType>(), "nosort", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
 
         transactionMock.Verify(@interface =>
@@ -136,7 +123,7 @@ internal class RedisHelperTests
         var database = databaseMock.Object;
 
         //Act
-        var action = _helper.AppendReadAction(database, transaction, new EntityCacheKey<Query>("some_query"));
+        var action = _helper.AppendReadAction(database, transaction, new EntityCacheKey<CacheTester>("some_cache_tester"));
         Assert.That(action, Is.Not.Null);
 
         var result = await action();
@@ -144,7 +131,7 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.HashGetAsync($"sqlpulse:$$entity:some_query", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
+            @interface.HashGetAsync($"sqlpulse:$$entity:some_cache_tester", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -161,36 +148,22 @@ internal class RedisHelperTests
             .Returns(new Mock<ITransaction>().Object);
         var database = databaseMock.Object;
 
-        var query = new Query()
+        var CacheTester = new CacheTester()
         {
-            Id = _queryId,
-            Name = "Test Query",
-            SqlText = "select 1 as [value];",
-            Metrics = new List<QueryMetric>()
-            {
-                new QueryMetric()
-                {
-                    QueryId = _queryId,
-                    MetricId = _metricId,
-                    Metric = new Metric()
-                    {
-                        Id = _metricId,
-                        Name = "Test Metric"
-                    }
-                }
-            }
+            Id = _CacheTesterId,
+            Name = "Test Cache Tester",
         };
 
         //Act
-        _helper.AppendRemoveAction(database, transaction, query);
+        _helper.AppendRemoveAction(database, transaction, CacheTester);
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.KeyDeleteAsync($"sqlpulse:$$table:queries:%22{_queryId}%22", It.IsAny<CommandFlags>()),
+            @interface.KeyDeleteAsync($"sqlpulse:$$table:cache_entities:%22{_CacheTesterId}%22", It.IsAny<CommandFlags>()),
             Times.Once());
 
         transactionMock.Verify(@interface =>
-            @interface.SortedSetRemoveAsync($"sqlpulse:$$table:queries:$$primary", $"%22{_queryId}%22", It.IsAny<CommandFlags>()),
+            @interface.SortedSetRemoveAsync($"sqlpulse:$$table:cache_entities:$$primary", $"%22{_CacheTesterId}%22", It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -207,32 +180,18 @@ internal class RedisHelperTests
             .Returns(new Mock<ITransaction>().Object);
         var database = databaseMock.Object;
 
-        var query = new Query()
+        var CacheTester = new CacheTester()
         {
-            Id = _queryId,
-            Name = "Test Query",
-            SqlText = "select 1 as [value];",
-            Metrics = new List<QueryMetric>()
-            {
-                new QueryMetric()
-                {
-                    QueryId = _queryId,
-                    MetricId = _metricId,
-                    Metric = new Metric()
-                    {
-                        Id = _metricId,
-                        Name = "Test Metric"
-                    }
-                }
-            }
+            Id = _CacheTesterId,
+            Name = "Test Cache Tester",
         };
 
         //Act
-        _helper.AppendSetAction(database, transaction, new EntityCacheKey<Query>("some_query"), query);
+        _helper.AppendSetAction(database, transaction, new EntityCacheKey<CacheTester>("some_cache_tester"), CacheTester);
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.HashSetAsync($"sqlpulse:$$entity:some_query", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
+            @interface.HashSetAsync($"sqlpulse:$$entity:some_cache_tester", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -252,7 +211,7 @@ internal class RedisHelperTests
         {
             Assert.That(properties.Count(), Is.GreaterThan(keys.Count()));
             Assert.That(lookupSingles.Count(), Is.EqualTo(0));
-            Assert.That(lookupSets.Count(), Is.EqualTo(1));
+            Assert.That(lookupSets.Count(), Is.EqualTo(0));
         });
     }
 
@@ -262,9 +221,20 @@ internal class RedisHelperTests
         //Arrange
 
         //Act
-        var tempKey = (_helper as RedisHelper<Query>)!.GetTempKey();
+        var tempKey = (_helper as RedisHelper<CacheTester>)!.GetTempKey();
 
         //Assert
         Assert.That(tempKey.ToString(), Does.StartWith("sqlpulse:$$temp:"));
     }
+}
+
+[Table("cache_entities")]
+internal class CacheTester
+{
+    [Column("cache_entity_id")]
+    [Key]
+    public Guid Id { get; set; }
+
+    [Column("name")]
+    public string? Name { get; set; }
 }

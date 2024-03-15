@@ -10,7 +10,6 @@ using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
-using EtherGizmos.SqlMonitor.Api.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using EtherGizmos.SqlMonitor.Database;
@@ -178,14 +177,9 @@ builder.Services
         opt.UseLazyLoadingProxies(true);
     })
     .AddScoped<ISaveService, SaveService>()
-    .AddScoped<IInstanceService, InstanceService>()
-    .AddScoped<IInstanceMetricBySecondService, InstanceMetricBySecondService>()
-    .AddScoped<IMetricBucketService, MetricBucketService>()
-    .AddScoped<IMetricService, MetricService>()
-    .AddScoped<IPermissionService, PermissionService>()
-    .AddScoped<IQueryService, QueryService>()
-    .AddScoped<ISecurableService, SecurableService>()
-    .AddScoped<IUserService, UserService>();
+    .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
+    .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
+    .AddScoped<IMonitoredSystemService, MonitoredSystemService>();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>
@@ -283,11 +277,6 @@ builder.Services
                 {
                     conf.Host();
 
-                    conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
-                    {
-                        opt.Consumer<RunQueryConsumer>(context);
-                    });
-
                     //TODO: Configure in-memory retry and other options
                 });
             }
@@ -334,11 +323,6 @@ builder.Services
                         }
                     });
 
-                    conf.ReceiveEndpoint(RunQueryConsumer.Queue, opt =>
-                    {
-                        opt.Consumer<RunQueryConsumer>(context);
-                    });
-
                     //TODO: Configure retry
                 });
             }
@@ -349,8 +333,6 @@ builder.Services
         });
     })
     .ImportSingleton<IDistributedRecordCache>()
-    .ImportScoped<IInstanceMetricBySecondService>()
-    .ImportScoped<IMetricBucketService>()
     .ImportScoped<ISaveService>()
     .ImportLogging()
     .ForwardMassTransit();

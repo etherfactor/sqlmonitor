@@ -1,28 +1,16 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("securables")]
-public class Securable : Auditable
+public class Securable
 {
     [Column("securable_id")]
-    public virtual string Id { get; set; }
+    [SqlDefaultValue]
+    public virtual int Id { get; set; }
 
-    [Column("name")]
-    public virtual string Name { get; set; }
-
-    [Column("description")]
-    public virtual string? Description { get; set; }
-
-    public virtual List<Permission> Permissions { get; set; } = new List<Permission>();
-
-    /// <summary>
-    /// Not intended for direct use.
-    /// </summary>
-    public Securable()
-    {
-        Id = null!;
-        Name = null!;
-    }
+    [Column("securable_type_id")]
+    public virtual SecurableType Type { get; set; }
 }
