@@ -179,7 +179,8 @@ builder.Services
     .AddScoped<ISaveService, SaveService>()
     .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
-    .AddScoped<IMonitoredSystemService, MonitoredSystemService>();
+    .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
+    .AddScoped<IScriptService, ScriptService>();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>

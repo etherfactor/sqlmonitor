@@ -6,7 +6,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// <summary>
 /// Provides access to <see cref="MonitoredEnvironment"/> records.
 /// </summary>
-public class MonitoredEnvironmentService : IMonitoredEnvironmentService
+internal class MonitoredEnvironmentService : IMonitoredEnvironmentService
 {
     private readonly DatabaseContext _context;
 

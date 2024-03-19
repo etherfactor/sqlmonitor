@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using System.Text.RegularExpressions;
 
 namespace EtherGizmos.SqlMonitor.Models.OData.Errors;
@@ -10,10 +10,10 @@ public class ODataModelStateInvalidError : ODataErrorBase
 {
     private const string Code = "test-0000";
 
-    public ODataModelStateInvalidError(Type entityType, ModelStateDictionary state)
+    public ODataModelStateInvalidError(IEdmModel model, Type entityType, ModelStateDictionary state)
         : base(codeProvider: () => Code,
             targetProvider: () => null,
-            messageProvider: () => $"Provided model is invalid for type '{GetTypeDisplayName(entityType)}'.")
+            messageProvider: () => $"Provided model is invalid for type '{GetTypeDisplayName(model, entityType)}'.")
     {
         //If the model contains an empty key, errors are listed under that node
         if (state.ContainsKey(""))
@@ -58,9 +58,7 @@ public class ODataModelStateInvalidError : ODataErrorBase
                     var property = entityType.GetProperty(propertyName)
                         ?? throw new InvalidOperationException(string.Format("Unrecognized property: {0}", propertyName));
 
-                    var propertyDisplayName = property.GetCustomAttribute<DisplayAttribute>()?.Name
-                        ?? throw new InvalidOperationException(string.Format("Property '{0}' on type '{1}' must be annotated with a '{2}' and specify the '{3}' property",
-                            property.Name, property.DeclaringType?.Name, nameof(DisplayAttribute), nameof(DisplayAttribute.Name)));
+                    var propertyDisplayName = propertyName;
 
                     AddDetail(new ODataModelStateInvalidErrorDetail(Code, propertyDisplayName, error.ErrorMessage));
                 }
@@ -71,13 +69,15 @@ public class ODataModelStateInvalidError : ODataErrorBase
     /// <summary>
     /// Loads the entity external name, throwing an error if it cannot be found.
     /// </summary>
+    /// <param name="model">The OData model.</param>
     /// <param name="entityType">The external entity type.</param>
     /// <returns>The external display name.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static string GetTypeDisplayName(Type entityType)
+    private static string GetTypeDisplayName(IEdmModel model, Type entityType)
     {
-        return entityType.GetCustomAttribute<DisplayAttribute>()?.Name
-            ?? throw new InvalidOperationException(string.Format("Type '{0}' must be annotated with a '{1}' and specify the '{2}' property",
-                entityType.Name, nameof(DisplayAttribute), nameof(DisplayAttribute.Name)));
+        var edmEntityType = model.SchemaElements.OfType<IEdmEntityType>()
+            .FirstOrDefault(e => model.GetAnnotationValue<ClrTypeAnnotation>(e).ClrType == entityType);
+
+        return edmEntityType?.Name ?? entityType.Name.Replace("DTO", "");
     }
 }

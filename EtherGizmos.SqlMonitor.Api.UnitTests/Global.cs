@@ -35,6 +35,7 @@ internal static class Global
         services.AddScoped<MonitoredEnvironmentsController>();
         services.AddScoped<MonitoredResourcesController>();
         services.AddScoped<MonitoredSystemsController>();
+        services.AddScoped<ScriptsController>();
 
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
         services.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
@@ -44,6 +45,7 @@ internal static class Global
         services.AddSingleton<IMonitoredEnvironmentService>(provider => provider.GetRequiredService<Mock<IMonitoredEnvironmentService>>().Object);
         services.AddSingleton<IMonitoredResourceService>(provider => provider.GetRequiredService<Mock<IMonitoredResourceService>>().Object);
         services.AddSingleton<IMonitoredSystemService>(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);
+        services.AddSingleton<IScriptService>(provider => provider.GetRequiredService<Mock<IScriptService>>().Object);
 
         services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<Mock<ISendEndpointProvider>>().Object);
 

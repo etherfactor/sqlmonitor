@@ -4,9 +4,9 @@ using EtherGizmos.SqlMonitor.Models.Database;
 namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 
 /// <summary>
-/// Provides access to <see cref="MonitoredSystem"/> records.
+/// Provides access to <see cref="Script"/> records.
 /// </summary>
-internal class MonitoredSystemService : IMonitoredSystemService
+internal class ScriptService : IEditableQueryableService<Script>, IScriptService
 {
     private readonly DatabaseContext _context;
 
@@ -14,27 +14,27 @@ internal class MonitoredSystemService : IMonitoredSystemService
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public MonitoredSystemService(DatabaseContext context)
+    public ScriptService(DatabaseContext context)
     {
         _context = context;
     }
 
     /// <inheritdoc/>
-    public void Add(MonitoredSystem record)
+    public void Add(Script record)
     {
-        if (!_context.MonitoredSystems.Contains(record))
-            _context.MonitoredSystems.Add(record);
+        if (!_context.Scripts.Contains(record))
+            _context.Scripts.Add(record);
     }
 
     /// <inheritdoc/>
-    public IQueryable<MonitoredSystem> GetQueryable()
+    public IQueryable<Script> GetQueryable()
     {
-        return _context.MonitoredSystems
+        return _context.Scripts
             .Where(e => !e.IsSoftDeleted);
     }
 
     /// <inheritdoc/>
-    public void Remove(MonitoredSystem record)
+    public void Remove(Script record)
     {
         record.IsSoftDeleted = true;
     }

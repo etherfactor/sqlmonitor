@@ -6,7 +6,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// <summary>
 /// Provides access to <see cref="MonitoredResource"/> records.
 /// </summary>
-public class MonitoredResourceService : IMonitoredResourceService
+internal class MonitoredResourceService : IMonitoredResourceService
 {
     private readonly DatabaseContext _context;
 
@@ -29,7 +29,8 @@ public class MonitoredResourceService : IMonitoredResourceService
     /// <inheritdoc/>
     public IQueryable<MonitoredResource> GetQueryable()
     {
-        return _context.MonitoredResources;
+        return _context.MonitoredResources
+            .Where(e => !e.IsSoftDeleted);
     }
 
     /// <inheritdoc/>

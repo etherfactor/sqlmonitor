@@ -14,7 +14,7 @@ public class MonitoredSystem : Auditable
     public virtual Guid Id { get; set; }
 
     [Column("name")]
-    public virtual required string Name { get; set; }
+    public virtual string Name { get; set; }
 
     [Column("description")]
     public virtual string? Description { get; set; }
@@ -31,6 +31,14 @@ public class MonitoredSystem : Auditable
     public virtual int SecurableId { get; set; }
 
     public virtual Securable Securable { get; set; } = new Securable() { Type = SecurableType.MonitoredSystem };
+
+    /// <summary>
+    /// Not intended for direct use.
+    /// </summary>
+    public MonitoredSystem()
+    {
+        Name = null!;
+    }
 
     public Task EnsureValid(IQueryable<MonitoredSystem> records)
     {

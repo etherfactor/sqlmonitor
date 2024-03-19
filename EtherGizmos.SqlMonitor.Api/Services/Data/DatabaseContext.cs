@@ -30,6 +30,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<MonitoredSystem> MonitoredSystems { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="Script"/> records, in 'dbo.scripts'.
+    /// </summary>
+    public virtual DbSet<Script> Scripts { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseContext"/> class using the specified options. The
     /// <see cref="DbContext.OnConfiguring(DbContextOptionsBuilder)"/> will still be called to allow further configuration
     /// of the options.

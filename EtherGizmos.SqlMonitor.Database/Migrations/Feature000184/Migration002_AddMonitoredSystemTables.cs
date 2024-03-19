@@ -22,11 +22,11 @@ public class Migration002_AddMonitoredSystemTables : AutoReversingMigration
             .WithColumn("is_soft_deleted").AsBoolean().NotNullable().WithDefaultValue(false)
             .WithColumn("securable_id").AsInt32().NotNullable();
 
-        Create.ForeignKey("FK_monitored_systems")
+        Create.ForeignKey("FK_monitored_systems_securable_id")
             .FromTable("monitored_systems").ForeignColumn("securable_id")
             .ToTable("securables").PrimaryColumn("securable_id");
 
-        Create.Index("IX_monitored_systems")
+        Create.Index("IX_monitored_systems_securable_id")
             .OnTable("monitored_systems")
             .OnColumn("securable_id");
     }
