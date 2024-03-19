@@ -6,6 +6,7 @@ public enum SecurableType
     MonitoredSystem = 100,
     MonitoredResource = 125,
     MonitoredEnvironment = 150,
+    Script = 300,
 }
 
 public static class SecurableTypeConverter
@@ -15,6 +16,7 @@ public static class SecurableTypeConverter
         { SecurableType.MonitoredSystem, 100 },
         { SecurableType.MonitoredResource, 125 },
         { SecurableType.MonitoredEnvironment, 150 },
+        { SecurableType.Script,300 },
     };
 
     public static SecurableType FromInteger(int value)

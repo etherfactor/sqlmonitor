@@ -25,6 +25,7 @@ public static class IServiceCollectionExtensions
                 opt.AddMonitoredEnvironment();
                 opt.AddMonitoredResource();
                 opt.AddMonitoredSystem();
+                opt.AddScript();
             });
 
             return configuration.CreateMapper();

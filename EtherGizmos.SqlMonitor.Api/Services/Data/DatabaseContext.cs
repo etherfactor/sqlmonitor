@@ -100,6 +100,23 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.SecurableId);
         });
 
+        modelBuilder.Entity<Script>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.RunFrequency);
+            entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.SecurableId);
+        });
+
         modelBuilder.Entity<Securable>(entity =>
         {
             entity.ToTableWithAnnotations();
