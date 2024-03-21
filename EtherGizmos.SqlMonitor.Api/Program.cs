@@ -180,7 +180,8 @@ builder.Services
     .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
     .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
-    .AddScoped<IScriptService, ScriptService>();
+    .AddScoped<IScriptService, ScriptService>()
+    .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>
@@ -411,10 +412,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 //**********************************************************
 // Run Application

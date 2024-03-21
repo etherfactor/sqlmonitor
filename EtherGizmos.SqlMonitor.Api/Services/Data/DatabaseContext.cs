@@ -35,6 +35,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<Script> Scripts { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="ScriptInterpreter"/> records, in 'dbo.script_interpreters'.
+    /// </summary>
+    public virtual DbSet<ScriptInterpreter> ScriptInterpreters { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseContext"/> class using the specified options. The
     /// <see cref="DbContext.OnConfiguring(DbContextOptionsBuilder)"/> will still be called to allow further configuration
     /// of the options.
@@ -118,6 +123,22 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.RunFrequency);
             entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
             entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.SecurableId);
+        });
+
+        modelBuilder.Entity<ScriptInterpreter>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.Command);
+            entity.PropertyWithAnnotations(e => e.Arguments);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.SecurableId);
         });
