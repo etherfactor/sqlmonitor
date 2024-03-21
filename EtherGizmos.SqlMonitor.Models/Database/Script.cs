@@ -36,7 +36,9 @@ public class Script : Auditable
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }
 
-    public virtual Securable Securable { get; set; } = new Securable() { Type = SecurableType.Script };
+    public virtual Securable Securable { get; set; } = new() { Type = SecurableType.Script };
+
+    public virtual List<ScriptVariant> Variants { get; set; } = [];
 
     /// <summary>
     /// Not intended for direct use.

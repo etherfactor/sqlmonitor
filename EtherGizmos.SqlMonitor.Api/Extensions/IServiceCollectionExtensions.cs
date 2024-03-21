@@ -27,6 +27,7 @@ public static class IServiceCollectionExtensions
                 opt.AddMonitoredSystem();
                 opt.AddScript();
                 opt.AddScriptInterpreter();
+                opt.AddScriptVariant();
             });
 
             return configuration.CreateMapper();

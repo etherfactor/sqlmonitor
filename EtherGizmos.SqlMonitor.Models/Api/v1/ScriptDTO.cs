@@ -32,6 +32,8 @@ public class ScriptDTO
 
     public bool? IsActive { get; set; }
 
+    public List<ScriptVariantDTO> Variants { get; set; } = new();
+
     public Task EnsureValid(IQueryable<Script> records)
     {
         return Task.CompletedTask;

@@ -64,8 +64,8 @@ public class Migration001_AddScriptTables : AutoReversingMigration
             .WithColumn("script_id").AsGuid().NotNullable()
             .WithColumn("script_interpreter_id").AsInt32().NotNullable()
             .WithColumn("script_text").AsString(int.MaxValue).NotNullable()
-            .WithColumn("timestamp_utc_name").AsString(500)
-            .WithColumn("bucket_name").AsString(500);
+            .WithColumn("timestamp_key").AsString(500)
+            .WithColumn("bucket_key").AsString(500);
 
         Create.ForeignKey("FK_script_variants_script_id")
             .FromTable("script_variants").ForeignColumn("script_id")

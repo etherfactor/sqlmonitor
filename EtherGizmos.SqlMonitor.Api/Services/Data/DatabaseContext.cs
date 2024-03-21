@@ -125,6 +125,9 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.IsActive);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.SecurableId);
+
+            entity.HasMany(e => e.Variants)
+                .WithOne(e => e.Script);
         });
 
         modelBuilder.Entity<ScriptInterpreter>(entity =>
@@ -141,6 +144,26 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Arguments);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.SecurableId);
+        });
+
+        modelBuilder.Entity<ScriptVariant>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.ScriptId);
+            entity.PropertyWithAnnotations(e => e.ScriptInterpreterId);
+            entity.PropertyWithAnnotations(e => e.ScriptText);
+            entity.PropertyWithAnnotations(e => e.TimestampKey);
+            entity.PropertyWithAnnotations(e => e.BucketKey);
+
+            entity.HasOne(e => e.Script)
+                .WithMany(e => e.Variants);
+
+            entity.HasOne(e => e.ScriptInterpreter);
         });
 
         modelBuilder.Entity<Securable>(entity =>
