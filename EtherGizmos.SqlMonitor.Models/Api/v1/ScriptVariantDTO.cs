@@ -1,10 +1,10 @@
-﻿using Asp.Versioning.OData;
-using Asp.Versioning;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
 using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.OData.ModelBuilder;
 using System.ComponentModel.DataAnnotations;
-using EtherGizmos.SqlMonitor.Models.Extensions;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 

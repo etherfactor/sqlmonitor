@@ -68,6 +68,7 @@ public class ScriptDTOConfiguration : IModelConfiguration
             entity.Property(e => e.RunFrequency);
             entity.Property(e => e.LastRunAtUtc);
             entity.Property(e => e.IsActive);
+            entity.CollectionProperty(e => e.Variants);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -32,7 +31,7 @@ public class ScriptInterpreter : Auditable
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }
 
-    public virtual Securable Securable { get; set; } = new Securable() { Type = SecurableType.ScriptInterpreter };
+    public virtual Securable Securable { get; set; }
 
     /// <summary>
     /// Not intended for direct use.
@@ -42,6 +41,7 @@ public class ScriptInterpreter : Auditable
         Name = null!;
         Command = null!;
         Arguments = null!;
+        Securable = null!;
     }
 
     public Task EnsureValid(IQueryable<ScriptInterpreter> records)

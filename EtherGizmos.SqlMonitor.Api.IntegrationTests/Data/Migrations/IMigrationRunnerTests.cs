@@ -95,8 +95,15 @@ internal class IMigrationRunnerTests
         Assert.DoesNotThrow(() =>
         {
             var migrationRunner = serviceProvider.GetRequiredService<IMigrationRunner>();
+
+            //Migrate up to ensure forward migrations work
             migrationRunner.MigrateUp(long.MaxValue);
+
+            //Migrate down to ensure backward migrations work
             migrationRunner.MigrateDown(long.MinValue);
+
+            //Migrate up again to ensure the down migrations clean up everything
+            migrationRunner.MigrateUp(long.MaxValue);
         });
     }
 }

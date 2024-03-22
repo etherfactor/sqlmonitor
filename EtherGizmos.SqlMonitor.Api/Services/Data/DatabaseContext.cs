@@ -70,7 +70,10 @@ public class DatabaseContext : DbContext
 
         modelBuilder.Entity<MonitoredEnvironment>(entity =>
         {
-            entity.ToTableWithAnnotations();
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_monitored_environments_insert_update");
+            });
 
             entity.HasKey(e => e.Id);
 
@@ -79,12 +82,16 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
-            entity.PropertyWithAnnotations(e => e.SecurableId);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
         });
 
         modelBuilder.Entity<MonitoredResource>(entity =>
         {
-            entity.ToTableWithAnnotations();
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_monitored_resources_insert_update");
+            });
 
             entity.HasKey(e => e.Id);
 
@@ -93,12 +100,16 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
-            entity.PropertyWithAnnotations(e => e.SecurableId);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
         });
 
         modelBuilder.Entity<MonitoredSystem>(entity =>
         {
-            entity.ToTableWithAnnotations();
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_monitored_systems_insert_update");
+            });
 
             entity.HasKey(e => e.Id);
 
@@ -107,12 +118,16 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
-            entity.PropertyWithAnnotations(e => e.SecurableId);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
         });
 
         modelBuilder.Entity<Script>(entity =>
         {
-            entity.ToTableWithAnnotations();
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_scripts_insert_update");
+            });
 
             entity.HasKey(e => e.Id);
 
@@ -124,7 +139,8 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
             entity.PropertyWithAnnotations(e => e.IsActive);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
-            entity.PropertyWithAnnotations(e => e.SecurableId);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
 
             entity.HasMany(e => e.Variants)
                 .WithOne(e => e.Script);
@@ -132,7 +148,10 @@ public class DatabaseContext : DbContext
 
         modelBuilder.Entity<ScriptInterpreter>(entity =>
         {
-            entity.ToTableWithAnnotations();
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_script_interpreters_insert_update");
+            });
 
             entity.HasKey(e => e.Id);
 
@@ -143,12 +162,16 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Command);
             entity.PropertyWithAnnotations(e => e.Arguments);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
-            entity.PropertyWithAnnotations(e => e.SecurableId);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
         });
 
         modelBuilder.Entity<ScriptVariant>(entity =>
         {
-            entity.ToTableWithAnnotations();
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_script_variants_insert_update");
+            });
 
             entity.HasKey(e => e.Id);
 

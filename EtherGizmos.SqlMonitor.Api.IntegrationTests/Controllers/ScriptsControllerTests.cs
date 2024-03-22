@@ -33,16 +33,39 @@ internal class ScriptsControllerTests : IntegrationTestBase
         {
             name = "Test",
             runFrequency = "PT5S",
+            variants = new[]
+            {
+                new
+                {
+                    scriptInterpreterId = 1,
+                    scriptText = "Write-Host '##metric: value=123 bucket=A'",
+                    timestampKey = null as string,
+                    bucketKey = "bucket",
+                },
+                new
+                {
+                    scriptInterpreterId = 2,
+                    scriptText = "Write-Host '##metric: value=123 bucket=A'",
+                    timestampKey = null as string,
+                    bucketKey = "bucket",
+                }
+            }
         };
 
         var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scripts", body.AsJsonContent());
 
-        var contentRead = await response.Content.ReadAsStringAsync();
-        Assert.Multiple(() =>
+        Assert.Multiple(async () =>
         {
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
             Assert.That(response.Content, Is.Not.Null);
+
+            if (response.StatusCode != HttpStatusCode.Created)
+            {
+                Console.Out.WriteLine("Returned response:"
+                    + Environment.NewLine
+                    + await response.Content.ReadAsStringAsync());
+            }
         });
     }
 
