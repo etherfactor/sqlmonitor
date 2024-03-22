@@ -40,8 +40,14 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
         {
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            var contentRead = await response.Content.ReadAsStringAsync();
             Assert.That(response.Content, Is.Not.Null);
+
+            if (response.StatusCode != HttpStatusCode.Created)
+            {
+                Console.Out.WriteLine("Returned response:"
+                    + Environment.NewLine
+                    + await response.Content.ReadAsStringAsync());
+            }
         });
     }
 
@@ -61,8 +67,14 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
         {
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            var contentRead = await response.Content.ReadAsStringAsync();
             Assert.That(response.Content, Is.Not.Null);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                Console.Out.WriteLine("Returned response:"
+                    + Environment.NewLine
+                    + await response.Content.ReadAsStringAsync());
+            }
         });
     }
 
@@ -75,10 +87,17 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
 
         var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredSystems", body.AsJsonContent());
 
-        Assert.Multiple(() =>
+        Assert.Multiple(async () =>
         {
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
             Assert.That(response.Content, Is.Not.Null);
+
+            if (response.StatusCode != HttpStatusCode.Created)
+            {
+                Console.Out.WriteLine("Returned response:"
+                    + Environment.NewLine
+                    + await response.Content.ReadAsStringAsync());
+            }
         });
 
         var data = await response.Content.ReadFromJsonModelAsync(new { id = default(Guid) });

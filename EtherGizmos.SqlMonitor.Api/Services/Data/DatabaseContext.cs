@@ -25,9 +25,19 @@ public class DatabaseContext : DbContext
     public virtual DbSet<MonitoredResource> MonitoredResources { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="MonitoredScriptTarget"/> records, in 'dbo.monitored_script_targets'.
+    /// </summary>
+    public virtual DbSet<MonitoredScriptTarget> MonitoredScriptTargets { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="MonitoredSystem"/> records, in 'dbo.monitored_systems'.
     /// </summary>
     public virtual DbSet<MonitoredSystem> MonitoredSystems { get; set; }
+
+    /// <summary>
+    /// Provides access to <see cref="MonitoredTarget"/> records, in 'dbo.monitored_targets'.
+    /// </summary>
+    public virtual DbSet<MonitoredTarget> MonitoredTargets { get; set; }
 
     /// <summary>
     /// Provides access to <see cref="Script"/> records, in 'dbo.scripts'.
@@ -72,7 +82,7 @@ public class DatabaseContext : DbContext
         {
             entity.ToTableWithAnnotations(buildAction: e =>
             {
-                e.HasTrigger("TR_monitored_environments_insert_update");
+                e.HasTrigger("TR_monitored_environments_audit");
             });
 
             entity.HasKey(e => e.Id);
@@ -90,7 +100,7 @@ public class DatabaseContext : DbContext
         {
             entity.ToTableWithAnnotations(buildAction: e =>
             {
-                e.HasTrigger("TR_monitored_resources_insert_update");
+                e.HasTrigger("TR_monitored_resources_audit");
             });
 
             entity.HasKey(e => e.Id);
@@ -100,6 +110,25 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Name);
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
+        });
+
+        modelBuilder.Entity<MonitoredScriptTarget>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_monitored_script_targets_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
+            entity.PropertyWithAnnotations(e => e.ScriptInterpreterId);
+            entity.PropertyWithAnnotations(e => e.HostName);
+            entity.PropertyWithAnnotations(e => e.FilePath);
             entity.PropertyWithAnnotations(e => e.SecurableId)
                 .HasDefaultValueSql();
         });
@@ -108,7 +137,7 @@ public class DatabaseContext : DbContext
         {
             entity.ToTableWithAnnotations(buildAction: e =>
             {
-                e.HasTrigger("TR_monitored_systems_insert_update");
+                e.HasTrigger("TR_monitored_systems_audit");
             });
 
             entity.HasKey(e => e.Id);
@@ -122,11 +151,23 @@ public class DatabaseContext : DbContext
                 .HasDefaultValueSql();
         });
 
+        modelBuilder.Entity<MonitoredTarget>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.MonitoredSystemId);
+            entity.PropertyWithAnnotations(e => e.MonitoredResourceId);
+            entity.PropertyWithAnnotations(e => e.MonitoredEnvironmentId);
+        });
+
         modelBuilder.Entity<Script>(entity =>
         {
             entity.ToTableWithAnnotations(buildAction: e =>
             {
-                e.HasTrigger("TR_scripts_insert_update");
+                e.HasTrigger("TR_scripts_audit");
             });
 
             entity.HasKey(e => e.Id);
@@ -150,7 +191,7 @@ public class DatabaseContext : DbContext
         {
             entity.ToTableWithAnnotations(buildAction: e =>
             {
-                e.HasTrigger("TR_script_interpreters_insert_update");
+                e.HasTrigger("TR_script_interpreters_audit");
             });
 
             entity.HasKey(e => e.Id);
@@ -170,7 +211,7 @@ public class DatabaseContext : DbContext
         {
             entity.ToTableWithAnnotations(buildAction: e =>
             {
-                e.HasTrigger("TR_script_variants_insert_update");
+                e.HasTrigger("TR_script_variants_audit");
             });
 
             entity.HasKey(e => e.Id);

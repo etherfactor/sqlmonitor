@@ -4,7 +4,7 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
 
 internal static class HttpContentExtensions
 {
-    public static async Task<TEntity?> ReadFromJsonModelAsync<TEntity>(this HttpContent @this, TEntity model)
+    public static async Task<TEntity?> ReadFromJsonModelAsync<TEntity>(this HttpContent @this, TEntity? model = default)
     {
         return await @this.ReadFromJsonAsync<TEntity>();
     }

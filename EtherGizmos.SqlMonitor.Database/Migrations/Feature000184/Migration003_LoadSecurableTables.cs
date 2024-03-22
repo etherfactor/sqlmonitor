@@ -11,21 +11,27 @@ public class Migration003_LoadSecurableTables : Migration
         Insert.IntoTable("securable_types")
             .Row(new
             {
-                securable_type_id = 120,
+                securable_type_id = 110,
                 name = "Monitored System",
                 description = "A system on a server being monitored.",
             })
             .Row(new
             {
-                securable_type_id = 140,
+                securable_type_id = 120,
                 name = "Monitored Resource",
                 description = "A component of a system on a server being monitored.",
             })
             .Row(new
             {
-                securable_type_id = 160,
+                securable_type_id = 130,
                 name = "Monitored Environment",
                 description = "An environment of a system on a server being monitored.",
+            })
+            .Row(new
+            {
+                securable_type_id = 150,
+                name = "Monitored Script Target",
+                description = "A server directory associated with a system, resource, and environment being monitored with scripts.",
             })
             .Row(new
             {

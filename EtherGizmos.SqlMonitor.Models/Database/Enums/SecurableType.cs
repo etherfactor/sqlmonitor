@@ -3,9 +3,10 @@
 public enum SecurableType
 {
     Unknown = -1,
-    MonitoredSystem = 100,
-    MonitoredResource = 125,
-    MonitoredEnvironment = 150,
+    MonitoredSystem = 110,
+    MonitoredResource = 120,
+    MonitoredEnvironment = 130,
+    MonitoredScriptTarget = 150,
     Script = 300,
     ScriptInterpreter = 390,
 }
@@ -14,9 +15,10 @@ public static class SecurableTypeConverter
 {
     private static Dictionary<SecurableType, int> Mappings { get; } = new Dictionary<SecurableType, int>()
     {
-        { SecurableType.MonitoredSystem, 100 },
-        { SecurableType.MonitoredResource, 125 },
-        { SecurableType.MonitoredEnvironment, 150 },
+        { SecurableType.MonitoredSystem, 110 },
+        { SecurableType.MonitoredResource, 120 },
+        { SecurableType.MonitoredEnvironment, 130 },
+        { SecurableType.MonitoredScriptTarget, 150 },
         { SecurableType.Script, 300 },
         { SecurableType.ScriptInterpreter, 390 },
     };

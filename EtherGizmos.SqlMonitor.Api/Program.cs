@@ -179,6 +179,7 @@ builder.Services
     .AddScoped<ISaveService, SaveService>()
     .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
+    .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
     .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
     .AddScoped<IScriptService, ScriptService>()
     .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();

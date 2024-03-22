@@ -224,13 +224,7 @@ end;");
     {
         Delete.Table("script_variants");
 
-        Execute.Sql(@"drop trigger [TR_scripts_audit];");
-        Execute.Sql(@"drop trigger [TR_scripts_securable_id];");
-
         Delete.Table("scripts");
-
-        Execute.Sql(@"drop trigger [TR_script_interpreters_audit];");
-        Execute.Sql(@"drop trigger [TR_script_interpreters_securable_id];");
 
         Delete.Table("script_interpreters");
     }

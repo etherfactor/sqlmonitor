@@ -24,6 +24,7 @@ public static class IServiceCollectionExtensions
                 //Add entities
                 opt.AddMonitoredEnvironment();
                 opt.AddMonitoredResource();
+                opt.AddMonitoredScriptTarget();
                 opt.AddMonitoredSystem();
                 opt.AddScript();
                 opt.AddScriptInterpreter();

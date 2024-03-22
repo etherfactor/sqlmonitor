@@ -58,7 +58,7 @@ begin
 
     declare @RecordId uniqueidentifier;
     declare @SecurableId int;
-    declare @SecurableTypeId int = 390;
+    declare @SecurableTypeId int = 110;
 
     --Handle inserts/updates
     if exists ( select 1 from inserted )
@@ -100,9 +100,6 @@ end;");
 
     public override void Down()
     {
-        Execute.Sql(@"drop trigger [TR_monitored_systems_audit];");
-        Execute.Sql(@"drop trigger [TR_monitored_systems_securable_id];");
-
         Delete.Table("monitored_systems");
     }
 }
