@@ -25,8 +25,20 @@ public class MonitoredScriptTarget : Auditable
     [Column("host_name")]
     public virtual string HostName { get; set; }
 
+    [Column("port")]
+    public virtual int? Port { get; set; }
+
     [Column("file_path")]
     public virtual string FilePath { get; set; }
+
+    [Column("use_ssl")]
+    public virtual bool UseSsl { get; set; }
+
+    [Column("username")]
+    public virtual string? Username { get; set; }
+
+    [Column("password")]
+    public virtual string? Password { get; set; }
 
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }

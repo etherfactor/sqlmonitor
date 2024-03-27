@@ -24,6 +24,9 @@ public class ScriptInterpreter : Auditable
     [Column("arguments")]
     public virtual string Arguments { get; set; }
 
+    [Column("extension")]
+    public virtual string Extension { get; set; }
+
     [Column("is_soft_deleted")]
     [SqlDefaultValue]
     public virtual bool IsSoftDeleted { get; set; }

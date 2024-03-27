@@ -35,8 +35,16 @@ public class MonitoredScriptTargetDTO
     [Required]
     public string? HostName { get; set; }
 
+    public int? Port { get; set; }
+
     [Required]
     public string? FilePath { get; set; }
+
+    public bool? UseSsl { get; set; }
+
+    public string? Username { get; set; }
+
+    public string? Password { get; set; }
 
     public Task EnsureValid(IQueryable<MonitoredScriptTarget> records)
     {
@@ -72,7 +80,11 @@ public class MonitoredScriptTargetDTOConfiguration : IModelConfiguration
             entity.Property(e => e.MonitoredEnvironmentId);
             entity.Property(e => e.ScriptInterpreterId);
             entity.Property(e => e.HostName);
+            entity.Property(e => e.Port);
             entity.Property(e => e.FilePath);
+            entity.Property(e => e.UseSsl);
+            entity.Property(e => e.Username);
+            entity.Property(e => e.Password);
         }
     }
 }
@@ -95,7 +107,11 @@ public static class ForMonitoredScriptTargetDTO
         toDto.MapMember(dest => dest.MonitoredEnvironmentId, src => src.MonitoredTarget.MonitoredEnvironmentId);
         toDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
         toDto.MapMember(dest => dest.HostName, src => src.HostName);
+        toDto.MapMember(dest => dest.Port, src => src.Port);
         toDto.MapMember(dest => dest.FilePath, src => src.FilePath);
+        toDto.MapMember(dest => dest.UseSsl, src => src.UseSsl);
+        toDto.MapMember(dest => dest.Username, src => src.Username);
+        toDto.MapMember(dest => dest.Password, src => src.Password);
 
         var fromDto = @this.CreateMap<MonitoredScriptTargetDTO, MonitoredScriptTarget>();
         fromDto.IgnoreAllMembers();
@@ -111,7 +127,11 @@ public static class ForMonitoredScriptTargetDTO
         fromDto.MapPath(dest => dest.MonitoredTarget.MonitoredEnvironmentId, src => src.MonitoredEnvironmentId);
         fromDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
         fromDto.MapMember(dest => dest.HostName, src => src.HostName);
+        fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.FilePath, src => src.FilePath);
+        fromDto.MapMember(dest => dest.UseSsl, src => src.UseSsl);
+        fromDto.MapMember(dest => dest.Username, src => src.Username);
+        fromDto.MapMember(dest => dest.Password, src => src.Password);
 
         return @this;
     }
