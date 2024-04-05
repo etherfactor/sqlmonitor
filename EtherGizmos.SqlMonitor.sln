@@ -20,7 +20,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Mode
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EtherGizmos.SqlMonitor.Web", "EtherGizmos.SqlMonitor.Web\EtherGizmos.SqlMonitor.Web.esproj", "{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Api.Extensions", "EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj", "{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.Extensions", "EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj", "{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh", "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh\EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh.csproj", "{8AC84FCC-9855-4C1A-A627-5095A006E8C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

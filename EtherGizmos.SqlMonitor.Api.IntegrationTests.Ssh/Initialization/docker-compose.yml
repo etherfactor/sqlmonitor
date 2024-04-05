@@ -1,0 +1,7 @@
+version: '3'
+services:
+  ssh-server:
+    build:
+      context: .
+    ports:
+      - "2222:22"

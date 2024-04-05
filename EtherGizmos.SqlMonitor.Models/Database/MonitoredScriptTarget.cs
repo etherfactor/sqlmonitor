@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,11 +35,20 @@ public class MonitoredScriptTarget : Auditable
     [Column("use_ssl")]
     public virtual bool UseSsl { get; set; }
 
+    [Column("ssh_authentication_type_id")]
+    public virtual SshAuthenticationType AuthenticationType { get; set; }
+
     [Column("username")]
     public virtual string? Username { get; set; }
 
     [Column("password")]
     public virtual string? Password { get; set; }
+
+    [Column("private_key")]
+    public virtual string? PrivateKey { get; set; }
+
+    [Column("private_key_password")]
+    public virtual string? PrivateKeyPassword { get; set; }
 
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }

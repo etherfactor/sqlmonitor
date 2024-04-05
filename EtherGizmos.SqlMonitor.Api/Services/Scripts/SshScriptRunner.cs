@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using Renci.SshNet;
 using System.Security.Cryptography;
 using System.Text;
@@ -16,13 +17,48 @@ public class SshScriptRunner
         var username = scriptTarget.Username;
         var password = scriptTarget.Password;
 
+        var privateKey = scriptTarget.PrivateKey;
+        var privateKeyPassword = scriptTarget.PrivateKeyPassword;
+
         var command = scriptVariant.ScriptInterpreter.Command;
         var arguments = scriptVariant.ScriptInterpreter.Arguments;
 
-        var passwordAuthentication = new PasswordAuthenticationMethod(username, password);
-        //new PrivateKeyAuthenticationMethod(username, new PrivateKeyFile());
-        //new NoneAuthenticationMethod(username);
-        var connectionInfo = new Renci.SshNet.ConnectionInfo(hostName, port, username, passwordAuthentication);
+        AuthenticationMethod authentication;
+        if (scriptTarget.AuthenticationType == SshAuthenticationType.None)
+        {
+            authentication = new NoneAuthenticationMethod(
+                username);
+        }
+        else if (scriptTarget.AuthenticationType == SshAuthenticationType.Password)
+        {
+            authentication = new PasswordAuthenticationMethod(
+                username,
+                password);
+        }
+        else if (scriptTarget.AuthenticationType == SshAuthenticationType.PrivateKey)
+        {
+            var privateKeyBytes = Encoding.UTF8.GetBytes(privateKey ?? "");
+            var privateKeyStream = new MemoryStream(privateKeyBytes);
+
+            if (privateKeyPassword is not null)
+            {
+                authentication = new PrivateKeyAuthenticationMethod(
+                    username,
+                    new PrivateKeyFile(privateKeyStream, privateKeyPassword));
+            }
+            else
+            {
+                authentication = new PrivateKeyAuthenticationMethod(
+                    username,
+                    new PrivateKeyFile(privateKeyStream));
+            }
+        }
+        else
+        {
+            throw new NotSupportedException($"The authentication type {scriptTarget.AuthenticationType} is not supported.");
+        }
+
+        var connectionInfo = new Renci.SshNet.ConnectionInfo(hostName, port, username, authentication);
 
         using var client = new SshClient(connectionInfo);
         await client.ConnectAsync(CancellationToken.None);
@@ -45,7 +81,7 @@ echo ""${scriptVariableName}"" > {scriptHash}.{scriptExtension}
 
         var result = client.RunCommand(commandText);
 
-        Console.Out.WriteLine(result);
+        Console.Out.WriteLine(result.Result);
     }
 
     private string EncodeScriptToVariable(string variableName, string script)
