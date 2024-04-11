@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using Renci.SshNet;
 using System.Security.Cryptography;
@@ -105,4 +105,7 @@ EOF
 
         return scriptHash;
     }
+
+    [GeneratedRegex(@"##metric:(\s*?[A-Za-z_]+=(?:[^ ""]+|""(?:[^""\\]|\\"")*?(?<!\\)""))+$")]
+    private static partial Regex MetricValueRegex();
 }
