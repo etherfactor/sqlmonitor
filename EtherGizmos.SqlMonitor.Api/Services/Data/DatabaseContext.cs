@@ -128,7 +128,7 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
             entity.PropertyWithAnnotations(e => e.ScriptInterpreterId);
             entity.PropertyWithAnnotations(e => e.HostName);
-            entity.PropertyWithAnnotations(e => e.FilePath);
+            entity.PropertyWithAnnotations(e => e.RunInPath);
             entity.PropertyWithAnnotations(e => e.SecurableId)
                 .HasDefaultValueSql();
         });
@@ -180,6 +180,8 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
             entity.PropertyWithAnnotations(e => e.IsActive);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.BucketKey);
+            entity.PropertyWithAnnotations(e => e.TimestampUtcKey);
             entity.PropertyWithAnnotations(e => e.SecurableId)
                 .HasDefaultValueSql();
 
@@ -221,8 +223,6 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.ScriptId);
             entity.PropertyWithAnnotations(e => e.ScriptInterpreterId);
             entity.PropertyWithAnnotations(e => e.ScriptText);
-            entity.PropertyWithAnnotations(e => e.TimestampKey);
-            entity.PropertyWithAnnotations(e => e.BucketKey);
 
             entity.HasOne(e => e.Script)
                 .WithMany(e => e.Variants);

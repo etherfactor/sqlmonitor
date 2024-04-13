@@ -20,6 +20,7 @@ public class Migration002_LoadScriptTables : Migration
                 description = "PowerShell 7 is a cross-platform scripting language compatible with Windows, macOS, and Linux. It runs scripts using the \"pwsh\" command, offering enhanced performance, modern language features, and improved compatibility with modules and scripts across different platforms.",
                 command = "pwsh",
                 arguments = "-NoProfile -ExecutionPolicy Unrestricted -Command $Script",
+                extension = "ps1",
             })
             .Row(new
             {
@@ -28,6 +29,7 @@ public class Migration002_LoadScriptTables : Migration
                 description = "PowerShell 5 is a Windows-native scripting language bundled with Windows operating systems. It executes scripts using the \"powershell\" command, providing comprehensive Windows systems management capabilities through its extensive commandlets library.",
                 command = "powershell",
                 arguments = "-NoProfile -ExecutionPolicy Unrestricted -Command $Script",
+                extension = "ps1",
             })
             .Row(new
             {
@@ -36,6 +38,7 @@ public class Migration002_LoadScriptTables : Migration
                 description = "Bash is a widely-used Unix shell and command language available on most Unix-based systems, including macOS and Linux. It executes scripts using the \"bash\" command, providing powerful command-line capabilities and scripting functionalities for automating tasks, file management, and system administration tasks.",
                 command = "bash",
                 arguments = "-c $Script",
+                extension = "sh",
             });
     }
 

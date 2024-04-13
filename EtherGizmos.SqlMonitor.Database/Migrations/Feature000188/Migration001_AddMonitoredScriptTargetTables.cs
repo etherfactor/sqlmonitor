@@ -20,6 +20,15 @@ public class Migration001_AddMonitoredScriptTargetTables : Migration
             .WithColumn("monitored_environment_id").AsGuid().NotNullable();
 
         /*
+         * Create [dbo].[ssh_authentication_types]
+         */
+        Create.Table("ssh_authentication_types")
+            .WithColumn("ssh_authentication_type_id").AsInt32().PrimaryKey()
+            .WithAuditColumns()
+            .WithColumn("name").AsString(200).NotNullable()
+            .WithColumn("description").AsString(int.MaxValue).Nullable();
+
+        /*
          * Create [dbo].[monitored_script_targets]
          *  - for a given target, a server & directory being targeted with monitoring scripts
          */
@@ -28,9 +37,15 @@ public class Migration001_AddMonitoredScriptTargetTables : Migration
             .WithAuditColumns()
             .WithColumn("monitored_target_id").AsInt32().NotNullable()
             .WithColumn("script_interpreter_id").AsInt32().NotNullable()
-            .WithColumn("host_name").AsString(255).NotNullable()
-            .WithColumn("file_path").AsString(int.MaxValue).NotNullable()
-            .WithColumn("securable_id").AsInt32().Nullable();
+            .WithColumn("host").AsString(255).NotNullable()
+            .WithColumn("port").AsInt32().Nullable()
+            .WithColumn("run_in_path").AsString(int.MaxValue).NotNullable()
+            .WithColumn("securable_id").AsInt32().Nullable()
+            .WithColumn("ssh_authentication_type_id").AsInt32().Nullable()
+            .WithColumn("ssh_username").AsString(255).Nullable()
+            .WithColumn("ssh_password").AsString(int.MaxValue).Nullable()
+            .WithColumn("ssh_private_key").AsString(int.MaxValue).Nullable()
+            .WithColumn("ssh_private_key_password").AsString(int.MaxValue).Nullable();
 
         Create.ForeignKey("FK_monitored_script_targets_monitored_target_id")
             .FromTable("monitored_script_targets").ForeignColumn("monitored_target_id")
@@ -127,6 +142,8 @@ end;");
     public override void Down()
     {
         Delete.Table("monitored_script_targets");
+
+        Delete.Table("ssh_authentication_types");
 
         Delete.Table("monitored_targets");
     }

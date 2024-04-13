@@ -20,6 +20,7 @@ public class Migration001_AddScriptTables : Migration
             .WithColumn("description").AsString(int.MaxValue).Nullable()
             .WithColumn("command").AsString(int.MaxValue).NotNullable()
             .WithColumn("arguments").AsString(int.MaxValue).NotNullable()
+            .WithColumn("extension").AsString(255).NotNullable()
             .WithColumn("is_soft_deleted").AsBoolean().NotNullable().WithDefaultValue(false)
             .WithColumn("system_id").AsGuid().NotNullable().WithDefault(SystemMethods.NewGuid)
             .WithColumn("securable_id").AsInt32().Nullable();
@@ -112,6 +113,8 @@ end;");
             .WithColumn("last_run_at_utc").AsDateTime2().Nullable()
             .WithColumn("is_active").AsBoolean().NotNullable().WithDefaultValue(true)
             .WithColumn("is_soft_deleted").AsBoolean().NotNullable().WithDefaultValue(false)
+            .WithColumn("bucket_key").AsString(100).Nullable()
+            .WithColumn("timestamp_utc_key").AsString(100).Nullable()
             .WithColumn("system_id").AsGuid().NotNullable().WithDefault(SystemMethods.NewGuid)
             .WithColumn("securable_id").AsInt32().Nullable();
 
@@ -199,9 +202,7 @@ end;");
             .WithAuditColumns()
             .WithColumn("script_id").AsGuid().NotNullable()
             .WithColumn("script_interpreter_id").AsInt32().NotNullable()
-            .WithColumn("script_text").AsString(int.MaxValue).NotNullable()
-            .WithColumn("timestamp_key").AsString(500)
-            .WithColumn("bucket_key").AsString(500);
+            .WithColumn("script_text").AsString(int.MaxValue).NotNullable();
 
         Create.ForeignKey("FK_script_variants_script_id")
             .FromTable("script_variants").ForeignColumn("script_id")

@@ -31,6 +31,9 @@ public class ScriptInterpreterDTO
     [Required]
     public string? Arguments { get; set; }
 
+    [Required]
+    public string? Extension { get; set; }
+
     public Task EnsureValid(IQueryable<ScriptInterpreter> records)
     {
         return Task.CompletedTask;
@@ -64,6 +67,7 @@ public class ScriptInterpreterDTOConfiguration : IModelConfiguration
             entity.Property(e => e.Description);
             entity.Property(e => e.Command);
             entity.Property(e => e.Arguments);
+            entity.Property(e => e.Extension);
         }
     }
 }
@@ -85,6 +89,7 @@ public static class ForScriptInterpreterDTO
         toDto.MapMember(dest => dest.Description, src => src.Description);
         toDto.MapMember(dest => dest.Command, src => src.Command);
         toDto.MapMember(dest => dest.Arguments, src => src.Arguments);
+        toDto.MapMember(dest => dest.Extension, src => src.Extension);
 
         var fromDto = @this.CreateMap<ScriptInterpreterDTO, ScriptInterpreter>();
         fromDto.IgnoreAllMembers();
@@ -99,6 +104,7 @@ public static class ForScriptInterpreterDTO
         fromDto.MapMember(dest => dest.Description, src => src.Description);
         fromDto.MapMember(dest => dest.Command, src => src.Command);
         fromDto.MapMember(dest => dest.Arguments, src => src.Arguments);
+        fromDto.MapMember(dest => dest.Extension, src => src.Extension);
 
         return @this;
     }

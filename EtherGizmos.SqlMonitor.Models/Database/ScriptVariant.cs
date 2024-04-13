@@ -22,12 +22,6 @@ public class ScriptVariant : Auditable
     [Column("script_text")]
     public virtual string ScriptText { get; set; }
 
-    [Column("timestamp_key")]
-    public virtual string? TimestampKey { get; set; }
-
-    [Column("bucket_key")]
-    public virtual string? BucketKey { get; set; }
-
     /// <summary>
     /// Not intended for direct use.
     /// </summary>

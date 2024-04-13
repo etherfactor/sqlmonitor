@@ -32,6 +32,10 @@ public class ScriptDTO
 
     public bool? IsActive { get; set; }
 
+    public string? BucketKey { get; set; }
+
+    public string? TimestampUtcKey { get; set; }
+
     public List<ScriptVariantDTO> Variants { get; set; } = new();
 
     public Task EnsureValid(IQueryable<Script> records)
@@ -68,6 +72,8 @@ public class ScriptDTOConfiguration : IModelConfiguration
             entity.Property(e => e.RunFrequency);
             entity.Property(e => e.LastRunAtUtc);
             entity.Property(e => e.IsActive);
+            entity.Property(e => e.BucketKey);
+            entity.Property(e => e.TimestampUtcKey);
             entity.CollectionProperty(e => e.Variants);
         }
     }
@@ -91,6 +97,9 @@ public static class ForScriptDTO
         toDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
         toDto.MapMember(dest => dest.LastRunAtUtc, src => src.LastRunAtUtc);
         toDto.MapMember(dest => dest.IsActive, src => src.IsActive);
+        toDto.MapMember(dest => dest.BucketKey, src => src.BucketKey);
+        toDto.MapMember(dest => dest.TimestampUtcKey, src => src.TimestampUtcKey);
+        toDto.MapMember(dest => dest.Variants, src => src.Variants);
 
         var fromDto = @this.CreateMap<ScriptDTO, Script>();
         fromDto.IgnoreAllMembers();
@@ -105,6 +114,9 @@ public static class ForScriptDTO
         fromDto.MapMember(dest => dest.Description, src => src.Description);
         fromDto.MapMember(dest => dest.RunFrequency, src => src.RunFrequency);
         fromDto.MapMember(dest => dest.IsActive, src => src.IsActive);
+        fromDto.MapMember(dest => dest.BucketKey, src => src.BucketKey);
+        fromDto.MapMember(dest => dest.TimestampUtcKey, src => src.TimestampUtcKey);
+        fromDto.MapMember(dest => dest.Variants, src => src.Variants);
 
         return @this;
     }

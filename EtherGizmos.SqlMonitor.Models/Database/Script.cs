@@ -32,12 +32,20 @@ public class Script : Auditable
     [SqlDefaultValue]
     public virtual bool IsSoftDeleted { get; set; }
 
+    [Column("bucket_key")]
+    public virtual string? BucketKey { get; set; }
+
+    [Column("timestamp_utc_key")]
+    public virtual string? TimestampUtcKey { get; set; }
+
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }
 
     public virtual Securable Securable { get; set; }
 
     public virtual List<ScriptVariant> Variants { get; set; } = [];
+
+    //public virtual List<ScriptMetric> Metrics { get; set; } = [];
 
     /// <summary>
     /// Not intended for direct use.

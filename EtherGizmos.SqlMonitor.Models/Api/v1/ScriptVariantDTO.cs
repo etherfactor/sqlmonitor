@@ -17,10 +17,6 @@ public class ScriptVariantDTO
 
     [Required]
     public string? ScriptText { get; set; }
-
-    public string? TimestampKey { get; set; }
-
-    public string? BucketKey { get; set; }
 }
 
 public class ScriptVariantDTOConfiguration : IModelConfiguration
@@ -39,8 +35,6 @@ public class ScriptVariantDTOConfiguration : IModelConfiguration
             entity.Property(e => e.ScriptInterpreterId);
             entity.HasRequired(e => e.ScriptInterpreter);
             entity.Property(e => e.ScriptText);
-            entity.Property(e => e.TimestampKey);
-            entity.Property(e => e.BucketKey);
         }
     }
 }
@@ -54,15 +48,11 @@ public static class ForScriptVariantDTO
         toDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
         toDto.MapMember(dest => dest.ScriptInterpreter, src => src.ScriptInterpreter);
         toDto.MapMember(dest => dest.ScriptText, src => src.ScriptText);
-        toDto.MapMember(dest => dest.TimestampKey, src => src.TimestampKey);
-        toDto.MapMember(dest => dest.BucketKey, src => src.BucketKey);
 
         var fromDto = @this.CreateMap<ScriptVariantDTO, ScriptVariant>();
         fromDto.IgnoreAllMembers();
         fromDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
         fromDto.MapMember(dest => dest.ScriptText, src => src.ScriptText);
-        fromDto.MapMember(dest => dest.TimestampKey, src => src.TimestampKey);
-        fromDto.MapMember(dest => dest.BucketKey, src => src.BucketKey);
 
         return @this;
     }

@@ -21,7 +21,7 @@ internal class SshScriptRunnerTests
         {
             HostName = "localhost",
             Port = 2222,
-            FilePath = "/home",
+            RunInPath = "/home",
             AuthenticationType = SshAuthenticationType.Password,
             Username = "root",
             Password = "password",
@@ -60,7 +60,7 @@ internal class SshScriptRunnerTests
         {
             HostName = "localhost",
             Port = 2222,
-            FilePath = "/home",
+            RunInPath = "/home",
             AuthenticationType = SshAuthenticationType.PrivateKey,
             Username = "root",
             PrivateKey = File.ReadAllText(Global.PrivateKeyFilePath),
@@ -100,7 +100,7 @@ internal class SshScriptRunnerTests
         {
             HostName = "localhost",
             Port = 2222,
-            FilePath = "/home",
+            RunInPath = "/home",
             AuthenticationType = SshAuthenticationType.Password,
             Username = "root",
             Password = "password",
@@ -123,7 +123,7 @@ internal class SshScriptRunnerTests
         {
             Assert.That(configuration.HostName, Is.EqualTo(target.HostName));
             Assert.That(configuration.Port, Is.EqualTo(target.Port));
-            Assert.That(configuration.FilePath, Is.EqualTo(target.FilePath));
+            Assert.That(configuration.FilePath, Is.EqualTo(target.RunInPath));
             Assert.That(configuration.AuthenticationType, Is.EqualTo(target.AuthenticationType));
             Assert.That(configuration.Username, Is.EqualTo(target.Username));
             Assert.That(configuration.Password, Is.EqualTo(target.Password));

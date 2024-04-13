@@ -39,15 +39,11 @@ internal class ScriptsControllerTests : IntegrationTestBase
                 {
                     scriptInterpreterId = 1,
                     scriptText = "Write-Host '##metric: value=123 bucket=A'",
-                    timestampKey = null as string,
-                    bucketKey = "bucket",
                 },
                 new
                 {
                     scriptInterpreterId = 2,
                     scriptText = "Write-Host '##metric: value=123 bucket=A'",
-                    timestampKey = null as string,
-                    bucketKey = "bucket",
                 }
             }
         };

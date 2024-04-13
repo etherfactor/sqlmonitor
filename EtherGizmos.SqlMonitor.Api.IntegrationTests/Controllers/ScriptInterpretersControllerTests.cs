@@ -34,6 +34,7 @@ internal class ScriptInterpretersControllerTests : IntegrationTestBase
             name = "Test",
             command = "test",
             arguments = "-s $Script",
+            extension = "tst",
         };
 
         var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scriptInterpreters", body.AsJsonContent());
@@ -87,6 +88,7 @@ internal class ScriptInterpretersControllerTests : IntegrationTestBase
             name = "Test",
             command = "test",
             arguments = "-s $Script",
+            extension = "tst",
         };
 
         var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scriptInterpreters", body.AsJsonContent());
