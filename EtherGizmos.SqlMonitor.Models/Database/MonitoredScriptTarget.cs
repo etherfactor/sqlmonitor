@@ -39,7 +39,7 @@ public class MonitoredScriptTarget : Auditable
     public virtual SshAuthenticationType AuthenticationType { get; set; }
 
     [Column("username")]
-    public virtual string? Username { get; set; }
+    public virtual string Username { get; set; }
 
     [Column("password")]
     public virtual string? Password { get; set; }
@@ -64,6 +64,7 @@ public class MonitoredScriptTarget : Auditable
         ScriptInterpreter = null!;
         HostName = null!;
         FilePath = null!;
+        Username = null!;
         Securable = null!;
     }
 
