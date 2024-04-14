@@ -32,23 +32,23 @@ public class MonitoredScriptTarget : Auditable
     [Column("run_in_path")]
     public virtual string RunInPath { get; set; }
 
-    //[Column("use_ssl")]
-    //public virtual bool UseSsl { get; set; }
-
     [Column("ssh_authentication_type_id")]
-    public virtual SshAuthenticationType? AuthenticationType { get; set; }
+    public virtual SshAuthenticationType? SshAuthenticationType { get; set; }
 
     [Column("ssh_username")]
-    public virtual string? Username { get; set; }
+    public virtual string? SshUsername { get; set; }
 
     [Column("ssh_password")]
-    public virtual string? Password { get; set; }
+    public virtual string? SshPassword { get; set; }
 
     [Column("ssh_private_key")]
-    public virtual string? PrivateKey { get; set; }
+    public virtual string? SshPrivateKey { get; set; }
 
     [Column("ssh_private_key_password")]
-    public virtual string? PrivateKeyPassword { get; set; }
+    public virtual string? SshPrivateKeyPassword { get; set; }
+
+    [Column("winrm_use_ssl")]
+    public virtual bool? WinRmUseSsl { get; set; }
 
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }
@@ -64,7 +64,7 @@ public class MonitoredScriptTarget : Auditable
         ScriptInterpreter = null!;
         HostName = null!;
         RunInPath = null!;
-        Username = null!;
+        SshUsername = null!;
         Securable = null!;
     }
 

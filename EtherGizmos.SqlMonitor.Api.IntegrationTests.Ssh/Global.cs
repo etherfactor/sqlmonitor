@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
 

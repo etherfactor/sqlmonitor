@@ -22,9 +22,9 @@ internal class SshScriptRunnerTests
             HostName = "localhost",
             Port = 2222,
             RunInPath = "/home",
-            AuthenticationType = SshAuthenticationType.Password,
-            Username = "root",
-            Password = "password",
+            SshAuthenticationType = SshAuthenticationType.Password,
+            SshUsername = "root",
+            SshPassword = "password",
         };
 
         var script = new ScriptVariant()
@@ -61,10 +61,10 @@ internal class SshScriptRunnerTests
             HostName = "localhost",
             Port = 2222,
             RunInPath = "/home",
-            AuthenticationType = SshAuthenticationType.PrivateKey,
-            Username = "root",
-            PrivateKey = File.ReadAllText(Global.PrivateKeyFilePath),
-            PrivateKeyPassword = "password",
+            SshAuthenticationType = SshAuthenticationType.PrivateKey,
+            SshUsername = "root",
+            SshPrivateKey = File.ReadAllText(Global.PrivateKeyFilePath),
+            SshPrivateKeyPassword = "password",
         };
 
         var script = new ScriptVariant()
@@ -101,9 +101,9 @@ internal class SshScriptRunnerTests
             HostName = "localhost",
             Port = 2222,
             RunInPath = "/home",
-            AuthenticationType = SshAuthenticationType.Password,
-            Username = "root",
-            Password = "password",
+            SshAuthenticationType = SshAuthenticationType.Password,
+            SshUsername = "root",
+            SshPassword = "password",
         };
 
         var script = new ScriptVariant()
@@ -124,9 +124,9 @@ internal class SshScriptRunnerTests
             Assert.That(configuration.HostName, Is.EqualTo(target.HostName));
             Assert.That(configuration.Port, Is.EqualTo(target.Port));
             Assert.That(configuration.FilePath, Is.EqualTo(target.RunInPath));
-            Assert.That(configuration.AuthenticationType, Is.EqualTo(target.AuthenticationType));
-            Assert.That(configuration.Username, Is.EqualTo(target.Username));
-            Assert.That(configuration.Password, Is.EqualTo(target.Password));
+            Assert.That(configuration.AuthenticationType, Is.EqualTo(target.SshAuthenticationType));
+            Assert.That(configuration.Username, Is.EqualTo(target.SshUsername));
+            Assert.That(configuration.Password, Is.EqualTo(target.SshPassword));
             Assert.That(configuration.Command, Is.EqualTo(script.ScriptInterpreter.Command));
             Assert.That(configuration.Arguments, Is.EqualTo(script.ScriptInterpreter.Arguments));
         });

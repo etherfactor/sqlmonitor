@@ -108,8 +108,8 @@ public static class ForMonitoredScriptTargetDTO
         toDto.MapMember(dest => dest.HostName, src => src.HostName);
         toDto.MapMember(dest => dest.Port, src => src.Port);
         toDto.MapMember(dest => dest.FilePath, src => src.RunInPath);
-        toDto.MapMember(dest => dest.Username, src => src.Username);
-        toDto.MapMember(dest => dest.Password, src => src.Password);
+        toDto.MapMember(dest => dest.Username, src => src.SshUsername);
+        toDto.MapMember(dest => dest.Password, src => src.SshPassword);
 
         var fromDto = @this.CreateMap<MonitoredScriptTargetDTO, MonitoredScriptTarget>();
         fromDto.IgnoreAllMembers();
@@ -127,8 +127,8 @@ public static class ForMonitoredScriptTargetDTO
         fromDto.MapMember(dest => dest.HostName, src => src.HostName);
         fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.RunInPath, src => src.FilePath);
-        fromDto.MapMember(dest => dest.Username, src => src.Username);
-        fromDto.MapMember(dest => dest.Password, src => src.Password);
+        fromDto.MapMember(dest => dest.SshUsername, src => src.Username);
+        fromDto.MapMember(dest => dest.SshPassword, src => src.Password);
 
         return @this;
     }

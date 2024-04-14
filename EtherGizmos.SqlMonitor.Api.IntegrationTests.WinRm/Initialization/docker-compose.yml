@@ -1,0 +1,9 @@
+version: '3'
+services:
+  winrm-server:
+    platform: windows/amd64
+    build:
+      context: .
+    ports:
+      - "55985:5985"
+      - "55986:5986"

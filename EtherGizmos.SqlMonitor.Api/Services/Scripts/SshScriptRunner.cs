@@ -46,11 +46,11 @@ public partial class SshScriptRunner : IScriptRunner
         var port = scriptTarget.Port ?? 22;
         var filePath = scriptTarget.RunInPath;
 
-        var username = scriptTarget.Username;
-        var password = scriptTarget.Password;
+        var username = scriptTarget.SshUsername;
+        var password = scriptTarget.SshPassword;
 
-        var privateKey = scriptTarget.PrivateKey;
-        var privateKeyPassword = scriptTarget.PrivateKeyPassword;
+        var privateKey = scriptTarget.SshPrivateKey;
+        var privateKeyPassword = scriptTarget.SshPrivateKeyPassword;
 
         var command = scriptVariant.ScriptInterpreter.Command;
         var arguments = scriptVariant.ScriptInterpreter.Arguments;
@@ -61,7 +61,7 @@ public partial class SshScriptRunner : IScriptRunner
             Port = port,
             FilePath = filePath,
 
-            AuthenticationType = scriptTarget.AuthenticationType ?? SshAuthenticationType.Unknown,
+            AuthenticationType = scriptTarget.SshAuthenticationType ?? SshAuthenticationType.Unknown,
 
             Username = username ?? throw new InvalidOperationException("Must specify a username"),
             Password = password,

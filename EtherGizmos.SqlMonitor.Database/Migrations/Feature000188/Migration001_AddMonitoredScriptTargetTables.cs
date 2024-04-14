@@ -45,7 +45,8 @@ public class Migration001_AddMonitoredScriptTargetTables : Migration
             .WithColumn("ssh_username").AsString(255).Nullable()
             .WithColumn("ssh_password").AsString(int.MaxValue).Nullable()
             .WithColumn("ssh_private_key").AsString(int.MaxValue).Nullable()
-            .WithColumn("ssh_private_key_password").AsString(int.MaxValue).Nullable();
+            .WithColumn("ssh_private_key_password").AsString(int.MaxValue).Nullable()
+            .WithColumn("winrm_use_ssl").AsBoolean().Nullable();
 
         Create.ForeignKey("FK_monitored_script_targets_monitored_target_id")
             .FromTable("monitored_script_targets").ForeignColumn("monitored_target_id")
