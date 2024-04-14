@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("metrics")]
-public class Metric
+public class Metric : Auditable
 {
     [Column("metric_id")]
     [Key, SqlDefaultValue]
@@ -21,11 +22,19 @@ public class Metric
     [Column("aggregate_type_id")]
     public virtual AggregateType AggregateType { get; set; }
 
+    [Column("is_soft_deleted")]
+    public virtual bool IsSoftDeleted { get; set; }
+
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
     public Metric()
     {
         Name = null!;
+    }
+
+    public Task EnsureValid(IQueryable<Metric> records)
+    {
+        return Task.CompletedTask;
     }
 }

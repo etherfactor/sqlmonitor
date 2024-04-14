@@ -177,6 +177,7 @@ builder.Services
         opt.UseLazyLoadingProxies(true);
     })
     .AddScoped<ISaveService, SaveService>()
+    .AddScoped<IMetricService, MetricService>()
     .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
     .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()

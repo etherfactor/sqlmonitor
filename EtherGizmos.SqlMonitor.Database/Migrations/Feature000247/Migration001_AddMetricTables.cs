@@ -47,7 +47,8 @@ end;");
             .WithAuditColumns()
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable()
-            .WithColumn("aggregate_type_id").AsInt32().NotNullable();
+            .WithColumn("aggregate_type_id").AsInt32().NotNullable()
+            .WithColumn("is_soft_deleted").AsBoolean().NotNullable().WithDefaultValue(false);
 
         Create.ForeignKey("FK_metrics_aggregate_type_id")
             .FromTable("metrics").ForeignColumn("aggregate_type_id")
