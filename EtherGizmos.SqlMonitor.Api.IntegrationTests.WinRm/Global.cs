@@ -10,6 +10,8 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm;
 [SetUpFixture]
 internal static class Global
 {
+    public const string DockerComposeFilePath = "./Initialization/docker-compose.yml";
+
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
     {

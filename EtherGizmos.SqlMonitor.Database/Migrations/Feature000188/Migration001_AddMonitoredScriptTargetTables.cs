@@ -21,12 +21,32 @@ public class Migration001_AddMonitoredScriptTargetTables : Migration
 
         /*
          * Create [dbo].[ssh_authentication_types]
+         *  - the types of authentication that can be used for SSH
          */
         Create.Table("ssh_authentication_types")
             .WithColumn("ssh_authentication_type_id").AsInt32().PrimaryKey()
             .WithAuditColumns()
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable();
+
+        Execute.Sql(@"create trigger [TR_ssh_authentication_types_audit]
+on [ssh_authentication_types]
+after insert, update
+as
+begin
+    set nocount on;
+
+    declare @RecordId int;
+
+    --Get the id of the inserted record
+    select @RecordId = inserted.ssh_authentication_type_id
+        from inserted;
+
+    --Set the last modified time of the record
+    update [ssh_authentication_types]
+      set [modified_at_utc] = getutcdate()
+      where [ssh_authentication_type_id] = @RecordId;
+end;");
 
         /*
          * Create [dbo].[monitored_script_targets]

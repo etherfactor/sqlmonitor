@@ -45,7 +45,7 @@ public class Script : Auditable
 
     public virtual List<ScriptVariant> Variants { get; set; } = [];
 
-    //public virtual List<ScriptMetric> Metrics { get; set; } = [];
+    public virtual List<ScriptMetric> Metrics { get; set; } = [];
 
     /// <summary>
     /// Not intended for direct use.

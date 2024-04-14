@@ -1,15 +1,21 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Models.Database;
 
 [Table("script_metrics")]
-public class ScriptMetric
+public class ScriptMetric : Auditable
 {
     [Column("script_metric_id")]
     [Key, SqlDefaultValue]
     public virtual int Id { get; set; }
+
+    [Column("script_id")]
+    public virtual Guid ScriptId { get; set; }
+
+    public virtual Script Script { get; set; }
 
     [Column("metric_id")]
     public virtual int MetricId { get; set; }
@@ -28,6 +34,7 @@ public class ScriptMetric
     /// </summary>
     public ScriptMetric()
     {
+        Script = null!;
         Metric = null!;
         ValueKey = null!;
     }

@@ -187,6 +187,9 @@ public class DatabaseContext : DbContext
 
             entity.HasMany(e => e.Variants)
                 .WithOne(e => e.Script);
+
+            entity.HasMany(e => e.Metrics)
+                .WithOne(e => e.Script);
         });
 
         modelBuilder.Entity<ScriptInterpreter>(entity =>
@@ -207,6 +210,26 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.SecurableId)
                 .HasDefaultValueSql();
+        });
+
+        modelBuilder.Entity<ScriptMetric>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_script_metrics_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.ScriptId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.ValueKey);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+
+            entity.HasOne(e => e.Script)
+                .WithMany(e => e.Metrics);
         });
 
         modelBuilder.Entity<ScriptVariant>(entity =>
