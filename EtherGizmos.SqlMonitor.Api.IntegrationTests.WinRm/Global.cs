@@ -17,6 +17,24 @@ internal static class Global
     {
         if (IsSupportedOS())
         {
+            //Wait 5 seconds before trying to switch to Windows containers, to reduce likelihood of contention with Linux
+            //containers that may be starting in other tests
+            await Task.Delay(5000);
+
+            using var switchProcess = new Process()
+            {
+                StartInfo = new()
+                {
+                    FileName = "powershell",
+                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchWindowsEngine",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            switchProcess.Start();
+            await switchProcess.WaitForExitAsync();
+
             using var dockerProcess = new Process()
             {
                 StartInfo = new()
@@ -28,10 +46,22 @@ internal static class Global
                     RedirectStandardError = true
                 }
             };
-
             dockerProcess.Start();
-
             await dockerProcess.WaitForExitAsync();
+
+            using var revertProcess = new Process()
+            {
+                StartInfo = new()
+                {
+                    FileName = "powershell",
+                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchLinuxEngine",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            revertProcess.Start();
+            await revertProcess.WaitForExitAsync();
         }
         else
         {
@@ -45,6 +75,20 @@ internal static class Global
     {
         if (IsSupportedOS())
         {
+            using var switchProcess = new Process()
+            {
+                StartInfo = new()
+                {
+                    FileName = "powershell",
+                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchWindowsEngine",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            switchProcess.Start();
+            await switchProcess.WaitForExitAsync();
+
             using var dockerProcess = new Process()
             {
                 StartInfo = new()
@@ -56,10 +100,22 @@ internal static class Global
                     RedirectStandardError = true
                 }
             };
-
             dockerProcess.Start();
-
             await dockerProcess.WaitForExitAsync();
+
+            using var revertProcess = new Process()
+            {
+                StartInfo = new()
+                {
+                    FileName = "powershell",
+                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchLinuxEngine",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            revertProcess.Start();
+            await revertProcess.WaitForExitAsync();
         }
     }
 

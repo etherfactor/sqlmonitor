@@ -39,8 +39,8 @@ public class PSRemotingScriptRunner : IScriptRunner
         var port = scriptTarget.Port ?? (useSsl ? 5986 : 5985);
         var filePath = scriptTarget.RunInPath;
 
-        var username = scriptTarget.SshUsername;
-        var password = scriptTarget.SshPassword;
+        var username = scriptTarget.WinRmUsername;
+        var password = scriptTarget.WinRmPassword;
 
         var command = scriptVariant.ScriptInterpreter.Command;
         var arguments = scriptVariant.ScriptInterpreter.Arguments;
@@ -82,12 +82,12 @@ public class PSRemotingScriptRunner : IScriptRunner
         }
 
         var connectionInfo = new WSManConnectionInfo(new Uri($"{configuration.Protocol}://{configuration.HostName}:{configuration.Port}"), "http://schemas.microsoft.com/powershell/Microsoft.PowerShell", credentials);
-        connectionInfo.AuthenticationMechanism = AuthenticationMechanism.Default;
+        connectionInfo.AuthenticationMechanism = AuthenticationMechanism.Basic;
 
-        using var runspace = RunspaceFactory.CreateRunspace(connectionInfo);
+        var runspace = RunspaceFactory.CreateRunspace(connectionInfo);
         runspace.Open();
 
-        using var powershell = PowerShell.Create();
+        var powershell = PowerShell.Create();
         powershell.Runspace = runspace;
 
         return powershell;
@@ -95,6 +95,59 @@ public class PSRemotingScriptRunner : IScriptRunner
 
     private async Task<string> ExecuteScriptAsync(PowerShell session, WinRmConfiguration configuration, ScriptVariant scriptVariant)
     {
+        var outputStringBuilder = new StringBuilder();
+
+        void Verbose_DataAdded(object? sender, DataAddedEventArgs e)
+        {
+            var verbose = (sender as PSDataCollection<VerboseRecord>)?[e.Index];
+            if (verbose is not null)
+            {
+                outputStringBuilder.AppendLine(verbose.Message);
+            }
+        }
+
+        void Debug_DataAdded(object? sender, DataAddedEventArgs e)
+        {
+            var debug = (sender as PSDataCollection<DebugRecord>)?[e.Index];
+            if (debug is not null)
+            {
+                outputStringBuilder.AppendLine(debug.Message);
+            }
+        }
+
+        void Information_DataAdded(object? sender, DataAddedEventArgs e)
+        {
+            var information = (sender as PSDataCollection<InformationalRecord>)?[e.Index];
+            if (information is not null)
+            {
+                outputStringBuilder.AppendLine(information.Message);
+            }
+        }
+
+        void Warning_DataAdded(object? sender, DataAddedEventArgs e)
+        {
+            var warning = (sender as PSDataCollection<WarningRecord>)?[e.Index];
+            if (warning is not null)
+            {
+                outputStringBuilder.AppendLine(warning.Message);
+            }
+        }
+
+        void Error_DataAdded(object? sender, DataAddedEventArgs e)
+        {
+            var error = (sender as PSDataCollection<ErrorRecord>)?[e.Index];
+            if (error is not null)
+            {
+                outputStringBuilder.AppendLine(error.Exception.Message);
+            }
+        }
+
+        session.Streams.Verbose.DataAdded += Verbose_DataAdded;
+        session.Streams.Debug.DataAdded += Debug_DataAdded;
+        session.Streams.Information.DataAdded += Information_DataAdded;
+        session.Streams.Warning.DataAdded += Warning_DataAdded;
+        session.Streams.Error.DataAdded += Error_DataAdded;
+
         var script = scriptVariant.ScriptText;
         var scriptVariable = EncodeScriptToVariable("Script", script);
 
@@ -105,15 +158,25 @@ public class PSRemotingScriptRunner : IScriptRunner
         session.AddScript(@$"{scriptVariable}
 
 if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
-    Set-Content -Path ""
-        {scriptHash}.{scriptExtension}"" -Value $Script | Out-Null
+    Set-Content -Path ""{scriptHash}.{scriptExtension}"" -Value $Script | Out-Null
 }}
 
 {configuration.Command} {configuration.Arguments.Replace("$Script", $@"""{scriptHash}.{scriptExtension}""")}");
 
         var result = await session.InvokeAsync();
 
-        return result.ToString()!;
+        foreach (var item in result)
+        {
+            outputStringBuilder.AppendLine(item.ToString());
+        }
+
+        session.Streams.Verbose.DataAdded -= Verbose_DataAdded;
+        session.Streams.Debug.DataAdded -= Debug_DataAdded;
+        session.Streams.Information.DataAdded -= Information_DataAdded;
+        session.Streams.Warning.DataAdded -= Warning_DataAdded;
+        session.Streams.Error.DataAdded -= Error_DataAdded;
+
+        return outputStringBuilder.ToString();
     }
 
     private string EncodeScriptToVariable(string variableName, string script)

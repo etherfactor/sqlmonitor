@@ -50,6 +50,12 @@ public class MonitoredScriptTarget : Auditable
     [Column("winrm_use_ssl")]
     public virtual bool? WinRmUseSsl { get; set; }
 
+    [Column("winrm_username")]
+    public virtual string? WinRmUsername { get; set; }
+
+    [Column("winrm_password")]
+    public virtual string? WinRmPassword { get; set; }
+
     [Column("securable_id")]
     public virtual int SecurableId { get; set; }
 
