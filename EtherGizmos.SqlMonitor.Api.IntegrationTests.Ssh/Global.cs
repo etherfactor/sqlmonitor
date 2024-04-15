@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 [assembly: ExcludeFromCodeCoverage]
 
@@ -14,59 +15,83 @@ internal static class Global
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
     {
-        if (!File.Exists(PrivateKeyFilePath))
+        using var maybeSemaphore = MaybeGetSemaphore("DockerSemaphore");
+        try
         {
-            using var keyProcess = new Process()
+            maybeSemaphore?.WaitOne();
+
+            if (!File.Exists(PrivateKeyFilePath))
+            {
+                using var keyProcess = new Process()
+                {
+                    StartInfo = new()
+                    {
+                        FileName = "ssh-keygen",
+                        Arguments = $"-t rsa -b 4096 -f {PrivateKeyFilePath} -N password",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                keyProcess.Start();
+                await keyProcess.WaitForExitAsync();
+            }
+
+            using var dockerProcess = new Process()
             {
                 StartInfo = new()
                 {
-                    FileName = "ssh-keygen",
-                    Arguments = $"-t rsa -b 4096 -f {PrivateKeyFilePath} -N password",
+                    FileName = "docker-compose",
+                    Arguments = $"-f {DockerComposeFilePath} up -d",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 }
             };
-
-            keyProcess.Start();
-
-            await keyProcess.WaitForExitAsync();
+            dockerProcess.Start();
+            await dockerProcess.WaitForExitAsync();
         }
-
-        using var dockerProcess = new Process()
+        finally
         {
-            StartInfo = new()
-            {
-                FileName = "docker-compose",
-                Arguments = $"-f {DockerComposeFilePath} up -d",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            }
-        };
-
-        dockerProcess.Start();
-
-        await dockerProcess.WaitForExitAsync();
+            maybeSemaphore?.Release();
+        }
     }
 
     [OneTimeTearDown]
     public static async Task OneTimeTearDown()
     {
-        using var dockerProcess = new Process()
+        using var maybeSemaphore = MaybeGetSemaphore("DockerSemaphore");
+        try
         {
-            StartInfo = new()
+            maybeSemaphore?.WaitOne();
+
+            using var dockerProcess = new Process()
             {
-                FileName = "docker-compose",
-                Arguments = $"-f {DockerComposeFilePath} down",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            }
-        };
+                StartInfo = new()
+                {
+                    FileName = "docker-compose",
+                    Arguments = $"-f {DockerComposeFilePath} down",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            dockerProcess.Start();
+            await dockerProcess.WaitForExitAsync();
+        }
+        finally
+        {
+            maybeSemaphore?.Release();
+        }
+    }
 
-        dockerProcess.Start();
+    private static Semaphore? MaybeGetSemaphore(string? name = null)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new Semaphore(1, 1, name);
+        }
 
-        await dockerProcess.WaitForExitAsync();
+        return null;
     }
 }

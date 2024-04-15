@@ -17,51 +17,57 @@ internal static class Global
     {
         if (IsSupportedOS())
         {
-            //Wait 5 seconds before trying to switch to Windows containers, to reduce likelihood of contention with Linux
-            //containers that may be starting in other tests
-            await Task.Delay(5000);
-
-            using var switchProcess = new Process()
+            using var maybeSemaphore = MaybeGetSemaphore("DockerSemaphore");
+            try
             {
-                StartInfo = new()
-                {
-                    FileName = "powershell",
-                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchWindowsEngine",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            switchProcess.Start();
-            await switchProcess.WaitForExitAsync();
+                maybeSemaphore?.WaitOne();
 
-            using var dockerProcess = new Process()
-            {
-                StartInfo = new()
+                using var switchProcess = new Process()
                 {
-                    FileName = "docker-compose",
-                    Arguments = $"-f {DockerComposeFilePath} up -d",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            dockerProcess.Start();
-            await dockerProcess.WaitForExitAsync();
+                    StartInfo = new()
+                    {
+                        FileName = "powershell",
+                        Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchWindowsEngine",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                switchProcess.Start();
+                await switchProcess.WaitForExitAsync();
 
-            using var revertProcess = new Process()
-            {
-                StartInfo = new()
+                using var dockerProcess = new Process()
                 {
-                    FileName = "powershell",
-                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchLinuxEngine",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            revertProcess.Start();
-            await revertProcess.WaitForExitAsync();
+                    StartInfo = new()
+                    {
+                        FileName = "docker-compose",
+                        Arguments = $"-f {DockerComposeFilePath} up -d",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                dockerProcess.Start();
+                await dockerProcess.WaitForExitAsync();
+
+                using var revertProcess = new Process()
+                {
+                    StartInfo = new()
+                    {
+                        FileName = "powershell",
+                        Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchLinuxEngine",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                revertProcess.Start();
+                await revertProcess.WaitForExitAsync();
+            }
+            finally
+            {
+                maybeSemaphore?.Release();
+            }
         }
         else
         {
@@ -75,47 +81,57 @@ internal static class Global
     {
         if (IsSupportedOS())
         {
-            using var switchProcess = new Process()
+            using var maybeSemaphore = MaybeGetSemaphore("DockerSemaphore");
+            try
             {
-                StartInfo = new()
-                {
-                    FileName = "powershell",
-                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchWindowsEngine",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            switchProcess.Start();
-            await switchProcess.WaitForExitAsync();
+                maybeSemaphore?.WaitOne();
 
-            using var dockerProcess = new Process()
-            {
-                StartInfo = new()
+                using var switchProcess = new Process()
                 {
-                    FileName = "docker-compose",
-                    Arguments = $"-f {DockerComposeFilePath} down",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            dockerProcess.Start();
-            await dockerProcess.WaitForExitAsync();
+                    StartInfo = new()
+                    {
+                        FileName = "powershell",
+                        Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchWindowsEngine",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                switchProcess.Start();
+                await switchProcess.WaitForExitAsync();
 
-            using var revertProcess = new Process()
-            {
-                StartInfo = new()
+                using var dockerProcess = new Process()
                 {
-                    FileName = "powershell",
-                    Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchLinuxEngine",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            revertProcess.Start();
-            await revertProcess.WaitForExitAsync();
+                    StartInfo = new()
+                    {
+                        FileName = "docker-compose",
+                        Arguments = $"-f {DockerComposeFilePath} down",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                dockerProcess.Start();
+                await dockerProcess.WaitForExitAsync();
+
+                using var revertProcess = new Process()
+                {
+                    StartInfo = new()
+                    {
+                        FileName = "powershell",
+                        Arguments = $"& $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchLinuxEngine",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                revertProcess.Start();
+                await revertProcess.WaitForExitAsync();
+            }
+            finally
+            {
+                maybeSemaphore?.Release();
+            }
         }
     }
 
@@ -141,5 +157,15 @@ internal static class Global
         }
 
         return false;
+    }
+
+    private static Semaphore? MaybeGetSemaphore(string? name = null)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new Semaphore(1, 1, name);
+        }
+
+        return null;
     }
 }
