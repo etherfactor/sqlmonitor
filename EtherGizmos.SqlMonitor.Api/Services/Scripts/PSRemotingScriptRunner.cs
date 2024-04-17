@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -39,6 +40,8 @@ public class PSRemotingScriptRunner : IScriptRunner
         var port = scriptTarget.Port ?? (useSsl ? 5986 : 5985);
         var filePath = scriptTarget.RunInPath;
 
+        var authenticationType = scriptTarget.WinRmAuthenticationType;
+
         var username = scriptTarget.WinRmUsername;
         var password = scriptTarget.WinRmPassword;
 
@@ -52,6 +55,8 @@ public class PSRemotingScriptRunner : IScriptRunner
             HostName = hostName,
             Port = port,
             FilePath = filePath,
+
+            AuthenticationType = authenticationType ?? WinRmAuthenticationType.Unknown,
 
             Username = username,
             Password = password,
@@ -82,7 +87,10 @@ public class PSRemotingScriptRunner : IScriptRunner
         }
 
         var connectionInfo = new WSManConnectionInfo(new Uri($"{configuration.Protocol}://{configuration.HostName}:{configuration.Port}"), "http://schemas.microsoft.com/powershell/Microsoft.PowerShell", credentials);
-        connectionInfo.AuthenticationMechanism = AuthenticationMechanism.Basic;
+        connectionInfo.AuthenticationMechanism =
+            configuration.AuthenticationType == WinRmAuthenticationType.Kerberos ? AuthenticationMechanism.Kerberos
+            : configuration.AuthenticationType == WinRmAuthenticationType.Basic ? AuthenticationMechanism.Basic
+            : throw new NotSupportedException($"The authentication type {configuration.AuthenticationType} is not supported.");
 
         var runspace = RunspaceFactory.CreateRunspace(connectionInfo);
         runspace.Open();
@@ -215,6 +223,8 @@ if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
         public required int Port { get; set; }
 
         public required string FilePath { get; set; }
+
+        public required WinRmAuthenticationType AuthenticationType { get; set; }
 
         public string? Username { get; set; }
 

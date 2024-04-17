@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Scripts;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Database.Enums;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.Services.Scripts;
 
@@ -21,6 +22,7 @@ internal class PSRemotingScriptRunnerTests
             HostName = "localhost",
             Port = 55985,
             RunInPath = "C:\\",
+            WinRmAuthenticationType = WinRmAuthenticationType.Basic,
             WinRmUseSsl = false,
             WinRmUsername = "User",
             WinRmPassword = "Password12345!",

@@ -12,6 +12,10 @@ public class Migration002_LoadMonitoredScriptTargetTables : Migration
             .Row(new { ssh_authentication_type_id = 1, name = "None", description = "Does not perform any authentication when connecting via SSH." })
             .Row(new { ssh_authentication_type_id = 10, name = "Password", description = "Authenticates using a username and password when connecting via SSH." })
             .Row(new { ssh_authentication_type_id = 20, name = "PrivateKey", description = "Authenticates using a private key when connecting via SSH." });
+
+        Insert.IntoTable("winrm_authentication_types")
+            .Row(new { winrm_authentication_type_id = 10, name = "Kerberos", description = "Authenticates through a domain controller when connecting via WinRM." })
+            .Row(new { winrm_authentication_type_id = 20, name = "Basic", description = "Authenticates using a username and password when connecting via WinRM." });
     }
 
     public override void Down()
@@ -20,5 +24,9 @@ public class Migration002_LoadMonitoredScriptTargetTables : Migration
             .Row(new { ssh_authentication_type_id = 1 })
             .Row(new { ssh_authentication_type_id = 10 })
             .Row(new { ssh_authentication_type_id = 20 });
+
+        Delete.FromTable("winrm_authentication_types")
+            .Row(new { winrm_authentication_type_id = 10 })
+            .Row(new { winrm_authentication_type_id = 20 });
     }
 }

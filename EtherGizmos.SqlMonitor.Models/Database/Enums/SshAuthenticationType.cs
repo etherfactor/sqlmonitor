@@ -2,7 +2,7 @@
 
 public enum SshAuthenticationType
 {
-    Unknown = -1,
+    Unknown = 0,
     None = 1,
     Password = 10,
     PrivateKey = 20,

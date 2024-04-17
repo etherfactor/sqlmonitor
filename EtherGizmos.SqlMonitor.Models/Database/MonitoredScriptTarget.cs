@@ -47,6 +47,9 @@ public class MonitoredScriptTarget : Auditable
     [Column("ssh_private_key_password")]
     public virtual string? SshPrivateKeyPassword { get; set; }
 
+    [Column("winrm_authentication_type_id")]
+    public virtual WinRmAuthenticationType? WinRmAuthenticationType { get; set; }
+
     [Column("winrm_use_ssl")]
     public virtual bool? WinRmUseSsl { get; set; }
 

@@ -49,6 +49,35 @@ begin
 end;");
 
         /*
+         * Create [dbo].[winrm_authentication_types]
+         *  - the types of authentication that can be used for WinRM
+         */
+        Create.Table("winrm_authentication_types")
+            .WithColumn("winrm_authentication_type_id").AsInt32().PrimaryKey()
+            .WithAuditColumns()
+            .WithColumn("name").AsString(200).NotNullable()
+            .WithColumn("description").AsString(int.MaxValue).Nullable();
+
+        Execute.Sql(@"create trigger [TR_winrm_authentication_types_audit]
+on [winrm_authentication_types]
+after insert, update
+as
+begin
+    set nocount on;
+
+    declare @RecordId int;
+
+    --Get the id of the inserted record
+    select @RecordId = inserted.winrm_authentication_type_id
+        from inserted;
+
+    --Set the last modified time of the record
+    update [winrm_authentication_types]
+      set [modified_at_utc] = getutcdate()
+      where [winrm_authentication_type_id] = @RecordId;
+end;");
+
+        /*
          * Create [dbo].[monitored_script_targets]
          *  - for a given target, a server & directory being targeted with monitoring scripts
          */
@@ -66,6 +95,7 @@ end;");
             .WithColumn("ssh_password").AsString(int.MaxValue).Nullable()
             .WithColumn("ssh_private_key").AsString(int.MaxValue).Nullable()
             .WithColumn("ssh_private_key_password").AsString(int.MaxValue).Nullable()
+            .WithColumn("winrm_authentication_type_id").AsInt32().Nullable()
             .WithColumn("winrm_use_ssl").AsBoolean().Nullable()
             .WithColumn("winrm_username").AsString(255).Nullable()
             .WithColumn("winrm_password").AsString(int.MaxValue).Nullable();
@@ -93,6 +123,14 @@ end;");
         Create.Index("IX_monitored_script_targets_securable_id")
             .OnTable("monitored_script_targets")
             .OnColumn("securable_id");
+
+        Create.ForeignKey("IX_monitored_script_targets_ssh_authentication_type_id")
+            .FromTable("monitored_script_targets").ForeignColumn("ssh_authentication_type_id")
+            .ToTable("ssh_authentication_types").PrimaryColumn("ssh_authentication_type_id");
+
+        Create.ForeignKey("IX_monitored_script_targets_winrm_authentication_type_id")
+            .FromTable("monitored_script_targets").ForeignColumn("winrm_authentication_type_id")
+            .ToTable("winrm_authentication_types").PrimaryColumn("winrm_authentication_type_id");
 
         Execute.Sql(@"create trigger [TR_monitored_script_targets_audit]
 on [monitored_script_targets]
@@ -167,6 +205,8 @@ end;");
         Delete.Table("monitored_script_targets");
 
         Delete.Table("ssh_authentication_types");
+
+        Delete.Table("winrm_authentication_types");
 
         Delete.Table("monitored_targets");
     }

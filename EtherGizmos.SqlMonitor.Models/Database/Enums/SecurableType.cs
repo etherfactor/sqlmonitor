@@ -2,7 +2,7 @@
 
 public enum SecurableType
 {
-    Unknown = -1,
+    Unknown = 0,
     MonitoredSystem = 110,
     MonitoredResource = 120,
     MonitoredEnvironment = 130,
