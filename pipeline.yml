@@ -130,6 +130,12 @@ stages:
         command: 'build'
         projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
 
+    - task: PowerShell@2
+      displayName: 'Enable Unencrypted Connections (WinRM)'
+      inputs:
+        targetType: 'inline'
+        script: 'winrm set winrm/config/client ''@{AllowUnencrypted="true"}'''
+
     - task: DockerCompose@0
       displayName: 'Create Docker Container (WinRM)'
       inputs:
