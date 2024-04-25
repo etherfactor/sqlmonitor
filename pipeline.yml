@@ -92,6 +92,13 @@ jobs:
       projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
       arguments: '--collect "XPlat Code Coverage"'
 
+  - task: DockerCompose@0
+    inputs:
+      containerregistrytype: 'Container Registry'
+      dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.Ssh/bin/**/docker-compose.yml'
+      action: 'Run a Docker Compose command'
+      dockerComposeCommand: 'up -d'
+
   - task: DotNetCoreCLI@2
     displayName: 'Perform Integration Tests (SSH)'
     inputs:
