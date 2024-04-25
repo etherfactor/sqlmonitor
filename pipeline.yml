@@ -53,6 +53,12 @@ stages:
         projects: '**/$(Build.Projects.Api).UnitTests.csproj'
         arguments: '--collect "XPlat Code Coverage"'
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Test Project (SSH)'
+      inputs:
+        command: 'build'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.Ssh.csproj'
+
     - task: DockerCompose@0
       displayName: 'Create Docker Container (SSH)'
       inputs:
@@ -86,14 +92,14 @@ stages:
         workingDir: '$(Build.Projects.Web)'
         customCommand: 'run test-headless'
 
-    - task: PublishTestResults@2 
-      displayName: 'Publish Angular Tests' 
+    - task: PublishTestResults@2
+      displayName: 'Publish Angular Tests'
       condition: succeededOrFailed() 
-      inputs: 
-        testResultsFormat: 'JUnit' 
-        testResultsFiles: '**/TESTS-*.xml' 
-        searchFolder:  
-        mergeTestResults: true 
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/TESTS-*.xml'
+        searchFolder:
+        mergeTestResults: true
 
     - task: reportgenerator@5
       displayName: 'Combine Code Coverage'
@@ -127,7 +133,7 @@ stages:
         arguments: '--collect "XPlat Code Coverage"'
 
     - task: DockerCompose@0
-      displayName: 'Create Docker Container (SSH)'
+      displayName: 'Create Docker Container (WinRM)'
       inputs:
         containerregistrytype: 'Container Registry'
         dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/bin/**/docker-compose.yml'
