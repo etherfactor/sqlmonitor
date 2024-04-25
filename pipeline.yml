@@ -59,14 +59,6 @@ stages:
         command: 'build'
         projects: '**/$(Build.Projects.Api).IntegrationTests.Ssh.csproj'
 
-    - task: DockerCompose@0
-      displayName: 'Create Docker Container (SSH)'
-      inputs:
-        containerregistrytype: 'Container Registry'
-        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.Ssh/bin/**/docker-compose.yml'
-        action: 'Run a Docker Compose command'
-        dockerComposeCommand: 'up -d'
-
     - task: DotNetCoreCLI@2
       displayName: 'Perform Integration Tests (SSH)'
       inputs:

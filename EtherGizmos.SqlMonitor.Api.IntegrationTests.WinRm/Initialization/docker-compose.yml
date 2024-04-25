@@ -2,6 +2,7 @@ version: '3'
 services:
   winrm-server:
     platform: windows/amd64
+    isolation: hyperv
     build:
       context: .
     ports:

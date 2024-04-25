@@ -48,6 +48,14 @@ internal static class Global
                     RedirectStandardError = true
                 }
             };
+            dockerProcess.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
+            {
+                Console.Out.WriteLine(e.Data);
+            });
+            dockerProcess.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
+            {
+                Console.Error.WriteLine(e.Data);
+            });
             dockerProcess.Start();
             await dockerProcess.WaitForExitAsync();
         }
