@@ -26,7 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Initialization\docker-compose.yml">
+    <None Update="Initialization\docker-compose-2022.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Initialization\docker-compose-2019.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Initialization\Dockerfile">

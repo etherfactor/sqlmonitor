@@ -134,7 +134,7 @@ stages:
       displayName: 'Create Docker Container (WinRM)'
       inputs:
         containerregistrytype: 'Container Registry'
-        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/bin/**/docker-compose.yml'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/bin/**/docker-compose-2022.yml'
         action: 'Run a Docker Compose command'
         dockerComposeCommand: 'up -d'
 
