@@ -132,6 +132,12 @@ stages:
         projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
         arguments: '--collect "XPlat Code Coverage"'
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Test Project (WinRM)'
+      inputs:
+        command: 'build'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
+
     - task: DockerCompose@0
       displayName: 'Create Docker Container (WinRM)'
       inputs:
