@@ -86,10 +86,24 @@ jobs:
       arguments: '--collect "XPlat Code Coverage"'
 
   - task: DotNetCoreCLI@2
-    displayName: 'Perform Integration Tests'
+    displayName: 'Perform Integration Tests (HTTP)'
     inputs:
       command: 'test'
-      projects: '**/$(Build.Projects.Api).IntegrationTests.csproj'
+      projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
+      arguments: '--collect "XPlat Code Coverage"'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Perform Integration Tests (SSH)'
+    inputs:
+      command: 'test'
+      projects: '**/$(Build.Projects.Api).IntegrationTests.Ssh.csproj'
+      arguments: '--collect "XPlat Code Coverage"'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Perform Integration Tests (WinRM)'
+    inputs:
+      command: 'test'
+      projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
       arguments: '--collect "XPlat Code Coverage"'
 
   - task: Npm@1

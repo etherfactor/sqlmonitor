@@ -12,11 +12,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.Extensions", "EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj", "{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests", "EtherGizmos.SqlMonitor.Api.IntegrationTests\EtherGizmos.SqlMonitor.Api.IntegrationTests.csproj", "{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.Http", "EtherGizmos.SqlMonitor.Api.IntegrationTests.Http\EtherGizmos.SqlMonitor.Api.IntegrationTests.Http.csproj", "{CCA9DADF-6DEC-4B1B-A3D5-70436234FB7E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh", "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh\EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh.csproj", "{8AC84FCC-9855-4C1A-A627-5095A006E8C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm", "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm\EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.csproj", "{71920C7C-55FE-43BE-837E-1FD1F371C0EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm", "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm\EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.csproj", "{71920C7C-55FE-43BE-837E-1FD1F371C0EE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.UnitTests", "EtherGizmos.SqlMonitor.Api.UnitTests\EtherGizmos.SqlMonitor.Api.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
 EndProject

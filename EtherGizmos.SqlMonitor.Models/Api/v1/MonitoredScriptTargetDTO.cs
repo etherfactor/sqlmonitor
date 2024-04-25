@@ -23,14 +23,22 @@ public class MonitoredScriptTargetDTO
     [Required]
     public Guid? MonitoredSystemId { get; set; }
 
+    public MonitoredSystemDTO? MonitoredSystem { get; set; }
+
     [Required]
     public Guid? MonitoredResourceId { get; set; }
+
+    public MonitoredResourceDTO? MonitoredResource { get; set; }
 
     [Required]
     public Guid? MonitoredEnvironmentId { get; set; }
 
+    public MonitoredEnvironmentDTO? MonitoredEnvironment { get; set; }
+
     [Required]
     public int? ScriptInterpreterId { get; set; }
+
+    public ScriptInterpreterDTO? ScriptInterpreter { get; set; }
 
     [Required]
     public string? HostName { get; set; }
@@ -76,9 +84,13 @@ public class MonitoredScriptTargetDTOConfiguration : IModelConfiguration
             entity.Property(e => e.ModifiedByUserId);
             /*  End Audit  */
             entity.Property(e => e.MonitoredSystemId);
+            entity.HasRequired(e => e.MonitoredSystem);
             entity.Property(e => e.MonitoredResourceId);
+            entity.HasRequired(e => e.MonitoredResource);
             entity.Property(e => e.MonitoredEnvironmentId);
+            entity.HasRequired(e => e.MonitoredEnvironment);
             entity.Property(e => e.ScriptInterpreterId);
+            entity.HasRequired(e => e.ScriptInterpreter);
             entity.Property(e => e.HostName);
             entity.Property(e => e.Port);
             entity.Property(e => e.FilePath);
@@ -102,9 +114,13 @@ public static class ForMonitoredScriptTargetDTO
         toDto.MapMember(dest => dest.ModifiedByUserId, src => src.ModifiedByUserId);
         /*  End Audit  */
         toDto.MapMember(dest => dest.MonitoredSystemId, src => src.MonitoredTarget.MonitoredSystemId);
+        toDto.MapMember(dest => dest.MonitoredSystem, src => src.MonitoredTarget.MonitoredSystem);
         toDto.MapMember(dest => dest.MonitoredResourceId, src => src.MonitoredTarget.MonitoredResourceId);
+        toDto.MapMember(dest => dest.MonitoredResource, src => src.MonitoredTarget.MonitoredResource);
         toDto.MapMember(dest => dest.MonitoredEnvironmentId, src => src.MonitoredTarget.MonitoredEnvironmentId);
+        toDto.MapMember(dest => dest.MonitoredEnvironment, src => src.MonitoredTarget.MonitoredEnvironment);
         toDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
+        toDto.MapMember(dest => dest.ScriptInterpreter, src => src.ScriptInterpreter);
         toDto.MapMember(dest => dest.HostName, src => src.HostName);
         toDto.MapMember(dest => dest.Port, src => src.Port);
         toDto.MapMember(dest => dest.FilePath, src => src.RunInPath);
