@@ -3,9 +3,6 @@ trigger:
     include:
       - main
 
-pool:
-  vmImage: 'windows-latest'
-
 variables:
   GitVersion.Version: '5.x.x'
   GitVersion.Config: 'gitversion.yml'
@@ -14,151 +11,182 @@ variables:
   Build.Projects.Api: 'EtherGizmos.SqlMonitor.Api'
   Build.Projects.Web: 'EtherGizmos.SqlMonitor.Web'
 
-jobs:
-- job: prepare
-  displayName: 'Pre-Build Tasks'
-  steps:
-  - checkout: self
-    fetchDepth: 0
-    clean: true
+stages:
+- stage: prepare
+  displayName: 'Prepare'
+  jobs:
+  - job: prepare
+    displayName: 'Pre-Build Tasks'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      fetchDepth: 0
+      clean: true
 
-  - task: gitversion/setup@0
-    displayName: 'Install GitVersion'
-    inputs:
-      versionSpec: '$(GitVersion.Version)'
+    - task: gitversion/setup@0
+      displayName: 'Install GitVersion'
+      inputs:
+        versionSpec: '$(GitVersion.Version)'
 
-  - task: gitversion/execute@0
-    displayName: 'Run GitVersion'
-    inputs:
-      useConfigFile: true
-      configFilePath: '$(GitVersion.Config)'
+    - task: gitversion/execute@0
+      displayName: 'Run GitVersion'
+      inputs:
+        useConfigFile: true
+        configFilePath: '$(GitVersion.Config)'
 
-- job: build
+- stage: test
+  displayName: 'Test'
   dependsOn: prepare
-  displayName: 'Build Tasks'
-  variables:
-    CheckDependencies: $[ convertToJson( dependencies ) ]
-  steps:
+  jobs:
 
-  - task: PowerShell@2
-    displayName: 'Debug Dependencies'
-    inputs:
-      targetType: 'inline'
-      script: 'Write-Host $env:CHECK_DEPENDENCIES'
-    env:
-      CHECK_DEPENDENCIES: $(CheckDependencies)
+  - job: test_linux
+    displayName: 'Linux Tests'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
 
-  - task: NuGetToolInstaller@1
-    displayName: 'Install NuGet'
-    inputs:
-      versionSpec: '$(NuGet.Version)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Unit Tests'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).UnitTests.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
 
-  - task: Npm@1
-    displayName: 'Install NPM Packages'
-    inputs:
-      command: 'ci'
-      workingDir: '$(Build.Projects.Web)'
+    - task: DockerCompose@0
+      displayName: 'Create Docker Container (SSH)'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.Ssh/bin/**/docker-compose.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'up -d'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore Projects'
-    inputs:
-      command: 'restore'
-      projects: '$(Build.Projects)'
-      feedsToUse: 'select'
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (SSH)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.Ssh.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Build Projects'
-    inputs:
-      command: 'build'
-      projects: '$(Build.Projects)'
+    - task: NuGetToolInstaller@1 
+      displayName: 'Install NuGet' 
+      inputs: 
+        versionSpec: '$(NuGet.Version)' 
 
-  - task: PowerShell@2
-    displayName: 'Start MSSQLLocalDB'
-    inputs:
-      targetType: 'inline'
-      script: 'sqllocaldb start mssqllocaldb'
+    - task: Npm@1 
+      displayName: 'Install NPM Packages' 
+      inputs: 
+        command: 'ci' 
+        workingDir: '$(Build.Projects.Web)' 
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Perform Unit Tests'
-    inputs:
-      command: 'test'
-      projects: '**/$(Build.Projects.Api).UnitTests.csproj'
-      arguments: '--collect "XPlat Code Coverage"'
+    - task: Npm@1
+      displayName: 'Perform Angular Tests'
+      inputs:
+        command: 'custom'
+        workingDir: '$(Build.Projects.Web)'
+        customCommand: 'run test-headless'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Perform Integration Tests (HTTP)'
-    inputs:
-      command: 'test'
-      projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
-      arguments: '--collect "XPlat Code Coverage"'
+    - task: PublishTestResults@2 
+      displayName: 'Publish Angular Tests' 
+      condition: succeededOrFailed() 
+      inputs: 
+        testResultsFormat: 'JUnit' 
+        testResultsFiles: '**/TESTS-*.xml' 
+        searchFolder:  
+        mergeTestResults: true 
 
-  - task: PowerShell@2
-    displayName: 'Switch to Linux Docker'
-    inputs:
-      targetType: 'inline'
-      script: '& $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine'
+    - task: reportgenerator@5
+      displayName: 'Combine Code Coverage'
+      inputs:
+        reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+        targetdir: '$(Build.SourcesDirectory)/CoverageResults'
 
-  - task: DockerCompose@0
-    displayName: 'Create Docker Container (SSH)'
-    inputs:
-      containerregistrytype: 'Container Registry'
-      dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.Ssh/bin/**/docker-compose.yml'
-      action: 'Run a Docker Compose command'
-      dockerComposeCommand: 'up -d'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/CoverageResults'
+        ArtifactName: 'linux-tests'
+        publishLocation: 'Container'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Perform Integration Tests (SSH)'
-    inputs:
-      command: 'test'
-      projects: '**/$(Build.Projects.Api).IntegrationTests.Ssh.csproj'
-      arguments: '--collect "XPlat Code Coverage"'
+  - job: test_windows
+    displayName: 'Windows Tests'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
 
-  - task: PowerShell@2
-    displayName: 'Switch to Windows Docker'
-    inputs:
-      targetType: 'inline'
-      script: '& $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchWindowsEngine'
+    - task: PowerShell@2
+      displayName: 'Start MSSQLLocalDB'
+      inputs:
+        targetType: 'inline'
+        script: 'sqllocaldb start mssqllocaldb'
 
-  - task: DockerCompose@0
-    displayName: 'Create Docker Container (WinRM)'
-    inputs:
-      containerregistrytype: 'Container Registry'
-      dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/bin/**/docker-compose.yml'
-      action: 'Run a Docker Compose command'
-      dockerComposeCommand: 'up -d'
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (HTTP)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Perform Integration Tests (WinRM)'
-    inputs:
-      command: 'test'
-      projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
-      arguments: '--collect "XPlat Code Coverage"'
+    - task: DockerCompose@0
+      displayName: 'Create Docker Container (SSH)'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/bin/**/docker-compose.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'up -d'
 
-  - task: Npm@1
-    displayName: 'Perform Angular Tests'
-    inputs:
-      command: 'custom'
-      workingDir: '$(Build.Projects.Web)'
-      customCommand: 'run test-headless'
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (WinRM)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
 
-  - task: PublishTestResults@2
-    displayName: 'Publish Angular Tests'
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '**/TESTS-*.xml'
-      searchFolder: 
-      mergeTestResults: true
+    - task: reportgenerator@5
+      displayName: 'Combine Code Coverage'
+      inputs:
+        reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+        targetdir: '$(Build.SourcesDirectory)/CoverageResults'
 
-  - task: reportgenerator@5
-    displayName: 'Combine Code Coverage'
-    inputs:
-      reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-      targetdir: '$(Build.SourcesDirectory)/CoverageResults'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/CoverageResults'
+        ArtifactName: 'windows-tests'
+        publishLocation: 'Container'
 
-  - task: PublishCodeCoverageResults@1
-    displayName: 'Publish Code Coverage'
-    inputs:
-      codeCoverageTool: 'Cobertura'
-      summaryFileLocation: '$(Build.SourcesDirectory)/CoverageResults/Cobertura.xml'
-      reportDirectory: '$(Build.SourcesDirectory)/CoverageResults'
+- stage: build
+  displayName: 'Build'
+  dependsOn: test
+  jobs:
+
+  - job: build
+    displayName: 'Build'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'linux-tests'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'windows-tests'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: reportgenerator@5
+      displayName: 'Combine Code Coverage'
+      inputs:
+        reports: '$(System.ArtifactsDirectory)/**/coverage.cobertura.xml'
+        targetdir: '$(Build.SourcesDirectory)/CoverageResults'
+
+    - task: PublishCodeCoverageResults@1
+      displayName: 'Publish Code Coverage'
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '$(Build.SourcesDirectory)/CoverageResults/Cobertura.xml'
+        reportDirectory: '$(Build.SourcesDirectory)/CoverageResults'
