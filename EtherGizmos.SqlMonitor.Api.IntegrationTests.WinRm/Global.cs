@@ -10,7 +10,8 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm;
 [SetUpFixture]
 internal static class Global
 {
-    public const string DockerComposeFilePath = "./Initialization/docker-compose.yml";
+    public const string DockerCompose2019FilePath = "./Initialization/docker-compose-2019.yml";
+    public const string DockerCompose2022FilePath = "./Initialization/docker-compose-2022.yml";
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
@@ -36,12 +37,13 @@ internal static class Global
                 switchProcess.Start();
                 await switchProcess.WaitForExitAsync();
 
+                var useDockerComposeFile = GetDockerComposeFile();
                 using var dockerProcess = new Process()
                 {
                     StartInfo = new()
                     {
                         FileName = "docker-compose",
-                        Arguments = $"-f {DockerComposeFilePath} up -d",
+                        Arguments = $"-f {useDockerComposeFile} up -d",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true
@@ -108,12 +110,13 @@ internal static class Global
                 switchProcess.Start();
                 await switchProcess.WaitForExitAsync();
 
+                var useDockerComposeFile = GetDockerComposeFile();
                 using var dockerProcess = new Process()
                 {
                     StartInfo = new()
                     {
                         FileName = "docker-compose",
-                        Arguments = $"-f {DockerComposeFilePath} down",
+                        Arguments = $"-f {useDockerComposeFile} down",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true
@@ -175,5 +178,45 @@ internal static class Global
         }
 
         return null;
+    }
+
+    private static string GetDockerComposeFile()
+    {
+        if (IsWindows10() || IsWindowsServer2019())
+        {
+            return DockerCompose2019FilePath;
+        }
+        else if (IsWindows11() || IsWindowsServer2022())
+        {
+            return DockerCompose2022FilePath;
+        }
+        else
+        {
+            throw new PlatformNotSupportedException(Environment.OSVersion.VersionString);
+        }
+    }
+
+    private static bool IsWindows10()
+    {
+        var osVersion = Environment.OSVersion.Version;
+        return osVersion.Major == 10 && osVersion.Build < 22000;
+    }
+
+    private static bool IsWindowsServer2019()
+    {
+        var osVersion = Environment.OSVersion.Version;
+        return osVersion.Major == 10 && osVersion.Build < 22000;
+    }
+
+    private static bool IsWindows11()
+    {
+        var osVersion = Environment.OSVersion.Version;
+        return osVersion.Major == 10 && osVersion.Build >= 22000;
+    }
+
+    private static bool IsWindowsServer2022()
+    {
+        var osVersion = Environment.OSVersion.Version;
+        return osVersion.Major == 10 && osVersion.Build >= 22000;
     }
 }

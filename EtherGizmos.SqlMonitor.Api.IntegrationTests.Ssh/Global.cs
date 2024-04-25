@@ -9,8 +9,7 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
 [SetUpFixture]
 internal static class Global
 {
-    public const string DockerCompose2019FilePath = "./Initialization/docker-compose-2019.yml";
-    public const string DockerCompose2022FilePath = "./Initialization/docker-compose-2022.yml";
+    public const string DockerComposeFilePath = "./Initialization/docker-compose.yml";
     public const string PrivateKeyFilePath = "./Initialization/id_rsa";
 
     [OneTimeSetUp]
@@ -108,41 +107,6 @@ internal static class Global
 
     private static string GetDockerComposeFile()
     {
-        if (IsWindows10() || IsWindowsServer2019())
-        {
-            return DockerCompose2019FilePath;
-        }
-        else if (IsWindows11() || IsWindowsServer2022())
-        {
-            return DockerCompose2022FilePath;
-        }
-        else
-        {
-            throw new PlatformNotSupportedException();
-        }
-    }
-
-    private static bool IsWindows10()
-    {
-        var osName = Environment.OSVersion.VersionString;
-        return osName.Contains("Windows 10");
-    }
-
-    private static bool IsWindowsServer2019()
-    {
-        var osName = Environment.OSVersion.VersionString;
-        return osName.Contains("Server 2019");
-    }
-
-    private static bool IsWindows11()
-    {
-        var osName = Environment.OSVersion.VersionString;
-        return osName.Contains("Windows 11");
-    }
-
-    private static bool IsWindowsServer2022()
-    {
-        var osName = Environment.OSVersion.VersionString;
-        return osName.Contains("Server 2022");
+        return DockerComposeFilePath;
     }
 }
