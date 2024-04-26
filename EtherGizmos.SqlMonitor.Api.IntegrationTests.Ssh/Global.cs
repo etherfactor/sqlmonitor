@@ -10,6 +10,7 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
 internal static class Global
 {
     public const string DockerComposeFilePath = "./Initialization/docker-compose.yml";
+    public const string PrivateKeyFilePath = "./Initialization/id_rsa";
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
