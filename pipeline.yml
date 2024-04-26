@@ -102,75 +102,74 @@ stages:
         targetdir: '$(Build.SourcesDirectory)/CoverageResults'
 
     - task: PublishBuildArtifacts@1
+      displayName: 'Publish Code Coverage Artifact'
       inputs:
         PathtoPublish: '$(Build.SourcesDirectory)/CoverageResults'
         ArtifactName: 'linux-tests'
         publishLocation: 'Container'
 
-#  - job: test_windows
-#    displayName: 'Windows Tests'
-#    pool:
-#      vmImage: 'windows-latest'
-#    steps:
-#
-#    - task: PowerShell@2
-#      displayName: 'Start MSSQLLocalDB'
-#      inputs:
-#        targetType: 'inline'
-#        script: 'sqllocaldb start mssqllocaldb'
-#
-#    - task: DotNetCoreCLI@2
-#      displayName: 'Perform Integration Tests (HTTP)'
-#      inputs:
-#        command: 'test'
-#        projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
-#        arguments: '--collect "XPlat Code Coverage"'
-#
-#    - task: PowerShell@2
-#      displayName: 'Enable Unencrypted Connections (WinRM)'
-#      inputs:
-#        targetType: 'inline'
-#        script: 'winrm set winrm/config/client ''@{AllowUnencrypted="true"}'''
-#
-#    - task: DockerCompose@0
-#      displayName: 'Create Docker Container (WinRM)'
-#      inputs:
-#        containerregistrytype: 'Container Registry'
-#        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/Initialization/docker-compose-2022.yml'
-#        action: 'Run a Docker Compose command'
-#        dockerComposeCommand: 'up -d'
-#
-#    - task: DotNetCoreCLI@2
-#      displayName: 'Perform Integration Tests (WinRM)'
-#      inputs:
-#        command: 'test'
-#        projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
-#        arguments: '--collect "XPlat Code Coverage"'
-#
-#    - task: reportgenerator@5
-#      displayName: 'Combine Code Coverage'
-#      inputs:
-#        reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-#        targetdir: '$(Build.SourcesDirectory)/CoverageResults'
-#
-#    - task: PublishBuildArtifacts@1
-#      inputs:
-#        PathtoPublish: '$(Build.SourcesDirectory)/CoverageResults'
-#        ArtifactName: 'windows-tests'
-#        publishLocation: 'Container'
-
-- stage: build
-  displayName: 'Build'
-  dependsOn: test
-  jobs:
-
-  - job: build
-    displayName: 'Build'
+  - job: test_windows
+    displayName: 'Windows Tests'
     pool:
       vmImage: 'windows-latest'
     steps:
 
+    - task: PowerShell@2
+      displayName: 'Start MSSQLLocalDB'
+      inputs:
+        targetType: 'inline'
+        script: 'sqllocaldb start mssqllocaldb'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (HTTP)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
+
+    - task: PowerShell@2
+      displayName: 'Enable Unencrypted Connections (WinRM)'
+      inputs:
+        targetType: 'inline'
+        script: 'winrm set winrm/config/client ''@{AllowUnencrypted="true"}'''
+
+    - task: DockerCompose@0
+      displayName: 'Create Docker Container (WinRM)'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/Initialization/docker-compose-2022.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'up -d'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (WinRM)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
+
+    - task: reportgenerator@5
+      displayName: 'Combine Code Coverage'
+      inputs:
+        reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+        targetdir: '$(Build.SourcesDirectory)/CoverageResults'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Code Coverage Artifact'
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/CoverageResults'
+        ArtifactName: 'windows-tests'
+        publishLocation: 'Container'
+
+  - job: merge_tests
+    displayName: 'Combine Code Coverage'
+    dependsOn:
+      - test_linux
+      - test_windows
+    steps:
+
     - task: DownloadBuildArtifacts@1
+      displayName: 'Download Linux Test Results'
       inputs:
         buildType: 'current'
         downloadType: 'single'
@@ -178,6 +177,7 @@ stages:
         downloadPath: '$(System.ArtifactsDirectory)'
 
     - task: DownloadBuildArtifacts@1
+      displayName: 'Download Windows Test Results'
       inputs:
         buildType: 'current'
         downloadType: 'single'
@@ -187,7 +187,7 @@ stages:
     - task: reportgenerator@5
       displayName: 'Combine Code Coverage'
       inputs:
-        reports: '$(System.ArtifactsDirectory)/**/coverage.cobertura.xml'
+        reports: '$(System.ArtifactsDirectory)/**/Cobertura.xml'
         targetdir: '$(Build.SourcesDirectory)/CoverageResults'
 
     - task: PublishCodeCoverageResults@1
@@ -196,3 +196,14 @@ stages:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Build.SourcesDirectory)/CoverageResults/Cobertura.xml'
         reportDirectory: '$(Build.SourcesDirectory)/CoverageResults'
+
+#- stage: build
+#  displayName: 'Build'
+#  dependsOn: test
+#  jobs:
+#
+#  - job: build
+#    displayName: 'Build'
+#    pool:
+#      vmImage: 'windows-latest'
+#    steps:
