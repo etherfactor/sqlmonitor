@@ -18,7 +18,7 @@ stages:
   - job: prepare
     displayName: 'Pre-Build Tasks'
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'ubuntu-latest'
     steps:
     - checkout: self
       fetchDepth: 0
@@ -219,14 +219,3 @@ stages:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Build.SourcesDirectory)/CoverageResults/Cobertura.xml'
         reportDirectory: '$(Build.SourcesDirectory)/CoverageResults'
-
-#- stage: build
-#  displayName: 'Build'
-#  dependsOn: test
-#  jobs:
-#
-#  - job: build
-#    displayName: 'Build'
-#    pool:
-#      vmImage: 'windows-latest'
-#    steps:
