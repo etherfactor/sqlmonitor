@@ -10,7 +10,6 @@ namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
 internal static class Global
 {
     public const string DockerComposeFilePath = "./Initialization/docker-compose.yml";
-    public const string PrivateKeyFilePath = "./Initialization/id_rsa";
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
@@ -19,23 +18,6 @@ internal static class Global
         try
         {
             maybeSemaphore?.WaitOne();
-
-            if (!File.Exists(PrivateKeyFilePath))
-            {
-                using var keyProcess = new Process()
-                {
-                    StartInfo = new()
-                    {
-                        FileName = "ssh-keygen",
-                        Arguments = $"-t rsa -b 4096 -f {PrivateKeyFilePath} -N password",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    }
-                };
-                keyProcess.Start();
-                await keyProcess.WaitForExitAsync();
-            }
 
             var useDockerComposeFile = GetDockerComposeFile();
             using var dockerProcess = new Process()

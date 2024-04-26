@@ -9,6 +9,7 @@ RUN dpkg -i packages-microsoft-prod.deb
 
 RUN apt-get update && \
     apt-get install -y openssh-server && \
+    apt-get install -y powershell && \
     mkdir /var/run/sshd && \
     echo 'root:password' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
