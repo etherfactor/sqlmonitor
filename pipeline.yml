@@ -53,21 +53,6 @@ stages:
         projects: '**/$(Build.Projects.Api).UnitTests.csproj'
         arguments: '--collect "XPlat Code Coverage"'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Build Test Project (SSH)'
-      inputs:
-        command: 'build'
-        projects: '**/$(Build.Projects.Api).IntegrationTests.Ssh.csproj'
-
-    - task: PowerShell@2
-      displayName: 'Create SSH Key (SSH)'
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host Get-Location
-          ssh-keygen -t rsa -b 4096 -f id_rsa -N password
-        workingDirectory: '$(Build.SourcesDirectory)/$(Build.Projects.Api).IntegrationTests.Ssh/Initialization'
-
     - task: DockerCompose@0
       displayName: 'Create Docker Container (SSH)'
       inputs:
@@ -141,12 +126,6 @@ stages:
 #        projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
 #        arguments: '--collect "XPlat Code Coverage"'
 #
-#    - task: DotNetCoreCLI@2
-#      displayName: 'Build Test Project (WinRM)'
-#      inputs:
-#        command: 'build'
-#        projects: '**/$(Build.Projects.Api).IntegrationTests.WinRm.csproj'
-#
 #    - task: PowerShell@2
 #      displayName: 'Enable Unencrypted Connections (WinRM)'
 #      inputs:
@@ -157,7 +136,7 @@ stages:
 #      displayName: 'Create Docker Container (WinRM)'
 #      inputs:
 #        containerregistrytype: 'Container Registry'
-#        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/bin/**/docker-compose-2022.yml'
+#        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.WinRm/Initialization/docker-compose-2022.yml'
 #        action: 'Run a Docker Compose command'
 #        dockerComposeCommand: 'up -d'
 #
