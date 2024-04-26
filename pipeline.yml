@@ -184,6 +184,29 @@ stages:
         artifactName: 'windows-tests'
         downloadPath: '$(System.ArtifactsDirectory)'
 
+    - task: PowerShell@2
+      displayName: 'Standardize Cobertura Paths'
+      inputs:
+        targetType: 'inline'
+        script: |
+          #Path to the Cobertura XML report generated on Windows
+          $WindowsReportPath = "$(System.ArtifactsDirectory)/windows-tests/Cobertura.xml"
+          
+          #Path to save the standardized Cobertura XML report
+          $StandardizedReportPath = "$(System.ArtifactsDirectory)/windows-tests/Cobertura.xml"
+          
+          #Read the content of the Windows Cobertura XML report
+          $ReportContent = Get-Content -Path $WindowsReportPath
+          
+          #Replace Windows worker file paths with Linux worker paths
+          $StandardizedContent = $ReportContent -replace 'D:\\a\\', '/home/vsts/work/'  # Replace drive letter
+          $StandardizedContent = $StandardizedContent -replace '\\', '/'  # Replace backslashes with forward slashes
+          
+          #Save the standardized content to a new file
+          $StandardizedContent | Out-File -FilePath $StandardizedReportPath -Encoding utf8
+          
+          Write-Host "Standardized report saved to: $StandardizedReportPath"
+
     - task: reportgenerator@5
       displayName: 'Combine Code Coverage'
       inputs:
