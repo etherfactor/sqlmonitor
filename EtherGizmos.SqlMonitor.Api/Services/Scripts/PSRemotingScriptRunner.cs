@@ -31,7 +31,7 @@ public class PSRemotingScriptRunner : IScriptRunner
         return ScriptExecutionResultSet.FromResults(scriptTarget, scriptVariant, output, executionMilliseconds);
     }
 
-    private WinRmConfiguration GetWinRmConfiguration(MonitoredScriptTarget scriptTarget, ScriptVariant scriptVariant)
+    internal WinRmConfiguration GetWinRmConfiguration(MonitoredScriptTarget scriptTarget, ScriptVariant scriptVariant)
     {
         var useSsl = scriptTarget.WinRmUseSsl ?? true;
         var protocol = useSsl ? "https" : "http";
@@ -68,7 +68,7 @@ public class PSRemotingScriptRunner : IScriptRunner
         return config;
     }
 
-    private PowerShell GetSession(WinRmConfiguration configuration)
+    internal PowerShell GetSession(WinRmConfiguration configuration)
     {
         PSCredential credentials;
         if (configuration.Username is not null && configuration.Password is not null)
@@ -101,7 +101,7 @@ public class PSRemotingScriptRunner : IScriptRunner
         return powershell;
     }
 
-    private async Task<string> ExecuteScriptAsync(PowerShell session, WinRmConfiguration configuration, ScriptVariant scriptVariant)
+    internal async Task<string> ExecuteScriptAsync(PowerShell session, WinRmConfiguration configuration, ScriptVariant scriptVariant)
     {
         var outputStringBuilder = new StringBuilder();
 
@@ -187,7 +187,7 @@ if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
         return outputStringBuilder.ToString();
     }
 
-    private string EncodeScriptToVariable(string variableName, string script)
+    internal string EncodeScriptToVariable(string variableName, string script)
     {
         //Each script line needs to be separated. Each single quote needs to be doubled to be escaped, and the whole text
         //needs to be surrounded by single quotes
@@ -203,7 +203,7 @@ if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
         return variableSet;
     }
 
-    private string CalculateMd5Checksum(string script)
+    internal string CalculateMd5Checksum(string script)
     {
         var md5 = MD5.Create();
 

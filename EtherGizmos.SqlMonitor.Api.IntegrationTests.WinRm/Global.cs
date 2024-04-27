@@ -81,7 +81,6 @@ internal static class Global
         }
         else
         {
-
             Assert.Inconclusive("Tests can only be run on Windows Professional or Windows Server installations");
         }
     }
