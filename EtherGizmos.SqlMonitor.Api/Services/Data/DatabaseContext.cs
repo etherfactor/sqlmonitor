@@ -45,6 +45,11 @@ public class DatabaseContext : DbContext
     public virtual DbSet<MonitoredTarget> MonitoredTargets { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="Query"/> records, in 'dbo.queries'.
+    /// </summary>
+    public virtual DbSet<Query> Queries { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Script"/> records, in 'dbo.scripts'.
     /// </summary>
     public virtual DbSet<Script> Scripts { get; set; }
@@ -183,6 +188,74 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.MonitoredSystemId);
             entity.PropertyWithAnnotations(e => e.MonitoredResourceId);
             entity.PropertyWithAnnotations(e => e.MonitoredEnvironmentId);
+        });
+
+        modelBuilder.Entity<Query>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_queries_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.RunFrequency);
+            entity.PropertyWithAnnotations(e => e.LastRunAtUtc);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.BucketColumn);
+            entity.PropertyWithAnnotations(e => e.TimestampUtcColumn);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
+
+            entity.HasMany(e => e.Variants)
+                .WithOne(e => e.Query);
+
+            entity.HasMany(e => e.Metrics)
+                .WithOne(e => e.Query);
+        });
+
+        modelBuilder.Entity<QueryVariant>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_query_variants_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.SqlType);
+            entity.PropertyWithAnnotations(e => e.QueryText);
+
+            entity.HasOne(e => e.Query)
+                .WithMany(e => e.Variants);
+        });
+
+        modelBuilder.Entity<QueryMetric>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_query_metrics_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.ValueKey);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+
+            entity.HasOne(e => e.Query)
+                .WithMany(e => e.Metrics);
         });
 
         modelBuilder.Entity<Script>(entity =>

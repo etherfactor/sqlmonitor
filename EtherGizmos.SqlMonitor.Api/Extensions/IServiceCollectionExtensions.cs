@@ -29,6 +29,8 @@ public static class IServiceCollectionExtensions
                 opt.AddMonitoredResource();
                 opt.AddMonitoredScriptTarget();
                 opt.AddMonitoredSystem();
+                opt.AddQuery();
+                opt.AddQueryVariant();
                 opt.AddScript();
                 opt.AddScriptInterpreter();
                 opt.AddScriptVariant();
