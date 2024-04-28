@@ -3,6 +3,7 @@ using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.OData.Extensions;
 using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Filters;
@@ -22,10 +23,12 @@ public class ModelStateFilter : IActionFilter
                 .FirstOrDefault(e => e.ParameterInfo.GetCustomAttribute<FromBodyAttribute>() != null)
                 ?.ParameterType;
 
+            var oDataFeature = context.HttpContext.ODataFeature();
+
             //Throw an error for the type of that argument
             if (argumentType != null)
             {
-                var error = new ODataModelStateInvalidError(argumentType, context.ModelState);
+                var error = new ODataModelStateInvalidError(oDataFeature.Model, argumentType, context.ModelState);
                 throw new ReturnODataErrorException(error);
             }
         }

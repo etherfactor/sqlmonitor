@@ -38,7 +38,7 @@ internal static class EntityTypeBuilderExtensions
     /// <param name="this">Itself.</param>
     /// <returns>Itself.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    internal static EntityTypeBuilder<TEntity> ToTableWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this)
+    internal static EntityTypeBuilder<TEntity> ToTableWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this, string? schema = null, Action<TableBuilder<TEntity>>? buildAction = null)
         where TEntity : class
     {
         //Extract the table name from a TableAttribute, and ensure it exists
@@ -48,7 +48,14 @@ internal static class EntityTypeBuilderExtensions
                 typeof(TEntity).Name, nameof(TableAttribute), nameof(TableAttribute.Name)));
 
         //Map to the table
-        @this.ToTable(tableName);
+        if (buildAction is not null)
+        {
+            @this.ToTable(tableName, schema, buildAction);
+        }
+        else
+        {
+            @this.ToTable(tableName, schema);
+        }
 
         return @this;
     }

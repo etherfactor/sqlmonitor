@@ -4,6 +4,7 @@ using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models;
 using MassTransit;
@@ -32,18 +33,26 @@ internal static class Global
         services.AddSingleton<ILogger>(o => o.GetRequiredService<Mock<ILogger>>().Object);
         services.AddSingleton(typeof(ILogger<>), typeof(ProxyLogger<>));
 
+        services.AddScoped<MetricsController>();
         services.AddScoped<MonitoredEnvironmentsController>();
         services.AddScoped<MonitoredResourcesController>();
+        services.AddScoped<MonitoredScriptTargetsController>();
         services.AddScoped<MonitoredSystemsController>();
+        services.AddScoped<ScriptsController>();
+        services.AddScoped<ScriptInterpretersController>();
 
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
         services.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
 
         services.AddSingleton<ISaveService>(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
+        services.AddSingleton<IMetricService>(provider => provider.GetRequiredService<Mock<IMetricService>>().Object);
         services.AddSingleton<IMonitoredEnvironmentService>(provider => provider.GetRequiredService<Mock<IMonitoredEnvironmentService>>().Object);
         services.AddSingleton<IMonitoredResourceService>(provider => provider.GetRequiredService<Mock<IMonitoredResourceService>>().Object);
+        services.AddSingleton<IMonitoredScriptTargetService>(provider => provider.GetRequiredService<Mock<IMonitoredScriptTargetService>>().Object);
         services.AddSingleton<IMonitoredSystemService>(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);
+        services.AddSingleton<IScriptService>(provider => provider.GetRequiredService<Mock<IScriptService>>().Object);
+        services.AddSingleton<IScriptInterpreterService>(provider => provider.GetRequiredService<Mock<IScriptInterpreterService>>().Object);
 
         services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<Mock<ISendEndpointProvider>>().Object);
 

@@ -177,9 +177,13 @@ builder.Services
         opt.UseLazyLoadingProxies(true);
     })
     .AddScoped<ISaveService, SaveService>()
+    .AddScoped<IMetricService, MetricService>()
     .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
-    .AddScoped<IMonitoredSystemService, MonitoredSystemService>();
+    .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
+    .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
+    .AddScoped<IScriptService, ScriptService>()
+    .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>
@@ -410,10 +414,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 //**********************************************************
 // Run Application

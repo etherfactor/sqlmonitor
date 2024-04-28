@@ -1,0 +1,11 @@
+version: '3'
+services:
+  winrm-server:
+    platform: windows/amd64
+    build:
+      context: .
+      args:
+        WIN_VER: 2022
+    ports:
+      - "55985:5985"
+      - "55986:5986"

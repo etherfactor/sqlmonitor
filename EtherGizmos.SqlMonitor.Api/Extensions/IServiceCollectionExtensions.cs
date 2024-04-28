@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
@@ -20,11 +21,17 @@ public static class IServiceCollectionExtensions
             MapperConfiguration configuration = new MapperConfiguration(opt =>
             {
                 //Add enums
+                opt.AddAggregateType();
 
                 //Add entities
+                opt.AddMetric();
                 opt.AddMonitoredEnvironment();
                 opt.AddMonitoredResource();
+                opt.AddMonitoredScriptTarget();
                 opt.AddMonitoredSystem();
+                opt.AddScript();
+                opt.AddScriptInterpreter();
+                opt.AddScriptVariant();
             });
 
             return configuration.CreateMapper();
