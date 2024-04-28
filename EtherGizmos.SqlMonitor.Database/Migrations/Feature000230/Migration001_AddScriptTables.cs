@@ -219,6 +219,25 @@ end;");
         Create.Index("IX_script_variants_script_interpreter_id")
             .OnTable("script_variants")
             .OnColumn("script_interpreter_id");
+
+        Execute.Sql(@"create trigger [TR_script_variants_audit]
+on [script_variants]
+after insert, update
+as
+begin
+    set nocount on;
+
+    declare @RecordId int;
+
+    --Get the id of the inserted record
+    select @RecordId = inserted.script_variant_id
+        from inserted;
+
+    --Set the last modified time of the record
+    update [script_variants]
+      set [modified_at_utc] = getutcdate()
+      where [script_variant_id] = @RecordId;
+end;");
     }
 
     public override void Down()

@@ -52,15 +52,15 @@ public class Migration003_LoadSecurableTables : Migration
         Delete.FromTable("securable_types")
             .Row(new
             {
+                securable_type_id = 110,
+            })
+            .Row(new
+            {
                 securable_type_id = 120,
             })
             .Row(new
             {
-                securable_type_id = 140,
-            })
-            .Row(new
-            {
-                securable_type_id = 160,
+                securable_type_id = 130,
             })
             .Row(new
             {
