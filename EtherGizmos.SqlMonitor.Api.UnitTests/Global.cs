@@ -38,6 +38,7 @@ internal static class Global
         services.AddScoped<MonitoredResourcesController>();
         services.AddScoped<MonitoredScriptTargetsController>();
         services.AddScoped<MonitoredSystemsController>();
+        services.AddScoped<QueriesController>();
         services.AddScoped<ScriptsController>();
         services.AddScoped<ScriptInterpretersController>();
 
@@ -51,6 +52,7 @@ internal static class Global
         services.AddSingleton<IMonitoredResourceService>(provider => provider.GetRequiredService<Mock<IMonitoredResourceService>>().Object);
         services.AddSingleton<IMonitoredScriptTargetService>(provider => provider.GetRequiredService<Mock<IMonitoredScriptTargetService>>().Object);
         services.AddSingleton<IMonitoredSystemService>(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);
+        services.AddSingleton<IQueryService>(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
         services.AddSingleton<IScriptService>(provider => provider.GetRequiredService<Mock<IScriptService>>().Object);
         services.AddSingleton<IScriptInterpreterService>(provider => provider.GetRequiredService<Mock<IScriptInterpreterService>>().Object);
 

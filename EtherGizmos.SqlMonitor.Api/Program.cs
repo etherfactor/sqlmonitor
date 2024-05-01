@@ -182,6 +182,7 @@ builder.Services
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
     .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
     .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
+    .AddScoped<IQueryService, QueryService>()
     .AddScoped<IScriptService, ScriptService>()
     .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
 

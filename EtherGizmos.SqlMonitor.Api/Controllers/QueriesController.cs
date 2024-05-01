@@ -14,39 +14,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EtherGizmos.SqlMonitor.Api.Controllers;
 
-public class ScriptsController : ODataController
+public class QueriesController : ODataController
 {
-    private const string BasePath = "api/v{version:apiVersion}/scripts";
+    private const string BasePath = "api/v{version:apiVersion}/queries";
 
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
-    private readonly IScriptService _scriptService;
+    private readonly IQueryService _queryService;
     private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Script> Scripts => _scriptService.GetQueryable();
+    private IQueryable<Query> Queries => _queryService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="scriptService">Provides access to the storage of records.</param>
+    /// <param name="queryService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public ScriptsController(
-        ILogger<ScriptsController> logger,
+    public QueriesController(
+        ILogger<QueriesController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
-        IScriptService scriptService,
+        IQueryService queryService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _scriptService = scriptService;
+        _queryService = queryService;
         _saveService = saveService;
     }
 
@@ -57,9 +57,9 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath)]
-    public async Task<IActionResult> Search(ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Search(ODataQueryOptions<QueryDTO> queryOptions)
     {
-        var finished = await Scripts.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
+        var finished = await Queries.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -71,13 +71,13 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath + "({id})")]
-    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
+        Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -91,16 +91,16 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPost(BasePath)]
-    public async Task<IActionResult> Create([FromBody] ScriptDTO newRecord, ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] QueryDTO newRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Scripts);
+        await newRecord.EnsureValid(Queries);
 
-        Script record = _mapper.Map<Script>(newRecord);
+        Query record = _mapper.Map<Query>(newRecord);
 
-        await record.EnsureValid(Scripts);
-        _scriptService.Add(record);
+        await record.EnsureValid(Queries);
+        _queryService.Add(record);
 
         await _saveService.SaveChangesAsync();
 
@@ -117,28 +117,28 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPatch(BasePath + "({id})")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<ScriptDTO> patchRecord, ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<QueryDTO> patchRecord, ODataQueryOptions<QueryDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        var testRecord = new ScriptDTO();
+        var testRecord = new QueryDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Scripts);
+        await testRecord.EnsureValid(Queries);
 
-        Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
+        Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = _mapper.MapExplicitly(record).To<ScriptDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<QueryDTO>();
         patchRecord.Patch(recordAsDto);
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Scripts);
+        await record.EnsureValid(Queries);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<Script>().AddAsync(record);
+        await _cache.EntitySet<Query>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -153,14 +153,14 @@ public class ScriptsController : ODataController
     [HttpDelete(BasePath + "({id})")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
+        Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
 
-        _scriptService.Remove(record);
+        _queryService.Remove(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<Script>().RemoveAsync(record);
+        await _cache.EntitySet<Query>().RemoveAsync(record);
 
         return NoContent();
     }
