@@ -45,19 +45,19 @@ public partial class ScriptExecutionResultSet
                             .Replace("\\\"", "\"");
                     }
 
-                    executionResult.Values.Add(variableName, variableValue);
+                    executionResult.Values.TryAdd(variableName, variableValue);
                 }
 
                 executionResults.Add(executionResult);
             }
         }
 
-        return new ScriptExecutionResultSet()
+        return new()
         {
             MonitoredScriptTarget = scriptTarget,
             ScriptVariant = scriptVariant,
-            Results = executionResults,
             ExecutionMilliseconds = executionMilliseconds,
+            Results = executionResults,
         };
     }
 }

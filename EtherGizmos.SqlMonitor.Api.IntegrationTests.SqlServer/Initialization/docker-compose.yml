@@ -1,0 +1,8 @@
+version: '3'
+services:
+  mssql-server:
+    platform: linux/amd64
+    build:
+      context: .
+    ports:
+      - "11433:1433"
