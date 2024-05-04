@@ -44,13 +44,16 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.Http</_Parameter1>
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Shared.IntegrationTests</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>EtherGizmos.SqlMonitor.Api.UnitTests</_Parameter1>

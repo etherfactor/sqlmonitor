@@ -1,22 +1,30 @@
-﻿using EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Controllers;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-internal class ScriptsControllerTests : IntegrationTestBase
+public abstract class MonitoredResourcesControllerTests : IntegrationTestBase
 {
-    private HttpClient _client;
+    private HttpClient _client = null!;
+
+    protected abstract HttpClient GetClient();
 
     [SetUp]
     public void SetUp()
     {
-        _client = Global.GetClient();
+        _client = GetClient();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _client?.Dispose();
     }
 
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/scripts");
+        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/monitoredResources");
 
         Assert.Multiple(() =>
         {
@@ -31,24 +39,10 @@ internal class ScriptsControllerTests : IntegrationTestBase
     {
         var body = new
         {
-            name = "Test",
-            runFrequency = "PT5S",
-            variants = new[]
-            {
-                new
-                {
-                    scriptInterpreterId = 1,
-                    scriptText = "Write-Host '##metric: value=123 bucket=A'",
-                },
-                new
-                {
-                    scriptInterpreterId = 2,
-                    scriptText = "Write-Host '##metric: value=123 bucket=A'",
-                }
-            }
+            name = "Test"
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scripts", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredResources", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -75,7 +69,7 @@ internal class ScriptsControllerTests : IntegrationTestBase
             name = "New Test"
         };
 
-        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/scripts({recordId})", body.AsJsonContent());
+        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/monitoredResources({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -83,7 +77,7 @@ internal class ScriptsControllerTests : IntegrationTestBase
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Content, Is.Not.Null);
 
-            if (response.StatusCode != HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.Created)
             {
                 Console.Out.WriteLine("Returned response:"
                     + Environment.NewLine
@@ -96,11 +90,10 @@ internal class ScriptsControllerTests : IntegrationTestBase
     {
         var body = new
         {
-            name = "Test",
-            runFrequency = "PT5S",
+            name = "Test"
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scripts", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredResources", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -119,6 +112,6 @@ internal class ScriptsControllerTests : IntegrationTestBase
 
         Assert.That(data, Is.Not.Null);
 
-        return data.id;
+        return data!.id;
     }
 }

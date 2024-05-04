@@ -1,22 +1,30 @@
-﻿using EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Controllers;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-internal class ScriptInterpretersControllerTests : IntegrationTestBase
+public abstract class MonitoredSystemsControllerTests : IntegrationTestBase
 {
-    private HttpClient _client;
+    private HttpClient _client = null!;
+
+    protected abstract HttpClient GetClient();
 
     [SetUp]
     public void SetUp()
     {
-        _client = Global.GetClient();
+        _client = GetClient();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _client?.Dispose();
     }
 
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/scriptInterpreters");
+        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/monitoredSystems");
 
         Assert.Multiple(() =>
         {
@@ -31,13 +39,10 @@ internal class ScriptInterpretersControllerTests : IntegrationTestBase
     {
         var body = new
         {
-            name = "Test",
-            command = "test",
-            arguments = "-s $Script",
-            extension = "tst",
+            name = "Test"
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scriptInterpreters", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredSystems", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -64,7 +69,7 @@ internal class ScriptInterpretersControllerTests : IntegrationTestBase
             name = "New Test"
         };
 
-        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/scriptInterpreters({recordId})", body.AsJsonContent());
+        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/monitoredSystems({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -81,17 +86,14 @@ internal class ScriptInterpretersControllerTests : IntegrationTestBase
         });
     }
 
-    private async Task<int> CreateTest()
+    private async Task<Guid> CreateTest()
     {
         var body = new
         {
-            name = "Test",
-            command = "test",
-            arguments = "-s $Script",
-            extension = "tst",
+            name = "Test"
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/scriptInterpreters", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredSystems", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -106,10 +108,10 @@ internal class ScriptInterpretersControllerTests : IntegrationTestBase
             }
         });
 
-        var data = await response.Content.ReadFromJsonModelAsync(new { id = default(int) });
+        var data = await response.Content.ReadFromJsonModelAsync(new { id = default(Guid) });
 
         Assert.That(data, Is.Not.Null);
 
-        return data.id;
+        return data!.id;
     }
 }

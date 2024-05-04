@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql;
 
 [SetUpFixture]
-internal class Global : DockerSetup
+internal class Global : DockerSetupBase
 {
     public override OSPlatform DockerOS => OSPlatform.Linux;
 

@@ -1,15 +1,11 @@
 ﻿using Microsoft.Win32;
-using NUnit.Framework;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-
-[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests;
 
 [SetUpFixture]
-public abstract class DockerSetup
+public abstract class DockerSetupBase
 {
     public abstract OSPlatform DockerOS { get; }
 

@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 
 internal static class HttpContentExtensions
 {

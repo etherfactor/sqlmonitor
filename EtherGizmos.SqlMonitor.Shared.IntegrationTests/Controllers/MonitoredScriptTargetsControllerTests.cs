@@ -1,17 +1,25 @@
-﻿using EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
-using EtherGizmos.SqlMonitor.Models.Api.v1;
+﻿using EtherGizmos.SqlMonitor.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Controllers;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-internal class MonitoredScriptTargetsControllerTests : IntegrationTestBase
+public abstract class MonitoredScriptTargetsControllerTests : IntegrationTestBase
 {
-    private HttpClient _client;
+    private HttpClient _client = null!;
+
+    protected abstract HttpClient GetClient();
 
     [SetUp]
     public void SetUp()
     {
-        _client = Global.GetClient();
+        _client = GetClient();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _client?.Dispose();
     }
 
     [Test]
@@ -41,9 +49,9 @@ internal class MonitoredScriptTargetsControllerTests : IntegrationTestBase
 
         var body = new
         {
-            monitoredSystemId = monitoredSystemId,
-            monitoredResourceId = monitoredResourceId,
-            monitoredEnvironmentId = monitoredEnvironmentId,
+            monitoredSystemId,
+            monitoredResourceId,
+            monitoredEnvironmentId,
             scriptInterpreterId = 1,
             hostName = "localhost",
             filePath = "C:/",
@@ -106,9 +114,9 @@ internal class MonitoredScriptTargetsControllerTests : IntegrationTestBase
 
         var body = new
         {
-            monitoredSystemId = monitoredSystemId,
-            monitoredResourceId = monitoredResourceId,
-            monitoredEnvironmentId = monitoredEnvironmentId,
+            monitoredSystemId,
+            monitoredResourceId,
+            monitoredEnvironmentId,
             scriptInterpreterId = 1,
             hostName = "localhost",
             filePath = "C:/",
@@ -133,6 +141,6 @@ internal class MonitoredScriptTargetsControllerTests : IntegrationTestBase
 
         Assert.That(data, Is.Not.Null);
 
-        return data.id;
+        return data!.id;
     }
 }

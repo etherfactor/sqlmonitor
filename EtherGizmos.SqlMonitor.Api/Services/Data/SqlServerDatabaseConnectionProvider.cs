@@ -2,6 +2,7 @@
 using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using System.Data.Common;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 
@@ -22,6 +23,13 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
     }
 
     /// <inheritdoc/>
+    public DbConnection GetConnection()
+    {
+        var connection = new SqlConnection(GetConnectionString());
+        return connection;
+    }
+
+    /// <inheritdoc/>
     public string GetConnectionString()
     {
         var optionsValue = _options.Value;
@@ -38,5 +46,15 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
         }
 
         return builder.ConnectionString;
+    }
+
+    /// <inheritdoc/>
+    public DbConnection GetDefaultConnection()
+    {
+        var builder = new SqlConnectionStringBuilder(GetConnectionString());
+        builder.Remove("Initial Catalog");
+
+        var connection = new SqlConnection(builder.ConnectionString);
+        return connection;
     }
 }

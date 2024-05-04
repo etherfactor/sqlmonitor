@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.Extensions;
 
 internal static class ObjectExtensions
 {

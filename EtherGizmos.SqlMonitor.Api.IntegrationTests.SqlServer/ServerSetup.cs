@@ -7,14 +7,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System.Diagnostics.CodeAnalysis;
 
-[assembly: ExcludeFromCodeCoverage]
-
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests;
+namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer;
 
 [SetUpFixture]
-internal static class Global
+internal static class ServerSetup
 {
     private static WebApplicationFactory<Program>? Factory { get; set; }
 
@@ -24,13 +21,17 @@ internal static class Global
 
     internal static HttpClient GetClient()
     {
-        Factory ??= GetFactory();
+        if (Factory is null)
+            throw new InvalidOperationException("Web application factory is not yet initialized.");
+
         return Factory.CreateDefaultClient();
     }
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
     {
+        Factory = GetFactory();
+
         //Load app settings
         var configBuilder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
@@ -103,6 +104,8 @@ internal static class Global
 
         command.CommandText = $"drop database [{TestDatabaseName.Replace("]", "]]")}];";
         await command.ExecuteNonQueryAsync();
+
+        Factory?.Dispose();
     }
 
     private static WebApplicationFactory<Program> GetFactory()
@@ -116,7 +119,7 @@ internal static class Global
                 config.AddJsonFile(Path.Combine(projectDirectory, "appsettings.Integration.json"));
 
                 //Override the database name for the connection string
-                config.AddInMemoryCollection(new Dictionary<string, string>()
+                config.AddInMemoryCollection(new Dictionary<string, string?>()
                 {
                     { "Connections:SqlServer:Initial Catalog", TestDatabaseName }
                 });

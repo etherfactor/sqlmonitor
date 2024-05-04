@@ -1,22 +1,30 @@
-﻿using EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Controllers;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-internal class MonitoredSystemsControllerTests : IntegrationTestBase
+public abstract class MonitoredEnvironmentsControllerTests : IntegrationTestBase
 {
-    private HttpClient _client;
+    private HttpClient _client = null!;
+
+    protected abstract HttpClient GetClient();
 
     [SetUp]
     public void SetUp()
     {
-        _client = Global.GetClient();
+        _client = GetClient();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _client?.Dispose();
     }
 
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/monitoredSystems");
+        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/monitoredEnvironments");
 
         Assert.Multiple(() =>
         {
@@ -34,7 +42,7 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
             name = "Test"
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredSystems", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredEnvironments", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -61,7 +69,7 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
             name = "New Test"
         };
 
-        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/monitoredSystems({recordId})", body.AsJsonContent());
+        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/monitoredEnvironments({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -85,7 +93,7 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
             name = "Test"
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredSystems", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/monitoredEnvironments", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -104,6 +112,6 @@ internal class MonitoredSystemsControllerTests : IntegrationTestBase
 
         Assert.That(data, Is.Not.Null);
 
-        return data.id;
+        return data!.id;
     }
 }

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
 
 [SetUpFixture]
-internal class Global : DockerSetup
+internal class Global : DockerSetupBase
 {
     public const string PrivateKeyFilePath = "./Initialization/id_rsa";
 

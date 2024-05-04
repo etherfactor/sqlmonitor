@@ -24,6 +24,8 @@ public class SqlServerQueryRunner : IQueryRunner
 
         var results = await command.ExecuteReaderAsync();
         var executionMilliseconds = stopwatch.ElapsedMilliseconds;
+        if (stopwatch.IsRunning && executionMilliseconds == 0)
+            executionMilliseconds++;
 
         return QueryExecutionResultSet.FromResults(queryTarget, queryVariant, results, executionMilliseconds);
     }

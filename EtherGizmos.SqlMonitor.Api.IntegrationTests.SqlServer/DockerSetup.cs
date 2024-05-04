@@ -2,16 +2,21 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-
-[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer;
 
 [SetUpFixture]
-internal class Global : DockerSetup
+internal class DockerSetup : DockerSetupBase
 {
+    public const string ServerHost = "localhost";
+    public const int ServerPort = 11433;
+    public const string ServerDatabase = "performance_pulse";
+    public const string ServerAdminUsername = "sa";
+    public const string ServerAdminPassword = "b@y4PJFfkiOIK1Ma6tXs";
+    public const string ServerDefaultUsername = "service";
+    public const string ServerDefaultPassword = "LO^9ZpGB8FiA*HMMQyfN";
+
     public override OSPlatform DockerOS => OSPlatform.Linux;
 
     public override string DockerComposeFile => "./Initialization/docker-compose.yml";
@@ -20,7 +25,7 @@ internal class Global : DockerSetup
     {
         await base.PerformSetUp();
 
-        var connection = new SqlConnection("Server=localhost,11433; User Id=sa; Password=b@y4PJFfkiOIK1Ma6tXs; TrustServerCertificate=true;");
+        var connection = new SqlConnection($"Server={ServerHost},{ServerPort}; User Id={ServerDefaultUsername}; Password={ServerDefaultPassword}; TrustServerCertificate=true;");
         var stopwatch = new Stopwatch();
         stopwatch.Start();
         do
@@ -40,7 +45,5 @@ internal class Global : DockerSetup
         {
             throw new InvalidOperationException("SQL Server connection failed to initialize.");
         }
-
-        await Task.Delay(5000);
     }
 }

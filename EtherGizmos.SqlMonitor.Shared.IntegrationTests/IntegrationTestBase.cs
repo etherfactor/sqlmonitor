@@ -1,16 +1,16 @@
 ﻿using System.Text;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests;
 
 /// <summary>
 /// Assuming integration tests do not run in parallel, intercepts the console output and logs it on a synchronous thread,
 /// allowing it to be captured by NUnit.
 /// </summary>
-internal abstract class IntegrationTestBase
+public abstract class IntegrationTestBase
 {
-    private TextWriter OriginalWriter { get; set; }
+    private TextWriter OriginalWriter { get; set; } = null!;
 
-    private StringBuilder CurrentOutput { get; set; }
+    private StringBuilder CurrentOutput { get; set; } = null!;
 
     [SetUp]
     public void ConsoleSetUp()

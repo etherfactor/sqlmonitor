@@ -1,22 +1,30 @@
-﻿using EtherGizmos.SqlMonitor.Api.IntegrationTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Controllers;
+namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-internal class MetricsControllerTests
+public abstract class QueriesControllerTests : IntegrationTestBase
 {
-    private HttpClient _client;
+    private HttpClient _client = null!;
+
+    protected abstract HttpClient GetClient();
 
     [SetUp]
     public void SetUp()
     {
-        _client = Global.GetClient();
+        _client = GetClient();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _client?.Dispose();
     }
 
     [Test]
     public async Task Search_Returns200Ok()
     {
-        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/metrics");
+        var response = await _client.GetAsync("https://localhost:7200/api/v0.1/queries");
 
         Assert.Multiple(() =>
         {
@@ -32,10 +40,23 @@ internal class MetricsControllerTests
         var body = new
         {
             name = "Test",
-            aggregateType = "Average"
+            runFrequency = "PT5S",
+            variants = new[]
+            {
+                new
+                {
+                    sqlType = "MicrosoftSqlServer",
+                    queryText = "select 1 as value;",
+                },
+                new
+                {
+                    sqlType = "PostgreSql",
+                    queryText = "select 2 as value, 'a' as bucket;",
+                }
+            }
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/metrics", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/queries", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -62,7 +83,7 @@ internal class MetricsControllerTests
             name = "New Test"
         };
 
-        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/metrics({recordId})", body.AsJsonContent());
+        var response = await _client.PatchAsync($"https://localhost:7200/api/v0.1/queries({recordId})", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -79,15 +100,15 @@ internal class MetricsControllerTests
         });
     }
 
-    private async Task<int> CreateTest()
+    private async Task<Guid> CreateTest()
     {
         var body = new
         {
             name = "Test",
-            aggregateType = "Average"
+            runFrequency = "PT5S",
         };
 
-        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/metrics", body.AsJsonContent());
+        var response = await _client.PostAsync("https://localhost:7200/api/v0.1/queries", body.AsJsonContent());
 
         Assert.Multiple(async () =>
         {
@@ -102,10 +123,10 @@ internal class MetricsControllerTests
             }
         });
 
-        var data = await response.Content.ReadFromJsonModelAsync(new { id = default(int) });
+        var data = await response.Content.ReadFromJsonModelAsync(new { id = default(Guid) });
 
         Assert.That(data, Is.Not.Null);
 
-        return data.id;
+        return data!.id;
     }
 }
