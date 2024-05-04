@@ -15,14 +15,10 @@ internal class Global : DockerSetup
     public const string DockerCompose2019FilePath = "./Initialization/docker-compose-2019.yml";
     public const string DockerCompose2022FilePath = "./Initialization/docker-compose-2022.yml";
 
-    public override async Task RunPreComposeUpCommands()
+    protected override async Task PerformSetUp()
     {
         await InvokeCommand("docker", $"network rm initialization_default");
-    }
-
-    public override Task RunPostComposeDownCommands()
-    {
-        return Task.CompletedTask;
+        await base.PerformSetUp();
     }
 
     private static string GetDockerComposeFile()

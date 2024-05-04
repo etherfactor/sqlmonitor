@@ -23,9 +23,7 @@ public abstract class DockerSetup
         await SemaphoreContext(async () =>
         {
             await SetContainerOS(DockerOS);
-
-            await RunPreComposeUpCommands();
-            await InvokeCommand("docker-compose", $"-f {DockerComposeFile} up -d");
+            await PerformSetUp();
         });
     }
 
@@ -35,16 +33,34 @@ public abstract class DockerSetup
         await SemaphoreContext(async () =>
         {
             await SetContainerOS(DockerOS);
-
-            await InvokeCommand("docker-compose", $"-f {DockerComposeFile} down");
-            await RunPostComposeDownCommands();
+            await PerformTearDown();
         });
     }
 
-    public abstract Task RunPreComposeUpCommands();
+    #region Inherited Methods
+    /// <summary>
+    /// Performs the Docker initialization. By default, calls docker-compose up on the compose file.
+    /// </summary>
+    /// <returns>An awaitable task.</returns>
+    protected virtual async Task PerformSetUp()
+    {
+        await InvokeCommand("docker-compose", $"-f {DockerComposeFile} up -d");
+    }
 
-    public abstract Task RunPostComposeDownCommands();
+    /// <summary>
+    /// Performs the Docker tear-down. By default, calls docker-compose down on the compose file.
+    /// </summary>
+    /// <returns>An awaitable task.</returns>
+    protected virtual async Task PerformTearDown()
+    {
+        await InvokeCommand("docker-compose", $"-f {DockerComposeFile} down");
+    }
+    #endregion Inherited Methods
 
+    #region Operating System
+    /// <summary>
+    /// Ensures the tests are running on a supported OS. If not, tests will be marked inconclusive (warning status).
+    /// </summary>
     private void EnsureSupportedOS()
     {
         if (!IsSupportedOS())
@@ -53,15 +69,20 @@ public abstract class DockerSetup
         }
     }
 
+    /// <summary>
+    /// Checks if the tests are running on a supported OS.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="PlatformNotSupportedException"></exception>
     private bool IsSupportedOS()
     {
+        //Docker for Windows requires Windows 10+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version.Major < 10)
+            return false;
+
         //Linux is always supported
         if (DockerOS == OSPlatform.Linux)
         {
-            //Unless you don't have Windows 10 or higher
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version.Major < 10)
-                return false;
-
             return true;
         }
         //Windows only works on Professional and Server
@@ -69,10 +90,6 @@ public abstract class DockerSetup
         {
             //So fail out if running Linux
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return false;
-
-            //Or if running Windows < 10
-            if (Environment.OSVersion.Version.Major < 10)
                 return false;
 
             //Running on Windows, so check the registry for the Windows edition
@@ -95,7 +112,31 @@ public abstract class DockerSetup
             throw new PlatformNotSupportedException("Docker tests currently only support Linux and Windows.");
         }
     }
+    #endregion Operating System
 
+    #region Test Coordination
+    /// <summary>
+    /// Attempts to get a Windows semaphore. On other operating systems, returns null.
+    /// </summary>
+    /// <param name="name">The name of the semaphore, if any.</param>
+    /// <returns>The semaphore, if on Windows.</returns>
+    private Semaphore? MaybeGetSemaphore(string? name = null)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new Semaphore(1, 1, name);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Runs a task in a Windows semaphore context. If on Linux, the semaphore will not be created. This is fine as the
+    /// semaphore is intended to coordinate swapping containers between Windows and Linux, which is only supported on
+    /// Windows, not Linux.
+    /// </summary>
+    /// <param name="context">The task to run.</param>
+    /// <returns>An awaitable task.</returns>
     private async Task SemaphoreContext(Func<Task> context)
     {
         using var maybeSemaphore = MaybeGetSemaphore("DockerSemaphore");
@@ -109,7 +150,15 @@ public abstract class DockerSetup
             maybeSemaphore?.Release();
         }
     }
+    #endregion Test Coordination
 
+    #region Test Setup
+    /// <summary>
+    /// Invokes a command as a separate process and waits for it to complete.
+    /// </summary>
+    /// <param name="command">The command to run.</param>
+    /// <param name="arguments">The arguments for the command.</param>
+    /// <returns>An awaitable task.</returns>
     protected async Task InvokeCommand(string command, string? arguments = null)
     {
         using var process = new Process()
@@ -135,6 +184,11 @@ public abstract class DockerSetup
         await process.WaitForExitAsync();
     }
 
+    /// <summary>
+    /// Switches the Docker container OS, if the current OS is Windows.
+    /// </summary>
+    /// <param name="dockerOS">The target Docker container OS.</param>
+    /// <returns>An awaitable task.</returns>
     private async Task SetContainerOS(OSPlatform dockerOS)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -153,14 +207,5 @@ public abstract class DockerSetup
             }
         }
     }
-
-    private Semaphore? MaybeGetSemaphore(string? name = null)
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return new Semaphore(1, 1, name);
-        }
-
-        return null;
-    }
+    #endregion Test Setup
 }
