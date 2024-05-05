@@ -2,16 +2,21 @@
 using MySqlConnector;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-
-[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql;
 
 [SetUpFixture]
-internal class Global : DockerSetupBase
+internal class DockerSetup : DockerSetupBase
 {
+    public const string ServerHost = "localhost";
+    public const int ServerPort = 33306;
+    public const string ServerDatabase = "performance_pulse";
+    public const string ServerAdminUsername = "root";
+    public const string ServerAdminPassword = "3NU1Cs!GXJf3CvWqIpCs";
+    public const string ServerDefaultUsername = "service";
+    public const string ServerDefaultPassword = "jipEZk@7ui2lw&XUiw^W";
+
     public override OSPlatform DockerOS => OSPlatform.Linux;
 
     public override string DockerComposeFile => "./Initialization/docker-compose.yml";

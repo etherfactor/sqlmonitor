@@ -1,8 +1,8 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql.Controllers;
 
-internal class ScriptsControllerTests_SqlServer : ScriptsControllerTests
+internal class MonitoredEnvironmentsControllerTests_MySql : MonitoredEnvironmentsControllerTests
 {
     protected override HttpClient GetClient()
     {
