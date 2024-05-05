@@ -83,6 +83,25 @@ builder.Services
     });
 
 builder.Services
+    .AddOptions<MySqlOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:MySql";
+
+        var section = conf.GetSection(path);
+
+        section.Bind(opt);
+        opt.AllProperties = section.GetChildren()
+            .Where(e => !typeof(MySqlOptions).GetProperties().Any(p => p.Name == e.Key))
+            .ToDictionary(e => e.Key, e => e.Value);
+
+        if (usage.Value.Database == DatabaseType.MySql)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
     .AddOptions<SqlServerOptions>()
     .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
     {
@@ -156,13 +175,24 @@ builder.Services
         var loggerFactory = services
             .GetRequiredService<ILoggerFactory>();
 
-        if (usageOptions.Database == DatabaseType.SqlServer)
+        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+        var connectionString = connectionProvider.GetConnectionString();
+        if (usageOptions.Database == DatabaseType.MySql)
         {
-            var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
-
             opt.UseLoggerFactory(loggerFactory);
 
-            opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
+            opt.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
+        else if (usageOptions.Database == DatabaseType.SqlServer)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseSqlServer(connectionString, conf =>
             {
                 conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
@@ -193,11 +223,16 @@ builder.Services
             .GetRequiredService<IOptions<UsageOptions>>()
             .Value;
 
-        if (usageOptions.Database == DatabaseType.SqlServer)
+        if (usageOptions.Database == DatabaseType.MySql)
+        {
+            childServices.AddTransient<IDatabaseConnectionProvider, MySqlDatabaseConnectionProvider>();
+        }
+        else if (usageOptions.Database == DatabaseType.SqlServer)
         {
             childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
         }
     })
+    .ImportSingleton<IOptions<MySqlOptions>>()
     .ImportSingleton<IOptions<SqlServerOptions>>()
     .ForwardTransient<IDatabaseConnectionProvider>();
 
@@ -215,12 +250,17 @@ builder.Services
             .AddFluentMigratorCore()
             .ConfigureRunner(opt =>
             {
-                if (usageOptions.Database == DatabaseType.SqlServer)
+                opt.WithGlobalConnectionString(connectionProvider.GetConnectionString())
+                    .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
+                    .WithVersionTable(new CustomVersionTableMetadata());
+
+                if (usageOptions.Database == DatabaseType.MySql)
                 {
-                    opt.AddSqlServer()
-                        .WithGlobalConnectionString(connectionProvider.GetConnectionString())
-                        .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
-                        .WithVersionTable(new CustomVersionTableMetadata());
+                    opt.AddMySql8();
+                }
+                else if (usageOptions.Database == DatabaseType.SqlServer)
+                {
+                    opt.AddSqlServer();
                 }
                 else
                 {

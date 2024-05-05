@@ -27,6 +27,7 @@ internal class ServerSetup : ServerSetupBase
             { "Connections:Use:MessageBroker", "InMemory" },
             { "Connections:MySql:Server", DockerSetup.ServerHost },
             { "Connections:MySql:Port", DockerSetup.ServerPort.ToString() },
+            { "Connections:MySql:Database", DockerSetup.ServerDatabase },
             { "Connections:MySql:Uid", DockerSetup.ServerDefaultUsername },
             { "Connections:MySql:Pwd", DockerSetup.ServerDefaultPassword },
         };

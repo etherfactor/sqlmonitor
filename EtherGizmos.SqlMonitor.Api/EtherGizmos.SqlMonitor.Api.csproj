@@ -15,10 +15,10 @@
     <PackageReference Include="Asp.Versioning.OData.ApiExplorer" Version="6.*" />
     <PackageReference Include="DistributedLock.Redis" Version="1.*" />
     <PackageReference Include="EtherGizmos.Extensions.DependencyInjection.ChildContainers" Version="0.1.0-ci.2" />
-    <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
+    <PackageReference Include="FluentMigrator.Runner" Version="5.*" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.*" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8" />
     <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.4.*" />
@@ -26,6 +26,7 @@
     <PackageReference Include="Microsoft.WSMan.Management" Version="7.4.*" />
     <PackageReference Include="MySqlConnector" Version="2.*" />
     <PackageReference Include="ncrontab" Version="3.*" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.*" />
     <PackageReference Include="Serilog" Version="3.0.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="7.0.0" />
