@@ -102,6 +102,25 @@ builder.Services
     });
 
 builder.Services
+    .AddOptions<PostgreSqlOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:PostgreSql";
+
+        var section = conf.GetSection(path);
+
+        section.Bind(opt);
+        opt.AllProperties = section.GetChildren()
+            .Where(e => !typeof(PostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
+            .ToDictionary(e => e.Key, e => e.Value);
+
+        if (usage.Value.Database == DatabaseType.PostgreSql)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
     .AddOptions<SqlServerOptions>()
     .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
     {
@@ -188,6 +207,17 @@ builder.Services
 
             opt.EnableSensitiveDataLogging();
         }
+        else if (usageOptions.Database == DatabaseType.PostgreSql)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseNpgsql(connectionString, conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
         else if (usageOptions.Database == DatabaseType.SqlServer)
         {
             opt.UseLoggerFactory(loggerFactory);
@@ -227,12 +257,17 @@ builder.Services
         {
             childServices.AddTransient<IDatabaseConnectionProvider, MySqlDatabaseConnectionProvider>();
         }
+        else if (usageOptions.Database == DatabaseType.PostgreSql)
+        {
+            childServices.AddTransient<IDatabaseConnectionProvider, PostgreSqlDatabaseConnectionProvider>();
+        }
         else if (usageOptions.Database == DatabaseType.SqlServer)
         {
             childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
         }
     })
     .ImportSingleton<IOptions<MySqlOptions>>()
+    .ImportSingleton<IOptions<PostgreSqlOptions>>()
     .ImportSingleton<IOptions<SqlServerOptions>>()
     .ForwardTransient<IDatabaseConnectionProvider>();
 
@@ -257,6 +292,10 @@ builder.Services
                 if (usageOptions.Database == DatabaseType.MySql)
                 {
                     opt.AddMySql8();
+                }
+                else if (usageOptions.Database == DatabaseType.PostgreSql)
+                {
+                    opt.AddPostgres();
                 }
                 else if (usageOptions.Database == DatabaseType.SqlServer)
                 {

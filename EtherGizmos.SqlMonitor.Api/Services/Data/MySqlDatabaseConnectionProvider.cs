@@ -16,7 +16,7 @@ public class MySqlDatabaseConnectionProvider : IDatabaseConnectionProvider
     /// <summary>
     /// Construct the service.
     /// </summary>
-    /// <param name="configuration">The application's configuration.</param>
+    /// <param name="options">The application's configuration.</param>
     public MySqlDatabaseConnectionProvider(IOptions<MySqlOptions> options)
     {
         _options = options;

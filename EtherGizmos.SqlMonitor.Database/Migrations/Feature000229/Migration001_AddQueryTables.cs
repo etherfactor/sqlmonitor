@@ -1,6 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
+using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000229;
 
@@ -19,24 +20,8 @@ public class Migration001_AddQueryTables : Migration
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable();
 
-        Execute.Sql(@"create trigger [TR_sql_types_audit]
-on [sql_types]
-after insert, update
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.sql_type_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [sql_types]
-      set [modified_at_utc] = getutcdate()
-      where [sql_type_id] = @RecordId;
-end;");
+        this.AddAuditTriggerV1("sql_types",
+            ("sql_type_id", DbType.Int32));
 
         /*
          * Create [dbo].[queries]
@@ -64,72 +49,11 @@ end;");
             .OnTable("queries")
             .OnColumn("securable_id");
 
-        Execute.Sql(@"create trigger [TR_queries_audit]
-on [queries]
-after insert, update
-as
-begin
-    set nocount on;
+        this.AddAuditTriggerV1("queries",
+            ("query_id", DbType.Guid));
 
-    declare @RecordId uniqueidentifier;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.query_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [queries]
-      set [modified_at_utc] = getutcdate()
-      where [query_id] = @RecordId;
-end;");
-
-        Execute.Sql(@"create trigger [TR_queries_securable_id]
-on [queries]
-after insert, update, delete
-as
-begin
-    set nocount on;
-
-    declare @RecordId uniqueidentifier;
-    declare @SecurableId int;
-    declare @SecurableTypeId int = 390;
-
-    --Handle inserts/updates
-    if exists ( select 1 from inserted )
-    begin
-        --Get the id of the inserted record
-        select @RecordId = inserted.query_id,
-          @SecurableId = inserted.securable_id
-          from inserted;
-
-        if @SecurableId is null
-        begin
-            --Insert a new row into [securables]
-            insert into [securables] ( [securable_type_id] )
-              values ( @SecurableTypeId );
-
-            --Get the generated id
-            select @SecurableId = scope_identity();
-
-            --Update the [queries] table with the generated [securable_id]
-            update [queries]
-              set [securable_id] = @SecurableId
-              where [query_id] = @RecordId;
-        end;
-    end
-    --Handle deletes
-    else
-    begin
-        --Get the id of the deleted record
-        select @RecordId = deleted.query_id,
-          @SecurableId = deleted.securable_id
-          from deleted;
-
-        --Delete the [securable_id] from the [securables] table
-        delete from [securables]
-          where [securable_id] = @SecurableId;
-    end;
-end;");
+        this.AddSecurableTriggerV1("queries", "securable_id", 390,
+            ("query_id", DbType.Guid));
 
         /*
          * Create [dbo].[query_variants]
@@ -158,24 +82,8 @@ end;");
             .OnTable("query_variants")
             .OnColumn("sql_type_id");
 
-        Execute.Sql(@"create trigger [TR_query_variants_audit]
-on [query_variants]
-after insert, update
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.query_variant_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [query_variants]
-      set [modified_at_utc] = getutcdate()
-      where [query_variant_id] = @RecordId;
-end;");
+        this.AddAuditTriggerV1("query_variants",
+            ("query_variant_id", DbType.Int32));
     }
 
     public override void Down()

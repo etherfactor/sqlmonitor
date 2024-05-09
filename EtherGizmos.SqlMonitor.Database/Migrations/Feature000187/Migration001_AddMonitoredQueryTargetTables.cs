@@ -1,6 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
+using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000187;
 
@@ -46,72 +47,11 @@ public class Migration001_AddMonitoredQueryTargetTables : Migration
             .OnTable("monitored_query_targets")
             .OnColumn("securable_id");
 
-        Execute.Sql(@"create trigger [TR_monitored_query_targets_audit]
-on [monitored_query_targets]
-after insert, update
-as
-begin
-    set nocount on;
+        this.AddAuditTriggerV1("monitored_query_targets",
+            ("monitored_query_target_id", DbType.Int32));
 
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.monitored_query_target_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [monitored_query_targets]
-      set [modified_at_utc] = getutcdate()
-      where [monitored_query_target_id] = @RecordId;
-end;");
-
-        Execute.Sql(@"create trigger [TR_monitored_query_targets_securable_id]
-on [monitored_query_targets]
-after insert, update, delete
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-    declare @SecurableId int;
-    declare @SecurableTypeId int = 150;
-
-    --Handle inserts/updates
-    if exists ( select 1 from inserted )
-    begin
-        --Get the id of the inserted record
-        select @RecordId = inserted.monitored_query_target_id,
-          @SecurableId = inserted.securable_id
-          from inserted;
-
-        if @SecurableId is null
-        begin
-            --Insert a new row into [securables]
-            insert into [securables] ( [securable_type_id] )
-              values ( @SecurableTypeId );
-
-            --Get the generated id
-            select @SecurableId = scope_identity();
-
-            --Update the [monitored_query_targets] table with the generated [securable_id]
-            update [monitored_query_targets]
-              set [securable_id] = @SecurableId
-              where [monitored_query_target_id] = @RecordId;
-        end;
-    end
-    --Handle deletes
-    else
-    begin
-        --Get the id of the deleted record
-        select @RecordId = deleted.monitored_query_target_id,
-          @SecurableId = deleted.securable_id
-          from deleted;
-
-        --Delete the [securable_id] from the [securables] table
-        delete from [securables]
-          where [securable_id] = @SecurableId;
-    end;
-end;");
+        this.AddSecurableTriggerV1("monitored_query_targets", "securable_id", 150,
+            ("monitored_query_target_id", DbType.Int32));
     }
 
     public override void Down()

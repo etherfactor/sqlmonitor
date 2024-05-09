@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using System.Data.Common;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Data;
@@ -9,15 +9,15 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// <summary>
 /// Provides a database connection string.
 /// </summary>
-public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
+public class PostgreSqlDatabaseConnectionProvider : IDatabaseConnectionProvider
 {
-    private readonly IOptions<SqlServerOptions> _options;
+    private readonly IOptions<PostgreSqlOptions> _options;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
-    /// <param name="options">The application's configuration.</param>
-    public SqlServerDatabaseConnectionProvider(IOptions<SqlServerOptions> options)
+    /// <param name="configuration">The application's configuration.</param>
+    public PostgreSqlDatabaseConnectionProvider(IOptions<PostgreSqlOptions> options)
     {
         _options = options;
     }
@@ -25,7 +25,7 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
     /// <inheritdoc/>
     public DbConnection GetConnection()
     {
-        var connection = new SqlConnection(GetConnectionString());
+        var connection = new NpgsqlConnection(GetConnectionString());
         return connection;
     }
 
@@ -34,7 +34,7 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
     {
         var optionsValue = _options.Value;
 
-        var builder = new SqlConnectionStringBuilder();
+        var builder = new NpgsqlConnectionStringBuilder();
 
         foreach (string key in optionsValue.AllProperties.Keys)
         {
@@ -51,10 +51,10 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
     /// <inheritdoc/>
     public DbConnection GetDefaultConnection()
     {
-        var builder = new SqlConnectionStringBuilder(GetConnectionString());
-        builder.Remove("Initial Catalog");
+        var builder = new NpgsqlConnectionStringBuilder(GetConnectionString());
+        builder.Remove("Database");
 
-        var connection = new SqlConnection(builder.ConnectionString);
+        var connection = new NpgsqlConnection(builder.ConnectionString);
         return connection;
     }
 }

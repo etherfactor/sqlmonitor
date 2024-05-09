@@ -1,6 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
+using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000188;
 
@@ -29,24 +30,8 @@ public class Migration001_AddMonitoredScriptTargetTables : Migration
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable();
 
-        Execute.Sql(@"create trigger [TR_ssh_authentication_types_audit]
-on [ssh_authentication_types]
-after insert, update
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.ssh_authentication_type_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [ssh_authentication_types]
-      set [modified_at_utc] = getutcdate()
-      where [ssh_authentication_type_id] = @RecordId;
-end;");
+        this.AddAuditTriggerV1("ssh_authentication_types",
+            ("ssh_authentication_type_id", DbType.Int32));
 
         /*
          * Create [dbo].[winrm_authentication_types]
@@ -58,24 +43,8 @@ end;");
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable();
 
-        Execute.Sql(@"create trigger [TR_winrm_authentication_types_audit]
-on [winrm_authentication_types]
-after insert, update
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.winrm_authentication_type_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [winrm_authentication_types]
-      set [modified_at_utc] = getutcdate()
-      where [winrm_authentication_type_id] = @RecordId;
-end;");
+        this.AddAuditTriggerV1("winrm_authentication_types",
+            ("winrm_authentication_type_id", DbType.Int32));
 
         /*
          * Create [dbo].[monitored_script_targets]
@@ -132,72 +101,11 @@ end;");
             .FromTable("monitored_script_targets").ForeignColumn("winrm_authentication_type_id")
             .ToTable("winrm_authentication_types").PrimaryColumn("winrm_authentication_type_id");
 
-        Execute.Sql(@"create trigger [TR_monitored_script_targets_audit]
-on [monitored_script_targets]
-after insert, update
-as
-begin
-    set nocount on;
+        this.AddAuditTriggerV1("monitored_script_targets",
+            ("monitored_script_target_id", DbType.Int32));
 
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.monitored_script_target_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [monitored_script_targets]
-      set [modified_at_utc] = getutcdate()
-      where [monitored_script_target_id] = @RecordId;
-end;");
-
-        Execute.Sql(@"create trigger [TR_monitored_script_targets_securable_id]
-on [monitored_script_targets]
-after insert, update, delete
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-    declare @SecurableId int;
-    declare @SecurableTypeId int = 150;
-
-    --Handle inserts/updates
-    if exists ( select 1 from inserted )
-    begin
-        --Get the id of the inserted record
-        select @RecordId = inserted.monitored_script_target_id,
-          @SecurableId = inserted.securable_id
-          from inserted;
-
-        if @SecurableId is null
-        begin
-            --Insert a new row into [securables]
-            insert into [securables] ( [securable_type_id] )
-              values ( @SecurableTypeId );
-
-            --Get the generated id
-            select @SecurableId = scope_identity();
-
-            --Update the [monitored_script_targets] table with the generated [securable_id]
-            update [monitored_script_targets]
-              set [securable_id] = @SecurableId
-              where [monitored_script_target_id] = @RecordId;
-        end;
-    end
-    --Handle deletes
-    else
-    begin
-        --Get the id of the deleted record
-        select @RecordId = deleted.monitored_script_target_id,
-          @SecurableId = deleted.securable_id
-          from deleted;
-
-        --Delete the [securable_id] from the [securables] table
-        delete from [securables]
-          where [securable_id] = @SecurableId;
-    end;
-end;");
+        this.AddSecurableTriggerV1("monitored_script_targets", "securable_id", 150,
+            ("monitored_script_target_id", DbType.Int32));
     }
 
     public override void Down()
