@@ -1,10 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Database;
-using MySqlConnector;
+using Npgsql;
 using System.Diagnostics;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Queries;
 
-public class MySqlQueryRunner : IQueryRunner
+public class PostgreSqlQueryRunner : IQueryRunner
 {
     /// <inheritdoc/>
     public async Task<QueryExecutionResultSet> ExecuteAsync(
@@ -12,7 +12,7 @@ public class MySqlQueryRunner : IQueryRunner
         QueryVariant queryVariant,
         CancellationToken cancellationToken = default)
     {
-        var connection = new MySqlConnection(queryTarget.ConnectionString);
+        var connection = new NpgsqlConnection(queryTarget.ConnectionString);
         await connection.OpenAsync(cancellationToken);
 
         var command = connection.CreateCommand();

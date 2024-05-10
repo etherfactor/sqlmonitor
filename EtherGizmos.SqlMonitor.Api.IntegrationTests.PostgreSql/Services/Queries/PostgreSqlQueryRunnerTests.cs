@@ -4,14 +4,14 @@ using EtherGizmos.SqlMonitor.Models.Database.Enums;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.Services.Queries;
 
-internal class MySqlQueryRunnerTests
+internal class PostgreSqlQueryRunnerTests
 {
-    private MySqlQueryRunner _runner;
+    private PostgreSqlQueryRunner _runner;
 
     [SetUp]
     public void SetUp()
     {
-        _runner = new MySqlQueryRunner();
+        _runner = new PostgreSqlQueryRunner();
     }
 
     [Test]
@@ -20,13 +20,13 @@ internal class MySqlQueryRunnerTests
         var target = new MonitoredQueryTarget()
         {
             HostName = "localhost",
-            ConnectionString = "Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;",
+            ConnectionString = $"Host={DockerSetup.ServerHost}; Port={DockerSetup.ServerPort}; Database={DockerSetup.ServerDatabase}; User Id={DockerSetup.ServerDefaultUsername}; Password={DockerSetup.ServerDefaultPassword};",
         };
 
         var query = new QueryVariant()
         {
-            QueryText = "select 1 as value, 'Test' as bucket from dual;",
-            SqlType = SqlType.MySql,
+            QueryText = "select 1 as value, 'Test' as bucket;",
+            SqlType = SqlType.PostgreSql,
         };
 
         var result = await _runner.ExecuteAsync(target, query);

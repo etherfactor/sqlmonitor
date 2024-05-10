@@ -15,13 +15,13 @@ internal static class Snippets
 returns trigger as $$
 begin
     --Set the last modified time of the record
-    new.""modified_at_utc"" = timezone('utc', now());
+    new.""modified_at_utc"" := timezone('utc', now());
     return new;
 end;
 $$ language plpgsql;
 
 create trigger {PostgreSqlHelper.Escape($"TR_{table}_audit")}
-after insert or update
+before insert or update
 on {PostgreSqlHelper.Escape(table)}
 for each row
 execute function {PostgreSqlHelper.Escape($"{table}_audit")}();");
@@ -64,61 +64,60 @@ end;");
          * PostgreSQL
          */
         @this.IfDatabase(ProcessorId.Postgres)
-            .Execute.Sql($@"create or replace function {PostgreSqlHelper.Escape($"{table}_{securableColumn}")}()
+            .Execute.Sql($@"create or replace function {PostgreSqlHelper.Escape($"{table}_{securableColumn}_insert")}()
 returns trigger as $$
 declare
-{primaryKeys
-    .Escape(PostgreSqlHelper.Escape)
-    .Expand(Environment.NewLine, "    RecordId$$Index$$ $$Type$$;", converter: PostgreSqlHelper.ToDbString)}
     SecurableId INT;
     SecurableTypeId INT := {securableTypeId};
 begin
-    if TG_OP = 'INSERT' or TG_OP = 'UPDATE' then
-        --Handle inserts/updates
-        select
-{primaryKeys
-    .Escape(PostgreSqlHelper.Escape)
-    .Expand("," + Environment.NewLine, $"          new.$$Name$$")},
-          new.""securable_id""
-          into {primaryKeys.Escape(PostgreSqlHelper.Escape).Expand(", ", $"RecordId$$Index$$")}, SecurableId;
+    --Handle inserts/updates
+    select new.""securable_id""
+      into SecurableId;
+
+    if SecurableId is null then
+        --Insert a new row into securables
+        insert into ""securables"" ( ""securable_type_id"" )
+          values ( SecurableTypeId )
+          returning ""securable_id"" into SecurableId;
         
-        if SecurableId is null then
-            --Insert a new row into securables
-            insert into ""securables"" ( ""securable_type_id"" )
-              values ( SecurableTypeId )
-              returning ""securable_id"" into SecurableId;
-            
-            --Update the {table} table with the generated securable_id
-            update {PostgreSqlHelper.Escape(table)}
-              set {PostgreSqlHelper.Escape(securableColumn)} = SecurableId
-              where
-{primaryKeys
-    .Escape(PostgreSqlHelper.Escape)
-    .Expand(" and" + Environment.NewLine, $"$$Name$$ = RecordId$$Index$$")};
-        end if;
-    else
-        --Handle deletes
-        select
-{primaryKeys
-    .Escape(PostgreSqlHelper.Escape)
-    .Expand("," + Environment.NewLine, $"          old.$$Name$$")},
-          old.""securable_id""
-          into {primaryKeys.Escape(PostgreSqlHelper.Escape).Expand(", ", $"RecordId$$Index$$")}, SecurableId;
-        
-        --Delete the securable_id from the securables table
-        delete from ""securables""
-          where ""securable_id"" = SecurableId;
+        --Update the {table} table with the generated securable_id
+        new.{PostgreSqlHelper.Escape(securableColumn)} := SecurableId;
     end if;
-    
-    return null;
+
+    return new;
 end;
 $$ language plpgsql;
 
-create trigger {PostgreSqlHelper.Escape($"TR_{table}_{securableColumn}")}
-after insert or update or delete
+create trigger {PostgreSqlHelper.Escape($"TR_{table}_{securableColumn}_insert")}
+before insert or update
 on {PostgreSqlHelper.Escape(table)}
 for each row
-execute function {PostgreSqlHelper.Escape($"{table}_{securableColumn}")}();");
+execute function {PostgreSqlHelper.Escape($"{table}_{securableColumn}_insert")}();");
+
+        @this.IfDatabase(ProcessorId.Postgres)
+            .Execute.Sql($@"create or replace function {PostgreSqlHelper.Escape($"{table}_{securableColumn}_delete")}()
+returns trigger as $$
+declare
+    SecurableId INT;
+    SecurableTypeId INT := {securableTypeId};
+begin
+    --Handle deletes
+    select old.""securable_id""
+      into SecurableId;
+
+    --Delete the securable_id from the securables table
+    delete from ""securables""
+      where ""securable_id"" = SecurableId;
+
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger {PostgreSqlHelper.Escape($"TR_{table}_{securableColumn}_delete")}
+after delete
+on {PostgreSqlHelper.Escape(table)}
+for each row
+execute function {PostgreSqlHelper.Escape($"{table}_{securableColumn}_delete")}();");
 
         /*
          * Microsoft SQL Server
@@ -144,7 +143,7 @@ begin
         select
 {primaryKeys
     .Escape(SqlServerHelper.Escape)
-    .Expand("," + Environment.NewLine, $"          @RecordId$$Index$$ = inserted.$$Name$$")}
+    .Expand("," + Environment.NewLine, $"          @RecordId$$Index$$ = inserted.$$Name$$")},
           @SecurableId = inserted.securable_id
           from inserted;
 
@@ -157,9 +156,9 @@ begin
             --Get the generated id
             select @SecurableId = scope_identity();
 
-            --Update the [monitored_systems] table with the generated [securable_id]
-            update [monitored_systems]
-              set [securable_id] = @SecurableId
+            --Update the {table} table with the generated securable_id
+            update {SqlServerHelper.Escape(table)}
+              set {SqlServerHelper.Escape(securableColumn)} = @SecurableId
               where
 {primaryKeys
     .Escape(SqlServerHelper.Escape)
@@ -173,7 +172,7 @@ begin
         select
 {primaryKeys
     .Escape(SqlServerHelper.Escape)
-    .Expand("," + Environment.NewLine, $"          @RecordId$$Index$$ = deleted.$$Name$$")}
+    .Expand("," + Environment.NewLine, $"          @RecordId$$Index$$ = deleted.$$Name$$")},
           @SecurableId = deleted.[securable_id]
           from deleted;
 

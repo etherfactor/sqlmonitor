@@ -12,6 +12,8 @@ public abstract class IMigrationRunnerTests
 {
     public abstract string CreateDatabaseCommand { get; }
 
+    public virtual string? PostCreateDatabaseCommand { get; }
+
     protected abstract IDictionary<string, string?> GetConfigurationValues();
 
     protected abstract void AddDatabaseConnectionProvider(IServiceCollection serviceCollection);
@@ -59,6 +61,18 @@ public abstract class IMigrationRunnerTests
         //Create a new database for this test
         command.CommandText = CreateDatabaseCommand;
         await command.ExecuteNonQueryAsync();
+
+        if (PostCreateDatabaseCommand is not null)
+        {
+            using var newConnection = connectionProvider.GetConnection();
+            await newConnection.OpenAsync();
+
+            using var newCommand = newConnection.CreateCommand();
+
+            //Run the post-setup command
+            newCommand.CommandText = PostCreateDatabaseCommand;
+            await newCommand.ExecuteNonQueryAsync();
+        }
 
         //Perform the database migration
         Assert.DoesNotThrow(() =>

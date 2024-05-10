@@ -2,7 +2,7 @@
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.Controllers;
 
-internal class MonitoredResourcesControllerTests_MySql : MonitoredResourcesControllerTests
+internal class QueriesControllerTests_PostgreSql : QueriesControllerTests
 {
     protected override HttpClient GetClient()
     {
