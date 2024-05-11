@@ -6,7 +6,7 @@ using System.Data;
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000185;
 
 [CreatedAt(year: 2024, month: 03, day: 13, hour: 20, minute: 00, description: "Create monitored resource tables", trackingId: 185)]
-public class Migration001_AddMonitoredResourceTables : Migration
+public class Migration001_AddMonitoredResourceTables : MigrationExtension
 {
     public override void Up()
     {

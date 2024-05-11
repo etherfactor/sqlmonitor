@@ -1,12 +1,11 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
-using FluentMigrator;
 using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000247;
 
 [CreatedAt(year: 2024, month: 04, day: 13, hour: 21, minute: 00, description: "Create metric tables", trackingId: 247)]
-public class Migration001_AddMetricTables : Migration
+public class Migration001_AddMetricTables : MigrationExtension
 {
     public override void Up()
     {

@@ -13,8 +13,10 @@ using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using EtherGizmos.SqlMonitor.Database;
+using EtherGizmos.SqlMonitor.Database.Remaps;
 using EtherGizmos.SqlMonitor.Models;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Generators.MySql;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -200,7 +202,7 @@ builder.Services
         {
             opt.UseLoggerFactory(loggerFactory);
 
-            opt.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), conf =>
+            opt.UseMySQL(connectionString, conf =>
             {
                 conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
@@ -291,7 +293,8 @@ builder.Services
 
                 if (usageOptions.Database == DatabaseType.MySql)
                 {
-                    opt.AddMySql8();
+                    opt.AddMySql8()
+                        .Services.AddScoped<MySqlQuoter, MySqlQuoterRemap>();
                 }
                 else if (usageOptions.Database == DatabaseType.PostgreSql)
                 {

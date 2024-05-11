@@ -6,7 +6,7 @@ using System.Data;
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000230;
 
 [CreatedAt(year: 2024, month: 03, day: 18, hour: 20, minute: 00, description: "Create script tables", trackingId: 230)]
-public class Migration001_AddScriptTables : Migration
+public class Migration001_AddScriptTables : MigrationExtension
 {
     public override void Up()
     {
@@ -57,6 +57,8 @@ public class Migration001_AddScriptTables : Migration
             .WithColumn("timestamp_utc_key").AsString(100).Nullable()
             .WithColumn("system_id").AsGuid().NotNullable().WithDefault(SystemMethods.NewGuid)
             .WithColumn("securable_id").AsInt32().Nullable();
+
+        this.FixTime("scripts", "run_frequency");
 
         Create.ForeignKey("FK_scripts_securable_id")
             .FromTable("scripts").ForeignColumn("securable_id")

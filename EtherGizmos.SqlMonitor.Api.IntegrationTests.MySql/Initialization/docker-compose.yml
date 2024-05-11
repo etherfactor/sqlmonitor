@@ -4,5 +4,6 @@ services:
     platform: linux/amd64
     build:
       context: .
+    command: ["--log_bin_trust_function_creators=1"]
     ports:
       - "33306:3306"

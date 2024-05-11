@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.4.*" />
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.*" />
     <PackageReference Include="Microsoft.WSMan.Management" Version="7.4.*" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="8.*" />
     <PackageReference Include="MySqlConnector" Version="2.*" />
     <PackageReference Include="ncrontab" Version="3.*" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" />

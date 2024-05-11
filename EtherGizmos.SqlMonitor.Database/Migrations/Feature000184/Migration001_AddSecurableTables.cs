@@ -1,12 +1,11 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
-using FluentMigrator;
 using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000184;
 
 [CreatedAt(year: 2024, month: 03, day: 13, hour: 18, minute: 00, description: "Create securable tables", trackingId: 184)]
-public class Migration001_AddSecurableTables : Migration
+public class Migration001_AddSecurableTables : MigrationExtension
 {
     public override void Up()
     {

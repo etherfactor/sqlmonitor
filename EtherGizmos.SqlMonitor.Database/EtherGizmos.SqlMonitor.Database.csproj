@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentMigrator" Version="5.*" />
+    <PackageReference Include="FluentMigrator.Runner.MySql" Version="5.*" />
   </ItemGroup>
 
 </Project>

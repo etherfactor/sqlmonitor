@@ -6,7 +6,7 @@ using System.Data;
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000229;
 
 [CreatedAt(year: 2024, month: 04, day: 28, hour: 11, minute: 00, description: "Create query tables", trackingId: 229)]
-public class Migration001_AddQueryTables : Migration
+public class Migration001_AddQueryTables : MigrationExtension
 {
     public override void Up()
     {
@@ -40,6 +40,8 @@ public class Migration001_AddQueryTables : Migration
             .WithColumn("timestamp_utc_column").AsString(100).Nullable()
             .WithColumn("system_id").AsGuid().NotNullable().WithDefault(SystemMethods.NewGuid)
             .WithColumn("securable_id").AsInt32().Nullable();
+
+        this.FixTime("queries", "run_frequency");
 
         Create.ForeignKey("FK_queries_securable_id")
             .FromTable("queries").ForeignColumn("securable_id")

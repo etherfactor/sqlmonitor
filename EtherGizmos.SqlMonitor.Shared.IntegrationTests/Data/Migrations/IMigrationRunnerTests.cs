@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Data.Migrations;
 
-public abstract class IMigrationRunnerTests
+public abstract class IMigrationRunnerTests : IntegrationTestBase
 {
     public abstract string CreateDatabaseCommand { get; }
 
@@ -45,7 +45,8 @@ public abstract class IMigrationRunnerTests
                         opt.WithGlobalConnectionString(connectionProvider.GetConnectionString())
                             .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
                             .WithVersionTable(new CustomVersionTableMetadata());
-                    });
+                    })
+                    .AddLogging(opt => opt.AddFluentMigratorConsole());
             })
             .ForwardTransient<IMigrationRunner>();
 

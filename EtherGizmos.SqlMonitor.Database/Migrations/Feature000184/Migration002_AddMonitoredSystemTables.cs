@@ -6,7 +6,7 @@ using System.Data;
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000184;
 
 [CreatedAt(year: 2024, month: 03, day: 13, hour: 18, minute: 30, description: "Create monitored system tables", trackingId: 184)]
-public class Migration002_AddMonitoredSystemTables : Migration
+public class Migration002_AddMonitoredSystemTables : MigrationExtension
 {
     public override void Up()
     {

@@ -9,7 +9,7 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class Query : Auditable
 {
     [Column("query_id")]
-    [Key, SqlDefaultValue]
+    [Key]
     public virtual Guid Id { get; set; }
 
     [Column("name")]

@@ -9,7 +9,7 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class MonitoredSystem : Auditable
 {
     [Column("monitored_system_id")]
-    [Key, SqlDefaultValue]
+    [Key]
     public virtual Guid Id { get; set; }
 
     [Column("name")]

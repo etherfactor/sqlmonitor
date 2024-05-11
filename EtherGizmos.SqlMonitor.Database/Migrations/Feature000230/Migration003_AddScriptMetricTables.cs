@@ -1,11 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
-using FluentMigrator;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000230;
 
 [CreatedAt(year: 2024, month: 04, day: 13, hour: 22, minute: 00, description: "Create script metric tables", trackingId: 230)]
-public class Migration003_AddScriptMetricTables : AutoReversingMigration
+public class Migration003_AddScriptMetricTables : MigrationExtension
 {
     public override void Up()
     {
@@ -20,5 +19,10 @@ public class Migration003_AddScriptMetricTables : AutoReversingMigration
             .WithColumn("metric_id").AsInt32().NotNullable()
             .WithColumn("value_key").AsString(100).NotNullable()
             .WithColumn("is_active").AsBoolean().NotNullable().WithDefaultValue(true);
+    }
+
+    public override void Down()
+    {
+        Delete.Table("script_metrics");
     }
 }

@@ -1,12 +1,11 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
-using FluentMigrator;
 using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000187;
 
 [CreatedAt(year: 2024, month: 04, day: 28, hour: 12, minute: 00, description: "Create monitored query target tables", trackingId: 187)]
-public class Migration001_AddMonitoredQueryTargetTables : Migration
+public class Migration001_AddMonitoredQueryTargetTables : MigrationExtension
 {
     public override void Up()
     {

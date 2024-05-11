@@ -8,6 +8,25 @@ internal static class Snippets
     public static void AddAuditTriggerV1(this MigrationBase @this, string table, params (string Name, DbType Type)[] primaryKeys)
     {
         /*
+         * MySQL
+         */
+        @this.IfDatabase(ProcessorId.MySql)
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"{table}_audit_insert")}
+before insert on {MySqlHelper.Escape(table)}
+for each row
+begin
+    set new.`modified_at_utc` = utc_timestamp;
+end;");
+
+        @this.IfDatabase(ProcessorId.MySql)
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"{table}_audit_update")}
+before update on {MySqlHelper.Escape(table)}
+for each row
+begin
+    set new.`modified_at_utc` = utc_timestamp;
+end;");
+
+        /*
          * PostgreSQL
          */
         @this.IfDatabase(ProcessorId.Postgres)
@@ -60,6 +79,70 @@ end;");
 
     public static void AddSecurableTriggerV1(this MigrationBase @this, string table, string securableColumn, int securableTypeId, params (string Name, DbType Type)[] primaryKeys)
     {
+        /*
+         * MySQL
+         */
+        @this.IfDatabase(ProcessorId.MySql)
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"TR_{table}_{securableColumn}_insert")}
+before insert on {MySqlHelper.Escape(table)}
+for each row
+begin
+    declare SecurableId int;
+    declare SecurableTypeId int default {securableTypeId};
+
+    if (new.{MySqlHelper.Escape(securableColumn)} is null) then
+        #Insert a new row into securables
+        insert into securables ( securable_type_id )
+          values ( SecurableTypeId );
+
+        #Get the generated id
+        set SecurableId = last_insert_id();
+
+        #Update the {table} table with the generated securable_id
+        set new.{MySqlHelper.Escape(securableColumn)} = SecurableId;
+    end if;
+end;");
+
+        @this.IfDatabase(ProcessorId.MySql)
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"TR_{table}_{securableColumn}_update")}
+before update on {MySqlHelper.Escape(table)}
+for each row
+begin
+    declare SecurableId int;
+    declare SecurableTypeId int default {securableTypeId};
+
+    if (new.{MySqlHelper.Escape(securableColumn)} is null) then
+        #Insert a new row into securables
+        insert into securables ( securable_type_id )
+          values ( SecurableTypeId );
+
+        #Get the generated id
+        set SecurableId = last_insert_id();
+
+        #Update the {table} table with the generated securable_id
+        set new.{MySqlHelper.Escape(securableColumn)} = SecurableId;
+    end if;
+end;");
+
+        @this.IfDatabase(ProcessorId.MySql)
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"TR_{table}_{securableColumn}_delete")}
+after delete on {MySqlHelper.Escape(table)}
+for each row
+begin
+    declare SecurableId int;
+    declare SecurableTypeId int default {securableTypeId};
+
+    if (new is null) then
+        #Get the id of the deleted record
+        select old.{MySqlHelper.Escape(securableColumn)}
+          into SecurableId;
+
+        #Delete the securable_id from the securables table
+        delete from `securables`
+          where `securable_id` = SecurableId;
+    end if;
+end;");
+
         /*
          * PostgreSQL
          */
@@ -181,6 +264,12 @@ begin
           where [securable_id] = @SecurableId;
     end;
 end;");
+    }
+
+    public static void FixTime(this MigrationBase @this, string table, string column)
+    {
+        @this.IfDatabase(ProcessorId.MySql)
+            .Alter.Column(column).OnTable(table).AsCustom("TIME");
     }
 
     private static IEnumerable<(string Name, DbType Type)> Escape(this IEnumerable<(string Name, DbType Type)> @this, Func<string, string> escape)
