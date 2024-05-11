@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer;
 
@@ -21,11 +22,13 @@ internal class DockerSetup : DockerSetupBase
 
     public override string DockerComposeFile => "./Initialization/docker-compose.yml";
 
+    public string PostComposeScript => "./Initialization/init.sql";
+
     protected override async Task PerformSetUp()
     {
         await base.PerformSetUp();
 
-        var connection = new SqlConnection($"Server={ServerHost},{ServerPort}; User Id={ServerDefaultUsername}; Password={ServerDefaultPassword}; TrustServerCertificate=true;");
+        var connection = new SqlConnection($"Server={ServerHost},{ServerPort}; User Id={ServerAdminUsername}; Password={ServerAdminPassword}; TrustServerCertificate=true;");
         var stopwatch = new Stopwatch();
         stopwatch.Start();
         do
@@ -44,6 +47,17 @@ internal class DockerSetup : DockerSetupBase
         if (connection.State != ConnectionState.Open)
         {
             throw new InvalidOperationException("SQL Server connection failed to initialize.");
+        }
+
+        var initScript = File.ReadAllText(PostComposeScript);
+        SqlCommand command;
+
+        foreach (var initScriptChunk in new Regex(@"\sgo\s").Split(initScript))
+        {
+            command = connection.CreateCommand();
+            command.CommandText = initScriptChunk;
+
+            await command.ExecuteNonQueryAsync();
         }
     }
 }
