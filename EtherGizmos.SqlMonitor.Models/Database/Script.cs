@@ -10,7 +10,7 @@ public class Script : Auditable
 {
     [Column("script_id")]
     [Key]
-    public virtual Guid Id { get; set; }
+    public virtual Guid Id { get; set; } = Guid.NewGuid();
 
     [Column("name")]
     public virtual string Name { get; set; }

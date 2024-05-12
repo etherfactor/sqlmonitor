@@ -54,6 +54,51 @@ stages:
         arguments: '--collect "XPlat Code Coverage"'
 
     - task: DockerCompose@0
+      displayName: 'Create Docker Container (MySQL)'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.MySql/Initialization/docker-compose.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'up -d'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (MySQL)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.MySql.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
+
+    - task: DockerCompose@0
+      displayName: 'Create Docker Container (PostgreSQL)'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.PostgreSql/Initialization/docker-compose.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'up -d'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (PostgreSQL)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.PostgreSql.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
+
+    - task: DockerCompose@0
+      displayName: 'Create Docker Container (SQL Server)'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerComposeFile: '**/$(Build.Projects.Api).IntegrationTests.SqlServer/Initialization/docker-compose.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'up -d'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Perform Integration Tests (SQL Server)'
+      inputs:
+        command: 'test'
+        projects: '**/$(Build.Projects.Api).IntegrationTests.SqlServer.csproj'
+        arguments: '--collect "XPlat Code Coverage"'
+
+    - task: DockerCompose@0
       displayName: 'Create Docker Container (SSH)'
       inputs:
         containerregistrytype: 'Container Registry'
@@ -113,19 +158,6 @@ stages:
     pool:
       vmImage: 'windows-latest'
     steps:
-
-    - task: PowerShell@2
-      displayName: 'Start MSSQLLocalDB'
-      inputs:
-        targetType: 'inline'
-        script: 'sqllocaldb start mssqllocaldb'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Perform Integration Tests (HTTP)'
-      inputs:
-        command: 'test'
-        projects: '**/$(Build.Projects.Api).IntegrationTests.Http.csproj'
-        arguments: '--collect "XPlat Code Coverage"'
 
     - task: PowerShell@2
       displayName: 'Enable Unencrypted Connections (WinRM)'

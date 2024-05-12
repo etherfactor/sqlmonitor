@@ -61,7 +61,7 @@ public abstract class DockerSetupBase
     {
         if (!IsSupportedOS())
         {
-            Assert.Inconclusive("Tests can only be run on Windows Professional or Windows Server installations");
+            Assert.Ignore("Tests can only be run on Windows Professional or Windows Server installations");
         }
     }
 

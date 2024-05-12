@@ -10,7 +10,7 @@ public class MonitoredSystem : Auditable
 {
     [Column("monitored_system_id")]
     [Key]
-    public virtual Guid Id { get; set; }
+    public virtual Guid Id { get; set; } = Guid.NewGuid();
 
     [Column("name")]
     public virtual string Name { get; set; }
