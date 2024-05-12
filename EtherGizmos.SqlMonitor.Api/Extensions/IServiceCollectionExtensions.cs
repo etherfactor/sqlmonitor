@@ -30,9 +30,11 @@ public static class IServiceCollectionExtensions
                 opt.AddMonitoredScriptTarget();
                 opt.AddMonitoredSystem();
                 opt.AddQuery();
+                opt.AddQueryMetric();
                 opt.AddQueryVariant();
                 opt.AddScript();
                 opt.AddScriptInterpreter();
+                opt.AddScriptMetric();
                 opt.AddScriptVariant();
             });
 

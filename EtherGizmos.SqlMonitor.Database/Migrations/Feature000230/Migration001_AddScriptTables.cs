@@ -37,7 +37,7 @@ public class Migration001_AddScriptTables : MigrationExtension
         this.AddAuditTriggerV1("script_interpreters",
             ("script_interpreter_id", DbType.Int32));
 
-        this.AddSecurableTriggerV1("script_interpreters", "securable_id", 150,
+        this.AddSecurableTriggerV1("script_interpreters", "securable_id", 390,
             ("script_interpreter_id", DbType.Int32));
 
         /* 
@@ -71,7 +71,7 @@ public class Migration001_AddScriptTables : MigrationExtension
         this.AddAuditTriggerV1("scripts",
             ("script_id", DbType.Guid));
 
-        this.AddSecurableTriggerV1("scripts", "securable_id", 390,
+        this.AddSecurableTriggerV1("scripts", "securable_id", 300,
             ("script_id", DbType.Guid));
 
         /*

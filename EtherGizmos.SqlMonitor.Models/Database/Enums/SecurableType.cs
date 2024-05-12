@@ -6,9 +6,12 @@ public enum SecurableType
     MonitoredSystem = 110,
     MonitoredResource = 120,
     MonitoredEnvironment = 130,
-    MonitoredScriptTarget = 150,
+    MonitoredQueryTarget = 170,
+    MonitoredScriptTarget = 180,
+    Query = 200,
     Script = 300,
     ScriptInterpreter = 390,
+    Metric = 500,
 }
 
 public static class SecurableTypeConverter
@@ -18,9 +21,12 @@ public static class SecurableTypeConverter
         { SecurableType.MonitoredSystem, 110 },
         { SecurableType.MonitoredResource, 120 },
         { SecurableType.MonitoredEnvironment, 130 },
-        { SecurableType.MonitoredScriptTarget, 150 },
+        { SecurableType.MonitoredQueryTarget, 170 },
+        { SecurableType.MonitoredScriptTarget, 180 },
+        { SecurableType.Query, 200 },
         { SecurableType.Script, 300 },
         { SecurableType.ScriptInterpreter, 390 },
+        { SecurableType.Metric, 500 },
     };
 
     public static SecurableType FromInteger(int value)

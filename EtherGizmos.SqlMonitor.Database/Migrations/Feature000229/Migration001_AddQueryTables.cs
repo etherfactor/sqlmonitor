@@ -54,7 +54,7 @@ public class Migration001_AddQueryTables : MigrationExtension
         this.AddAuditTriggerV1("queries",
             ("query_id", DbType.Guid));
 
-        this.AddSecurableTriggerV1("queries", "securable_id", 390,
+        this.AddSecurableTriggerV1("queries", "securable_id", 200,
             ("query_id", DbType.Guid));
 
         /*

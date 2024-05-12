@@ -25,12 +25,18 @@ public class Metric : Auditable
     [Column("is_soft_deleted")]
     public virtual bool IsSoftDeleted { get; set; }
 
+    [Column("securable_id")]
+    public virtual int SecurableId { get; set; }
+
+    public virtual Securable Securable { get; set; }
+
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
     public Metric()
     {
         Name = null!;
+        Securable = null!;
     }
 
     public Task EnsureValid(IQueryable<Metric> records)

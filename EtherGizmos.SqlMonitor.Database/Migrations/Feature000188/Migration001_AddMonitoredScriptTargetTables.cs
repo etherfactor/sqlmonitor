@@ -103,7 +103,7 @@ public class Migration001_AddMonitoredScriptTargetTables : MigrationExtension
         this.AddAuditTriggerV1("monitored_script_targets",
             ("monitored_script_target_id", DbType.Int32));
 
-        this.AddSecurableTriggerV1("monitored_script_targets", "securable_id", 150,
+        this.AddSecurableTriggerV1("monitored_script_targets", "securable_id", 180,
             ("monitored_script_target_id", DbType.Int32));
     }
 

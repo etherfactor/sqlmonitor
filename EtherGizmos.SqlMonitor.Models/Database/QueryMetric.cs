@@ -23,7 +23,7 @@ public class QueryMetric : Auditable
     public virtual Metric Metric { get; set; }
 
     [Column("value_column")]
-    public virtual string ValueKey { get; set; }
+    public virtual string ValueColumn { get; set; }
 
     [Column("is_active")]
     [SqlDefaultValue]
@@ -36,6 +36,6 @@ public class QueryMetric : Auditable
     {
         Query = null!;
         Metric = null!;
-        ValueKey = null!;
+        ValueColumn = null!;
     }
 }

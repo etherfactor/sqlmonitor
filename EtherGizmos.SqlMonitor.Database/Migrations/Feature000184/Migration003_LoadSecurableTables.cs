@@ -28,9 +28,21 @@ public class Migration003_LoadSecurableTables : MigrationExtension
             })
             .Row(new
             {
-                securable_type_id = 150,
+                securable_type_id = 170,
+                name = "Monitored Query Target",
+                description = "A server database associated with a system, resource, and environment being monitored with queries.",
+            })
+            .Row(new
+            {
+                securable_type_id = 180,
                 name = "Monitored Script Target",
                 description = "A server directory associated with a system, resource, and environment being monitored with scripts.",
+            })
+            .Row(new
+            {
+                securable_type_id = 200,
+                name = "Query",
+                description = "A query run against a server used to gather metrics.",
             })
             .Row(new
             {
@@ -43,6 +55,12 @@ public class Migration003_LoadSecurableTables : MigrationExtension
                 securable_type_id = 390,
                 name = "Script Interpreter",
                 description = "An application that is capable of running scripts.",
+            })
+            .Row(new
+            {
+                securable_type_id = 500,
+                name = "Metric",
+                description = "A data point tracked over time, with values returned via queries and scripts targeting systems.",
             })
             .Match(t => t.securable_type_id);
     }

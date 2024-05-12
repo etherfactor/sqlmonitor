@@ -37,6 +37,7 @@ public class MonitoredSystem : Auditable
     public MonitoredSystem()
     {
         Name = null!;
+        Securable = null!;
     }
 
     public Task EnsureValid(IQueryable<MonitoredSystem> records)
