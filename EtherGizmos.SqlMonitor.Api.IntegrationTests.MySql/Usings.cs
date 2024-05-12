@@ -1,3 +1,1 @@
-using System.Diagnostics.CodeAnalysis;
-
-[assembly: ExcludeFromCodeCoverage]
+global using NUnit.Framework;

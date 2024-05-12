@@ -1,8 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-
-[assembly: ExcludeFromCodeCoverage]
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
 
