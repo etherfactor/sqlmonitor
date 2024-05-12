@@ -13,8 +13,10 @@ using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using EtherGizmos.SqlMonitor.Database;
+using EtherGizmos.SqlMonitor.Database.Remaps;
 using EtherGizmos.SqlMonitor.Models;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Generators.MySql;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +79,44 @@ builder.Services
             .Bind(opt);
 
         if (usage.Value.Cache == CacheType.Redis)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
+    .AddOptions<MySqlOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:MySql";
+
+        var section = conf.GetSection(path);
+
+        section.Bind(opt);
+        opt.AllProperties = section.GetChildren()
+            .Where(e => !typeof(MySqlOptions).GetProperties().Any(p => p.Name == e.Key))
+            .ToDictionary(e => e.Key, e => e.Value);
+
+        if (usage.Value.Database == DatabaseType.MySql)
+        {
+            opt.AssertValid(path);
+        }
+    });
+
+builder.Services
+    .AddOptions<PostgreSqlOptions>()
+    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
+    {
+        var path = "Connections:PostgreSql";
+
+        var section = conf.GetSection(path);
+
+        section.Bind(opt);
+        opt.AllProperties = section.GetChildren()
+            .Where(e => !typeof(PostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
+            .ToDictionary(e => e.Key, e => e.Value);
+
+        if (usage.Value.Database == DatabaseType.PostgreSql)
         {
             opt.AssertValid(path);
         }
@@ -156,13 +196,35 @@ builder.Services
         var loggerFactory = services
             .GetRequiredService<ILoggerFactory>();
 
-        if (usageOptions.Database == DatabaseType.SqlServer)
+        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+        var connectionString = connectionProvider.GetConnectionString();
+        if (usageOptions.Database == DatabaseType.MySql)
         {
-            var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
-
             opt.UseLoggerFactory(loggerFactory);
 
-            opt.UseSqlServer(connectionProvider.GetConnectionString(), conf =>
+            opt.UseMySQL(connectionString, conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
+        else if (usageOptions.Database == DatabaseType.PostgreSql)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseNpgsql(connectionString, conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
+        else if (usageOptions.Database == DatabaseType.SqlServer)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseSqlServer(connectionString, conf =>
             {
                 conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
@@ -182,6 +244,7 @@ builder.Services
     .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
     .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
     .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
+    .AddScoped<IQueryService, QueryService>()
     .AddScoped<IScriptService, ScriptService>()
     .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
 
@@ -192,11 +255,21 @@ builder.Services
             .GetRequiredService<IOptions<UsageOptions>>()
             .Value;
 
-        if (usageOptions.Database == DatabaseType.SqlServer)
+        if (usageOptions.Database == DatabaseType.MySql)
+        {
+            childServices.AddTransient<IDatabaseConnectionProvider, MySqlDatabaseConnectionProvider>();
+        }
+        else if (usageOptions.Database == DatabaseType.PostgreSql)
+        {
+            childServices.AddTransient<IDatabaseConnectionProvider, PostgreSqlDatabaseConnectionProvider>();
+        }
+        else if (usageOptions.Database == DatabaseType.SqlServer)
         {
             childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
         }
     })
+    .ImportSingleton<IOptions<MySqlOptions>>()
+    .ImportSingleton<IOptions<PostgreSqlOptions>>()
     .ImportSingleton<IOptions<SqlServerOptions>>()
     .ForwardTransient<IDatabaseConnectionProvider>();
 
@@ -214,12 +287,22 @@ builder.Services
             .AddFluentMigratorCore()
             .ConfigureRunner(opt =>
             {
-                if (usageOptions.Database == DatabaseType.SqlServer)
+                opt.WithGlobalConnectionString(connectionProvider.GetConnectionString())
+                    .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
+                    .WithVersionTable(new CustomVersionTableMetadata());
+
+                if (usageOptions.Database == DatabaseType.MySql)
                 {
-                    opt.AddSqlServer()
-                        .WithGlobalConnectionString(connectionProvider.GetConnectionString())
-                        .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
-                        .WithVersionTable(new CustomVersionTableMetadata());
+                    opt.AddMySql8()
+                        .Services.AddScoped<MySqlQuoter, MySqlQuoterRemap>();
+                }
+                else if (usageOptions.Database == DatabaseType.PostgreSql)
+                {
+                    opt.AddPostgres();
+                }
+                else if (usageOptions.Database == DatabaseType.SqlServer)
+                {
+                    opt.AddSqlServer();
                 }
                 else
                 {

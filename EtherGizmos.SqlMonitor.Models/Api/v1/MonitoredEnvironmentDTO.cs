@@ -10,7 +10,7 @@ namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
 public class MonitoredEnvironmentDTO
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public DateTimeOffset? CreatedAt { get; set; }
 

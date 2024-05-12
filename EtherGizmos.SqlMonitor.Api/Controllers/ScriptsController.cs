@@ -34,19 +34,19 @@ public class ScriptsController : ODataController
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="instanceService">Provides access to the storage of records.</param>
+    /// <param name="scriptService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
     public ScriptsController(
         ILogger<ScriptsController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
-        IScriptService instanceService,
+        IScriptService scriptService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _scriptService = instanceService;
+        _scriptService = scriptService;
         _saveService = saveService;
     }
 

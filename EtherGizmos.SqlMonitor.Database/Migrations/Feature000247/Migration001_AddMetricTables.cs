@@ -1,11 +1,11 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
-using FluentMigrator;
+using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000247;
 
 [CreatedAt(year: 2024, month: 04, day: 13, hour: 21, minute: 00, description: "Create metric tables", trackingId: 247)]
-public class Migration001_AddMetricTables : Migration
+public class Migration001_AddMetricTables : MigrationExtension
 {
     public override void Up()
     {
@@ -19,24 +19,8 @@ public class Migration001_AddMetricTables : Migration
             .WithColumn("name").AsString(200).NotNullable()
             .WithColumn("description").AsString(int.MaxValue).Nullable();
 
-        Execute.Sql(@"create trigger [TR_aggregate_types_audit]
-on [aggregate_types]
-after insert, update
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.aggregate_type_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [aggregate_types]
-      set [modified_at_utc] = getutcdate()
-      where [aggregate_type_id] = @RecordId;
-end;");
+        this.AddAuditTriggerV1("aggregate_types",
+            ("aggregate_type_id", DbType.Int32));
 
         /*
          * Create [dbo].[metrics]
@@ -54,24 +38,8 @@ end;");
             .FromTable("metrics").ForeignColumn("aggregate_type_id")
             .ToTable("aggregate_types").PrimaryColumn("aggregate_type_id");
 
-        Execute.Sql(@"create trigger [TR_metrics_audit]
-on [metrics]
-after insert, update
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.metric_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [metrics]
-      set [modified_at_utc] = getutcdate()
-      where [metric_id] = @RecordId;
-end;");
+        this.AddAuditTriggerV1("metrics",
+            ("metric_id", DbType.Int32));
     }
 
     public override void Down()

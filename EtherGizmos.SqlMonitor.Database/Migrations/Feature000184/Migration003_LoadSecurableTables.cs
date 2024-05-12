@@ -1,14 +1,13 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
-using FluentMigrator;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000184;
 
 [CreatedAt(year: 2024, month: 03, day: 13, hour: 18, minute: 45, description: "Load securable tables", trackingId: 184)]
-public class Migration003_LoadSecurableTables : Migration
+public class Migration003_LoadSecurableTables : MigrationExtension
 {
     public override void Up()
     {
-        Insert.IntoTable("securable_types")
+        Merge.IntoTable("securable_types")
             .Row(new
             {
                 securable_type_id = 110,
@@ -44,31 +43,11 @@ public class Migration003_LoadSecurableTables : Migration
                 securable_type_id = 390,
                 name = "Script Interpreter",
                 description = "An application that is capable of running scripts.",
-            });
+            })
+            .Match(t => t.securable_type_id);
     }
 
     public override void Down()
     {
-        Delete.FromTable("securable_types")
-            .Row(new
-            {
-                securable_type_id = 120,
-            })
-            .Row(new
-            {
-                securable_type_id = 140,
-            })
-            .Row(new
-            {
-                securable_type_id = 160,
-            })
-            .Row(new
-            {
-                securable_type_id = 300,
-            })
-            .Row(new
-            {
-                securable_type_id = 390,
-            });
     }
 }

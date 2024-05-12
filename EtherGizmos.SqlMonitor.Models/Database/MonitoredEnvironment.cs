@@ -9,8 +9,8 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class MonitoredEnvironment : Auditable
 {
     [Column("monitored_environment_id")]
-    [Key, SqlDefaultValue]
-    public virtual Guid Id { get; set; }
+    [Key]
+    public virtual Guid Id { get; set; } = Guid.NewGuid();
 
     [Column("name")]
     public virtual string Name { get; set; }

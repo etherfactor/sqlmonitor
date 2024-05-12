@@ -63,7 +63,7 @@ internal class SshScriptRunnerTests
             RunInPath = "/home",
             SshAuthenticationType = SshAuthenticationType.PrivateKey,
             SshUsername = "root",
-            SshPrivateKey = File.ReadAllText(Global.PrivateKeyFilePath),
+            SshPrivateKey = File.ReadAllText(DockerSetup.PrivateKeyFilePath),
             SshPrivateKeyPassword = "password",
         };
 

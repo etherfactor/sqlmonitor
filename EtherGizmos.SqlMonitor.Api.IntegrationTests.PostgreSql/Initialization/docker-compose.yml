@@ -1,0 +1,8 @@
+version: '3'
+services:
+  postgresql-server:
+    platform: linux/amd64
+    build:
+      context: .
+    ports:
+      - "55432:5432"

@@ -1,11 +1,12 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 using FluentMigrator;
+using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000230;
 
 [CreatedAt(year: 2024, month: 03, day: 18, hour: 20, minute: 00, description: "Create script tables", trackingId: 230)]
-public class Migration001_AddScriptTables : Migration
+public class Migration001_AddScriptTables : MigrationExtension
 {
     public override void Up()
     {
@@ -33,72 +34,11 @@ public class Migration001_AddScriptTables : Migration
             .OnTable("script_interpreters")
             .OnColumn("securable_id");
 
-        Execute.Sql(@"create trigger [TR_script_interpreters_audit]
-on [script_interpreters]
-after insert, update
-as
-begin
-    set nocount on;
+        this.AddAuditTriggerV1("script_interpreters",
+            ("script_interpreter_id", DbType.Int32));
 
-    declare @RecordId int;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.script_interpreter_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [script_interpreters]
-      set [modified_at_utc] = getutcdate()
-      where [script_interpreter_id] = @RecordId;
-end;");
-
-        Execute.Sql(@"create trigger [TR_script_interpreters_securable_id]
-on [script_interpreters]
-after insert, update, delete
-as
-begin
-    set nocount on;
-
-    declare @RecordId int;
-    declare @SecurableId int;
-    declare @SecurableTypeId int = 390;
-
-    --Handle inserts/updates
-    if exists ( select 1 from inserted )
-    begin
-        --Get the id of the inserted record
-        select @RecordId = inserted.script_interpreter_id,
-          @SecurableId = inserted.securable_id
-          from inserted;
-
-        if @SecurableId is null
-        begin
-            --Insert a new row into [securables]
-            insert into [securables] ( [securable_type_id] )
-              values ( @SecurableTypeId );
-
-            --Get the generated id
-            select @SecurableId = scope_identity();
-
-            --Update the [script_interpreters] table with the generated [securable_id]
-            update [script_interpreters]
-              set [securable_id] = @SecurableId
-              where [script_interpreter_id] = @RecordId;
-        end;
-    end
-    --Handle deletes
-    else
-    begin
-        --Get the id of the deleted record
-        select @RecordId = deleted.script_interpreter_id,
-          @SecurableId = deleted.securable_id
-          from deleted;
-
-        --Delete the [securable_id] from the [securables] table
-        delete from [securables]
-          where [securable_id] = @SecurableId;
-    end;
-end;");
+        this.AddSecurableTriggerV1("script_interpreters", "securable_id", 150,
+            ("script_interpreter_id", DbType.Int32));
 
         /* 
          * Create [dbo].[scripts]
@@ -118,6 +58,8 @@ end;");
             .WithColumn("system_id").AsGuid().NotNullable().WithDefault(SystemMethods.NewGuid)
             .WithColumn("securable_id").AsInt32().Nullable();
 
+        this.FixTime("scripts", "run_frequency");
+
         Create.ForeignKey("FK_scripts_securable_id")
             .FromTable("scripts").ForeignColumn("securable_id")
             .ToTable("securables").PrimaryColumn("securable_id");
@@ -126,72 +68,11 @@ end;");
             .OnTable("scripts")
             .OnColumn("securable_id");
 
-        Execute.Sql(@"create trigger [TR_scripts_audit]
-on [scripts]
-after insert, update
-as
-begin
-    set nocount on;
+        this.AddAuditTriggerV1("scripts",
+            ("script_id", DbType.Guid));
 
-    declare @RecordId uniqueidentifier;
-
-    --Get the id of the inserted record
-    select @RecordId = inserted.script_id
-        from inserted;
-
-    --Set the last modified time of the record
-    update [scripts]
-      set [modified_at_utc] = getutcdate()
-      where [script_id] = @RecordId;
-end;");
-
-        Execute.Sql(@"create trigger [TR_scripts_securable_id]
-on [scripts]
-after insert, update, delete
-as
-begin
-    set nocount on;
-
-    declare @RecordId uniqueidentifier;
-    declare @SecurableId int;
-    declare @SecurableTypeId int = 390;
-
-    --Handle inserts/updates
-    if exists ( select 1 from inserted )
-    begin
-        --Get the id of the inserted record
-        select @RecordId = inserted.script_id,
-          @SecurableId = inserted.securable_id
-          from inserted;
-
-        if @SecurableId is null
-        begin
-            --Insert a new row into [securables]
-            insert into [securables] ( [securable_type_id] )
-              values ( @SecurableTypeId );
-
-            --Get the generated id
-            select @SecurableId = scope_identity();
-
-            --Update the [scripts] table with the generated [securable_id]
-            update [scripts]
-              set [securable_id] = @SecurableId
-              where [script_id] = @RecordId;
-        end;
-    end
-    --Handle deletes
-    else
-    begin
-        --Get the id of the deleted record
-        select @RecordId = deleted.script_id,
-          @SecurableId = deleted.securable_id
-          from deleted;
-
-        --Delete the [securable_id] from the [securables] table
-        delete from [securables]
-          where [securable_id] = @SecurableId;
-    end;
-end;");
+        this.AddSecurableTriggerV1("scripts", "securable_id", 390,
+            ("script_id", DbType.Guid));
 
         /*
          * Create [dbo].[script_variants]
@@ -219,6 +100,9 @@ end;");
         Create.Index("IX_script_variants_script_interpreter_id")
             .OnTable("script_variants")
             .OnColumn("script_interpreter_id");
+
+        this.AddAuditTriggerV1("script_variants",
+            ("script_variant_id", DbType.Int32));
     }
 
     public override void Down()
