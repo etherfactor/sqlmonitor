@@ -1,9 +1,13 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Queries.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Database;
 using Npgsql;
 using System.Diagnostics;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Queries;
 
+/// <summary>
+/// Executes queries against a PostgreSQL database.
+/// </summary>
 public class PostgreSqlQueryRunner : IQueryRunner
 {
     /// <inheritdoc/>

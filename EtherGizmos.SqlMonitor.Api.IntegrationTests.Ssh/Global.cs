@@ -1,17 +1,3 @@
-﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+﻿using System.Diagnostics.CodeAnalysis;
 
 [assembly: ExcludeFromCodeCoverage]
-
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh;
-
-[SetUpFixture]
-internal class Global : DockerSetupBase
-{
-    public const string PrivateKeyFilePath = "./Initialization/id_rsa";
-
-    public override OSPlatform DockerOS => OSPlatform.Linux;
-
-    public override string DockerComposeFile => "./Initialization/docker-compose.yml";
-}

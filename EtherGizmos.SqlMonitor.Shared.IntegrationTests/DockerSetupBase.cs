@@ -4,13 +4,26 @@ using System.Runtime.InteropServices;
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests;
 
+/// <summary>
+/// Provides a base for initializing Docker containers needed for tests.
+/// </summary>
 [SetUpFixture]
 public abstract class DockerSetupBase
 {
+    /// <summary>
+    /// The target platform of the Docker container. Should be either <see cref="OSPlatform.Linux"/> or <see cref="OSPlatform.Windows"/>.
+    /// </summary>
     public abstract OSPlatform DockerOS { get; }
 
+    /// <summary>
+    /// The relative path to the Docker compose file.
+    /// </summary>
     public abstract string DockerComposeFile { get; }
 
+    /// <summary>
+    /// Initializes the Docker container.
+    /// </summary>
+    /// <returns>An awaitable task.</returns>
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
@@ -23,6 +36,10 @@ public abstract class DockerSetupBase
         });
     }
 
+    /// <summary>
+    /// Removes the Docker container.
+    /// </summary>
+    /// <returns>An awaitable task.</returns>
     [OneTimeTearDown]
     public async Task OneTimeTearDown()
     {

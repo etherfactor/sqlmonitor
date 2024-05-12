@@ -1,9 +1,13 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Queries.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Database;
 using MySqlConnector;
 using System.Diagnostics;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Queries;
 
+/// <summary>
+/// Executes queries against a MySQL database.
+/// </summary>
 public class MySqlQueryRunner : IQueryRunner
 {
     /// <inheritdoc/>

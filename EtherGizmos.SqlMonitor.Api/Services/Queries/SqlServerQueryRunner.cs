@@ -1,9 +1,13 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Queries.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Database;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Queries;
 
+/// <summary>
+/// Executes queries against a Microsoft SQL Server database.
+/// </summary>
 public class SqlServerQueryRunner : IQueryRunner
 {
     /// <inheritdoc/>

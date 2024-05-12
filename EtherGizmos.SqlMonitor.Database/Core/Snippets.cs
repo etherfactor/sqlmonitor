@@ -5,6 +5,12 @@ namespace EtherGizmos.SqlMonitor.Database.Core;
 
 internal static class Snippets
 {
+    /// <summary>
+    /// Adds an audit trigger to a table.
+    /// </summary>
+    /// <param name="this">The migration.</param>
+    /// <param name="table">The table name.</param>
+    /// <param name="primaryKeys">The table's keys and their data types.</param>
     public static void AddAuditTriggerV1(this MigrationBase @this, string table, params (string Name, DbType Type)[] primaryKeys)
     {
         /*
@@ -77,6 +83,14 @@ begin
 end;");
     }
 
+    /// <summary>
+    /// Adds a securable trigger to a table.
+    /// </summary>
+    /// <param name="this">The migration.</param>
+    /// <param name="table">The table name.</param>
+    /// <param name="securableColumn">The table's securable id column.</param>
+    /// <param name="securableTypeId">The type of securable being stored in this table.</param>
+    /// <param name="primaryKeys">The table's primary keys and their data types.</param>
     public static void AddSecurableTriggerV1(this MigrationBase @this, string table, string securableColumn, int securableTypeId, params (string Name, DbType Type)[] primaryKeys)
     {
         /*
@@ -266,6 +280,12 @@ begin
 end;");
     }
 
+    /// <summary>
+    /// Fixes a MySQL time column, as there is now a TIME data type.
+    /// </summary>
+    /// <param name="this">The migration.</param>
+    /// <param name="table">The table name.</param>
+    /// <param name="column">The column to fix from DATETIME to TIME.</param>
     public static void FixTime(this MigrationBase @this, string table, string column)
     {
         @this.IfDatabase(ProcessorId.MySql)
