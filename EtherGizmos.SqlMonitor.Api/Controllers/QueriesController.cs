@@ -2,9 +2,11 @@
 using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Exceptions;
 using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
@@ -23,6 +25,7 @@ public class QueriesController : ODataController
     private readonly IMapper _mapper;
     private readonly IQueryService _queryService;
     private readonly ISaveService _saveService;
+    private readonly IMetricService _metricService;
 
     /// <summary>
     /// Queries stored records.
@@ -36,18 +39,21 @@ public class QueriesController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="queryService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
+    /// <param name="metricService">Provides access to metric records.</param>
     public QueriesController(
         ILogger<QueriesController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
         IQueryService queryService,
-        ISaveService saveService)
+        ISaveService saveService,
+        IMetricService metricService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
         _queryService = queryService;
         _saveService = saveService;
+        _metricService = metricService;
     }
 
     /// <summary>
@@ -97,6 +103,16 @@ public class QueriesController : ODataController
 
         await newRecord.EnsureValid(Queries);
 
+        var allMetrics = _metricService.GetQueryable();
+        foreach (var metricId in newRecord.Metrics.Select(e => e.MetricId).Distinct())
+        {
+            if (!await allMetrics.AnyAsync(e => e.Id == metricId))
+            {
+                var error = new ODataRecordNotFoundError<MetricDTO>((e => e.Id, metricId!));
+                throw new ReturnODataErrorException(error);
+            }
+        }
+
         Query record = _mapper.Map<Query>(newRecord);
 
         await record.EnsureValid(Queries);
@@ -129,6 +145,16 @@ public class QueriesController : ODataController
         Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
             return new ODataRecordNotFoundError<QueryDTO>((e => e.Id, id)).GetResponse();
+
+        var allMetrics = _metricService.GetQueryable();
+        foreach (var metricId in testRecord.Metrics.Select(e => e.MetricId).Distinct())
+        {
+            if (!await allMetrics.AnyAsync(e => e.Id == metricId))
+            {
+                var error = new ODataRecordNotFoundError<MetricDTO>((e => e.Id, metricId!));
+                throw new ReturnODataErrorException(error);
+            }
+        }
 
         var recordAsDto = _mapper.MapExplicitly(record).To<QueryDTO>();
         patchRecord.Patch(recordAsDto);

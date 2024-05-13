@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
+using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models;
@@ -66,6 +67,20 @@ internal class QueriesControllerTests
 
         var mockServ = _provider.GetRequiredService<Mock<IQueryService>>();
         mockServ.Setup(service => service.GetQueryable()).Returns(mockData);
+
+        var metricData = new List<Metric>()
+        {
+            new()
+            {
+                Id = 1,
+                Name = "Test Metric",
+            },
+        };
+
+        var mockMetricData = metricData.AsQueryable().BuildMock();
+
+        var mockMetricServ = _provider.GetRequiredService<Mock<IMetricService>>();
+        mockMetricServ.Setup(service => service.GetQueryable()).Returns(mockMetricData);
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Setup(service => service.SaveChangesAsync()).Returns(Task.CompletedTask);
@@ -493,6 +508,72 @@ internal class QueriesControllerTests
     }
 
     [Test]
+    public void Create_WithNonexistentMetric_Returns404NotFound()
+    {
+        var model = ApiVersions.V0_1.GenerateEdmModel();
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+            model,
+            "POST",
+            "https://localhost:7200",
+            "api/v0.1",
+            "queries",
+            "",
+            "");
+
+        var record = new QueryDTO()
+        {
+            Name = "Test",
+            Metrics = new()
+            {
+                new()
+                {
+                    MetricId = -1,
+                },
+            },
+        };
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await _controller.Create(record, queryOptions);
+        });
+    }
+
+    [Test]
+    public void Create_WithDuplicateMetrics_Returns422UnprocessableEntity()
+    {
+        var model = ApiVersions.V0_1.GenerateEdmModel();
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+            model,
+            "POST",
+            "https://localhost:7200",
+            "api/v0.1",
+            "queries",
+            "",
+            "");
+
+        var record = new QueryDTO()
+        {
+            Name = "Test",
+            Metrics = new()
+            {
+                new()
+                {
+                    MetricId = 1,
+                },
+                new()
+                {
+                    MetricId = 1,
+                },
+            },
+        };
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await _controller.Create(record, queryOptions);
+        });
+    }
+
+    [Test]
     public async Task Create_IsValid_Returns201Created()
     {
         var model = ApiVersions.V0_1.GenerateEdmModel();
@@ -721,11 +802,75 @@ internal class QueriesControllerTests
     }
 
     [Test]
+    public void Update_WithNonexistentMetric_Returns404NotFound()
+    {
+        var recordId = _recordId;
+
+        var model = ApiVersions.V0_1.GenerateEdmModel();
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+            model,
+            "POST",
+            "https://localhost:7200",
+            "api/v0.1",
+            "queries",
+            "",
+            "");
+
+        var record = new Delta<QueryDTO>();
+        record.TrySetPropertyValue(nameof(QueryDTO.Metrics), new List<QueryMetricDTO>()
+        {
+            new()
+            {
+                MetricId = -1,
+            },
+        });
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await _controller.Update(recordId, record, queryOptions);
+        });
+    }
+
+    [Test]
+    public void Update_WithDuplicateMetrics_Returns422UnprocessableEntity()
+    {
+        var recordId = _recordId;
+
+        var model = ApiVersions.V0_1.GenerateEdmModel();
+        var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
+            model,
+            "POST",
+            "https://localhost:7200",
+            "api/v0.1",
+            "queries",
+            "",
+            "");
+
+        var record = new Delta<QueryDTO>();
+        record.TrySetPropertyValue(nameof(QueryDTO.Metrics), new List<QueryMetricDTO>()
+        {
+            new()
+            {
+                MetricId = 1,
+            },
+            new()
+            {
+                MetricId = 1,
+            },
+        });
+
+        Assert.ThrowsAsync<ReturnODataErrorException>(async () =>
+        {
+            var result = await _controller.Update(recordId, record, queryOptions);
+        });
+    }
+
+    [Test]
     public async Task Update_IsValid_Returns200Ok()
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "POST",
