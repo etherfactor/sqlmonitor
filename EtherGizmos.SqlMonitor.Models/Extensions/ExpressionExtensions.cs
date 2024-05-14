@@ -53,4 +53,108 @@ public static class ExpressionExtensions
 
         return property;
     }
+
+    /// <summary>
+    /// Converts the expression into a path, such as Values[2].Id.
+    /// </summary>
+    /// <typeparam name="TSource">The type of entity.</typeparam>
+    /// <param name="this">The expression selecting a property.</param>
+    /// <returns>The expression path.</returns>
+    public static string GetPath<TSource>(this Expression<Func<TSource, object?>> @this)
+    {
+        var path = GetExpressionPath(@this.Body);
+        return path ?? @this.ToString();
+    }
+
+    private static string? GetExpressionPath(Expression? expression)
+    {
+        return expression switch
+        {
+            UnaryExpression unaryExpression when unaryExpression.NodeType == ExpressionType.Convert => GetExpressionPath(unaryExpression.Operand),
+            MemberExpression member => GetMemberPath(member),
+            MethodCallExpression method => GetMethodCallPath(method),
+            ParameterExpression => null, //The initial argument of the expression (e.g., e), we don't want this
+            _ => expression?.ToString(),
+        };
+    }
+
+    private static string GetMemberPath(MemberExpression expression)
+    {
+        var prefix = GetExpressionPath(expression.Expression);
+        var postfix = expression.Member.Name;
+
+        return prefix is not null
+            ? $"{prefix}.{postfix}"
+            : postfix;
+    }
+
+    private static string GetMethodCallPath(MethodCallExpression expression)
+    {
+        //Handle method call (e.g., accessing an element of a collection)
+        if (expression.Object is MemberExpression memberExpression)
+        {
+            var path = GetMemberPath(memberExpression);
+            var index = GetIndexFromMethodCall(expression);
+
+            //If the index is a string (e.g., dictionary), escape any double quotes in the accessor
+            return index is string stringIndex
+                ? $"{path}[\"{stringIndex.Replace("\"", "\\\"")}\"]"
+                : $"{path}[{index}]";
+        }
+
+        //If the method points to another type of expression, return it as a string, as we do not know how to handle it
+        return expression.ToString();
+    }
+
+    private static object? GetIndexFromMethodCall(MethodCallExpression methodCallExpression)
+    {
+        //Assuming the method called is an indexer (e.g., Values[index])
+        //Extract the index from the method call arguments
+        if (methodCallExpression.Arguments.Count == 1)
+        {
+            switch (methodCallExpression.Arguments[0])
+            {
+                case ConstantExpression constant:
+                    return constant.Value;
+
+                case MemberExpression member:
+                    return GetValueFromExpression(member);
+            }
+        }
+
+        throw new ArgumentException("Unsupported method call expression.");
+    }
+
+    private static object? GetValueFromExpression(MemberExpression expression)
+    {
+        object? extractValue;
+        if (expression.Expression is ConstantExpression constant)
+        {
+            //Expression is a member of a constant value
+            extractValue = constant.Value;
+        }
+        else if (expression.Expression is MemberExpression member)
+        {
+            //Expression is a member of another object, so extract the value recursively
+            extractValue = GetValueFromExpression(member);
+        }
+        else
+        {
+            throw new ArgumentException("Unsupported method call expression.");
+        }
+
+        switch (expression.Member)
+        {
+            case PropertyInfo property:
+                //Extract the property from the constant
+                return property.GetValue(extractValue);
+
+            case FieldInfo field:
+                //Extract the field from the constant
+                return field.GetValue(extractValue);
+
+            default:
+                throw new ArgumentException("Unsupported method call expression.");
+        }
+    }
 }

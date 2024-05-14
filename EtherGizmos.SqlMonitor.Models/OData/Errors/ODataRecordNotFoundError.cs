@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace EtherGizmos.SqlMonitor.Models.OData.Errors;
 
 /// <summary>
-/// Utilize when a record was expected but could not be found.
+/// Utilize when a record was expected but none could be found.
 /// </summary>
 /// <typeparam name="TEntity">The externally-facing type of record.</typeparam>
 public class ODataRecordNotFoundError<TEntity> : ODataErrorBase

@@ -2,9 +2,12 @@
 using Asp.Versioning.OData;
 using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Exceptions;
 using EtherGizmos.SqlMonitor.Models.Extensions;
+using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.OData.ModelBuilder;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
@@ -38,8 +41,29 @@ public class QueryDTO
 
     public List<QueryVariantDTO> Variants { get; set; } = new();
 
+    public List<QueryMetricDTO> Metrics { get; set; } = new();
+
     public Task EnsureValid(IQueryable<Query> records)
     {
+        var duplicates = Metrics.Select((e, i) => new { Index = i, Value = e })
+            .GroupBy(e => e.Value.MetricId)
+            .Where(e => e.Count() > 1);
+
+        if (duplicates.Any())
+        {
+            var values = duplicates.SelectMany(e =>
+                e.Take(1).Select(v => new { First = true, Value = v }).Concat(
+                    e.Skip(1).Select(v => new { First = false, Value = v })));
+
+            var error = new ODataDuplicateReferenceError<QueryDTO>(values.Select(v =>
+            {
+                Expression<Func<QueryDTO, object?>> expression = e => e.Metrics[v.Value.Index].MetricId;
+                return (v.First, expression);
+            }).ToArray());
+
+            throw new ReturnODataErrorException(error);
+        }
+
         return Task.CompletedTask;
     }
 }

@@ -2,9 +2,12 @@
 using Asp.Versioning.OData;
 using AutoMapper;
 using EtherGizmos.SqlMonitor.Models.Database;
+using EtherGizmos.SqlMonitor.Models.Exceptions;
 using EtherGizmos.SqlMonitor.Models.Extensions;
+using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.OData.ModelBuilder;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Models.Api.v1;
 
@@ -38,8 +41,29 @@ public class ScriptDTO
 
     public List<ScriptVariantDTO> Variants { get; set; } = new();
 
+    public List<ScriptMetricDTO> Metrics { get; set; } = new();
+
     public Task EnsureValid(IQueryable<Script> records)
     {
+        var duplicates = Metrics.Select((e, i) => new { Index = i, Value = e })
+            .GroupBy(e => e.Value.MetricId)
+            .Where(e => e.Count() > 1);
+
+        if (duplicates.Any())
+        {
+            var values = duplicates.SelectMany(e =>
+                e.Take(1).Select(v => new { First = true, Value = v }).Concat(
+                    e.Skip(1).Select(v => new { First = false, Value = v })));
+
+            var error = new ODataDuplicateReferenceError<ScriptDTO>(values.Select(v =>
+            {
+                Expression<Func<ScriptDTO, object?>> expression = e => e.Metrics[v.Value.Index].MetricId;
+                return (v.First, expression);
+            }).ToArray());
+
+            throw new ReturnODataErrorException(error);
+        }
+
         return Task.CompletedTask;
     }
 }
@@ -75,6 +99,7 @@ public class ScriptDTOConfiguration : IModelConfiguration
             entity.Property(e => e.BucketKey);
             entity.Property(e => e.TimestampUtcKey);
             entity.CollectionProperty(e => e.Variants);
+            entity.CollectionProperty(e => e.Metrics);
         }
     }
 }
@@ -100,6 +125,7 @@ public static class ForScriptDTO
         toDto.MapMember(dest => dest.BucketKey, src => src.BucketKey);
         toDto.MapMember(dest => dest.TimestampUtcKey, src => src.TimestampUtcKey);
         toDto.MapMember(dest => dest.Variants, src => src.Variants);
+        toDto.MapMember(dest => dest.Metrics, src => src.Metrics);
 
         var fromDto = @this.CreateMap<ScriptDTO, Script>();
         fromDto.IgnoreAllMembers();
@@ -117,6 +143,7 @@ public static class ForScriptDTO
         fromDto.MapMember(dest => dest.BucketKey, src => src.BucketKey);
         fromDto.MapMember(dest => dest.TimestampUtcKey, src => src.TimestampUtcKey);
         fromDto.MapMember(dest => dest.Variants, src => src.Variants);
+        fromDto.MapMember(dest => dest.Metrics, src => src.Metrics);
 
         return @this;
     }

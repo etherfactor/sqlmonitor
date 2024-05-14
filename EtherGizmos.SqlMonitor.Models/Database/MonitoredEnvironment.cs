@@ -37,6 +37,7 @@ public class MonitoredEnvironment : Auditable
     public MonitoredEnvironment()
     {
         Name = null!;
+        Securable = null!;
     }
 
     public Task EnsureValid(IQueryable<MonitoredEnvironment> records)

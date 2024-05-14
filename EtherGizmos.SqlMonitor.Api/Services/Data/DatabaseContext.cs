@@ -103,6 +103,8 @@ public class DatabaseContext : DbContext
             entity.PropertyWithAnnotations(e => e.Description);
             entity.PropertyWithAnnotations(e => e.AggregateType);
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
         });
 
         modelBuilder.Entity<MonitoredEnvironment>(entity =>
@@ -219,6 +221,26 @@ public class DatabaseContext : DbContext
                 .WithOne(e => e.Query);
         });
 
+        modelBuilder.Entity<QueryMetric>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_query_metrics_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.QueryId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.ValueColumn);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+
+            entity.HasOne(e => e.Query)
+                .WithMany(e => e.Metrics);
+        });
+
         modelBuilder.Entity<QueryVariant>(entity =>
         {
             entity.ToTableWithAnnotations(buildAction: e =>
@@ -251,7 +273,7 @@ public class DatabaseContext : DbContext
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.QueryId);
             entity.PropertyWithAnnotations(e => e.MetricId);
-            entity.PropertyWithAnnotations(e => e.ValueKey);
+            entity.PropertyWithAnnotations(e => e.ValueColumn);
             entity.PropertyWithAnnotations(e => e.IsActive);
 
             entity.HasOne(e => e.Query)

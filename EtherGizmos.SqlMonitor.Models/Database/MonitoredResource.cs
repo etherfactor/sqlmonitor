@@ -37,6 +37,7 @@ public class MonitoredResource : Auditable
     public MonitoredResource()
     {
         Name = null!;
+        Securable = null!;
     }
 
     public Task EnsureValid(IQueryable<MonitoredResource> records)

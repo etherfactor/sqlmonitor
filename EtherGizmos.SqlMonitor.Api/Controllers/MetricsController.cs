@@ -15,6 +15,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EtherGizmos.SqlMonitor.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for <see cref="Metric"/> records.
+/// </summary>
 public class MetricsController : ODataController
 {
     private const string BasePath = "api/v{version:apiVersion}/metrics";

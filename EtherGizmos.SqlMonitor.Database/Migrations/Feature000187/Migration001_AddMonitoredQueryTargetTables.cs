@@ -49,7 +49,7 @@ public class Migration001_AddMonitoredQueryTargetTables : MigrationExtension
         this.AddAuditTriggerV1("monitored_query_targets",
             ("monitored_query_target_id", DbType.Int32));
 
-        this.AddSecurableTriggerV1("monitored_query_targets", "securable_id", 150,
+        this.AddSecurableTriggerV1("monitored_query_targets", "securable_id", 170,
             ("monitored_query_target_id", DbType.Int32));
     }
 
