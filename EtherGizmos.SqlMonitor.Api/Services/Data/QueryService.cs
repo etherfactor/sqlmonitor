@@ -8,13 +8,13 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// </summary>
 internal class QueryService : IQueryService
 {
-    private readonly DatabaseContext _context;
+    private readonly ApplicationContext _context;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public QueryService(DatabaseContext context)
+    public QueryService(ApplicationContext context)
     {
         _context = context;
     }

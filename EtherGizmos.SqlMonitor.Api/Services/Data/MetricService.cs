@@ -8,13 +8,13 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// </summary>
 public class MetricService : IMetricService
 {
-    private readonly DatabaseContext _context;
+    private readonly ApplicationContext _context;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public MetricService(DatabaseContext context)
+    public MetricService(ApplicationContext context)
     {
         _context = context;
     }

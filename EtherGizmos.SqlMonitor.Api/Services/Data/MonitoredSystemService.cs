@@ -8,13 +8,13 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// </summary>
 internal class MonitoredSystemService : IMonitoredSystemService
 {
-    private readonly DatabaseContext _context;
+    private readonly ApplicationContext _context;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public MonitoredSystemService(DatabaseContext context)
+    public MonitoredSystemService(ApplicationContext context)
     {
         _context = context;
     }

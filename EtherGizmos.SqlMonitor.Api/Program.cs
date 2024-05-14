@@ -1,6 +1,7 @@
 using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Services.Authorization;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
@@ -147,6 +148,14 @@ builder.Services
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
+builder.Services.AddOpenIddict()
+    .AddCore(opt =>
+    {
+        opt.UseEntityFrameworkCore()
+            .UseDbContext<AuthorizationContext>()
+            .ReplaceDefaultEntities<OAuth2Application, OAuth2Authorization, OAuth2Scope, OAuth2Token, int>();
+    });
+
 builder.Services
     .AddControllers(opt =>
     {
@@ -187,7 +196,7 @@ builder.Services
     });
 
 builder.Services
-    .AddDbContext<DatabaseContext>((services, opt) =>
+    .AddDbContext<ApplicationContext>((services, opt) =>
     {
         var usageOptions = services
             .GetRequiredService<IOptions<UsageOptions>>()

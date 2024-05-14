@@ -8,13 +8,13 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// </summary>
 public class ScriptInterpreterService : IScriptInterpreterService
 {
-    private readonly DatabaseContext _context;
+    private readonly ApplicationContext _context;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="context">The internal database context.</param>
-    public ScriptInterpreterService(DatabaseContext context)
+    public ScriptInterpreterService(ApplicationContext context)
     {
         _context = context;
     }

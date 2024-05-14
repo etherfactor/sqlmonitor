@@ -8,13 +8,13 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 public class SaveService : ISaveService
 {
     private readonly ILogger _logger;
-    internal readonly DatabaseContext _context;
+    internal readonly ApplicationContext _context;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="context">The EF context.</param>
-    public SaveService(ILogger<SaveService> logger, DatabaseContext context)
+    public SaveService(ILogger<SaveService> logger, ApplicationContext context)
     {
         _logger = logger;
         _context = context;

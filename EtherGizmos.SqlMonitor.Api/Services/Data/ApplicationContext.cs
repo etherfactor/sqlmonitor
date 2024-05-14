@@ -12,7 +12,7 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 /// Provides access to database tables.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class DatabaseContext : DbContext
+public class ApplicationContext : DbContext
 {
     /// <summary>
     /// Provides access to <see cref="Metric"/> records, in 'dbo.metrics'.
@@ -60,24 +60,24 @@ public class DatabaseContext : DbContext
     public virtual DbSet<ScriptInterpreter> ScriptInterpreters { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DatabaseContext"/> class using the specified options. The
+    /// Initializes a new instance of the <see cref="ApplicationContext"/> class using the specified options. The
     /// <see cref="DbContext.OnConfiguring(DbContextOptionsBuilder)"/> will still be called to allow further configuration
     /// of the options.
     /// </summary>
     /// <param name="options">The options for this context.</param>
     /// <param name="migrationManager">Manages database migrations.</param>
-    public DatabaseContext(DbContextOptions options, IMigrationManager migrationManager) : base(options)
+    public ApplicationContext(DbContextOptions options, IMigrationManager migrationManager) : base(options)
     {
         migrationManager.EnsureMigrated();
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DatabaseContext"/> class. The
+    /// Initializes a new instance of the <see cref="ApplicationContext"/> class. The
     /// <see cref="DbContext.OnConfiguring(DbContextOptionsBuilder)"/> method will be called to configure the database (and
     /// other options) to be used for this context.
     /// </summary>
     /// <param name="migrationManager">Manages database migrations.</param>
-    protected DatabaseContext(IMigrationManager migrationManager) : base()
+    protected ApplicationContext(IMigrationManager migrationManager) : base()
     {
         migrationManager.EnsureMigrated();
     }
