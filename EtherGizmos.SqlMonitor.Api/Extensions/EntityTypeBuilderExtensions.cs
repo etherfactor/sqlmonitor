@@ -76,7 +76,7 @@ internal static class EntityTypeBuilderExtensions
         var property = propertyExpression.GetPropertyInfo();
 
         //Use the overridden property, if it exists
-        property = typeof(TEntity)
+        var topProperty = typeof(TEntity)
             .GetProperty(property.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             ?? property;
 
@@ -84,7 +84,9 @@ internal static class EntityTypeBuilderExtensions
         var builder = @this.Property(propertyExpression);
 
         //Extract the column name from a ColumnAttribute, and ensure it exists
-        var columnAttribute = property.GetCustomAttribute<ColumnAttribute>();
+        var columnAttribute = topProperty.GetCustomAttribute<ColumnAttribute>(true)
+            ?? property.GetCustomAttribute<ColumnAttribute>(true);
+
         string columnName = columnAttribute?.Name
             ?? throw new InvalidOperationException(string.Format("Property '{0}' on type '{1}' must be annotated with a '{2}' and specify the '{3}' property",
                  property.Name, typeof(TEntity).Name, nameof(ColumnAttribute), nameof(ColumnAttribute.Name)));
