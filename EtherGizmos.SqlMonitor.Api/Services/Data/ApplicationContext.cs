@@ -66,7 +66,7 @@ public class ApplicationContext : DbContext
     /// </summary>
     /// <param name="options">The options for this context.</param>
     /// <param name="migrationManager">Manages database migrations.</param>
-    public ApplicationContext(DbContextOptions options, IMigrationManager migrationManager) : base(options)
+    public ApplicationContext(DbContextOptions<ApplicationContext> options, IMigrationManager migrationManager) : base(options)
     {
         migrationManager.EnsureMigrated();
     }

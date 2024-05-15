@@ -258,6 +258,59 @@ builder.Services
     .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
 
 builder.Services
+    .AddDbContext<AuthorizationContext>((services, opt) =>
+    {
+        var usageOptions = services
+            .GetRequiredService<IOptions<UsageOptions>>()
+            .Value;
+
+        var loggerFactory = services
+            .GetRequiredService<ILoggerFactory>();
+
+        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
+        var connectionString = connectionProvider.GetConnectionString();
+        if (usageOptions.Database == DatabaseType.MySql)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseMySQL(connectionString, conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
+        else if (usageOptions.Database == DatabaseType.PostgreSql)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseNpgsql(connectionString, conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
+        else if (usageOptions.Database == DatabaseType.SqlServer)
+        {
+            opt.UseLoggerFactory(loggerFactory);
+
+            opt.UseSqlServer(connectionString, conf =>
+            {
+                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            opt.EnableSensitiveDataLogging();
+        }
+        else
+        {
+            throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
+        }
+
+        opt.UseLazyLoadingProxies(true);
+    });
+
+builder.Services
     .AddChildContainer((childServices, parentServices) =>
     {
         var usageOptions = parentServices

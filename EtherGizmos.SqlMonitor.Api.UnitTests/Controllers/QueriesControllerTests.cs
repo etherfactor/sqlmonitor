@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
-using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models;

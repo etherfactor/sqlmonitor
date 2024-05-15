@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Models.Annotations;
 using EtherGizmos.SqlMonitor.Models.Database.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -74,6 +74,11 @@ internal static class EntityTypeBuilderExtensions
     {
         //Extract the property info from the expression
         var property = propertyExpression.GetPropertyInfo();
+
+        //Use the overridden property, if it exists
+        property = typeof(TEntity)
+            .GetProperty(property.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? property;
 
         //Create the property builder
         var builder = @this.Property(propertyExpression);
