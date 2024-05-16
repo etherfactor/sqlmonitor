@@ -47,11 +47,14 @@ public class AuthorizationContext : DbContext
             entity.AuditPropertiesWithAnnotations();
             entity.PropertyWithAnnotations(e => e.ApplicationType)
                 .HasConversion(new ApplicationTypeValueConverter());
-            entity.PropertyWithAnnotations(e => e.ClientId);
+            entity.PropertyWithAnnotations(e => e.ClientId)
+                .HasConversion(new NullableGuidToStringValueConverter());
             entity.PropertyWithAnnotations(e => e.ClientSecret);
-            entity.PropertyWithAnnotations(e => e.ClientType);
+            entity.PropertyWithAnnotations(e => e.ClientType)
+                .HasConversion(new ClientTypeValueConverter());
             entity.PropertyWithAnnotations(e => e.ConcurrencyToken);
-            entity.PropertyWithAnnotations(e => e.ConsentType);
+            entity.PropertyWithAnnotations(e => e.ConsentType)
+                .HasConversion(new ConsentTypeValueConverter());
             entity.PropertyWithAnnotations(e => e.DisplayName);
             entity.PropertyWithAnnotations(e => e.DisplayNames);
             entity.PropertyWithAnnotations(e => e.JsonWebKeySet);
@@ -63,11 +66,80 @@ public class AuthorizationContext : DbContext
             entity.PropertyWithAnnotations(e => e.Settings);
         });
 
-        modelBuilder.Entity<OAuth2Authorization>();
+        modelBuilder.Entity<OAuth2Authorization>(entity =>
+        {
+            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            {
+                e.HasTrigger("TR_oauth2_authorizations_audit");
+            });
 
-        modelBuilder.Entity<OAuth2Scope>();
+            entity.HasKey(e => e.Id);
 
-        modelBuilder.Entity<OAuth2Token>();
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.CreationDate).HasDefaultValueSql();
+            entity.PropertyWithAnnotations(e => e.CreatedByUserId);
+            entity.PropertyWithAnnotations(e => e.ModifiedAt);
+            entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
+            entity.PropertyWithAnnotations(e => e.ApplicationId);
+            entity.PropertyWithAnnotations(e => e.ConcurrencyToken);
+            entity.PropertyWithAnnotations(e => e.Properties);
+            entity.PropertyWithAnnotations(e => e.Scopes);
+            entity.PropertyWithAnnotations(e => e.Status)
+                .HasConversion(new StatusTypeValueConverter());
+            entity.PropertyWithAnnotations(e => e.Subject);
+            entity.PropertyWithAnnotations(e => e.Type)
+                .HasConversion(new AuthorizationTypeValueConverter());
+        });
+
+        modelBuilder.Entity<OAuth2Scope>(entity =>
+        {
+            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            {
+                e.HasTrigger("TR_oauth2_scopes_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.ConcurrencyToken);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.Descriptions);
+            entity.PropertyWithAnnotations(e => e.DisplayName);
+            entity.PropertyWithAnnotations(e => e.DisplayNames);
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Properties);
+            entity.PropertyWithAnnotations(e => e.Resources);
+        });
+
+        modelBuilder.Entity<OAuth2Token>(entity =>
+        {
+            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            {
+                e.HasTrigger("TR_oauth2_tokens_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.PropertyWithAnnotations(e => e.CreationDate).HasDefaultValueSql();
+            entity.PropertyWithAnnotations(e => e.CreatedByUserId);
+            entity.PropertyWithAnnotations(e => e.ModifiedAt);
+            entity.PropertyWithAnnotations(e => e.ModifiedByUserId);
+            entity.PropertyWithAnnotations(e => e.ApplicationId);
+            entity.PropertyWithAnnotations(e => e.AuthorizationId);
+            entity.PropertyWithAnnotations(e => e.ConcurrencyToken);
+            entity.PropertyWithAnnotations(e => e.ExpirationDate);
+            entity.PropertyWithAnnotations(e => e.Payload);
+            entity.PropertyWithAnnotations(e => e.Properties);
+            entity.PropertyWithAnnotations(e => e.RedemptionDate);
+            entity.PropertyWithAnnotations(e => e.ReferenceId);
+            entity.PropertyWithAnnotations(e => e.Status)
+                .HasConversion(new StatusTypeValueConverter());
+            entity.PropertyWithAnnotations(e => e.Subject);
+            entity.PropertyWithAnnotations(e => e.Type)
+                .HasConversion(new TokenTypeValueConverter());
+        });
 
         //**********************************************************
         // Add Value Converters

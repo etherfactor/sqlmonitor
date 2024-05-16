@@ -2,22 +2,20 @@
 
 namespace EtherGizmos.SqlMonitor.Models.Authorization.Enums;
 
-public enum ApplicationType
+public enum TokenType
 {
     Unknown = 0,
-    Native = 10,
-    Web = 20,
+    Bearer = 10,
 }
 
-public static class ApplicationTypeConverter
+public static class TokenTypeConverter
 {
-    private static Dictionary<ApplicationType, string?> Mappings { get; } = new Dictionary<ApplicationType, string?>()
+    private static Dictionary<TokenType, string?> Mappings { get; } = new Dictionary<TokenType, string?>()
     {
-        { ApplicationType.Native, OpenIddictConstants.ApplicationTypes.Native },
-        { ApplicationType.Web, OpenIddictConstants.ApplicationTypes.Web },
+        { TokenType.Bearer, OpenIddictConstants.TokenTypes.Bearer },
     };
 
-    public static ApplicationType FromString(string? value)
+    public static TokenType FromString(string? value)
     {
         if (!Mappings.ContainsValue(value))
             throw new InvalidOperationException(string.Format("Unmapped type: {0}", value));
@@ -25,7 +23,7 @@ public static class ApplicationTypeConverter
         return Mappings.Single(e => e.Value == value).Key;
     }
 
-    public static ApplicationType? FromStringOrDefault(string? value)
+    public static TokenType? FromStringOrDefault(string? value)
     {
         if (value == null || !Mappings.ContainsValue((string?)value))
             return null;
@@ -33,9 +31,9 @@ public static class ApplicationTypeConverter
         return Mappings.Single(e => e.Value == value).Key;
     }
 
-    public static string? ToString(ApplicationType value)
+    public static string? ToString(TokenType value)
     {
-        if (value == ApplicationType.Unknown)
+        if (value == TokenType.Unknown)
             return null;
 
         if (!Mappings.ContainsKey(value))
@@ -44,12 +42,12 @@ public static class ApplicationTypeConverter
         return Mappings.Single(e => e.Key == value).Value;
     }
 
-    public static string? ToStringOrDefault(ApplicationType? value)
+    public static string? ToStringOrDefault(TokenType? value)
     {
-        if (value == ApplicationType.Unknown)
+        if (value == TokenType.Unknown)
             return null;
 
-        if (value == null || !Mappings.ContainsKey((ApplicationType)value))
+        if (value == null || !Mappings.ContainsKey((TokenType)value))
             return null;
 
         return Mappings.Single(e => e.Key == value).Value;

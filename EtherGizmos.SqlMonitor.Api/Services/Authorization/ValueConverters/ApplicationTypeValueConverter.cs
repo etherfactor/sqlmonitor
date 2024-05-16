@@ -1,12 +1,14 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Authorization.Enums;
+﻿using EtherGizmos.SqlMonitor.Models.Authorization.Enums;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Authorization.ValueConverters;
 
-public class ApplicationTypeValueConverter : ValueConverter<string?, int>
+public class ApplicationTypeValueConverter : ValueConverter<string?, ApplicationType>
 {
     public ApplicationTypeValueConverter()
-        : base(e => (int)ApplicationTypeConverter.FromString(e), e => ApplicationTypeConverter.ToString((ApplicationType)e))
+        : base(
+            e => ApplicationTypeConverter.FromString(e),
+            e => ApplicationTypeConverter.ToString(e))
     {
     }
 }
