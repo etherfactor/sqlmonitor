@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Authorization;
 
-[Table("authorizations", Schema = "oauth2")]
+[Table("oauth2_authorizations")]
 public class OAuth2Authorization : OpenIddictEntityFrameworkCoreAuthorization<int, OAuth2Application, OAuth2Token>
 {
     [Column("created_at_utc")]
@@ -18,13 +18,13 @@ public class OAuth2Authorization : OpenIddictEntityFrameworkCoreAuthorization<in
     [Column("modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
-    [Column("application_id")]
+    [Column("oauth2_application_id")]
     public virtual int? ApplicationId { get; set; }
 
     [Column("concurrency_token")]
     public override string? ConcurrencyToken { get => base.ConcurrencyToken; set => base.ConcurrencyToken = value; }
 
-    [Column("authorization_id")]
+    [Column("oauth2_authorization_id")]
     public override int Id { get => base.Id; set => base.Id = value; }
 
     [Column("properties")]
@@ -33,12 +33,12 @@ public class OAuth2Authorization : OpenIddictEntityFrameworkCoreAuthorization<in
     [Column("scopes")]
     public override string? Scopes { get => base.Scopes; set => base.Scopes = value; }
 
-    [Column("status_type_id")]
+    [Column("oauth2_status_type_id")]
     public override string? Status { get => base.Status; set => base.Status = value; }
 
     [Column("subject")]
     public override string? Subject { get => base.Subject; set => base.Subject = value; }
 
-    [Column("authorization_type_id")]
+    [Column("oauth2_authorization_type_id")]
     public override string? Type { get => base.Type; set => base.Type = value; }
 }

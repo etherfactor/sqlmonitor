@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Authorization;
 
-[Table("tokens", Schema = "oauth2")]
+[Table("oauth2_tokens")]
 public class OAuth2Token : OpenIddictEntityFrameworkCoreToken<int, OAuth2Application, OAuth2Authorization>
 {
     [Column("created_at_utc")]
@@ -18,10 +18,10 @@ public class OAuth2Token : OpenIddictEntityFrameworkCoreToken<int, OAuth2Applica
     [Column("modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
-    [Column("application_id")]
+    [Column("oauth2_application_id")]
     public virtual int? ApplicationId { get; set; }
 
-    [Column("authorization_id")]
+    [Column("oauth2_authorization_id")]
     public virtual int? AuthorizationId { get; set; }
 
     [Column("concurrency_token")]
@@ -30,7 +30,7 @@ public class OAuth2Token : OpenIddictEntityFrameworkCoreToken<int, OAuth2Applica
     [Column("expires_at_utc")]
     public override DateTime? ExpirationDate { get => base.ExpirationDate; set => base.ExpirationDate = value; }
 
-    [Column("token_id")]
+    [Column("oauth2_token_id")]
     public override int Id { get => base.Id; set => base.Id = value; }
 
     [Column("payload")]
@@ -45,12 +45,12 @@ public class OAuth2Token : OpenIddictEntityFrameworkCoreToken<int, OAuth2Applica
     [Column("reference_id")]
     public override string? ReferenceId { get => base.ReferenceId; set => base.ReferenceId = value; }
 
-    [Column("status_type_id")]
+    [Column("oauth2_status_type_id")]
     public override string? Status { get => base.Status; set => base.Status = value; }
 
     [Column("subject")]
     public override string? Subject { get => base.Subject; set => base.Subject = value; }
 
-    [Column("token_type_id")]
+    [Column("oauth2_token_type_id")]
     public override string? Type { get => base.Type; set => base.Type = value; }
 }

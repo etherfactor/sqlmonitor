@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Authorization;
 
-[Table("applications", Schema = "oauth2")]
+[Table("oauth2_applications")]
 public class OAuth2Application : OpenIddictEntityFrameworkCoreApplication<int, OAuth2Authorization, OAuth2Token>, IAuditable
 {
     [Column("created_at_utc")]
@@ -19,7 +19,7 @@ public class OAuth2Application : OpenIddictEntityFrameworkCoreApplication<int, O
     [Column("modified_by_user_id")]
     public Guid? ModifiedByUserId { get; set; }
 
-    [Column("application_type_id")]
+    [Column("oauth2_application_type_id")]
     public override string? ApplicationType { get => base.ApplicationType; set => base.ApplicationType = value; }
 
     [Column("client_id")]
@@ -28,13 +28,13 @@ public class OAuth2Application : OpenIddictEntityFrameworkCoreApplication<int, O
     [Column("client_secret")]
     public override string? ClientSecret { get => base.ClientSecret; set => base.ClientSecret = value; }
 
-    [Column("client_type_id")]
+    [Column("oauth2_client_type_id")]
     public override string? ClientType { get => base.ClientType; set => base.ClientType = value; }
 
     [Column("concurrency_token")]
     public override string? ConcurrencyToken { get => base.ConcurrencyToken; set => base.ConcurrencyToken = value; }
 
-    [Column("consent_type_id")]
+    [Column("oauth2_consent_type_id")]
     public override string? ConsentType { get => base.ConsentType; set => base.ConsentType = value; }
 
     [Column("display_name")]
@@ -43,7 +43,7 @@ public class OAuth2Application : OpenIddictEntityFrameworkCoreApplication<int, O
     [Column("display_names")]
     public override string? DisplayNames { get => base.DisplayNames; set => base.DisplayNames = value; }
 
-    [Column("application_id")]
+    [Column("oauth2_application_id")]
     public override int Id { get => base.Id; set => base.Id = value; }
 
     [Column("json_web_key_set")]

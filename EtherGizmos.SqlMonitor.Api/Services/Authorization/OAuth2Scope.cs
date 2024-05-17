@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Authorization;
 
-[Table("scopes", Schema = "oauth2")]
+[Table("oauth2_scopes")]
 public class OAuth2Scope : OpenIddictEntityFrameworkCoreScope<int>, IAuditable
 {
     [Column("created_at_utc")]
@@ -34,7 +34,7 @@ public class OAuth2Scope : OpenIddictEntityFrameworkCoreScope<int>, IAuditable
     [Column("display_names")]
     public override string? DisplayNames { get => base.DisplayNames; set => base.DisplayNames = value; }
 
-    [Column("scope_id")]
+    [Column("oauth2_scope_id")]
     public override int Id { get => base.Id; set => base.Id = value; }
 
     [Column("name")]

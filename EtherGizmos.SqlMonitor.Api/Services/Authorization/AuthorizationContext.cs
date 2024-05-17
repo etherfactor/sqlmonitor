@@ -36,7 +36,7 @@ public class AuthorizationContext : DbContext
 
         modelBuilder.Entity<OAuth2Application>(entity =>
         {
-            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            entity.ToTableWithAnnotations(buildAction: e =>
             {
                 e.HasTrigger("TR_oauth2_applications_audit");
             });
@@ -68,7 +68,7 @@ public class AuthorizationContext : DbContext
 
         modelBuilder.Entity<OAuth2Authorization>(entity =>
         {
-            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            entity.ToTableWithAnnotations(buildAction: e =>
             {
                 e.HasTrigger("TR_oauth2_authorizations_audit");
             });
@@ -93,7 +93,7 @@ public class AuthorizationContext : DbContext
 
         modelBuilder.Entity<OAuth2Scope>(entity =>
         {
-            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            entity.ToTableWithAnnotations(buildAction: e =>
             {
                 e.HasTrigger("TR_oauth2_scopes_audit");
             });
@@ -114,7 +114,7 @@ public class AuthorizationContext : DbContext
 
         modelBuilder.Entity<OAuth2Token>(entity =>
         {
-            entity.ToTableWithAnnotations("oauth2", buildAction: e =>
+            entity.ToTableWithAnnotations(buildAction: e =>
             {
                 e.HasTrigger("TR_oauth2_tokens_audit");
             });
