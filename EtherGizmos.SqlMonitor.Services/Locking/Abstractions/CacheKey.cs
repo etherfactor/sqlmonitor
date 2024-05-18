@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿namespace EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 
 /// <summary>
 /// Provides methods for constructing keys. Ensures no key conflicts by tracking existing keys.

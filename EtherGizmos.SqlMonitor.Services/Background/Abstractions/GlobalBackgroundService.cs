@@ -1,5 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 

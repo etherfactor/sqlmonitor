@@ -45,6 +45,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj" />
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
-﻿
-namespace EtherGizmos.SqlMonitor.Services.Locking;
+﻿namespace EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 
 internal interface IDistributedLockProvider
 {
