@@ -154,7 +154,28 @@ builder.Services.AddOpenIddict()
         opt.UseEntityFrameworkCore()
             .UseDbContext<AuthorizationContext>()
             .ReplaceDefaultEntities<OAuth2Application, OAuth2Authorization, OAuth2Scope, OAuth2Token, int>();
+    })
+    .AddServer(opt =>
+    {
+        opt.SetTokenEndpointUris(Constants.OAuth2.Endpoints.Token);
+
+        opt.AllowClientCredentialsFlow()
+            .AllowRefreshTokenFlow();
+
+        opt.AddDevelopmentEncryptionCertificate()
+            .AddDevelopmentSigningCertificate();
+
+        opt.UseAspNetCore()
+            .EnableTokenEndpointPassthrough();
+    })
+    .AddValidation(opt =>
+    {
+        opt.UseLocalServer();
+
+        opt.UseAspNetCore();
     });
+
+builder.Services.AddHostedService<OAuth2Seeder>();
 
 builder.Services
     .AddControllers(opt =>

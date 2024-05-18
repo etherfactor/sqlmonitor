@@ -39,6 +39,8 @@ public class Migration002_LoadOAuth2Tables : MigrationExtension
 
         Merge.IntoTable("oauth2_token_types")
             .Row(new { oauth2_token_type_id = 10, name = "Bearer", description = null as string })
+            .Row(new { oauth2_token_type_id = 20, name = "Access Token", description = null as string })
+            .Row(new { oauth2_token_type_id = 30, name = "Refresh Token", description = null as string })
             .Match(e => e.oauth2_token_type_id);
     }
 

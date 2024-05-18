@@ -6,6 +6,19 @@
 public static class Constants
 {
     /// <summary>
+    /// Constants used for OAuth2.0
+    /// </summary>
+    public static class OAuth2
+    {
+        private const string RootPath = "/oauth/v2.0";
+
+        public static class Endpoints
+        {
+            public const string Token = RootPath + "/token";
+        }
+    }
+
+    /// <summary>
     /// Constants shared by all caches.
     /// </summary>
     public static class Cache

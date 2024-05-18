@@ -6,6 +6,9 @@ public enum TokenType
 {
     Unknown = 0,
     Bearer = 10,
+    AccessToken = 20,
+    IdentityToken = 25,
+    RefreshToken = 30,
 }
 
 public static class TokenTypeConverter
@@ -13,6 +16,9 @@ public static class TokenTypeConverter
     private static Dictionary<TokenType, string?> Mappings { get; } = new Dictionary<TokenType, string?>()
     {
         { TokenType.Bearer, OpenIddictConstants.TokenTypes.Bearer },
+        { TokenType.AccessToken, "access_token" },
+        { TokenType.IdentityToken, "id_token" },
+        { TokenType.RefreshToken, "refresh_token" },
     };
 
     public static TokenType FromString(string? value)
