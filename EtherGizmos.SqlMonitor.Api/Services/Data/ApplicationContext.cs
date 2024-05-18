@@ -15,6 +15,11 @@ namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 public class ApplicationContext : DbContext
 {
     /// <summary>
+    /// Provides access to <see cref="Agent"/> records, in 'dbo.agents'.
+    /// </summary>
+    public virtual DbSet<Agent> Agents { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="Metric"/> records, in 'dbo.metrics'.
     /// </summary>
     public virtual DbSet<Metric> Metrics { get; set; }
@@ -87,6 +92,27 @@ public class ApplicationContext : DbContext
     {
         //**********************************************************
         // Add Entities
+
+        modelBuilder.Entity<Agent>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_agents_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
+            entity.PropertyWithAnnotations(e => e.AgentType);
+            entity.PropertyWithAnnotations(e => e.DedicatedHost);
+            entity.PropertyWithAnnotations(e => e.ActiveCount);
+            entity.PropertyWithAnnotations(e => e.IsActive);
+            entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
+            entity.PropertyWithAnnotations(e => e.ApplicationId);
+        });
 
         modelBuilder.Entity<Metric>(entity =>
         {

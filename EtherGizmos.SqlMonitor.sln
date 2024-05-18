@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.IntegrationTests", "EtherGizmos.SqlMonitor.Shared.IntegrationTests\EtherGizmos.SqlMonitor.Shared.IntegrationTests.csproj", "{16A4A613-0998-41D0-A135-82017A909FEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql", "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql\EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.csproj", "{A334CE52-C2E7-432A-B1D5-D23D048752B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql", "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql\EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.csproj", "{A334CE52-C2E7-432A-B1D5-D23D048752B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

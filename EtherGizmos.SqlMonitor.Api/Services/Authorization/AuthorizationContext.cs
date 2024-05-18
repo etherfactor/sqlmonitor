@@ -1,6 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Authorization.ValueConverters;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Models.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Diagnostics.CodeAnalysis;

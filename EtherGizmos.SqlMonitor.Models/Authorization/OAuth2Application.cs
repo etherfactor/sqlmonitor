@@ -2,7 +2,7 @@
 using OpenIddict.EntityFrameworkCore.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Authorization;
+namespace EtherGizmos.SqlMonitor.Models.Authorization;
 
 [Table("oauth2_applications")]
 public class OAuth2Application : OpenIddictEntityFrameworkCoreApplication<int, OAuth2Authorization, OAuth2Token>, IAuditable

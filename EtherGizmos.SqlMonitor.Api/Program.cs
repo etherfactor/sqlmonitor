@@ -16,6 +16,7 @@ using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using EtherGizmos.SqlMonitor.Database;
 using EtherGizmos.SqlMonitor.Database.Remaps;
 using EtherGizmos.SqlMonitor.Models;
+using EtherGizmos.SqlMonitor.Models.Authorization;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Generators.MySql;
 using MassTransit;
@@ -167,6 +168,8 @@ builder.Services.AddOpenIddict()
 
         opt.UseAspNetCore()
             .EnableTokenEndpointPassthrough();
+
+        opt.DisableAccessTokenEncryption();
     })
     .AddValidation(opt =>
     {

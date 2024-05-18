@@ -35,6 +35,7 @@ public class OAuth2Seeder : OneTimeBackgroundService
                 ClientId = "69008023-2be5-4a2e-902d-0e8268947b25",
                 ClientSecret = "SECRET",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
+                ApplicationType = "agent",
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Token,
@@ -51,6 +52,7 @@ public class OAuth2Seeder : OneTimeBackgroundService
                 ClientId = "69008023-2be5-4a2e-902d-0e8268947b25",
                 ClientSecret = "SECRET",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
+                ApplicationType = "agent",
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Token,

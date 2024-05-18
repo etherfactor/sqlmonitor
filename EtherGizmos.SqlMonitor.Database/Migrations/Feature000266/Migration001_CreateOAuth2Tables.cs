@@ -1,9 +1,9 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 using EtherGizmos.SqlMonitor.Database.Extensions;
 
-namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000257;
+namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000266;
 
-[CreatedAt(year: 2024, month: 05, day: 14, hour: 21, minute: 00, description: "Create OAuth 2.0 tables", trackingId: 257)]
+[CreatedAt(year: 2024, month: 05, day: 14, hour: 21, minute: 00, description: "Create OAuth 2.0 tables", trackingId: 266)]
 public class Migration001_CreateOAuth2Tables : MigrationExtension
 {
     public override void Up()

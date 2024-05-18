@@ -1,8 +1,8 @@
 ﻿using EtherGizmos.SqlMonitor.Database.Core;
 
-namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000257;
+namespace EtherGizmos.SqlMonitor.Database.Migrations.Feature000266;
 
-[CreatedAt(year: 2024, month: 05, day: 15, hour: 22, minute: 00, description: "Load OAuth 2.0 tables", trackingId: 257)]
+[CreatedAt(year: 2024, month: 05, day: 15, hour: 22, minute: 00, description: "Load OAuth 2.0 tables", trackingId: 266)]
 public class Migration002_LoadOAuth2Tables : MigrationExtension
 {
     public override void Up()
@@ -10,6 +10,7 @@ public class Migration002_LoadOAuth2Tables : MigrationExtension
         Merge.IntoTable("oauth2_application_types")
             .Row(new { oauth2_application_type_id = 10, name = "Native", description = null as string })
             .Row(new { oauth2_application_type_id = 20, name = "Web", description = null as string })
+            .Row(new { oauth2_application_type_id = 100, name = "Agent", description = null as string })
             .Match(e => e.oauth2_application_type_id);
 
         Merge.IntoTable("oauth2_authorization_types")

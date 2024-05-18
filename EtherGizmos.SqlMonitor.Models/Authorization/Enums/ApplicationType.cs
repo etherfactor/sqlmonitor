@@ -7,6 +7,7 @@ public enum ApplicationType
     Unknown = 0,
     Native = 10,
     Web = 20,
+    Agent = 100,
 }
 
 public static class ApplicationTypeConverter
@@ -15,6 +16,7 @@ public static class ApplicationTypeConverter
     {
         { ApplicationType.Native, OpenIddictConstants.ApplicationTypes.Native },
         { ApplicationType.Web, OpenIddictConstants.ApplicationTypes.Web },
+        { ApplicationType.Agent, "agent" },
     };
 
     public static ApplicationType FromString(string? value)

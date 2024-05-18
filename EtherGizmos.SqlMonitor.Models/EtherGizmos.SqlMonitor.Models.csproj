@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.0" />
     <PackageReference Include="Microsoft.OData.Core" Version="7.17.0" />
     <PackageReference Include="OpenIddict.Abstractions" Version="5.*" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.*" />
   </ItemGroup>
   
   <ItemGroup>

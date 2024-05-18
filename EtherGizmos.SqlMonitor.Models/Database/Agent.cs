@@ -8,34 +8,31 @@ namespace EtherGizmos.SqlMonitor.Models.Database;
 public class Agent : Auditable
 {
     [Column("agent_id")]
-    public Guid Id { get; set; }
-
-    [Column("agent_type_id")]
-    public AgentType Type { get; set; }
+    public virtual Guid Id { get; set; }
 
     [Column("name")]
-    public string Name { get; set; }
+    public virtual string Name { get; set; }
 
     [Column("description")]
-    public string? Description { get; set; }
+    public virtual string? Description { get; set; }
 
-    [Column("target_host")]
-    public string? TargetHost { get; set; }
+    [Column("agent_type_id")]
+    public virtual AgentType AgentType { get; set; }
+
+    [Column("dedicated_host")]
+    public virtual string? DedicatedHost { get; set; }
 
     [Column("active_count")]
-    public int ActiveCount { get; set; }
-
-    [Column("max_active_count")]
-    public int MaxActiveCount { get; set; }
-
-    [Column("is_active")]
-    public bool IsActive { get; set; }
-
-    [Column("is_soft_deleted")]
-    public bool IsSoftDeleted { get; set; }
+    public virtual int ActiveCount { get; set; }
 
     [Column("oauth2_application_id")]
-    public int ApplicationId { get; set; }
+    public virtual int ApplicationId { get; set; }
+
+    [Column("is_active")]
+    public virtual bool IsActive { get; set; }
+
+    [Column("is_soft_deleted")]
+    public virtual bool IsSoftDeleted { get; set; }
 
     /// <summary>
     /// Not intended for direct use.
