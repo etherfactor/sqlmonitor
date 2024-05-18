@@ -1,6 +1,8 @@
-﻿using NCrontab;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NCrontab;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
+namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 
 /// <summary>
 /// Performs work on a periodic timer. Runs the job on every instance.

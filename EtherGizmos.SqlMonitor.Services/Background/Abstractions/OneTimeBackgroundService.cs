@@ -1,4 +1,7 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 
 public abstract class OneTimeBackgroundService : BackgroundService
 {

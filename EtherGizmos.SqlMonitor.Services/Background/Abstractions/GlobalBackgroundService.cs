@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
+namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 
 /// <summary>
 /// Performs work on a periodic timer. Uses distributed locks to run the job on the first instance to obtain its lock.

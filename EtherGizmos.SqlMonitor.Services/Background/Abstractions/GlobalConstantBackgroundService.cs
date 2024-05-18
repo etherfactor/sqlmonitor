@@ -2,7 +2,7 @@
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using NCrontab;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
+namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 
 public abstract class GlobalConstantBackgroundService : PeriodicBackgroundService
 {
