@@ -17,13 +17,6 @@ internal class InMemoryRecordCache : IDistributedRecordCache
     }
 
     /// <inheritdoc/>
-    public Task<CacheLock<TKey>?> AcquireLockAsync<TKey>(TKey key, TimeSpan timeout, CancellationToken cancellationToken = default) where TKey : ICacheKey
-    {
-        var @lock = new CacheLock<TKey>(key, new InMemorySynchronizationHandle());
-        return Task.FromResult<CacheLock<TKey>?>(@lock);
-    }
-
-    /// <inheritdoc/>
     public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
         where TEntity : class, new()
     {

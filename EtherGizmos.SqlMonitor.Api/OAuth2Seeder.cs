@@ -1,5 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Authorization;
-using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
+using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 using OpenIddict.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api;
@@ -17,7 +17,7 @@ public class OAuth2Seeder : OneTimeBackgroundService
         _serviceProvider = serviceProvider;
     }
 
-    protected internal override async Task DoWorkAsync(CancellationToken stoppingToken)
+    protected override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         using var scope = _serviceProvider.CreateScope();
         var provider = scope.ServiceProvider;

@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
@@ -10,23 +9,23 @@ namespace EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 public abstract class GlobalBackgroundService : PeriodicBackgroundService
 {
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _distributedRecordCache;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public GlobalBackgroundService(
         ILogger logger,
-        IDistributedRecordCache distributedRecordCache,
+        IDistributedLockProvider distributedLockProvider,
         string cronExpression)
         : base(logger, cronExpression)
     {
         _logger = logger;
-        _distributedRecordCache = distributedRecordCache;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     /// <inheritdoc/>
     protected internal sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
-        using var @lock = await _distributedRecordCache.AcquireLockAsync(
-            CacheKeys.EnqueueMonitorQueries,
+        using var @lock = await _distributedLockProvider.AcquireLockAsync(
+            new JobCacheKey(GetType()),
             timeout: TimeSpan.Zero,
             cancellationToken: stoppingToken);
 

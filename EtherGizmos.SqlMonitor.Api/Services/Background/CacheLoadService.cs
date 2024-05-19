@@ -1,5 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Background;
 
@@ -19,7 +19,7 @@ public class CacheLoadService : OneTimeBackgroundService
     }
 
     /// <inheritdoc/>
-    protected internal override async Task DoWorkAsync(CancellationToken stoppingToken)
+    protected override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         var scope = _serviceProvider.CreateScope()
             .ServiceProvider;

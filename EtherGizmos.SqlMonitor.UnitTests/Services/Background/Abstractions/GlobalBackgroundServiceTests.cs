@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,10 +23,10 @@ internal class GlobalBackgroundServiceTests
     public async Task DoWorkAsync_WhenObtainsLock_DoesWork()
     {
         //Arrange
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedRecordCache>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new CacheLock<JobCacheKey>(new JobCacheKey("test"), new TestSynchronizationHandle()));
+            .ReturnsAsync(new CacheLock<JobCacheKey>(new JobCacheKey(typeof(GlobalBackgroundServiceImplemented)), new TestSynchronizationHandle()));
         var cache = cacheMock.Object;
 
         _service = new GlobalBackgroundServiceImplemented(_logger, cache, "0/1 * * * * *");
@@ -44,7 +42,7 @@ internal class GlobalBackgroundServiceTests
     public async Task DoWorkAsync_WhenDoesNotObtainLock_DoesNotWork()
     {
         //Arrange
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedRecordCache>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as CacheLock<JobCacheKey>);
@@ -66,7 +64,7 @@ internal class GlobalBackgroundServiceImplemented : GlobalBackgroundService
 
     public GlobalBackgroundServiceImplemented(
         ILogger<GlobalBackgroundServiceImplemented> logger,
-        IDistributedRecordCache cache,
+        IDistributedLockProvider cache,
         string cronExpression)
         : base(logger, cache, cronExpression) { }
 

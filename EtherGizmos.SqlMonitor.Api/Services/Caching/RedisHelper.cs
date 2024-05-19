@@ -3,6 +3,7 @@ using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Annotations;
+using EtherGizmos.SqlMonitor.Services;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
@@ -153,7 +154,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     /// <returns>The Redis key for the entity.</returns>
     public RedisKey GetEntityKey(EntityCacheKey<TEntity> key)
     {
-        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$entity:{key.KeyName}");
+        var keyData = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$entity:{key.KeyName}");
         return keyData;
     }
 
@@ -183,7 +184,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     /// <returns>The Redis key for the entity.</returns>
     public RedisKey GetEntitySetEntityKey(TEntity entity)
     {
-        var value = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(entity)}");
+        var value = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(entity)}");
         return value;
     }
 
@@ -194,7 +195,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     /// <returns>The Redis key for the entity.</returns>
     public RedisKey GetEntitySetEntityKey(object[] keys)
     {
-        var value = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(keys)}");
+        var value = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$table:{_tableKey}:{GetRecordId(keys)}");
         return value;
     }
 
@@ -204,7 +205,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     /// <returns>The set's primary key.</returns>
     private RedisKey GetEntitySetPrimaryKey()
     {
-        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:$$primary");
+        var keyData = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$table:{_tableKey}:$$primary");
         return keyData;
     }
 
@@ -216,7 +217,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     /// <exception cref="InvalidOperationException"></exception>
     private RedisKey GetEntitySetIndexKey(IRedisIndexProperty<TEntity> index)
     {
-        var keyData = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:${index.DisplayName.ToSnakeCase()}");
+        var keyData = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$table:{_tableKey}:${index.DisplayName.ToSnakeCase()}");
         return keyData;
     }
 
@@ -236,7 +237,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
                 var lookupTableKey = property.PropertyType.GetCustomAttribute<TableAttribute>()!.Name;
 
                 var redisKeyValue = new RedisValue(string.Join(IdSeparator, lookupValues));
-                var redisKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{_tableKey}:{lookupTableKey}:{redisKeyValue}:${property.LookupProperty?.DisplayName?.ToSnakeCase()}");
+                var redisKey = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$table:{_tableKey}:{lookupTableKey}:{redisKeyValue}:${property.LookupProperty?.DisplayName?.ToSnakeCase()}");
 
                 var redisValue = GetRecordId(entity);
 
@@ -258,7 +259,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     internal RedisKey GetTempKey()
     {
         var guid = Guid.NewGuid();
-        var tempKey = new RedisKey($"{Constants.Cache.SchemaName}:$$temp:{guid}");
+        var tempKey = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$temp:{guid}");
         return tempKey;
     }
 
@@ -282,7 +283,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     private RedisValue[] GetListProperties()
     {
         var propertyNames = _properties
-            .Select(e => $"{Constants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.DisplayName.ToSnakeCase()}")
+            .Select(e => $"{ServiceConstants.Cache.SchemaName}:$$table:{_tableKey}:*->{e.DisplayName.ToSnakeCase()}")
             .Select(e => new RedisValue(e))
             .ToArray();
 

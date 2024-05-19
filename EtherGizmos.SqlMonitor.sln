@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm", "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm\EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.csproj", "{71920C7C-55FE-43BE-837E-1FD1F371C0EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.UnitTests", "EtherGizmos.SqlMonitor.Api.UnitTests\EtherGizmos.SqlMonitor.Api.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.UnitTests", "EtherGizmos.SqlMonitor.UnitTests\EtherGizmos.SqlMonitor.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Database", "EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
 EndProject
@@ -32,9 +32,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql", "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql\EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.csproj", "{A334CE52-C2E7-432A-B1D5-D23D048752B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Agent", "EtherGizmos.SqlMonitor.Agent\EtherGizmos.SqlMonitor.Agent.csproj", "{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Agent", "EtherGizmos.SqlMonitor.Agent\EtherGizmos.SqlMonitor.Agent.csproj", "{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Services", "EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj", "{2990652D-4464-4852-9B56-B5B09D8066CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Services", "EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj", "{2990652D-4464-4852-9B56-B5B09D8066CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

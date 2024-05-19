@@ -49,11 +49,11 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.HashSetAsync($"sqlpulse:$$table:cache_entities:%22{_CacheTesterId}%22", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
+            @interface.HashSetAsync($"performancepulse:$$table:cache_entities:%22{_CacheTesterId}%22", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
 
         transactionMock.Verify(@interface =>
-            @interface.SortedSetAddAsync($"sqlpulse:$$table:cache_entities:$$primary", $"%22{_CacheTesterId}%22", 0, It.IsAny<SortedSetWhen>(), It.IsAny<CommandFlags>()),
+            @interface.SortedSetAddAsync($"performancepulse:$$table:cache_entities:$$primary", $"%22{_CacheTesterId}%22", 0, It.IsAny<SortedSetWhen>(), It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -75,7 +75,7 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.KeyDeleteAsync($"sqlpulse:$$entity:some_cache_tester", It.IsAny<CommandFlags>()),
+            @interface.KeyDeleteAsync($"performancepulse:$$entity:some_cache_tester", It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -101,7 +101,7 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.SortAsync($"sqlpulse:$$table:cache_entities:$$primary", It.IsAny<long>(), It.IsAny<long>(), It.IsAny<Order>(), It.IsAny<SortType>(), "nosort", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
+            @interface.SortAsync($"performancepulse:$$table:cache_entities:$$primary", It.IsAny<long>(), It.IsAny<long>(), It.IsAny<Order>(), It.IsAny<SortType>(), "nosort", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
 
         transactionMock.Verify(@interface =>
@@ -131,7 +131,7 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.HashGetAsync($"sqlpulse:$$entity:some_cache_tester", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
+            @interface.HashGetAsync($"performancepulse:$$entity:some_cache_tester", It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -159,11 +159,11 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.KeyDeleteAsync($"sqlpulse:$$table:cache_entities:%22{_CacheTesterId}%22", It.IsAny<CommandFlags>()),
+            @interface.KeyDeleteAsync($"performancepulse:$$table:cache_entities:%22{_CacheTesterId}%22", It.IsAny<CommandFlags>()),
             Times.Once());
 
         transactionMock.Verify(@interface =>
-            @interface.SortedSetRemoveAsync($"sqlpulse:$$table:cache_entities:$$primary", $"%22{_CacheTesterId}%22", It.IsAny<CommandFlags>()),
+            @interface.SortedSetRemoveAsync($"performancepulse:$$table:cache_entities:$$primary", $"%22{_CacheTesterId}%22", It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -191,7 +191,7 @@ internal class RedisHelperTests
 
         //Assert
         transactionMock.Verify(@interface =>
-            @interface.HashSetAsync($"sqlpulse:$$entity:some_cache_tester", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
+            @interface.HashSetAsync($"performancepulse:$$entity:some_cache_tester", It.IsAny<HashEntry[]>(), It.IsAny<CommandFlags>()),
             Times.Once());
     }
 
@@ -224,7 +224,7 @@ internal class RedisHelperTests
         var tempKey = (_helper as RedisHelper<CacheTester>)!.GetTempKey();
 
         //Assert
-        Assert.That(tempKey.ToString(), Does.StartWith("sqlpulse:$$temp:"));
+        Assert.That(tempKey.ToString(), Does.StartWith("performancepulse:$$temp:"));
     }
 }
 

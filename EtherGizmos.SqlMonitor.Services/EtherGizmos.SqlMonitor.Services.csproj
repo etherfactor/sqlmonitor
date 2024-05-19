@@ -13,4 +13,14 @@
     <PackageReference Include="NCrontab" Version="3.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

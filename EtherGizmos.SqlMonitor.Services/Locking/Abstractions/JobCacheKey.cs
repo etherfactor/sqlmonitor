@@ -1,7 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
+namespace EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 
 /// <summary>
 /// A lockable job in a distributed cache.
@@ -14,14 +13,14 @@ public readonly struct JobCacheKey : ICacheKey
     /// <summary>
     /// Use <see cref="CacheKey.ForJob(string)"/> instead!
     /// </summary>
-    internal JobCacheKey(string name)
+    public JobCacheKey(Type jobType)
     {
-        KeyName = name.ToSnakeCase();
+        KeyName = jobType.Name.ToSnakeCase();
     }
 
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        return (KeyName).GetHashCode();
+        return KeyName.GetHashCode();
     }
 }

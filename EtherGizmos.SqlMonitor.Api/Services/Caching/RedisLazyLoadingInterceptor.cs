@@ -1,6 +1,7 @@
 ﻿using Castle.DynamicProxy;
 using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Services;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -103,7 +104,7 @@ public class RedisLazyLoadingInterceptor<TEntity> : IInterceptor
             if (primaryKeys.All(e => _defaultValues.ContainsKey(e.DisplayName)))
             {
                 var primaryKey = helper.GetRecordId(primaryKeys.Select(e => _defaultValues[e.DisplayName]!));
-                var useLookupKey = new RedisKey($"{Constants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookup.DisplayName.ToSnakeCase()}");
+                var useLookupKey = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$table:{subHelper.GetTableName()}:{helper.GetTableName()}:{primaryKey}:${lookup.DisplayName.ToSnakeCase()}");
 
                 var transaction = _database.CreateTransaction();
                 var subAction = subHelper.AppendListAction(_database, transaction, lookupKey: useLookupKey, savedObjects: savedObjects);

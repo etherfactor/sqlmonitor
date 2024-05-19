@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -26,13 +24,13 @@ internal class GlobalConstantBackgroundServiceTests
     {
         //Arrange
         var handle = new TestSynchronizationHandle();
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedRecordCache>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new CacheLock<JobCacheKey>(new JobCacheKey("test"), handle));
+            .ReturnsAsync(new CacheLock<JobCacheKey>(new JobCacheKey(typeof(GlobalConstantBackgroundServiceImplemented)), handle));
         var cache = cacheMock.Object;
 
-        _service = new GlobalConstantBackgroundServiceImplemented(_logger, _serviceProvider, cache, new JobCacheKey("test"), "0/5 * * * * *", "0/1 * * * * *");
+        _service = new GlobalConstantBackgroundServiceImplemented(_logger, _serviceProvider, cache, "0/5 * * * * *", "0/1 * * * * *");
 
         //Act
         _ = _service.DoWorkAsync(CancellationToken.None);
@@ -48,13 +46,13 @@ internal class GlobalConstantBackgroundServiceTests
     {
         //Arrange
         var handle = new TestSynchronizationHandle();
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedRecordCache>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as CacheLock<JobCacheKey>);
         var cache = cacheMock.Object;
 
-        _service = new GlobalConstantBackgroundServiceImplemented(_logger, _serviceProvider, cache, new JobCacheKey("test"), "0/5 * * * * *", "0/1 * * * * *");
+        _service = new GlobalConstantBackgroundServiceImplemented(_logger, _serviceProvider, cache, "0/5 * * * * *", "0/1 * * * * *");
 
         //Act
         _ = _service.DoWorkAsync(CancellationToken.None);
@@ -73,11 +71,10 @@ internal class GlobalConstantBackgroundServiceImplemented : GlobalConstantBackgr
     public GlobalConstantBackgroundServiceImplemented(
         ILogger<GlobalConstantBackgroundServiceImplemented> logger,
         IServiceProvider serviceProvider,
-        IDistributedRecordCache cache,
-        JobCacheKey cacheKey,
+        IDistributedLockProvider cache,
         string lockCronExpression,
         string cronExpression)
-        : base(logger, serviceProvider, cache, cacheKey, lockCronExpression, cronExpression) { }
+        : base(logger, serviceProvider, cache, lockCronExpression, cronExpression) { }
 
     protected internal override Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
     {

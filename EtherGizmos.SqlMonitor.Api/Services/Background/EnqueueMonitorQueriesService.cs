@@ -1,6 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Background.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
+using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Background;
 
@@ -13,7 +12,7 @@ public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
     private const string ConstantCronExpression = "0/1 * * * * *";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _distributedRecordCache;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     /// <summary>
     /// Construct the service.
@@ -23,16 +22,16 @@ public class EnqueueMonitorQueriesService : GlobalConstantBackgroundService
     public EnqueueMonitorQueriesService(
         ILogger<EnqueueMonitorQueriesService> logger,
         IServiceProvider serviceProvider,
-        IDistributedRecordCache distributedRecordCache)
-        : base(logger, serviceProvider, distributedRecordCache, CacheKeys.EnqueueMonitorQueries, CronExpression, ConstantCronExpression)
+        IDistributedLockProvider distributedLockProvider)
+        : base(logger, serviceProvider, distributedLockProvider, CronExpression, ConstantCronExpression)
     {
         _logger = logger;
-        _distributedRecordCache = distributedRecordCache;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     /// <inheritdoc/>
-    protected internal override async Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
+    protected override Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
     {
-
+        return Task.CompletedTask;
     }
 }
