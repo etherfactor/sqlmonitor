@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests;
+namespace EtherGizmos.SqlMonitor.UnitTests;
 
 public class ProxyLogger<T> : ILogger<T>
 {
@@ -8,12 +8,12 @@ public class ProxyLogger<T> : ILogger<T>
 
     public ProxyLogger(ILogger proxee)
     {
-        this.Logger = proxee;
+        Logger = proxee;
     }
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull
     {
-        return Logger.BeginScope<TState>(state);
+        return Logger.BeginScope(state);
     }
 
     public bool IsEnabled(LogLevel logLevel)

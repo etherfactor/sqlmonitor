@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
-namespace EtherGizmos.SqlMonitor.Api.Helpers;
+namespace EtherGizmos.SqlMonitor.Services.Helpers;
 
 internal static class ThrowHelper
 {

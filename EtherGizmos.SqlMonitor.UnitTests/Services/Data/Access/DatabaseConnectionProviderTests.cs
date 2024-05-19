@@ -1,9 +1,9 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
+using EtherGizmos.SqlMonitor.Services.Data.Configuration;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Data.Access;
+namespace EtherGizmos.SqlMonitor.UnitTests.Services.Data.Access;
 
 internal class DatabaseConnectionProviderTests
 {

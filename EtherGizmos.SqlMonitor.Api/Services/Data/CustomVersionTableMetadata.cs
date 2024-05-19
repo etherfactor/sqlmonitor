@@ -1,7 +1,7 @@
 ﻿using FluentMigrator.Runner.VersionTableInfo;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
+namespace EtherGizmos.SqlMonitor.Api.Services.Data;
 
 /// <summary>
 /// Overrides default FluentMigrator version table naming.

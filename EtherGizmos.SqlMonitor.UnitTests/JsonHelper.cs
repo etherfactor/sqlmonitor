@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests;
+namespace EtherGizmos.SqlMonitor.UnitTests;
 
 internal static class JsonHelper
 {

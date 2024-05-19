@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.OData.Results;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
+namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
 
 internal static class IActionResultExtensions
 {

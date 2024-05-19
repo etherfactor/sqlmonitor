@@ -1,6 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Api.Helpers;
+﻿using EtherGizmos.SqlMonitor.Services.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Configuration;
+namespace EtherGizmos.SqlMonitor.Services.Configuration;
 
 public class HostAddressOptions
 {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Background.Abstractions;
+namespace EtherGizmos.SqlMonitor.UnitTests.Services.Background.Abstractions;
 
 internal class GlobalConstantBackgroundServiceTests
 {

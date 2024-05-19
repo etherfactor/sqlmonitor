@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="DistributedLock.Core" Version="1.*" />
+    <PackageReference Include="EtherGizmos.Extensions.DependencyInjection.ChildContainers" Version="0.1.0-ci.2" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.*" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.*" />
     <PackageReference Include="NCrontab" Version="3.*" />

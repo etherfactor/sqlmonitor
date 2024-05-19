@@ -1,8 +1,8 @@
 ﻿using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using EtherGizmos.SqlMonitor.Database.Remaps;
+using EtherGizmos.SqlMonitor.Services.Data.Configuration;
 using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Data.Migrations;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Generators.MySql;

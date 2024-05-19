@@ -1,10 +1,9 @@
-﻿using EtherGizmos.SqlMonitor.Api.Helpers;
-using Microsoft.Data.SqlClient;
+﻿using EtherGizmos.SqlMonitor.Services.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
+namespace EtherGizmos.SqlMonitor.Services.Data.Configuration;
 
 /// <summary>
-/// Provides configuration options for a <see cref="SqlConnectionStringBuilder"/>.
+/// Provides configuration options for a SQL Server connection string builder.
 /// </summary>
 public class SqlServerOptions
 {

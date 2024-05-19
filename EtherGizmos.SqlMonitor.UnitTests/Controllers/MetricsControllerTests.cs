@@ -1,10 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Controllers;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
 using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
 using EtherGizmos.SqlMonitor.Models.Exceptions;
+using EtherGizmos.SqlMonitor.UnitTests.Extensions;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +13,7 @@ using MockQueryable.Moq;
 using Moq;
 using System.Net;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Controllers;
+namespace EtherGizmos.SqlMonitor.UnitTests.Controllers;
 
 internal class MetricsControllerTests
 {

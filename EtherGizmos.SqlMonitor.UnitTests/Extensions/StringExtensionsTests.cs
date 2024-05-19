@@ -1,6 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Extensions;
+namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
 
 internal class StringExtensionsTests
 {

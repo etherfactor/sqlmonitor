@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Moq;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Filters;
+namespace EtherGizmos.SqlMonitor.UnitTests.Services.Filters;
 
 internal class ReturnODataErrorFilterTests
 {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests;
+namespace EtherGizmos.SqlMonitor.UnitTests;
 
 internal static class ODataQueryOptionsHelper
 {

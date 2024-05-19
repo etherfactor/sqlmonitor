@@ -1,9 +1,9 @@
-﻿using EtherGizmos.SqlMonitor.Api.Helpers;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
-using EtherGizmos.SqlMonitor.Api.Services.Messaging.Configuration;
+﻿using EtherGizmos.SqlMonitor.Services.Caching.Configuration;
+using EtherGizmos.SqlMonitor.Services.Data.Configuration;
+using EtherGizmos.SqlMonitor.Services.Helpers;
+using EtherGizmos.SqlMonitor.Services.Messaging.Configuration;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Configuration;
+namespace EtherGizmos.SqlMonitor.Services.Configuration;
 
 public class UsageOptions
 {

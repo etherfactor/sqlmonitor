@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
+﻿namespace EtherGizmos.SqlMonitor.Services.Data.Configuration;
 
 /// <summary>
 /// The type of database to use with the application.

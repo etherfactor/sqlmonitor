@@ -1,7 +1,7 @@
-﻿using EtherGizmos.SqlMonitor.Api.Helpers;
-using EtherGizmos.SqlMonitor.Api.Services.Configuration;
+﻿using EtherGizmos.SqlMonitor.Services.Configuration;
+using EtherGizmos.SqlMonitor.Services.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
+namespace EtherGizmos.SqlMonitor.Services.Caching.Configuration;
 
 public class RedisOptions
 {

@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Configuration;
+﻿using EtherGizmos.SqlMonitor.Models;
+using EtherGizmos.SqlMonitor.Services.Caching.Configuration;
 using StackExchange.Redis;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;

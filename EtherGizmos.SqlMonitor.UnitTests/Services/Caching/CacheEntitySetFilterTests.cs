@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Caching;
+namespace EtherGizmos.SqlMonitor.UnitTests.Services.Caching;
 
 internal class CacheEntitySetFilterTests
 {

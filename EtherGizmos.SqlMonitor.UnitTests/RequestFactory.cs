@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using EtherGizmos.SqlMonitor.UnitTests;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Abstracts;
@@ -8,7 +9,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using System.Text;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests;
+namespace EtherGizmos.SqlMonitor.UnitTests;
 
 /// <summary>
 /// A class to create HttpRequest for tests. See https://github.com/OData/AspNetCoreOData/blob/master/test/Microsoft.AspNetCore.OData.Tests/Extensions/RequestFactory.cs

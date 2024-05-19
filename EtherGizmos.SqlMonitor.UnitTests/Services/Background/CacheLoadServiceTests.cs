@@ -1,6 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Background;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Background;
+namespace EtherGizmos.SqlMonitor.UnitTests.Services.Background;
 
 internal class CacheLoadServiceTests
 {

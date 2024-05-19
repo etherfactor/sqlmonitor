@@ -1,6 +1,6 @@
 ﻿using Medallion.Threading;
 
-namespace EtherGizmos.SqlMonitor.Api.UnitTests.Services.Background.Abstractions;
+namespace EtherGizmos.SqlMonitor.UnitTests.Services.Background.Abstractions;
 
 internal class TestSynchronizationHandle : IDistributedSynchronizationHandle
 {

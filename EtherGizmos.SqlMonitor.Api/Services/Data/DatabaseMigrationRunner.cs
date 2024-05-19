@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Configuration;
 using EtherGizmos.SqlMonitor.Database;
 using FluentMigrator.Runner;
 using Serilog;

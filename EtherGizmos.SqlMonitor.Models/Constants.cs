@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api;
+﻿namespace EtherGizmos.SqlMonitor.Models;
 
 /// <summary>
 /// Constants used by the application.
