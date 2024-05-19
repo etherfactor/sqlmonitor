@@ -9,14 +9,15 @@ using EtherGizmos.SqlMonitor.Api.Services.Data;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
+using EtherGizmos.SqlMonitor.Configuration;
+using EtherGizmos.SqlMonitor.Configuration.Caching;
+using EtherGizmos.SqlMonitor.Configuration.Data;
+using EtherGizmos.SqlMonitor.Configuration.Messaging;
 using EtherGizmos.SqlMonitor.Database;
 using EtherGizmos.SqlMonitor.Database.Remaps;
 using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Authorization;
-using EtherGizmos.SqlMonitor.Services.Caching.Configuration;
-using EtherGizmos.SqlMonitor.Services.Configuration;
-using EtherGizmos.SqlMonitor.Services.Data.Configuration;
-using EtherGizmos.SqlMonitor.Services.Messaging.Configuration;
+using EtherGizmos.SqlMonitor.Shared.Messaging;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Generators.MySql;
 using MassTransit;
@@ -433,82 +434,7 @@ builder.Services
     .ImportLogging()
     .ForwardCaching();
 
-builder.Services
-    .AddChildContainer((childServices, parentServices) =>
-    {
-        var usageOptions = parentServices
-            .GetRequiredService<IOptions<UsageOptions>>()
-            .Value;
-
-        childServices.AddMassTransit(opt =>
-        {
-            opt.AddConsumersFromNamespaceContaining<RootOfNamespace>();
-
-            if (usageOptions.MessageBroker == MessageBrokerType.InMemory)
-            {
-                opt.UsingInMemory((context, conf) =>
-                {
-                    conf.Host();
-
-                    //TODO: Configure in-memory retry and other options
-                });
-            }
-            else if (usageOptions.MessageBroker == MessageBrokerType.RabbitMQ)
-            {
-                var rabbitMQOptions = parentServices
-                    .GetRequiredService<IOptions<RabbitMQOptions>>()
-                    .Value;
-
-                opt.UsingRabbitMq((context, conf) =>
-                {
-                    string useHost;
-                    if (rabbitMQOptions.Hosts.Count == 1)
-                    {
-                        var host = rabbitMQOptions.Hosts.Single();
-
-                        useHost = host.Address;
-                        var usePort = host.Port != 0 ? host.Port : Constants.RabbitMQ.Port;
-
-                        useHost = $"{useHost}:{usePort}";
-                    }
-                    else
-                    {
-                        useHost = "cluster";
-                    }
-
-                    conf.Host(useHost, opt =>
-                    {
-                        opt.Username(rabbitMQOptions.Username);
-                        opt.Password(rabbitMQOptions.Password);
-
-                        if (rabbitMQOptions.Hosts.Count > 1)
-                        {
-                            opt.UseCluster(conf =>
-                            {
-                                foreach (var node in rabbitMQOptions.Hosts)
-                                {
-                                    var useNode = node.Address;
-                                    var usePort = node.Port != 0 ? node.Port : Constants.RabbitMQ.Port;
-
-                                    conf.Node(useNode);
-                                }
-                            });
-                        }
-                    });
-
-                    //TODO: Configure retry
-                });
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format("Unknown message broker type: {0}", usageOptions.MessageBroker));
-            }
-        });
-    })
-    .ImportSingleton<IDistributedRecordCache>()
-    .ImportScoped<ISaveService>()
-    .ImportLogging()
-    .ForwardMassTransit();
+builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
 
 builder.Services
     .AddChildContainer((childCollection, parentServices) =>

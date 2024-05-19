@@ -17,5 +17,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Shared.Messaging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 </Project>

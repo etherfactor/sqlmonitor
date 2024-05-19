@@ -1,7 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Services.Configuration;
-using EtherGizmos.SqlMonitor.Services.Helpers;
+﻿using EtherGizmos.SqlMonitor.Configuration.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Services.Messaging.Configuration;
+namespace EtherGizmos.SqlMonitor.Configuration.Messaging;
 
 public class RabbitMQOptions
 {

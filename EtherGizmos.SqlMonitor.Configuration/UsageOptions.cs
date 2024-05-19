@@ -1,11 +1,11 @@
-﻿using EtherGizmos.SqlMonitor.Services.Caching.Configuration;
-using EtherGizmos.SqlMonitor.Services.Data.Configuration;
-using EtherGizmos.SqlMonitor.Services.Helpers;
-using EtherGizmos.SqlMonitor.Services.Messaging.Configuration;
+﻿using EtherGizmos.SqlMonitor.Configuration.Caching;
+using EtherGizmos.SqlMonitor.Configuration.Data;
+using EtherGizmos.SqlMonitor.Configuration.Helpers;
+using EtherGizmos.SqlMonitor.Configuration.Messaging;
 
-namespace EtherGizmos.SqlMonitor.Services.Configuration;
+namespace EtherGizmos.SqlMonitor.Configuration;
 
-public class UsageOptions
+public class UsageOptions : IValidatableOptions
 {
     public CacheType Cache { get; set; }
 

@@ -1,6 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Annotations;
-using EtherGizmos.SqlMonitor.Models.Extensions;
 using StackExchange.Redis;
 using System.Linq.Expressions;
 using System.Reflection;

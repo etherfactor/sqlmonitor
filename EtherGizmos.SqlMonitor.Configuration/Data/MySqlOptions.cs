@@ -1,11 +1,11 @@
-﻿using EtherGizmos.SqlMonitor.Services.Helpers;
+﻿using EtherGizmos.SqlMonitor.Configuration.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Services.Data.Configuration;
+namespace EtherGizmos.SqlMonitor.Configuration.Data;
 
 /// <summary>
-/// Provides configuration options for a MySQL connection string builder.
+/// Provides configuration options for a <see cref="MySqlConnectionStringBuilder"/>.
 /// </summary>
-public class PostgreSqlOptions
+public class MySqlOptions
 {
     public Dictionary<string, string?> AllProperties { get; set; } = new();
 
@@ -25,13 +25,13 @@ public class PostgreSqlOptions
     /// <param name="rootPath">The root of the configuration in which these settings are located.</param>
     public void AssertValid(string rootPath)
     {
-        if (GetProperty("Host") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Host", typeof(string));
+        if (GetProperty("Server") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Server", typeof(string));
         if (GetProperty("Database") is null)
             ThrowHelper.ForMissingConfiguration(rootPath, this, "Database", typeof(string));
-        if (GetProperty("User Id") is null && GetProperty("User ID") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "User Id", typeof(string));
-        if (GetProperty("Password") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Password", typeof(string));
+        if (GetProperty("Uid") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Uid", typeof(string));
+        if (GetProperty("Pwd") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Pwd", typeof(string));
     }
 }

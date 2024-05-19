@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Services.Messaging.Configuration;
+﻿namespace EtherGizmos.SqlMonitor.Configuration.Messaging;
 
 public enum MessageBrokerType
 {

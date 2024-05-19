@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions;
+using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Annotations;
-using EtherGizmos.SqlMonitor.Models.Extensions;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;

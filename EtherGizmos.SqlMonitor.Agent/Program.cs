@@ -1,6 +1,6 @@
-using EtherGizmos.SqlMonitor.Agent;
-using EtherGizmos.SqlMonitor.Services.Configuration;
-using EtherGizmos.SqlMonitor.Services.Messaging.Configuration;
+using EtherGizmos.SqlMonitor.Configuration;
+using EtherGizmos.SqlMonitor.Configuration.Messaging;
+using EtherGizmos.SqlMonitor.Shared.Messaging;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -48,7 +48,7 @@ builder.Services
         }
     });
 
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
 
 var host = builder.Build();
 

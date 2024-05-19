@@ -1,6 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Services.Helpers;
+﻿using EtherGizmos.SqlMonitor.Configuration.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Services.Data.Configuration;
+namespace EtherGizmos.SqlMonitor.Configuration.Data;
 
 /// <summary>
 /// Provides configuration options for a SQL Server connection string builder.

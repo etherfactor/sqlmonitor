@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Models.Api.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Models.Api.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Helpers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;

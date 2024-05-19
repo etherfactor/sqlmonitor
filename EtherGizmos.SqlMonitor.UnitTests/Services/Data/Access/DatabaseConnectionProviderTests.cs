@@ -1,5 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
-using EtherGizmos.SqlMonitor.Services.Data.Configuration;
+using EtherGizmos.SqlMonitor.Configuration.Data;
 using Microsoft.Extensions.Options;
 using Moq;
 

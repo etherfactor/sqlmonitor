@@ -1,9 +1,8 @@
-﻿using EtherGizmos.SqlMonitor.Services.Configuration;
-using EtherGizmos.SqlMonitor.Services.Helpers;
+﻿using EtherGizmos.SqlMonitor.Configuration.Helpers;
 
-namespace EtherGizmos.SqlMonitor.Services.Caching.Configuration;
+namespace EtherGizmos.SqlMonitor.Configuration.Caching;
 
-public class RedisOptions
+public class RedisOptions : IValidatableOptions
 {
     public string? Username { get; set; }
 

@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
-using EtherGizmos.SqlMonitor.Models.Extensions;
 using EtherGizmos.SqlMonitor.Models.OData.Errors.Abstractions;
 using System.Linq.Expressions;
 

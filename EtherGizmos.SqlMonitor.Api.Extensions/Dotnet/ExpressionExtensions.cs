@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EtherGizmos.SqlMonitor.Models.Extensions;
+namespace EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 
 /// <summary>
 /// Provides extension methods for <see cref="Expression{TDelegate}"/>.
