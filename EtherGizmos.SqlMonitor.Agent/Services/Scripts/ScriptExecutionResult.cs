@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Scripts;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Services.Scripts;
 
 public class ScriptExecutionResult
 {

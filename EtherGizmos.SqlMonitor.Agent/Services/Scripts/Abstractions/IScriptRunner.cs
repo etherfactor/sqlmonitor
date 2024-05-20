@@ -1,6 +1,7 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Scripts;
+using EtherGizmos.SqlMonitor.Models.Database;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Scripts.Abstractions;
+namespace EtherGizmos.SqlMonitor.Agent.Services.Scripts.Abstractions;
 
 /// <summary>
 /// Executes scripts against servers, either by connecting or running them locally.

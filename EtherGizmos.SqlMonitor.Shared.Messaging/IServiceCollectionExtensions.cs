@@ -33,7 +33,7 @@ public static class IServiceCollectionExtensions
                             //TODO: Configure in-memory retry and other options
                         });
                     }
-                    else if(usageOptions.MessageBroker == MessageBrokerType.RabbitMQ)
+                    else if (usageOptions.MessageBroker == MessageBrokerType.RabbitMQ)
                     {
                         var rabbitMQOptions = parentServices
                             .GetRequiredService<IOptions<RabbitMQOptions>>()

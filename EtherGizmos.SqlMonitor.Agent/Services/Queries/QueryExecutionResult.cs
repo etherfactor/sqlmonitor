@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Services.Queries;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Services.Queries;
 
 /// <summary>
 /// A result produced by a query.

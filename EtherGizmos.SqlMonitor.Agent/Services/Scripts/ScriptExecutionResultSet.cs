@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Agent.Services.Scripts;
+using EtherGizmos.SqlMonitor.Models.Database;
 using System.Text.RegularExpressions;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Scripts;

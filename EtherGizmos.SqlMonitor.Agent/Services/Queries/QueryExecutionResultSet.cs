@@ -1,7 +1,7 @@
 ﻿using EtherGizmos.SqlMonitor.Models.Database;
 using System.Data.Common;
 
-namespace EtherGizmos.SqlMonitor.Api.Services.Queries;
+namespace EtherGizmos.SqlMonitor.Agent.Services.Queries;
 
 /// <summary>
 /// A set of results produced by a query.
