@@ -9,11 +9,6 @@ namespace EtherGizmos.SqlMonitor.Agent.Services.Queries;
 public class QueryExecutionResultSet
 {
     /// <summary>
-    /// The server against which the query was run.
-    /// </summary>
-    public required MonitoredQueryTarget MonitoredQueryTarget { get; set; }
-
-    /// <summary>
     /// The query that was run.
     /// </summary>
     public required QueryVariant QueryVariant { get; set; }
@@ -31,13 +26,11 @@ public class QueryExecutionResultSet
     /// <summary>
     /// Create a result set from a <see cref="DbDataReader"/>.
     /// </summary>
-    /// <param name="queryTarget">The server against which the query was run.</param>
     /// <param name="queryVariant">The query that was run.</param>
     /// <param name="reader">The reader produced by running the query.</param>
     /// <param name="executionMilliseconds">The duration the query took to run.</param>
     /// <returns>The set of results produced by the query.</returns>
     public static QueryExecutionResultSet FromResults(
-        MonitoredQueryTarget queryTarget,
         QueryVariant queryVariant,
         DbDataReader reader,
         long executionMilliseconds)
@@ -63,7 +56,6 @@ public class QueryExecutionResultSet
 
         return new()
         {
-            MonitoredQueryTarget = queryTarget,
             QueryVariant = queryVariant,
             ExecutionMilliseconds = executionMilliseconds,
             Results = executionResults,

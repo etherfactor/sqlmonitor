@@ -10,13 +10,20 @@ namespace EtherGizmos.SqlMonitor.Agent.Services.Queries;
 /// </summary>
 public class PostgreSqlQueryRunner : IQueryRunner
 {
+    private readonly string _connectionString;
+
+    public PostgreSqlQueryRunner(
+        string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
     /// <inheritdoc/>
     public async Task<QueryExecutionResultSet> ExecuteAsync(
-        MonitoredQueryTarget queryTarget,
         QueryVariant queryVariant,
         CancellationToken cancellationToken = default)
     {
-        var connection = new NpgsqlConnection(queryTarget.ConnectionString);
+        var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
         var command = connection.CreateCommand();
@@ -31,6 +38,6 @@ public class PostgreSqlQueryRunner : IQueryRunner
         if (stopwatch.IsRunning && executionMilliseconds == 0)
             executionMilliseconds++;
 
-        return QueryExecutionResultSet.FromResults(queryTarget, queryVariant, results, executionMilliseconds);
+        return QueryExecutionResultSet.FromResults(queryVariant, results, executionMilliseconds);
     }
 }
