@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Models;
 using EtherGizmos.SqlMonitor.Agent.Services.Communication.Abstractions;
+using EtherGizmos.SqlMonitor.Api.Extensions.Dotnet;
 using System.Net.Http.Json;
 
 namespace EtherGizmos.SqlMonitor.Agent.Services.Communication;
@@ -18,8 +19,14 @@ internal class ConnectionRetriever : IConnectionRetriever
     {
         using var client = _clientFactory.CreateClient("coordinator");
 
+        var uriBuilder = new UriBuilder($"/agent/v1/credentials");
+        var queryParams = uriBuilder.GetQueryParameters();
+
+        queryParams.Add("connectionToken", connectionToken);
+        uriBuilder.SetQueryParameters(queryParams);
+
         var request = JsonContent.Create(new QueryConnectionRequest(connectionToken));
-        var httpResponse = await client.PostAsync($"/agent/v1/connectionToken/query", request, cancellationToken);
+        var httpResponse = await client.PostAsync(uriBuilder.Uri, request, cancellationToken);
         var response = await httpResponse.Content.ReadFromJsonAsync<QueryConnectionResponse>(cancellationToken)
             ?? throw new InvalidOperationException("Unable to parse as JSON");
 

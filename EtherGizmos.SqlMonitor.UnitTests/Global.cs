@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.OData;
-using EtherGizmos.SqlMonitor.Api.Controllers;
+using EtherGizmos.SqlMonitor.Api.Controllers.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;

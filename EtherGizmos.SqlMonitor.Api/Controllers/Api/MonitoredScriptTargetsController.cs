@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
-namespace EtherGizmos.SqlMonitor.Api.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.Controllers.Api;
 
 /// <summary>
 /// Provides endpoints for <see cref="MonitoredScriptTarget"/> records.

@@ -8,7 +8,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using System.Security.Claims;
 
-namespace EtherGizmos.SqlMonitor.Api.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.Controllers.Authorization;
 
 public class OAuth2Controller : ControllerBase
 {

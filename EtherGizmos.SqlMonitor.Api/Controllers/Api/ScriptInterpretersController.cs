@@ -12,25 +12,25 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
-namespace EtherGizmos.SqlMonitor.Api.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.Controllers.Api;
 
 /// <summary>
-/// Provides endpoints for <see cref="Metric"/> records.
+/// Provides endpoints for <see cref="ScriptInterpreter"/> records.
 /// </summary>
-public class MetricsController : ODataController
+public class ScriptInterpretersController : ODataController
 {
-    private const string BasePath = "api/v{version:apiVersion}/metrics";
+    private const string BasePath = "api/v{version:apiVersion}/scriptInterpreters";
 
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
-    private readonly IMetricService _metricService;
+    private readonly IScriptInterpreterService _scriptInterpreterService;
     private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Metric> Metrics => _metricService.GetQueryable();
+    private IQueryable<ScriptInterpreter> ScriptInterpreters => _scriptInterpreterService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -39,17 +39,17 @@ public class MetricsController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="instanceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public MetricsController(
-        ILogger<MetricsController> logger,
+    public ScriptInterpretersController(
+        ILogger<ScriptInterpretersController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
-        IMetricService instanceService,
+        IScriptInterpreterService instanceService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _metricService = instanceService;
+        _scriptInterpreterService = instanceService;
         _saveService = saveService;
     }
 
@@ -60,9 +60,9 @@ public class MetricsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath)]
-    public async Task<IActionResult> Search(ODataQueryOptions<MetricDTO> queryOptions)
+    public async Task<IActionResult> Search(ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
     {
-        var finished = await Metrics.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
+        var finished = await ScriptInterpreters.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -74,13 +74,13 @@ public class MetricsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath + "({id})")]
-    public async Task<IActionResult> Get(int id, ODataQueryOptions<MetricDTO> queryOptions)
+    public async Task<IActionResult> Get(int id, ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
+        ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<MetricDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<ScriptInterpreterDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -94,16 +94,16 @@ public class MetricsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPost(BasePath)]
-    public async Task<IActionResult> Create([FromBody] MetricDTO newRecord, ODataQueryOptions<MetricDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] ScriptInterpreterDTO newRecord, ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Metrics);
+        await newRecord.EnsureValid(ScriptInterpreters);
 
-        Metric record = _mapper.Map<Metric>(newRecord);
+        ScriptInterpreter record = _mapper.Map<ScriptInterpreter>(newRecord);
 
-        await record.EnsureValid(Metrics);
-        _metricService.Add(record);
+        await record.EnsureValid(ScriptInterpreters);
+        _scriptInterpreterService.Add(record);
 
         await _saveService.SaveChangesAsync();
 
@@ -120,28 +120,28 @@ public class MetricsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPatch(BasePath + "({id})")]
-    public async Task<IActionResult> Update(int id, [FromBody] Delta<MetricDTO> patchRecord, ODataQueryOptions<MetricDTO> queryOptions)
+    public async Task<IActionResult> Update(int id, [FromBody] Delta<ScriptInterpreterDTO> patchRecord, ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        var testRecord = new MetricDTO();
+        var testRecord = new ScriptInterpreterDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Metrics);
+        await testRecord.EnsureValid(ScriptInterpreters);
 
-        Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
+        ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<MetricDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<ScriptInterpreterDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = _mapper.MapExplicitly(record).To<MetricDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<ScriptInterpreterDTO>();
         patchRecord.Patch(recordAsDto);
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Metrics);
+        await record.EnsureValid(ScriptInterpreters);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<Metric>().AddAsync(record);
+        await _cache.EntitySet<ScriptInterpreter>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -156,14 +156,14 @@ public class MetricsController : ODataController
     [HttpDelete(BasePath + "({id})")]
     public async Task<IActionResult> Delete(int id)
     {
-        Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
+        ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<MetricDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<ScriptInterpreterDTO>((e => e.Id, id)).GetResponse();
 
-        _metricService.Remove(record);
+        _scriptInterpreterService.Remove(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<Metric>().RemoveAsync(record);
+        await _cache.EntitySet<ScriptInterpreter>().RemoveAsync(record);
 
         return NoContent();
     }

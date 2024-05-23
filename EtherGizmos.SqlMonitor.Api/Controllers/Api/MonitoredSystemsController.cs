@@ -5,7 +5,6 @@ using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Models.Database;
-using EtherGizmos.SqlMonitor.Models.Exceptions;
 using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
@@ -13,46 +12,45 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
-namespace EtherGizmos.SqlMonitor.Api.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.Controllers.Api;
 
-public class ScriptsController : ODataController
+/// <summary>
+/// Provides endpoints for <see cref="MonitoredSystem"/> records.
+/// </summary>
+public class MonitoredSystemsController : ODataController
 {
-    private const string BasePath = "api/v{version:apiVersion}/scripts";
+    private const string BasePath = "api/v{version:apiVersion}/monitoredSystems";
 
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
-    private readonly IScriptService _scriptService;
+    private readonly IMonitoredSystemService _monitoredSystemService;
     private readonly ISaveService _saveService;
-    private readonly IMetricService _metricService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<Script> Scripts => _scriptService.GetQueryable();
+    private IQueryable<MonitoredSystem> MonitoredSystems => _monitoredSystemService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="scriptService">Provides access to the storage of records.</param>
+    /// <param name="instanceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    /// <param name="metricService">Provides access to metric records.</param>
-    public ScriptsController(
-        ILogger<ScriptsController> logger,
+    public MonitoredSystemsController(
+        ILogger<MonitoredSystemsController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
-        IScriptService scriptService,
-        ISaveService saveService,
-        IMetricService metricService)
+        IMonitoredSystemService instanceService,
+        ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _scriptService = scriptService;
+        _monitoredSystemService = instanceService;
         _saveService = saveService;
-        _metricService = metricService;
     }
 
     /// <summary>
@@ -62,9 +60,9 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath)]
-    public async Task<IActionResult> Search(ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Search(ODataQueryOptions<MonitoredSystemDTO> queryOptions)
     {
-        var finished = await Scripts.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
+        var finished = await MonitoredSystems.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -76,13 +74,13 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath + "({id})")]
-    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<MonitoredSystemDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
+        MonitoredSystem? record = await MonitoredSystems.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MonitoredSystemDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -96,26 +94,16 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPost(BasePath)]
-    public async Task<IActionResult> Create([FromBody] ScriptDTO newRecord, ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] MonitoredSystemDTO newRecord, ODataQueryOptions<MonitoredSystemDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Scripts);
+        await newRecord.EnsureValid(MonitoredSystems);
 
-        var allMetrics = _metricService.GetQueryable();
-        foreach (var metricId in newRecord.Metrics.Select(e => e.MetricId).Distinct())
-        {
-            if (!await allMetrics.AnyAsync(e => e.Id == metricId))
-            {
-                var error = new ODataRecordNotFoundError<MetricDTO>((e => e.Id, metricId!));
-                throw new ReturnODataErrorException(error);
-            }
-        }
+        MonitoredSystem record = _mapper.Map<MonitoredSystem>(newRecord);
 
-        Script record = _mapper.Map<Script>(newRecord);
-
-        await record.EnsureValid(Scripts);
-        _scriptService.Add(record);
+        await record.EnsureValid(MonitoredSystems);
+        _monitoredSystemService.Add(record);
 
         await _saveService.SaveChangesAsync();
 
@@ -132,38 +120,28 @@ public class ScriptsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPatch(BasePath + "({id})")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<ScriptDTO> patchRecord, ODataQueryOptions<ScriptDTO> queryOptions)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<MonitoredSystemDTO> patchRecord, ODataQueryOptions<MonitoredSystemDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        var testRecord = new ScriptDTO();
+        var testRecord = new MonitoredSystemDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Scripts);
+        await testRecord.EnsureValid(MonitoredSystems);
 
-        Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
+        MonitoredSystem? record = await MonitoredSystems.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MonitoredSystemDTO>((e => e.Id, id)).GetResponse();
 
-        var allMetrics = _metricService.GetQueryable();
-        foreach (var metricId in testRecord.Metrics.Select(e => e.MetricId).Distinct())
-        {
-            if (!await allMetrics.AnyAsync(e => e.Id == metricId))
-            {
-                var error = new ODataRecordNotFoundError<MetricDTO>((e => e.Id, metricId!));
-                throw new ReturnODataErrorException(error);
-            }
-        }
-
-        var recordAsDto = _mapper.MapExplicitly(record).To<ScriptDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<MonitoredSystemDTO>();
         patchRecord.Patch(recordAsDto);
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Scripts);
+        await record.EnsureValid(MonitoredSystems);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<Script>().AddAsync(record);
+        await _cache.EntitySet<MonitoredSystem>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -178,14 +156,14 @@ public class ScriptsController : ODataController
     [HttpDelete(BasePath + "({id})")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
+        MonitoredSystem? record = await MonitoredSystems.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MonitoredSystemDTO>((e => e.Id, id)).GetResponse();
 
-        _scriptService.Remove(record);
+        _monitoredSystemService.Remove(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<Script>().RemoveAsync(record);
+        await _cache.EntitySet<MonitoredSystem>().RemoveAsync(record);
 
         return NoContent();
     }

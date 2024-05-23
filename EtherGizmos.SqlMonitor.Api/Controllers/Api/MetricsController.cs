@@ -12,25 +12,25 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
-namespace EtherGizmos.SqlMonitor.Api.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.Controllers.Api;
 
 /// <summary>
-/// Provides endpoints for <see cref="MonitoredEnvironment"/> records.
+/// Provides endpoints for <see cref="Metric"/> records.
 /// </summary>
-public class MonitoredEnvironmentsController : ODataController
+public class MetricsController : ODataController
 {
-    private const string BasePath = "api/v{version:apiVersion}/monitoredEnvironments";
+    private const string BasePath = "api/v{version:apiVersion}/metrics";
 
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
-    private readonly IMonitoredEnvironmentService _monitoredEnvironmentService;
+    private readonly IMetricService _metricService;
     private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<MonitoredEnvironment> MonitoredEnvironments => _monitoredEnvironmentService.GetQueryable();
+    private IQueryable<Metric> Metrics => _metricService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -39,17 +39,17 @@ public class MonitoredEnvironmentsController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="instanceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public MonitoredEnvironmentsController(
-        ILogger<MonitoredEnvironmentsController> logger,
+    public MetricsController(
+        ILogger<MetricsController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
-        IMonitoredEnvironmentService instanceService,
+        IMetricService instanceService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _monitoredEnvironmentService = instanceService;
+        _metricService = instanceService;
         _saveService = saveService;
     }
 
@@ -60,9 +60,9 @@ public class MonitoredEnvironmentsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath)]
-    public async Task<IActionResult> Search(ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
+    public async Task<IActionResult> Search(ODataQueryOptions<MetricDTO> queryOptions)
     {
-        var finished = await MonitoredEnvironments.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
+        var finished = await Metrics.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -74,13 +74,13 @@ public class MonitoredEnvironmentsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath + "({id})")]
-    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
+    public async Task<IActionResult> Get(int id, ODataQueryOptions<MetricDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
+        Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<MonitoredEnvironmentDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MetricDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -94,16 +94,16 @@ public class MonitoredEnvironmentsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPost(BasePath)]
-    public async Task<IActionResult> Create([FromBody] MonitoredEnvironmentDTO newRecord, ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] MetricDTO newRecord, ODataQueryOptions<MetricDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(MonitoredEnvironments);
+        await newRecord.EnsureValid(Metrics);
 
-        MonitoredEnvironment record = _mapper.Map<MonitoredEnvironment>(newRecord);
+        Metric record = _mapper.Map<Metric>(newRecord);
 
-        await record.EnsureValid(MonitoredEnvironments);
-        _monitoredEnvironmentService.Add(record);
+        await record.EnsureValid(Metrics);
+        _metricService.Add(record);
 
         await _saveService.SaveChangesAsync();
 
@@ -120,28 +120,28 @@ public class MonitoredEnvironmentsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPatch(BasePath + "({id})")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<MonitoredEnvironmentDTO> patchRecord, ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
+    public async Task<IActionResult> Update(int id, [FromBody] Delta<MetricDTO> patchRecord, ODataQueryOptions<MetricDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        var testRecord = new MonitoredEnvironmentDTO();
+        var testRecord = new MetricDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(MonitoredEnvironments);
+        await testRecord.EnsureValid(Metrics);
 
-        MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
+        Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<MonitoredEnvironmentDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MetricDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = _mapper.MapExplicitly(record).To<MonitoredEnvironmentDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<MetricDTO>();
         patchRecord.Patch(recordAsDto);
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(MonitoredEnvironments);
+        await record.EnsureValid(Metrics);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<MonitoredEnvironment>().AddAsync(record);
+        await _cache.EntitySet<Metric>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -154,16 +154,16 @@ public class MonitoredEnvironmentsController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpDelete(BasePath + "({id})")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(int id)
     {
-        MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
+        Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<MonitoredEnvironmentDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MetricDTO>((e => e.Id, id)).GetResponse();
 
-        _monitoredEnvironmentService.Remove(record);
+        _metricService.Remove(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<MonitoredEnvironment>().RemoveAsync(record);
+        await _cache.EntitySet<Metric>().RemoveAsync(record);
 
         return NoContent();
     }

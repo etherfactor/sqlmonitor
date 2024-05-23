@@ -12,25 +12,25 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
-namespace EtherGizmos.SqlMonitor.Api.Controllers;
+namespace EtherGizmos.SqlMonitor.Api.Controllers.Api;
 
 /// <summary>
-/// Provides endpoints for <see cref="ScriptInterpreter"/> records.
+/// Provides endpoints for <see cref="MonitoredEnvironment"/> records.
 /// </summary>
-public class ScriptInterpretersController : ODataController
+public class MonitoredEnvironmentsController : ODataController
 {
-    private const string BasePath = "api/v{version:apiVersion}/scriptInterpreters";
+    private const string BasePath = "api/v{version:apiVersion}/monitoredEnvironments";
 
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
-    private readonly IScriptInterpreterService _scriptInterpreterService;
+    private readonly IMonitoredEnvironmentService _monitoredEnvironmentService;
     private readonly ISaveService _saveService;
 
     /// <summary>
     /// Queries stored records.
     /// </summary>
-    private IQueryable<ScriptInterpreter> ScriptInterpreters => _scriptInterpreterService.GetQueryable();
+    private IQueryable<MonitoredEnvironment> MonitoredEnvironments => _monitoredEnvironmentService.GetQueryable();
 
     /// <summary>
     /// Constructs the controller.
@@ -39,17 +39,17 @@ public class ScriptInterpretersController : ODataController
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
     /// <param name="instanceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
-    public ScriptInterpretersController(
-        ILogger<ScriptInterpretersController> logger,
+    public MonitoredEnvironmentsController(
+        ILogger<MonitoredEnvironmentsController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
-        IScriptInterpreterService instanceService,
+        IMonitoredEnvironmentService instanceService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _scriptInterpreterService = instanceService;
+        _monitoredEnvironmentService = instanceService;
         _saveService = saveService;
     }
 
@@ -60,9 +60,9 @@ public class ScriptInterpretersController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath)]
-    public async Task<IActionResult> Search(ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
+    public async Task<IActionResult> Search(ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
     {
-        var finished = await ScriptInterpreters.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
+        var finished = await MonitoredEnvironments.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
     }
 
@@ -74,13 +74,13 @@ public class ScriptInterpretersController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpGet(BasePath + "({id})")]
-    public async Task<IActionResult> Get(int id, ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
+    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
+        MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptInterpreterDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MonitoredEnvironmentDTO>((e => e.Id, id)).GetResponse();
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -94,16 +94,16 @@ public class ScriptInterpretersController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPost(BasePath)]
-    public async Task<IActionResult> Create([FromBody] ScriptInterpreterDTO newRecord, ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
+    public async Task<IActionResult> Create([FromBody] MonitoredEnvironmentDTO newRecord, ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(ScriptInterpreters);
+        await newRecord.EnsureValid(MonitoredEnvironments);
 
-        ScriptInterpreter record = _mapper.Map<ScriptInterpreter>(newRecord);
+        MonitoredEnvironment record = _mapper.Map<MonitoredEnvironment>(newRecord);
 
-        await record.EnsureValid(ScriptInterpreters);
-        _scriptInterpreterService.Add(record);
+        await record.EnsureValid(MonitoredEnvironments);
+        _monitoredEnvironmentService.Add(record);
 
         await _saveService.SaveChangesAsync();
 
@@ -120,28 +120,28 @@ public class ScriptInterpretersController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpPatch(BasePath + "({id})")]
-    public async Task<IActionResult> Update(int id, [FromBody] Delta<ScriptInterpreterDTO> patchRecord, ODataQueryOptions<ScriptInterpreterDTO> queryOptions)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Delta<MonitoredEnvironmentDTO> patchRecord, ODataQueryOptions<MonitoredEnvironmentDTO> queryOptions)
     {
         queryOptions.EnsureValidForSingle();
 
-        var testRecord = new ScriptInterpreterDTO();
+        var testRecord = new MonitoredEnvironmentDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(ScriptInterpreters);
+        await testRecord.EnsureValid(MonitoredEnvironments);
 
-        ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
+        MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptInterpreterDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MonitoredEnvironmentDTO>((e => e.Id, id)).GetResponse();
 
-        var recordAsDto = _mapper.MapExplicitly(record).To<ScriptInterpreterDTO>();
+        var recordAsDto = _mapper.MapExplicitly(record).To<MonitoredEnvironmentDTO>();
         patchRecord.Patch(recordAsDto);
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(ScriptInterpreters);
+        await record.EnsureValid(MonitoredEnvironments);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<ScriptInterpreter>().AddAsync(record);
+        await _cache.EntitySet<MonitoredEnvironment>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
@@ -154,16 +154,16 @@ public class ScriptInterpretersController : ODataController
     /// <returns>An awaitable task.</returns>
     [ApiVersion("0.1")]
     [HttpDelete(BasePath + "({id})")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
+        MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
-            return new ODataRecordNotFoundError<ScriptInterpreterDTO>((e => e.Id, id)).GetResponse();
+            return new ODataRecordNotFoundError<MonitoredEnvironmentDTO>((e => e.Id, id)).GetResponse();
 
-        _scriptInterpreterService.Remove(record);
+        _monitoredEnvironmentService.Remove(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<ScriptInterpreter>().RemoveAsync(record);
+        await _cache.EntitySet<MonitoredEnvironment>().RemoveAsync(record);
 
         return NoContent();
     }

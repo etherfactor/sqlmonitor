@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Controllers;
+﻿using EtherGizmos.SqlMonitor.Api.Controllers.Api;
 using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Models;
 using EtherGizmos.SqlMonitor.Models.Api.v1;

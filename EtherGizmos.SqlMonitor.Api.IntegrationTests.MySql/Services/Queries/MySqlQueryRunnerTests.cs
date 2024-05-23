@@ -11,30 +11,23 @@ internal class MySqlQueryRunnerTests
     [SetUp]
     public void SetUp()
     {
-        _runner = new MySqlQueryRunner();
+        _runner = new MySqlQueryRunner("Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;");
     }
 
     [Test]
     public async Task ExecuteAsync_PasswordAuthentication_ReturnsResults()
     {
-        var target = new MonitoredQueryTarget()
-        {
-            HostName = "localhost",
-            ConnectionString = "Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;",
-        };
-
         var query = new QueryVariant()
         {
             QueryText = "select 1 as value, 'Test' as bucket from dual;",
             SqlType = SqlType.MySql,
         };
 
-        var result = await _runner.ExecuteAsync(target, query);
+        var result = await _runner.ExecuteAsync(query);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Results.Count(), Is.EqualTo(1));
-            Assert.That(result.MonitoredQueryTarget, Is.EqualTo(target));
             Assert.That(result.QueryVariant, Is.EqualTo(query));
             Assert.That(result.ExecutionMilliseconds, Is.GreaterThan(0));
 
