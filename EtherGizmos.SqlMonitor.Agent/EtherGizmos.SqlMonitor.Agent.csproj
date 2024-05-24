@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj" />
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj" />
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Shared.Messaging.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Old.Models.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Old.Services.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Old.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

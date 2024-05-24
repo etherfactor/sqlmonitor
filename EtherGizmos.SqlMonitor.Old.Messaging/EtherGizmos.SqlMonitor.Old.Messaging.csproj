@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Old.Services.csproj" />
   </ItemGroup>
 
 </Project>

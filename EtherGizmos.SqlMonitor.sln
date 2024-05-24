@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api", "EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj", "{2F466962-D42B-434D-B854-745E3DE16F6E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.Extensions", "EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj", "{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Old.Extensions", "EtherGizmos.SqlMonitor.Old.Extensions\EtherGizmos.SqlMonitor.Old.Extensions.csproj", "{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh", "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh\EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh.csproj", "{8AC84FCC-9855-4C1A-A627-5095A006E8C4}"
 EndProject
@@ -18,9 +18,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.UnitTests", "EtherGizmos.SqlMonitor.UnitTests\EtherGizmos.SqlMonitor.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Database", "EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Old.Database", "EtherGizmos.SqlMonitor.Old.Database\EtherGizmos.SqlMonitor.Old.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Models", "EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj", "{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Old.Models", "EtherGizmos.SqlMonitor.Old.Models\EtherGizmos.SqlMonitor.Old.Models.csproj", "{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EtherGizmos.SqlMonitor.Web", "EtherGizmos.SqlMonitor.Web\EtherGizmos.SqlMonitor.Web.esproj", "{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}"
 EndProject
@@ -34,11 +34,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Agent", "EtherGizmos.SqlMonitor.Agent\EtherGizmos.SqlMonitor.Agent.csproj", "{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Services", "EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Services.csproj", "{2990652D-4464-4852-9B56-B5B09D8066CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Old.Services", "EtherGizmos.SqlMonitor.Old.Services\EtherGizmos.SqlMonitor.Old.Services.csproj", "{2990652D-4464-4852-9B56-B5B09D8066CB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Messaging", "EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Shared.Messaging.csproj", "{CF9D3076-893A-4E55-A54F-D5B8C6470B63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Old.Messaging", "EtherGizmos.SqlMonitor.Old.Messaging\EtherGizmos.SqlMonitor.Old.Messaging.csproj", "{CF9D3076-893A-4E55-A54F-D5B8C6470B63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Configuration", "EtherGizmos.SqlMonitor.Configuration\EtherGizmos.SqlMonitor.Configuration.csproj", "{FF94DEE7-F49C-45D0-AF81-EC284565B80A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Old.Configuration", "EtherGizmos.SqlMonitor.Old.Configuration\EtherGizmos.SqlMonitor.Old.Configuration.csproj", "{FF94DEE7-F49C-45D0-AF81-EC284565B80A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

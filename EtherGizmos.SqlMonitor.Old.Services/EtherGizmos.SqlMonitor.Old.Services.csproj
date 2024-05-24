@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj" />
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Configuration\EtherGizmos.SqlMonitor.Configuration.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Old.Extensions.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Configuration\EtherGizmos.SqlMonitor.Old.Configuration.csproj" />
   </ItemGroup>
 
   <ItemGroup>

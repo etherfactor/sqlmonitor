@@ -21,7 +21,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Old.Extensions.csproj" />
   </ItemGroup>
 
 </Project>
