@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
+﻿using EtherGizmos.SqlMonitor.Shared.OData.Errors;
+using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
 using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.OData.Extensions;

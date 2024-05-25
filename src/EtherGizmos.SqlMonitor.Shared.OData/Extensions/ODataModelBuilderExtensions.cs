@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.OData.ModelBuilder;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Shared.OData.Extensions;

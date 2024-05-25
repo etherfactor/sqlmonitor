@@ -2,7 +2,6 @@
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
 
@@ -37,30 +36,6 @@ public class ScriptDTO
     public List<ScriptVariantDTO> Variants { get; set; } = new();
 
     public List<ScriptMetricDTO> Metrics { get; set; } = new();
-
-    public Task EnsureValid(IQueryable<Script> records)
-    {
-        var duplicates = Metrics.Select((e, i) => new { Index = i, Value = e })
-            .GroupBy(e => e.Value.MetricId)
-            .Where(e => e.Count() > 1);
-
-        if (duplicates.Any())
-        {
-            var values = duplicates.SelectMany(e =>
-                e.Take(1).Select(v => new { First = true, Value = v }).Concat(
-                    e.Skip(1).Select(v => new { First = false, Value = v })));
-
-            var error = new ODataDuplicateReferenceError<ScriptDTO>(values.Select(v =>
-            {
-                Expression<Func<ScriptDTO, object?>> expression = e => e.Metrics[v.Value.Index].MetricId;
-                return (v.First, expression);
-            }).ToArray());
-
-            throw new ReturnODataErrorException(error);
-        }
-
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForScriptDTO

@@ -1,4 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.OData.Errors.Abstractions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Results;
 using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.OData.Errors;

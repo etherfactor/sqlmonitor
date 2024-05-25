@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.OData" Version="8.*" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Database\EtherGizmos.SqlMonitor.Shared.Database.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Models\EtherGizmos.SqlMonitor.Shared.Models.csproj" />
+  </ItemGroup>
+
 </Project>

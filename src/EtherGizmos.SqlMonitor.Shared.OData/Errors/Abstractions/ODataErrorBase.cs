@@ -1,4 +1,8 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.OData.Errors.Abstractions;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Results;
+using Microsoft.OData;
+
+namespace EtherGizmos.SqlMonitor.Shared.OData.Errors.Abstractions;
 
 /// <summary>
 /// A base class upon which to construct OData errors.

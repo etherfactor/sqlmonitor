@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.OData.Errors.Abstractions;
+﻿using Microsoft.OData;
+
+namespace EtherGizmos.SqlMonitor.Shared.OData.Errors.Abstractions;
 
 /// <summary>
 /// A base class upon which to construct OData error details.

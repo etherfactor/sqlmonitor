@@ -1,4 +1,8 @@
-﻿using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Helpers;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;

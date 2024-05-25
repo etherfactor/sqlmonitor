@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
 
 public abstract class GlobalConstantBackgroundService : PeriodicBackgroundService
 {
