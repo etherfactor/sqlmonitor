@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj" />
+  </ItemGroup>
+
 </Project>

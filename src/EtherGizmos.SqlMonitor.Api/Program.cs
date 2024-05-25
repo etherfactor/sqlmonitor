@@ -10,17 +10,16 @@ using EtherGizmos.SqlMonitor.Api.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Configuration.Caching;
 using EtherGizmos.SqlMonitor.Shared.Configuration.Data;
-using EtherGizmos.SqlMonitor.Shared.Configuration.Messaging;
 using EtherGizmos.SqlMonitor.Shared.Database;
 using EtherGizmos.SqlMonitor.Shared.Database.Services;
 using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
+using EtherGizmos.SqlMonitor.Shared.Utilities;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Serilog;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -31,117 +30,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
 
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
+builder.AddLoggingServices();
 
 //**********************************************************
 // Add Services
 
-builder.Services
-    .AddOptions();
+builder.Services.AddUsageOptions();
 
-builder.Services
-    .AddOptions<UsageOptions>()
-    .Configure<IConfiguration>((opt, conf) =>
-    {
-        var path = "Connections:Use";
+builder.Services.AddRabbitMQOptions();
 
-        conf.GetSection(path)
-            .Bind(opt);
+builder.Services.AddRedisOptions();
 
-        opt.AssertValid(path);
-    });
+builder.Services.AddMySqlOptions();
 
-builder.Services
-    .AddOptions<RabbitMQOptions>()
-    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
-    {
-        var path = "Connections:RabbitMQ";
+builder.Services.AddPostgreSqlOptions();
 
-        conf.GetSection(path)
-            .Bind(opt);
-
-        if (usage.Value.MessageBroker == MessageBrokerType.RabbitMQ)
-        {
-            opt.AssertValid(path);
-        }
-    });
-
-builder.Services
-    .AddOptions<RedisOptions>()
-    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
-    {
-        var path = "Connections:Redis";
-
-        conf.GetSection(path)
-            .Bind(opt);
-
-        if (usage.Value.Cache == CacheType.Redis)
-        {
-            opt.AssertValid(path);
-        }
-    });
-
-builder.Services
-    .AddOptions<MySqlOptions>()
-    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
-    {
-        var path = "Connections:MySql";
-
-        var section = conf.GetSection(path);
-
-        section.Bind(opt);
-        opt.AllProperties = section.GetChildren()
-            .Where(e => !typeof(MySqlOptions).GetProperties().Any(p => p.Name == e.Key))
-            .ToDictionary(e => e.Key, e => e.Value);
-
-        if (usage.Value.Database == DatabaseType.MySql)
-        {
-            opt.AssertValid(path);
-        }
-    });
-
-builder.Services
-    .AddOptions<PostgreSqlOptions>()
-    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
-    {
-        var path = "Connections:PostgreSql";
-
-        var section = conf.GetSection(path);
-
-        section.Bind(opt);
-        opt.AllProperties = section.GetChildren()
-            .Where(e => !typeof(PostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
-            .ToDictionary(e => e.Key, e => e.Value);
-
-        if (usage.Value.Database == DatabaseType.PostgreSql)
-        {
-            opt.AssertValid(path);
-        }
-    });
-
-builder.Services
-    .AddOptions<SqlServerOptions>()
-    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
-    {
-        var path = "Connections:SqlServer";
-
-        var section = conf.GetSection(path);
-
-        section.Bind(opt);
-        opt.AllProperties = section.GetChildren()
-            .Where(e => !typeof(SqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
-            .ToDictionary(e => e.Key, e => e.Value);
-
-        if (usage.Value.Database == DatabaseType.SqlServer)
-        {
-            opt.AssertValid(path);
-        }
-    });
-
-builder.Services
-    .AddSerilog(Log.Logger);
+builder.Services.AddSqlServerOptions();
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();

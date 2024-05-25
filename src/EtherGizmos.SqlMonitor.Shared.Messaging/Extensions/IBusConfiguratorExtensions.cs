@@ -1,4 +1,6 @@
-﻿using MassTransit;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
 
 namespace EtherGizmos.SqlMonitor.Shared.Messaging.Extensions;
 
