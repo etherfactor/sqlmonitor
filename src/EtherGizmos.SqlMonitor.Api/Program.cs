@@ -32,7 +32,8 @@ builder.Services.AddUsageOptions();
 // Caching
 builder.Services.AddRedisOptions();
 
-builder.Services.AddCaching();
+builder.Services.AddDistributedCaching();
+builder.Services.AddDistributedLocking();
 
 // Database
 builder.Services.AddMySqlOptions();

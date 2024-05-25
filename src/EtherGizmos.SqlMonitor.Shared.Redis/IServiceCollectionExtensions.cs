@@ -3,17 +3,21 @@ using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Configuration.Caching;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
+using Medallion.Threading.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.System.Text.Json;
+using IMedallionDistributedLockProvider = Medallion.Threading.IDistributedLockProvider;
 
 namespace EtherGizmos.SqlMonitor.Shared.Redis;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddCaching(this IServiceCollection @this)
+    public static IServiceCollection AddDistributedCaching(this IServiceCollection @this)
     {
         @this
             .AddChildContainer((childServices, parentServices) =>
@@ -30,6 +34,39 @@ public static class IServiceCollectionExtensions
                 {
                     childServices.AddRedisServices();
                     childServices.AddScoped<IDistributedRecordCache, RedisDistributedRecordCache>();
+                }
+                else
+                {
+                    throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
+                }
+
+                childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+            })
+            .ImportLogging()
+            .ImportSingleton<IOptions<UsageOptions>>()
+            .ForwardSingleton<IDistributedRecordCache>()
+            .ForwardSingleton<IRedisHelperFactory>();
+
+        return @this;
+    }
+
+    public static IServiceCollection AddDistributedLocking(this IServiceCollection @this)
+    {
+        @this
+            .AddChildContainer((childServices, parentServices) =>
+            {
+                var usageOptions = parentServices
+                    .GetRequiredService<IOptions<UsageOptions>>()
+                    .Value;
+
+                if (usageOptions.Cache == CacheType.InMemory)
+                {
+                    childServices.AddScoped<IDistributedLockProvider, InMemoryLockProvider>();
+                }
+                else if (usageOptions.Cache == CacheType.Redis)
+                {
+                    childServices.AddScoped<IMedallionDistributedLockProvider, RedisDistributedSynchronizationProvider>();
+                    childServices.AddScoped<IDistributedLockProvider, DistributedLockProvider>();
                 }
                 else
                 {

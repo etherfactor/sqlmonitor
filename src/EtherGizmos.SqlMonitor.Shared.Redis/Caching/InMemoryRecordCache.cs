@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
-using Medallion.Threading;
 
 namespace EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 
@@ -28,28 +27,5 @@ internal class InMemoryRecordCache : IDistributedRecordCache
         where TEntity : class, new()
     {
         return new InMemoryCacheEntitySet<TEntity>(_serviceProvider);
-    }
-
-    private class InMemorySynchronizationHandle : IDistributedSynchronizationHandle
-    {
-        private readonly CancellationTokenSource _handleLostTokenSource;
-
-        public CancellationToken HandleLostToken => _handleLostTokenSource.Token;
-
-        public InMemorySynchronizationHandle()
-        {
-            _handleLostTokenSource = new CancellationTokenSource();
-        }
-
-        public void Dispose()
-        {
-            _handleLostTokenSource.Cancel();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            Dispose();
-            return ValueTask.CompletedTask;
-        }
     }
 }
