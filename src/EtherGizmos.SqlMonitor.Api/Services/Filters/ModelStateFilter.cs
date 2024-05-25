@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Exceptions;
-using EtherGizmos.SqlMonitor.Models.OData.Errors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.OData.Extensions;

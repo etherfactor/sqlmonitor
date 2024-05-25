@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Exceptions;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Filters;
 

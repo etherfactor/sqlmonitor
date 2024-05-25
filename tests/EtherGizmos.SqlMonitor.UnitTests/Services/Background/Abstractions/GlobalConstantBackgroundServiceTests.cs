@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
-using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 

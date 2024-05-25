@@ -1,9 +1,4 @@
-﻿using EtherGizmos.Extensions.DependencyInjection;
-using EtherGizmos.SqlMonitor.Api.Services.Data;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Configuration.Data;
-using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Data.Migrations;
-using FluentMigrator.Runner;
+﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Data.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

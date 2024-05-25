@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database;
-
-namespace EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
 
 /// <summary>
 /// Executes queries against a server, either by connecting or running them locally.

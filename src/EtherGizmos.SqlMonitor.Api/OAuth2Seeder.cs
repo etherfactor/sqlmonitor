@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Authorization;
-using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
 using OpenIddict.Abstractions;
 
 namespace EtherGizmos.SqlMonitor.Api;

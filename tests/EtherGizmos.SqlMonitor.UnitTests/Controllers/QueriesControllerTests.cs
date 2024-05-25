@@ -1,14 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Controllers.Api;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Models;
-using EtherGizmos.SqlMonitor.Models.Api.v1;
-using EtherGizmos.SqlMonitor.Models.Database;
-using EtherGizmos.SqlMonitor.Models.Exceptions;
-using EtherGizmos.SqlMonitor.UnitTests.Extensions;
-using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.AspNetCore.OData.Query.Wrapper;
+﻿using EtherGizmos.SqlMonitor.UnitTests.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData;
 using MockQueryable.Moq;
 using Moq;
 using System.Net;

@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Annotations;
 using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Caching;

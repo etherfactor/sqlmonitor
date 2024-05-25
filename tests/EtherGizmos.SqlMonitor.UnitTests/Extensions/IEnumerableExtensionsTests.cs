@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Extensions;
-
-namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
+﻿namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
 
 internal class IEnumerableExtensionsTests
 {

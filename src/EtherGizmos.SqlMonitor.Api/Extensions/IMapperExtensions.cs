@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-namespace EtherGizmos.SqlMonitor.Api.Extensions;
+﻿namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
 /// <summary>
 /// Provides extension methods for <see cref="IMapper"/>.

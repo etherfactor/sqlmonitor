@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Scripts;
-using EtherGizmos.SqlMonitor.Models.Database;
 
 namespace EtherGizmos.SqlMonitor.Agent.Services.Scripts.Abstractions;
 

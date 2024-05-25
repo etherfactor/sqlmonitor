@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Database.Enums;
-
-namespace EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
 
 public interface IQueryRunnerFactory
 {

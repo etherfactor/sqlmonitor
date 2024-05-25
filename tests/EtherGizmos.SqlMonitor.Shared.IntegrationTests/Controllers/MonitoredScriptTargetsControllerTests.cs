@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Api.v1;
-using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests.Extensions;
 using System.Net;
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;

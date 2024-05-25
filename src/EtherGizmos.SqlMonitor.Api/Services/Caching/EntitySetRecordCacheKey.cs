@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
-
-namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿namespace EtherGizmos.SqlMonitor.Api.Services.Caching;
 
 /// <summary>
 /// A lockable entity contained in a set in a distributed cache.

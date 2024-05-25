@@ -1,7 +1,5 @@
-﻿using EtherGizmos.Extensions.DependencyInjection;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
+﻿using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Configuration.Caching;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
 using StackExchange.Redis;

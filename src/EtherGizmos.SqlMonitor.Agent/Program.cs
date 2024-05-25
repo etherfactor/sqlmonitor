@@ -1,6 +1,3 @@
-using EtherGizmos.SqlMonitor.Configuration;
-using EtherGizmos.SqlMonitor.Configuration.Messaging;
-using EtherGizmos.SqlMonitor.Shared.Messaging;
 using Microsoft.Extensions.Options;
 using Serilog;
 

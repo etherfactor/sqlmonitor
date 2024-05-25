@@ -1,5 +1,4 @@
-﻿using EtherGizmos.Extensions.DependencyInjection;
-using MassTransit;
+﻿using MassTransit;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 

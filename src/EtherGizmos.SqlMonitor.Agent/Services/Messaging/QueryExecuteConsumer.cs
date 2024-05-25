@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Messaging;
 using MassTransit;
 
 namespace EtherGizmos.SqlMonitor.Agent.Services.Messaging;

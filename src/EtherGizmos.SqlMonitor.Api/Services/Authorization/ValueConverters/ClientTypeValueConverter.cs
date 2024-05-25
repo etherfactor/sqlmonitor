@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Models.Authorization.Enums;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EtherGizmos.SqlMonitor.Api.Services.Authorization.ValueConverters;
 

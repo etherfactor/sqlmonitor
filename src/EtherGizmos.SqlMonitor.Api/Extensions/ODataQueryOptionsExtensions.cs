@@ -1,6 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Filters;
-using EtherGizmos.SqlMonitor.Models.Exceptions;
-using EtherGizmos.SqlMonitor.Models.OData.Errors;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder.Annotations;

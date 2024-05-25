@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Configuration.Data;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 using System.Data.Common;

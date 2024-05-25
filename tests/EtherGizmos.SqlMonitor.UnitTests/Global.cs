@@ -1,17 +1,5 @@
-﻿using Asp.Versioning;
-using Asp.Versioning.OData;
-using EtherGizmos.SqlMonitor.Api.Controllers.Api;
-using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
-using EtherGizmos.SqlMonitor.Models;
-using MassTransit;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 

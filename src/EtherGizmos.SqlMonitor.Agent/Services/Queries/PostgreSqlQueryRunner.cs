@@ -1,5 +1,4 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Database;
 using Npgsql;
 using System.Diagnostics;
 

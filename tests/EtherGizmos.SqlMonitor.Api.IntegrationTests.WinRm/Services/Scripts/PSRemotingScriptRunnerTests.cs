@@ -1,8 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Services.Scripts;
-using EtherGizmos.SqlMonitor.Models.Database;
-using EtherGizmos.SqlMonitor.Models.Database.Enums;
-
-namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.Services.Scripts;
+﻿namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.Services.Scripts;
 
 internal class PSRemotingScriptRunnerTests
 {

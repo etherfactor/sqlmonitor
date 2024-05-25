@@ -1,8 +1,4 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Models.Api.v1;
-using EtherGizmos.SqlMonitor.Models.Api.v1.Enums;
-
-namespace EtherGizmos.SqlMonitor.Api.Extensions;
+﻿namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
 /// <summary>
 /// Provides extension methods for <see cref="IServiceCollection"/>.

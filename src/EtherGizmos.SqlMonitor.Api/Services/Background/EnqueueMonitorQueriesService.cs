@@ -1,7 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Services.Background.Abstractions;
-using EtherGizmos.SqlMonitor.Services.Locking.Abstractions;
-
-namespace EtherGizmos.SqlMonitor.Api.Services.Background;
+﻿namespace EtherGizmos.SqlMonitor.Api.Services.Background;
 
 /// <summary>
 /// Runs queries against instances on a periodic timer.

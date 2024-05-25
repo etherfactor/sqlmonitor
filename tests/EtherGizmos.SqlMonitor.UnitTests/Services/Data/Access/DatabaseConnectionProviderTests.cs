@@ -1,6 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
-using EtherGizmos.SqlMonitor.Configuration.Data;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Moq;
 
 namespace EtherGizmos.SqlMonitor.UnitTests.Services.Data.Access;

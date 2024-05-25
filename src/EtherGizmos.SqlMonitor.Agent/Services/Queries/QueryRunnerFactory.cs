@@ -1,6 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
-using EtherGizmos.SqlMonitor.Models.Database.Enums;
 
 namespace EtherGizmos.SqlMonitor.Agent.Services.Queries;
 

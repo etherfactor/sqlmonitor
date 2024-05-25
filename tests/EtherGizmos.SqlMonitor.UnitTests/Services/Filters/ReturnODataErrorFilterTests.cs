@@ -1,13 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Filters;
-using EtherGizmos.SqlMonitor.Models.Exceptions;
-using EtherGizmos.SqlMonitor.Models.OData.Errors;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Routing;
-using Moq;
+﻿using Moq;
 
 namespace EtherGizmos.SqlMonitor.UnitTests.Services.Filters;
 
