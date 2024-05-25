@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Messaging;
+﻿using EtherGizmos.SqlMonitor.Shared.Models.Database;
+
+namespace EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 
 public class QueryExecuteMessage
 {

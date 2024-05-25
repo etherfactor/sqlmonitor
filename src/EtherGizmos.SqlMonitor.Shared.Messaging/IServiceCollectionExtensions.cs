@@ -1,4 +1,11 @@
-﻿using System.Reflection;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using EtherGizmos.SqlMonitor.Shared.Configuration;
+using EtherGizmos.SqlMonitor.Shared.Configuration.Messaging;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using System.Reflection;
 
 namespace EtherGizmos.SqlMonitor.Shared.Messaging;
 
