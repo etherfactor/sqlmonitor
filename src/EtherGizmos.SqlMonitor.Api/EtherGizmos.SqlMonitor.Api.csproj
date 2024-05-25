@@ -12,67 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Asp.Versioning.OData.ApiExplorer" Version="6.*" />
-    <PackageReference Include="DistributedLock.Redis" Version="1.*" />
-    <PackageReference Include="FluentMigrator.Runner" Version="5.*" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.*" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.*" />
-    <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.4.*" />
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.*" />
-    <PackageReference Include="Microsoft.WSMan.Management" Version="7.4.*" />
-    <PackageReference Include="MySql.EntityFrameworkCore" Version="8.*" />
-    <PackageReference Include="ncrontab" Version="3.*" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" />
-    <PackageReference Include="OpenIddict.AspNetCore" Version="5.*" />
-    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.*" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.*" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.*" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="8.*" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.*" />
-    <PackageReference Include="StackExchange.Redis" Version="2.*" />
-    <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="9.*" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Old.Database.csproj" />
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Old.Models.csproj" />
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Services\EtherGizmos.SqlMonitor.Old.Services.csproj" />
-    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Old.Messaging.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.Shared.IntegrationTests</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>EtherGizmos.SqlMonitor.UnitTests</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Sql\DynamicQuery.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Core\EtherGizmos.SqlMonitor.Api.Core.csproj" />
   </ItemGroup>
 
   <Target Name="RunAngularBuild" BeforeTargets="BeforePublish">

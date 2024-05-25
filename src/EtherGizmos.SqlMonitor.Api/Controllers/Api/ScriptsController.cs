@@ -1,7 +1,14 @@
 ﻿using Asp.Versioning;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
+using EtherGizmos.SqlMonitor.Shared.OData.Errors;
+using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
+using EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -17,6 +24,7 @@ public class ScriptsController : ODataController
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IScriptService _scriptService;
     private readonly ISaveService _saveService;
     private readonly IMetricService _metricService;
@@ -38,6 +46,7 @@ public class ScriptsController : ODataController
         ILogger<ScriptsController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
+        IModelValidatorFactory modelValidatorFactory,
         IScriptService scriptService,
         ISaveService saveService,
         IMetricService metricService)
@@ -45,6 +54,7 @@ public class ScriptsController : ODataController
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
+        _modelValidatorFactory = modelValidatorFactory;
         _scriptService = scriptService;
         _saveService = saveService;
         _metricService = metricService;
@@ -95,7 +105,8 @@ public class ScriptsController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Scripts);
+        var validator = _modelValidatorFactory.GetValidator<ScriptDTO>();
+        await validator.ValidateAsync(newRecord);
 
         var allMetrics = _metricService.GetQueryable();
         foreach (var metricId in newRecord.Metrics.Select(e => e.MetricId).Distinct())
@@ -134,7 +145,8 @@ public class ScriptsController : ODataController
         var testRecord = new ScriptDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Scripts);
+        var validator = _modelValidatorFactory.GetValidator<ScriptDTO>();
+        await validator.ValidateAsync(testRecord);
 
         Script? record = await Scripts.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)

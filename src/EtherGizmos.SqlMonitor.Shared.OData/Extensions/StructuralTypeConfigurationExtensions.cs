@@ -1,5 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
-using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Helpers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;

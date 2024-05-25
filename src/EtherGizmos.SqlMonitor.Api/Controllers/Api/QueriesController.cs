@@ -1,7 +1,14 @@
 ﻿using Asp.Versioning;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
+using EtherGizmos.SqlMonitor.Shared.OData.Errors;
+using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
+using EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -17,6 +24,7 @@ public class QueriesController : ODataController
     private readonly ILogger _logger;
     private readonly IDistributedRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IQueryService _queryService;
     private readonly ISaveService _saveService;
     private readonly IMetricService _metricService;
@@ -38,6 +46,7 @@ public class QueriesController : ODataController
         ILogger<QueriesController> logger,
         IDistributedRecordCache cache,
         IMapper mapper,
+        IModelValidatorFactory modelValidatorFactory,
         IQueryService queryService,
         ISaveService saveService,
         IMetricService metricService)
@@ -45,6 +54,7 @@ public class QueriesController : ODataController
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
+        _modelValidatorFactory = modelValidatorFactory;
         _queryService = queryService;
         _saveService = saveService;
         _metricService = metricService;
@@ -95,7 +105,8 @@ public class QueriesController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Queries);
+        var validator = _modelValidatorFactory.GetValidator<QueryDTO>();
+        await validator.ValidateAsync(newRecord);
 
         var allMetrics = _metricService.GetQueryable();
         foreach (var metricId in newRecord.Metrics.Select(e => e.MetricId).Distinct())
@@ -134,7 +145,8 @@ public class QueriesController : ODataController
         var testRecord = new QueryDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Queries);
+        var validator = _modelValidatorFactory.GetValidator<QueryDTO>();
+        await validator.ValidateAsync(testRecord);
 
         Query? record = await Queries.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)

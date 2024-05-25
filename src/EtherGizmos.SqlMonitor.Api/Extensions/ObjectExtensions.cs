@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.OData.Query;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace EtherGizmos.SqlMonitor.Api.Extensions;
 

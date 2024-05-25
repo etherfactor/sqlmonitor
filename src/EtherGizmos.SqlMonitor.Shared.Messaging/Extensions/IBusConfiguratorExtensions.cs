@@ -1,6 +1,6 @@
 ﻿using MassTransit;
 
-namespace EtherGizmos.SqlMonitor.Api.Extensions;
+namespace EtherGizmos.SqlMonitor.Shared.Messaging.Extensions;
 
 public static class IBusConfiguratorExtensions
 {

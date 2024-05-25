@@ -1,7 +1,12 @@
 ﻿using Asp.Versioning;
+using AutoMapper;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
+using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;

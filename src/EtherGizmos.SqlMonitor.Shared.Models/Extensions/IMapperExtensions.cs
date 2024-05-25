@@ -1,15 +1,17 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Extensions;
+﻿using AutoMapper;
+
+namespace EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 
 /// <summary>
 /// Provides extension methods for <see cref="IMapper"/>.
 /// </summary>
-internal static class IMapperExtensions
+public static class IMapperExtensions
 {
     /// <summary>
     /// Allows explicit mapping.
     /// </summary>
     /// <typeparam name="TFrom">The initial type.</typeparam>
-    internal interface IMapExplicitly<TFrom>
+    public interface IMapExplicitly<TFrom>
     {
         /// <summary>
         /// Maps explicitly to a type.
@@ -50,7 +52,7 @@ internal static class IMapperExtensions
     /// <param name="this">Itself.</param>
     /// <param name="entity">The entity to map.</param>
     /// <returns>A wrapper to allow explicit mapping.</returns>
-    internal static IMapExplicitly<TTo> MapExplicitly<TTo>(this IMapper @this, TTo entity)
+    public static IMapExplicitly<TTo> MapExplicitly<TTo>(this IMapper @this, TTo entity)
     {
         return new ValueMapExplicitly<TTo>(@this, entity);
     }
@@ -59,7 +61,7 @@ internal static class IMapperExtensions
     /// Simplifies record merging.
     /// </summary>
     /// <typeparam name="TTo">The resulting type.</typeparam>
-    internal interface IMergeInto<TTo>
+    public interface IMergeInto<TTo>
     {
         /// <summary>
         /// Merges records into the original.
@@ -96,7 +98,7 @@ internal static class IMapperExtensions
     /// <param name="this">Itself.</param>
     /// <param name="entity">The entity to map.</param>
     /// <returns>A wrapper to allow merging.</returns>
-    internal static IMergeInto<TTo> MergeInto<TTo>(this IMapper @this, TTo entity)
+    public static IMergeInto<TTo> MergeInto<TTo>(this IMapper @this, TTo entity)
     {
         return new ValueMergeInto<TTo>(@this, entity);
     }

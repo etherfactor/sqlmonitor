@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Data;
+﻿using EtherGizmos.SqlMonitor.Shared.Database.Services;
+using EtherGizmos.SqlMonitor.Shared.OAuth;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ public class OAuth2Controller : ControllerBase
         _applicationManager = applicationManager;
     }
 
-    [HttpPost(Constants.OAuth2.Endpoints.Token)]
+    [HttpPost(OAuthConstants.Endpoints.Token)]
     public async Task<IActionResult> Token()
     {
         var request = HttpContext.GetOpenIddictServerRequest()

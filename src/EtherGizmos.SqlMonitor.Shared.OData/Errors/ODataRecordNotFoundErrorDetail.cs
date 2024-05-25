@@ -1,5 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.OData.Errors.Abstractions;
-using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.OData.Errors;

@@ -1,6 +1,6 @@
 using EtherGizmos.SqlMonitor.Shared.Models.Annotations;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
-using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel.DataAnnotations.Schema;

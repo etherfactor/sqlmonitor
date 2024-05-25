@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.Extensions;
+﻿namespace EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 
 public static class DateTimeExtensions
 {
@@ -16,7 +16,7 @@ public static class DateTimeExtensions
         if (interval.Ticks <= 0)
             throw new InvalidOperationException("Rounding interval must be greater than 00:00.");
 
-        var ticks = (@this.UtcTicks + (interval.Ticks / 2) + 1) / interval.Ticks;
+        var ticks = (@this.UtcTicks + interval.Ticks / 2 + 1) / interval.Ticks;
         return @this.AddTicks(ticks * interval.Ticks - @this.UtcTicks);
     }
 

@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 
 namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 

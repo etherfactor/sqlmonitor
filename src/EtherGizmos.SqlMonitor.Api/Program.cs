@@ -1,15 +1,21 @@
+using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Extensions;
 using EtherGizmos.SqlMonitor.Api.Services.Authorization;
 using EtherGizmos.SqlMonitor.Api.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Services.Caching;
 using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Data;
-using EtherGizmos.SqlMonitor.Api.Services.Data.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Services.Validation;
-using FluentMigrator.Runner;
-using FluentMigrator.Runner.Generators.MySql;
+using EtherGizmos.SqlMonitor.Shared.Configuration;
+using EtherGizmos.SqlMonitor.Shared.Configuration.Caching;
+using EtherGizmos.SqlMonitor.Shared.Configuration.Data;
+using EtherGizmos.SqlMonitor.Shared.Configuration.Messaging;
+using EtherGizmos.SqlMonitor.Shared.Database;
+using EtherGizmos.SqlMonitor.Shared.Database.Services;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models;
+using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
 using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -210,67 +216,7 @@ builder.Services
         opt.OperationFilter<SwaggerDefaultValues>();
     });
 
-builder.Services
-    .AddDbContext<ApplicationContext>((services, opt) =>
-    {
-        var usageOptions = services
-            .GetRequiredService<IOptions<UsageOptions>>()
-            .Value;
-
-        var loggerFactory = services
-            .GetRequiredService<ILoggerFactory>();
-
-        var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
-        var connectionString = connectionProvider.GetConnectionString();
-        if (usageOptions.Database == DatabaseType.MySql)
-        {
-            opt.UseLoggerFactory(loggerFactory);
-
-            opt.UseMySQL(connectionString, conf =>
-            {
-                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
-
-            opt.EnableSensitiveDataLogging();
-        }
-        else if (usageOptions.Database == DatabaseType.PostgreSql)
-        {
-            opt.UseLoggerFactory(loggerFactory);
-
-            opt.UseNpgsql(connectionString, conf =>
-            {
-                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
-
-            opt.EnableSensitiveDataLogging();
-        }
-        else if (usageOptions.Database == DatabaseType.SqlServer)
-        {
-            opt.UseLoggerFactory(loggerFactory);
-
-            opt.UseSqlServer(connectionString, conf =>
-            {
-                conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
-
-            opt.EnableSensitiveDataLogging();
-        }
-        else
-        {
-            throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
-        }
-
-        opt.UseLazyLoadingProxies(true);
-    })
-    .AddScoped<ISaveService, SaveService>()
-    .AddScoped<IMetricService, MetricService>()
-    .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
-    .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
-    .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
-    .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
-    .AddScoped<IQueryService, QueryService>()
-    .AddScoped<IScriptService, ScriptService>()
-    .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
+builder.Services.AddDatabaseServices();
 
 builder.Services
     .AddDbContext<AuthorizationContext>((services, opt) =>
@@ -349,48 +295,6 @@ builder.Services
     .ImportSingleton<IOptions<PostgreSqlOptions>>()
     .ImportSingleton<IOptions<SqlServerOptions>>()
     .ForwardTransient<IDatabaseConnectionProvider>();
-
-builder.Services
-    .AddChildContainer((childServices, parentServices) =>
-    {
-        var usageOptions = parentServices
-            .GetRequiredService<IOptions<UsageOptions>>()
-            .Value;
-
-        var connectionProvider = parentServices.GetRequiredService<IDatabaseConnectionProvider>();
-
-        childServices
-            .AddLogging(opt => opt.AddFluentMigratorConsole())
-            .AddFluentMigratorCore()
-            .ConfigureRunner(opt =>
-            {
-                opt.WithGlobalConnectionString(connectionProvider.GetConnectionString())
-                    .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
-                    .WithVersionTable(new CustomVersionTableMetadata());
-
-                if (usageOptions.Database == DatabaseType.MySql)
-                {
-                    opt.AddMySql8()
-                        .Services.AddScoped<MySqlQuoter, MySqlQuoterRemap>();
-                }
-                else if (usageOptions.Database == DatabaseType.PostgreSql)
-                {
-                    opt.AddPostgres();
-                }
-                else if (usageOptions.Database == DatabaseType.SqlServer)
-                {
-                    opt.AddSqlServer();
-                }
-                else
-                {
-                    throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
-                }
-            });
-
-        childServices.AddSingleton<IMigrationManager, MigrationManager>();
-    })
-    .ImportLogging()
-    .ForwardSingleton<IMigrationManager>();
 
 builder.Services
     .AddChildContainer((childServices, parentServices) =>

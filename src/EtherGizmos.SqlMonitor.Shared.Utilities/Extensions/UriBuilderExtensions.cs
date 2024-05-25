@@ -1,7 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Web;
 
-namespace EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 
 public static class UriBuilderExtensions
 {

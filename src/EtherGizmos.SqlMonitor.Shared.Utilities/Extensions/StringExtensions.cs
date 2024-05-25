@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 
 /// <summary>
 /// Provides extension methods for <see cref="string"/>.
