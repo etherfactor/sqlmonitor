@@ -1,4 +1,8 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
+using Microsoft.Extensions.Logging;
+
+namespace EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
 
 /// <summary>
 /// Performs work on a periodic timer. Uses distributed locks to run the job on the first instance to obtain its lock.
@@ -19,7 +23,7 @@ public abstract class GlobalBackgroundService : PeriodicBackgroundService
     }
 
     /// <inheritdoc/>
-    protected internal sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
+    protected sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         using var @lock = await _distributedLockProvider.AcquireLockAsync(
             new JobCacheKey(GetType()),

@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+﻿using Medallion.Threading;
+
+namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 
 /// <summary>
 /// Holds a lock on a key.

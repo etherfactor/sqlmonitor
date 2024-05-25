@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions.Dotnet;
+
+namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 
 /// <summary>
 /// A lockable job in a distributed cache.

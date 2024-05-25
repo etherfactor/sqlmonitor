@@ -1,9 +1,12 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+using Medallion.Threading;
+using Microsoft.Extensions.Logging;
+using ILocalDistributedLockProvider = EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions.IDistributedLockProvider;
 using IMedallionDistributedLockProvider = Medallion.Threading.IDistributedLockProvider;
 
 namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking;
 
-internal class DistributedLockProvider : IDistributedLockProvider
+internal class DistributedLockProvider : ILocalDistributedLockProvider
 {
     private readonly ILogger _logger;
     private readonly IMedallionDistributedLockProvider _medallionDistributedLockProvider;

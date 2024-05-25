@@ -1,4 +1,10 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NCrontab;
+
+namespace EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
 
 public abstract class GlobalConstantBackgroundService : PeriodicBackgroundService
 {
@@ -27,7 +33,7 @@ public abstract class GlobalConstantBackgroundService : PeriodicBackgroundServic
     }
 
     /// <inheritdoc/>
-    protected internal sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
+    protected sealed override async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         var key = new JobCacheKey(GetType());
         using var @lock = await _distributedLockProvider.AcquireLockAsync(key, TimeSpan.Zero, stoppingToken);
