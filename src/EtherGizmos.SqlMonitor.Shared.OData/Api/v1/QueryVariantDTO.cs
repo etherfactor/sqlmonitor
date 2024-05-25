@@ -1,8 +1,4 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Shared.Models.Database;
-using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
-using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
 
@@ -13,6 +9,25 @@ public class QueryVariantDTO
 
     [Required]
     public string? QueryText { get; set; }
+}
+
+public class QueryVariantDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entity = builder.ComplexType<QueryVariantDTO>();
+
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.EnumProperty(e => e.SqlType);
+            entity.Property(e => e.QueryText);
+        }
+    }
 }
 
 public static class ForQueryVariantDTO

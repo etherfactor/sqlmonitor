@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Shared.Models.Database;
-using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
 
@@ -34,6 +31,38 @@ public class ScriptInterpreterDTO
     public Task EnsureValid(IQueryable<ScriptInterpreter> records)
     {
         return Task.CompletedTask;
+    }
+}
+
+public class ScriptInterpreterDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entitySet = builder.EntitySet<ScriptInterpreterDTO>("scriptInterpreters");
+        var entity = builder.EntityType<ScriptInterpreterDTO>();
+
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            /* Begin Audit */
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.CreatedByUserId);
+            entity.Property(e => e.ModifiedAt);
+            entity.Property(e => e.ModifiedByUserId);
+            /*  End Audit  */
+            entity.Property(e => e.Name);
+            entity.Property(e => e.Description);
+            entity.Property(e => e.Command);
+            entity.Property(e => e.Arguments);
+            entity.Property(e => e.Extension);
+        }
     }
 }
 

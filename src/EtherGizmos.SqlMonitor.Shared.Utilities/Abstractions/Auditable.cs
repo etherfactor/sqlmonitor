@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Models.Database.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 
 public abstract class Auditable : IAuditable
 {

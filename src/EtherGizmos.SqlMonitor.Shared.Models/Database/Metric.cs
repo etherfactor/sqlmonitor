@@ -1,5 +1,6 @@
-﻿using EtherGizmos.SqlMonitor.Shared.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Models.Annotations;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

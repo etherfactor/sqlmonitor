@@ -1,7 +1,8 @@
-﻿using EtherGizmos.SqlMonitor.Shared.Models.Database.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+using OpenIddict.EntityFrameworkCore.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EtherGizmos.SqlMonitor.Shared.Models.Authorization;
+namespace EtherGizmos.SqlMonitor.Shared.OAuth.Models;
 
 [Table("oauth2_scopes")]
 public class OAuth2Scope : OpenIddictEntityFrameworkCoreScope<int>, IAuditable

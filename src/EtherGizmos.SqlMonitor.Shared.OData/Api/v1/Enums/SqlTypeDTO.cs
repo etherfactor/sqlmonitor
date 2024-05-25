@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1.Enums;
 
@@ -11,6 +9,21 @@ public enum SqlTypeDTO
     MySql = 20,
     MariaDb = 25,
     PostgreSql = 30,
+}
+
+public class SqlTypeDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var enumeration = builder.EnumType<SqlTypeDTO>();
+
+        enumeration.Namespace = "EtherGizmos.PerformancePulse";
+        enumeration.Name = enumeration.Name.Replace("DTO", "");
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+        }
+    }
 }
 
 public static class ForSqlTypeDTO

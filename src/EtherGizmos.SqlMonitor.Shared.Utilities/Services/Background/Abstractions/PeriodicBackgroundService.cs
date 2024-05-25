@@ -1,4 +1,8 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NCrontab;
+
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
 
 /// <summary>
 /// Performs work on a periodic timer. Runs the job on every instance.

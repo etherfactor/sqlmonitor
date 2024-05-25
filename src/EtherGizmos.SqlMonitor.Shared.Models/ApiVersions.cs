@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Models;
+﻿using Asp.Versioning;
+
+namespace EtherGizmos.SqlMonitor.Shared.Models;
 
 public static class ApiVersions
 {

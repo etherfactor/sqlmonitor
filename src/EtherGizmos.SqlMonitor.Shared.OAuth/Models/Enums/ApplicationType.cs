@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Models.Authorization.Enums;
+﻿using OpenIddict.Abstractions;
+
+namespace EtherGizmos.SqlMonitor.Shared.OAuth.Models.Enums;
 
 public enum ApplicationType
 {

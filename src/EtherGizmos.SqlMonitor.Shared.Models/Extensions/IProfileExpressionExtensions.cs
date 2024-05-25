@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using AutoMapper;
+using AutoMapper.Configuration;
+using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 

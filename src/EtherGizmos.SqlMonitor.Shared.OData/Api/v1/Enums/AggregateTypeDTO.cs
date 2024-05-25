@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1.Enums;
 
@@ -11,6 +9,21 @@ public enum AggregateTypeDTO
     Average = 20,
     Minimum = 30,
     Maximum = 35,
+}
+
+public class AggregateTypeDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var enumeration = builder.EnumType<AggregateTypeDTO>();
+
+        enumeration.Namespace = "EtherGizmos.PerformancePulse";
+        enumeration.Name = enumeration.Name.Replace("DTO", "");
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+        }
+    }
 }
 
 public static class ForAggregateTypeDTO

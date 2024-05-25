@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EtherGizmos.SqlMonitor.Shared.Models.Api.Abstractions;
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 
 public interface IAuditableDTO
 {

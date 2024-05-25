@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using EtherGizmos.SqlMonitor.Shared.Models.Database;
-using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
 
@@ -14,6 +11,26 @@ public class ScriptVariantDTO
 
     [Required]
     public string? ScriptText { get; set; }
+}
+
+public class ScriptVariantDTOConfiguration : IModelConfiguration
+{
+    public void Apply(ODataModelBuilder builder, ApiVersion apiVersion, string? routePrefix)
+    {
+        var entity = builder.ComplexType<ScriptVariantDTO>();
+
+        entity.Namespace = "EtherGizmos.PerformancePulse";
+        entity.Name = entity.Name.Replace("DTO", "");
+
+        entity.IgnoreAll();
+
+        if (apiVersion >= ApiVersions.V0_1)
+        {
+            entity.Property(e => e.ScriptInterpreterId);
+            entity.HasRequired(e => e.ScriptInterpreter);
+            entity.Property(e => e.ScriptText);
+        }
+    }
 }
 
 public static class ForScriptVariantDTO

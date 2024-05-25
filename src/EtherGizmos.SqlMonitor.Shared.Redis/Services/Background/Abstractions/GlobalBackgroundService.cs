@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
+﻿using Microsoft.Extensions.Logging;
+
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Services.Background.Abstractions;
 
 /// <summary>
 /// Performs work on a periodic timer. Uses distributed locks to run the job on the first instance to obtain its lock.

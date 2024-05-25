@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EtherGizmos.SqlMonitor.Shared.Models.Database.Abstractions;
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 
 public interface IAuditable
 {
