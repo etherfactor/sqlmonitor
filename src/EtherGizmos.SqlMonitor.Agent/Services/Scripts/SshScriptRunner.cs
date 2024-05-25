@@ -1,5 +1,7 @@
 using EtherGizmos.SqlMonitor.Agent.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Scripts;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Renci.SshNet;
 using System.Diagnostics;
 using System.Security.Cryptography;

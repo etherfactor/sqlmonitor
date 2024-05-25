@@ -6,7 +6,7 @@ namespace EtherGizmos.SqlMonitor.Shared.Database.Extensions;
 /// <summary>
 /// Provides extension methods for <see cref="ModelBuilder"/>.
 /// </summary>
-internal static class ModelBuilderExtensions
+public static class ModelBuilderExtensions
 {
     /// <summary>
     /// Adds a value converter to all properties of a given type.
@@ -16,7 +16,7 @@ internal static class ModelBuilderExtensions
     /// <param name="this">Itself.</param>
     /// <param name="converter">The converter to use.</param>
     /// <returns>Itself.</returns>
-    internal static ModelBuilder AddGlobalValueConverter<TProvider, TModel>(this ModelBuilder @this, ValueConverter<TModel, TProvider> converter)
+    public static ModelBuilder AddGlobalValueConverter<TProvider, TModel>(this ModelBuilder @this, ValueConverter<TModel, TProvider> converter)
     {
         foreach (var entityType in @this.Model.GetEntityTypes())
         {

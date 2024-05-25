@@ -1,24 +1,24 @@
-﻿using StackExchange.Redis;
+﻿//using StackExchange.Redis;
 
-namespace EtherGizmos.SqlMonitor.Api.Extensions;
+//namespace EtherGizmos.SqlMonitor.Api.Extensions;
 
-internal static class RedisOptionsExtensions
-{
-    public static ConfigurationOptions ToStackExchangeRedisOptions(this RedisOptions @this)
-    {
-        var config = new ConfigurationOptions();
+//internal static class RedisOptionsExtensions
+//{
+//    public static ConfigurationOptions ToStackExchangeRedisOptions(this RedisOptions @this)
+//    {
+//        var config = new ConfigurationOptions();
 
-        config.User = @this.Username;
-        config.Password = @this.Password;
+//        config.User = @this.Username;
+//        config.Password = @this.Password;
 
-        foreach (var host in @this.Hosts)
-        {
-            var useAddress = host.Address;
-            var usePort = host.Port != 0 ? host.Port : Constants.Redis.Port;
+//        foreach (var host in @this.Hosts)
+//        {
+//            var useAddress = host.Address;
+//            var usePort = host.Port != 0 ? host.Port : Constants.Redis.Port;
 
-            config.EndPoints.Add(useAddress, usePort);
-        }
+//            config.EndPoints.Add(useAddress, usePort);
+//        }
 
-        return config;
-    }
-}
+//        return config;
+//    }
+//}

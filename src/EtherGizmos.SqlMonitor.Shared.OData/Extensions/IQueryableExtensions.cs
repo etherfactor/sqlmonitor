@@ -1,35 +1,51 @@
-﻿using EtherGizmos.SqlMonitor.Shared.OData.Errors;
-using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
-using System.Linq.Expressions;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.EntityFrameworkCore;
 
 namespace EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 
+/// <summary>
+/// Provides extension methods for <see cref="IQueryable{T}"/>.
+/// </summary>
 public static class IQueryableExtensions
 {
     /// <summary>
-    /// Ensures that a record with the given properties is unique in a dataset.
+    /// Explicitly maps a queryable and applies OData query options.
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TFrom">The initial type.</typeparam>
+    /// <typeparam name="TTo">The final type.</typeparam>
     /// <param name="this">Itself.</param>
-    /// <param name="properties">The properties and their values to check for uniqueness. If two different properties must
-    /// be independently unique, call this function two separate times.</param>
-    /// <exception cref="ReturnODataErrorException"></exception>
-    public static void EnsureUnique<TEntity>(this IQueryable<TEntity> @this, params (Expression<Func<TEntity, object?>>, object?)[] properties)
+    /// <param name="mapper">The mapper to use.</param>
+    /// <param name="queryOptions">The OData query options.</param>
+    /// <returns>The mapped queryable. (Note: cannot be cast to <see cref="IQueryable{TFrom}"/> if $select/$expand are used.)</returns>
+    public static async Task<IQueryable> MapExplicitlyAndApplyQueryOptions<TFrom, TTo>(this IQueryable<TFrom> @this, IMapper mapper, ODataQueryOptions<TTo> queryOptions)
+        where TFrom : class
+        where TTo : class
     {
-        foreach (var property in properties)
-        {
-            var propertyRef = property.Item1.Body;
-            var parameter = property.Item1.Parameters[0];
-            var constantRef = Expression.Constant(property.Item2);
-            var comparer = Expression.Lambda<Func<TEntity, bool>>(Expression.Equal(propertyRef, constantRef), parameter);
+        string[] expanded = queryOptions.GetExpandedProperties().ToArray();
+        IQueryable<TTo> queryable = mapper.ProjectTo<TTo>(@this, null, expanded);
 
-            @this = @this.Where(comparer);
-        }
+        return await queryable.ApplyQueryOptions(queryOptions);
+    }
 
-        if (@this.Any())
-        {
-            var error = new ODataRecordNotUniqueError<TEntity>(properties);
-            throw new ReturnODataErrorException(error);
-        }
+    /// <summary>
+    /// Applies OData query options.
+    /// </summary>
+    /// <typeparam name="TEntity">The initial type.</typeparam>
+    /// <param name="this">Itself.</param>
+    /// <param name="queryOptions">The OData query options.</param>
+    /// <returns>The result queryable. (Note: cannot be cast to <see cref="IQueryable{TFrom}"/> if $select/$expand are used.)</returns>
+    public static async Task<IQueryable> ApplyQueryOptions<TEntity>(this IQueryable<TEntity> @this, ODataQueryOptions<TEntity> queryOptions)
+        where TEntity : class
+    {
+        AllowedQueryOptions noSelectExpand = AllowedQueryOptions.Select | AllowedQueryOptions.Expand;
+        AllowedQueryOptions onlySelectExpand = AllowedQueryOptions.All & ~noSelectExpand;
+
+        IQueryable<TEntity> noSelectExpandQueryable = (IQueryable<TEntity>)queryOptions.ApplyTo(@this, noSelectExpand);
+
+        List<TEntity> noSelectExpandList = await noSelectExpandQueryable.ToListAsync();
+        IQueryable finished = queryOptions.ApplyTo(noSelectExpandList.AsQueryable(), onlySelectExpand);
+
+        return finished;
     }
 }

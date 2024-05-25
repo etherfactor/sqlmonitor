@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using System.Data.Common;
 
 namespace EtherGizmos.SqlMonitor.Agent.Services.Queries;
 

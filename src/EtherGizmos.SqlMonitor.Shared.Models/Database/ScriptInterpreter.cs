@@ -1,5 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Shared.Models.Annotations;
-using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -44,6 +44,7 @@ public class ScriptInterpreter : Auditable
         Name = null!;
         Command = null!;
         Arguments = null!;
+        Extension = null!;
         Securable = null!;
     }
 

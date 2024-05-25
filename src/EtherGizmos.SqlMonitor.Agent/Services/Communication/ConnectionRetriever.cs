@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Models;
 using EtherGizmos.SqlMonitor.Agent.Services.Communication.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using System.Net.Http.Json;
 
 namespace EtherGizmos.SqlMonitor.Agent.Services.Communication;

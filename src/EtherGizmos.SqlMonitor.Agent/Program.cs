@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+using EtherGizmos.SqlMonitor.Shared.Configuration;
 using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -18,34 +18,11 @@ Log.Logger = new LoggerConfiguration()
 builder.Services
     .AddOptions();
 
-builder.Services
-    .AddOptions<UsageOptions>()
-    .Configure<IConfiguration>((opt, conf) =>
-    {
-        var path = "Connections:Use";
+builder.Services.AddUsageOptions();
 
-        conf.GetSection(path)
-            .Bind(opt);
+builder.Services.AddRabbitMQOptions();
 
-        opt.AssertValid(path);
-    });
-
-builder.Services
-    .AddOptions<RabbitMQOptions>()
-    .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
-    {
-        var path = "Connections:RabbitMQ";
-
-        conf.GetSection(path)
-            .Bind(opt);
-
-        if (usage.Value.MessageBroker == MessageBrokerType.RabbitMQ)
-        {
-            opt.AssertValid(path);
-        }
-    });
-
-builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
+//builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
 
 var host = builder.Build();
 

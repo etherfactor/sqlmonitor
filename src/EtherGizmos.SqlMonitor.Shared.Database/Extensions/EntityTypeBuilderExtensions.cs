@@ -1,5 +1,5 @@
-using EtherGizmos.SqlMonitor.Shared.Models.Annotations;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Annotations;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,7 +12,7 @@ namespace EtherGizmos.SqlMonitor.Shared.Database.Extensions;
 /// <summary>
 /// Provides extension methods for <see cref="EntityTypeBuilder{TEntity}"/>.
 /// </summary>
-internal static class EntityTypeBuilderExtensions
+public static class EntityTypeBuilderExtensions
 {
     /// <summary>
     /// Adds auditing columns to an entity, reading from annotations.
@@ -20,7 +20,7 @@ internal static class EntityTypeBuilderExtensions
     /// <typeparam name="TEntity">The type of entity.</typeparam>
     /// <param name="this">Itself.</param>
     /// <returns>Itself.</returns>
-    internal static EntityTypeBuilder<TEntity> AuditPropertiesWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this)
+    public static EntityTypeBuilder<TEntity> AuditPropertiesWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this)
         where TEntity : class, IAuditable
     {
         @this.PropertyWithAnnotations(e => e.CreatedAt).HasDefaultValueSql();
@@ -38,7 +38,7 @@ internal static class EntityTypeBuilderExtensions
     /// <param name="this">Itself.</param>
     /// <returns>Itself.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    internal static EntityTypeBuilder<TEntity> ToTableWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this, string? schema = null, Action<TableBuilder<TEntity>>? buildAction = null)
+    public static EntityTypeBuilder<TEntity> ToTableWithAnnotations<TEntity>(this EntityTypeBuilder<TEntity> @this, string? schema = null, Action<TableBuilder<TEntity>>? buildAction = null)
         where TEntity : class
     {
         //Extract the table name from a TableAttribute, and ensure it exists
@@ -69,7 +69,7 @@ internal static class EntityTypeBuilderExtensions
     /// <param name="propertyExpression">An expression selecting the property.</param>
     /// <returns>The property builder.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    internal static PropertyBuilder<TMember> PropertyWithAnnotations<TEntity, TMember>(this EntityTypeBuilder<TEntity> @this, Expression<Func<TEntity, TMember>> propertyExpression)
+    public static PropertyBuilder<TMember> PropertyWithAnnotations<TEntity, TMember>(this EntityTypeBuilder<TEntity> @this, Expression<Func<TEntity, TMember>> propertyExpression)
         where TEntity : class
     {
         //Extract the property info from the expression

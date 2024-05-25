@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 

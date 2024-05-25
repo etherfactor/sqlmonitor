@@ -1,26 +1,21 @@
 using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Api;
-using EtherGizmos.SqlMonitor.Api.Extensions;
-using EtherGizmos.SqlMonitor.Api.Services.Authorization;
-using EtherGizmos.SqlMonitor.Api.Services.Background;
-using EtherGizmos.SqlMonitor.Api.Services.Caching;
-using EtherGizmos.SqlMonitor.Api.Services.Caching.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Filters;
-using EtherGizmos.SqlMonitor.Api.Services.Validation;
+using EtherGizmos.SqlMonitor.Api.Core.Services.Background;
+using EtherGizmos.SqlMonitor.Api.Core.Services.Filters;
+using EtherGizmos.SqlMonitor.Api.Core.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
-using EtherGizmos.SqlMonitor.Shared.Configuration.Caching;
 using EtherGizmos.SqlMonitor.Shared.Configuration.Data;
 using EtherGizmos.SqlMonitor.Shared.Database;
 using EtherGizmos.SqlMonitor.Shared.Database.Services;
 using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
+using EtherGizmos.SqlMonitor.Shared.OAuth.Services;
+using EtherGizmos.SqlMonitor.Shared.Redis;
 using EtherGizmos.SqlMonitor.Shared.Utilities;
-using MassTransit;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,17 +30,19 @@ builder.AddLoggingServices();
 //**********************************************************
 // Add Services
 
+// General options
 builder.Services.AddUsageOptions();
 
-builder.Services.AddRabbitMQOptions();
-
+// Caching options
 builder.Services.AddRedisOptions();
 
+// Database options
 builder.Services.AddMySqlOptions();
-
 builder.Services.AddPostgreSqlOptions();
-
 builder.Services.AddSqlServerOptions();
+
+// Messaging options
+builder.Services.AddRabbitMQOptions();
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
@@ -200,57 +197,59 @@ builder.Services
     .ImportSingleton<IOptions<SqlServerOptions>>()
     .ForwardTransient<IDatabaseConnectionProvider>();
 
-builder.Services
-    .AddChildContainer((childServices, parentServices) =>
-    {
-        var usageOptions = parentServices
-            .GetRequiredService<IOptions<UsageOptions>>()
-            .Value;
+builder.Services.AddRedisServices();
 
-        childServices.AddCaching(opt =>
-        {
-            if (usageOptions.Cache == CacheType.InMemory)
-            {
-                opt.UsingInMemory();
-            }
-            else if (usageOptions.Cache == CacheType.Redis)
-            {
-                var redisOptions = parentServices
-                    .GetRequiredService<IOptions<RedisOptions>>()
-                    .Value;
+//builder.Services
+//    .AddChildContainer((childServices, parentServices) =>
+//    {
+//        var usageOptions = parentServices
+//            .GetRequiredService<IOptions<UsageOptions>>()
+//            .Value;
 
-                opt.UsingRedis(redisOptions);
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
-            }
-        });
+//        childServices.AddCaching(opt =>
+//        {
+//            if (usageOptions.Cache == CacheType.InMemory)
+//            {
+//                opt.UsingInMemory();
+//            }
+//            else if (usageOptions.Cache == CacheType.Redis)
+//            {
+//                var redisOptions = parentServices
+//                    .GetRequiredService<IOptions<RedisOptions>>()
+//                    .Value;
 
-        childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
-    })
-    .ImportLogging()
-    .ForwardCaching();
+//                opt.UsingRedis(redisOptions);
+//            }
+//            else
+//            {
+//                throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
+//            }
+//        });
 
-builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
+//        childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
+//    })
+//    .ImportLogging()
+//    .ForwardCaching();
 
-builder.Services
-    .AddChildContainer((childCollection, parentServices) =>
-    {
-        var redisOptions = parentServices
-            .GetRequiredService<IOptions<RedisOptions>>()
-            .Value;
+//builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
 
-        childCollection.AddSingleton<IConnectionMultiplexer>(_ =>
-        {
-            var internalValue = redisOptions.ToStackExchangeRedisOptions();
+//builder.Services
+//    .AddChildContainer((childCollection, parentServices) =>
+//    {
+//        var redisOptions = parentServices
+//            .GetRequiredService<IOptions<RedisOptions>>()
+//            .Value;
 
-            RedisConnectionMultiplexer.Initialize(internalValue);
-            return RedisConnectionMultiplexer.Instance;
-        });
-    })
-    .ImportSingleton<IOptions<ConfigurationOptions>>()
-    .ForwardSingleton<IConnectionMultiplexer>();
+//        childCollection.AddSingleton<IConnectionMultiplexer>(_ =>
+//        {
+//            var internalValue = redisOptions.ToStackExchangeRedisOptions();
+
+//            RedisConnectionMultiplexer.Initialize(internalValue);
+//            return RedisConnectionMultiplexer.Instance;
+//        });
+//    })
+//    .ImportSingleton<IOptions<ConfigurationOptions>>()
+//    .ForwardSingleton<IConnectionMultiplexer>();
 
 builder.Services.AddMapper();
 

@@ -8,14 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Sql\DynamicQuery.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Sql\DynamicQuery.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Core\EtherGizmos.SqlMonitor.Api.Core.csproj" />
   </ItemGroup>
 
