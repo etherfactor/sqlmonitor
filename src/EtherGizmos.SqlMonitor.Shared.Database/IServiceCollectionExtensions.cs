@@ -1,74 +1,55 @@
 ﻿using EtherGizmos.Extensions.DependencyInjection;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Configuration.Data;
+using EtherGizmos.SqlMonitor.Shared.Database.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Database.Remaps;
 using EtherGizmos.SqlMonitor.Shared.Database.Services;
 using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Generators.MySql;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace EtherGizmos.SqlMonitor.Shared.Database;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddDatabaseServices(this IServiceCollection @this)
+    public static IServiceCollection AddDatabaseConnectionProvider(this IServiceCollection @this)
     {
-        //Add Entity Framework Core database context
         @this
-            .AddDbContext<ApplicationContext>((services, opt) =>
+            .AddChildContainer((childServices, parentServices) =>
             {
-                var usageOptions = services
+                var usageOptions = parentServices
                     .GetRequiredService<IOptions<UsageOptions>>()
                     .Value;
 
-                var loggerFactory = services
-                    .GetRequiredService<ILoggerFactory>();
-
-                var connectionProvider = services.GetRequiredService<IDatabaseConnectionProvider>();
-                var connectionString = connectionProvider.GetConnectionString();
                 if (usageOptions.Database == DatabaseType.MySql)
                 {
-                    opt.UseLoggerFactory(loggerFactory);
-
-                    opt.UseMySQL(connectionString, conf =>
-                    {
-                        conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    });
-
-                    opt.EnableSensitiveDataLogging();
+                    childServices.AddTransient<IDatabaseConnectionProvider, MySqlDatabaseConnectionProvider>();
                 }
                 else if (usageOptions.Database == DatabaseType.PostgreSql)
                 {
-                    opt.UseLoggerFactory(loggerFactory);
-
-                    opt.UseNpgsql(connectionString, conf =>
-                    {
-                        conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    });
-
-                    opt.EnableSensitiveDataLogging();
+                    childServices.AddTransient<IDatabaseConnectionProvider, PostgreSqlDatabaseConnectionProvider>();
                 }
                 else if (usageOptions.Database == DatabaseType.SqlServer)
                 {
-                    opt.UseLoggerFactory(loggerFactory);
-
-                    opt.UseSqlServer(connectionString, conf =>
-                    {
-                        conf.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    });
-
-                    opt.EnableSensitiveDataLogging();
+                    childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
                 }
-                else
-                {
-                    throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
-                }
+            })
+            .ImportSingleton<IOptions<MySqlOptions>>()
+            .ImportSingleton<IOptions<PostgreSqlOptions>>()
+            .ImportSingleton<IOptions<SqlServerOptions>>()
+            .ForwardTransient<IDatabaseConnectionProvider>();
 
-                opt.UseLazyLoadingProxies(true);
+        return @this;
+    }
+
+    public static IServiceCollection AddDatabaseContext(this IServiceCollection @this)
+    {
+        @this.AddMigrationManager()
+            .AddDbContext<ApplicationContext>((services, opt) =>
+            {
+                opt.ConfigureForServices(services);
             })
             .AddScoped<ISaveService, SaveService>()
             .AddScoped<IMetricService, MetricService>()
@@ -80,48 +61,56 @@ public static class IServiceCollectionExtensions
             .AddScoped<IScriptService, ScriptService>()
             .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();
 
-        //Add FluentMigrator
-        @this
-            .AddChildContainer((childServices, parentServices) =>
-            {
-                var usageOptions = parentServices
-                    .GetRequiredService<IOptions<UsageOptions>>()
-                    .Value;
+        return @this;
+    }
 
-                var connectionProvider = parentServices.GetRequiredService<IDatabaseConnectionProvider>();
+    public static IServiceCollection AddMigrationManager(this IServiceCollection @this)
+    {
+        //Add FluentMigrator if it has not been added already
+        if (!@this.Any(e => e.ServiceType == typeof(IMigrationManager)))
+        {
+            @this
+                .AddChildContainer((childServices, parentServices) =>
+                {
+                    var usageOptions = parentServices
+                        .GetRequiredService<IOptions<UsageOptions>>()
+                        .Value;
 
-                childServices
-                    .AddLogging(opt => opt.AddFluentMigratorConsole())
-                    .AddFluentMigratorCore()
-                    .ConfigureRunner(opt =>
-                    {
-                        opt.WithGlobalConnectionString(connectionProvider.GetConnectionString())
-                            .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
-                            .WithVersionTable(new CustomVersionTableMetadata());
+                    var connectionProvider = parentServices.GetRequiredService<IDatabaseConnectionProvider>();
 
-                        if (usageOptions.Database == DatabaseType.MySql)
+                    childServices
+                        .AddLogging(opt => opt.AddFluentMigratorConsole())
+                        .AddFluentMigratorCore()
+                        .ConfigureRunner(opt =>
                         {
-                            opt.AddMySql8()
-                                .Services.AddScoped<MySqlQuoter, MySqlQuoterRemap>();
-                        }
-                        else if (usageOptions.Database == DatabaseType.PostgreSql)
-                        {
-                            opt.AddPostgres();
-                        }
-                        else if (usageOptions.Database == DatabaseType.SqlServer)
-                        {
-                            opt.AddSqlServer();
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
-                        }
-                    });
+                            opt.WithGlobalConnectionString(connectionProvider.GetConnectionString())
+                                .ScanIn(typeof(DatabaseMigrationTarget).Assembly).For.Migrations()
+                                .WithVersionTable(new CustomVersionTableMetadata());
 
-                childServices.AddSingleton<IMigrationManager, MigrationManager>();
-            })
-            .ImportLogging()
-            .ForwardSingleton<IMigrationManager>();
+                            if (usageOptions.Database == DatabaseType.MySql)
+                            {
+                                opt.AddMySql8()
+                                    .Services.AddScoped<MySqlQuoter, MySqlQuoterRemap>();
+                            }
+                            else if (usageOptions.Database == DatabaseType.PostgreSql)
+                            {
+                                opt.AddPostgres();
+                            }
+                            else if (usageOptions.Database == DatabaseType.SqlServer)
+                            {
+                                opt.AddSqlServer();
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException(string.Format("Unknown database type: {0}", usageOptions.Database));
+                            }
+                        });
+
+                    childServices.AddSingleton<IMigrationManager, MigrationManager>();
+                })
+                .ImportLogging()
+                .ForwardSingleton<IMigrationManager>();
+        }
 
         return @this;
     }

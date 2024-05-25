@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="5.*" />
     <PackageReference Include="DistributedLock.Redis" Version="1.*" />
+    <PackageReference Include="EtherGizmos.Extensions.DependencyInjection.ChildContainers" Version="0.1.0-ci.2" />
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="10.*" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.*" />
     <PackageReference Include="StackExchange.Redis.Extensions.System.Text.Json" Version="10.*" />
