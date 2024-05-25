@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentMigrator.Runner.MySql" Version="5.*" />
+    <PackageReference Include="FluentMigrator.Runner.Postgres" Version="5.*" />
+    <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="5.*" />
+  </ItemGroup>
+
 </Project>

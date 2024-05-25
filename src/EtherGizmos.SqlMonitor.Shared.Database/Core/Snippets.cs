@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using FluentMigrator;
+using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Shared.Database.Core;
 

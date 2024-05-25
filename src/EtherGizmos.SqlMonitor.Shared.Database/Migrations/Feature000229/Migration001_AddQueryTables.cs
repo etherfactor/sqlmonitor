@@ -1,4 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Database.Core;
+using EtherGizmos.SqlMonitor.Shared.Database.Extensions;
+using FluentMigrator;
 using System.Data;
 
 namespace EtherGizmos.SqlMonitor.Shared.Database.Migrations.Feature000229;

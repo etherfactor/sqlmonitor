@@ -1,4 +1,8 @@
-﻿using System.ComponentModel;
+﻿using FluentMigrator;
+using FluentMigrator.Expressions;
+using FluentMigrator.Infrastructure;
+using FluentMigrator.Model;
+using System.ComponentModel;
 using System.Data;
 using System.Reflection;
 

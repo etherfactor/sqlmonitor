@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Database.Core;
+﻿using FluentMigrator;
+
+namespace EtherGizmos.SqlMonitor.Shared.Database.Core;
 
 /// <summary>
 /// Allows migration forward, but not backward.

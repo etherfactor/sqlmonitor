@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Database.Core;
+﻿using FluentMigrator;
+
+namespace EtherGizmos.SqlMonitor.Shared.Database.Core;
 
 /// <summary>
 /// Generates a version number for the migration based on the date/time at which the migration was authored. Migrations will

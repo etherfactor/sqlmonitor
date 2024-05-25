@@ -1,4 +1,7 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Database.Extensions;
+﻿using FluentMigrator;
+using FluentMigrator.Builders.Create.Table;
+
+namespace EtherGizmos.SqlMonitor.Shared.Database.Extensions;
 
 /// <summary>
 /// Provides extension methods for <see cref="ICreateTableWithColumnSyntax"/>.

@@ -1,4 +1,7 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Database.Remaps;
+﻿using FluentMigrator;
+using FluentMigrator.Runner.Generators.MySql;
+
+namespace EtherGizmos.SqlMonitor.Shared.Database.Remaps;
 
 public class MySqlQuoterRemap : MySqlQuoter
 {
