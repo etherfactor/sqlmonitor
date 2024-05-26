@@ -19,7 +19,8 @@ internal class ConnectionRetriever : IConnectionRetriever
     {
         using var client = _clientFactory.CreateClient("coordinator");
 
-        var uriBuilder = new UriBuilder($"/agent/v1/credentials");
+        var uriBuilder = new UriBuilder(client.BaseAddress!);
+        uriBuilder.Path = $"/agent/v0.1/credentials";
         var queryParams = uriBuilder.GetQueryParameters();
 
         queryParams.Add("connectionToken", connectionToken);
