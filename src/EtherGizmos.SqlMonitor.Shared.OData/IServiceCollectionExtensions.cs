@@ -13,7 +13,7 @@ public static class IServiceCollectionExtensions
 
         var modelValidators = typeof(IServiceCollectionExtensions).Assembly
             .GetTypes()
-            .Where(t => !t.IsInterface && !t.IsAbstract)
+            .Where(t => !t.IsInterface && !t.IsAbstract && !t.IsGenericType)
             .SelectMany(t => t.GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IModelValidator<>))
                 .Select(i => new { ValidatorType = t, ModelType = i.GetGenericArguments().Single() }));
