@@ -3,6 +3,7 @@ using Asp.Versioning.OData;
 using EtherGizmos.SqlMonitor.Api.Controllers.Api;
 using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Models;
+using EtherGizmos.SqlMonitor.Shared.OData;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using MassTransit;
@@ -42,6 +43,8 @@ internal static class Global
         services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
         services.AddSingleton(e => RedisHelperFactory.Instance);
 
+        services.AddModelValidators();
+
         services.AddSingleton(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMetricService>>().Object);
@@ -63,7 +66,7 @@ internal static class Global
     {
         var builder = new ODataConventionModelBuilder();
 
-        var configurations = typeof(ApiVersions).Assembly.GetTypes()
+        var configurations = typeof(ODataModelTarget).Assembly.GetTypes()
             .Where(e => e.IsAssignableTo(typeof(IModelConfiguration)));
 
         foreach (var configuration in configurations)

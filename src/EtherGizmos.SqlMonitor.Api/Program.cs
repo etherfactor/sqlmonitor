@@ -9,6 +9,7 @@ using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Services;
+using EtherGizmos.SqlMonitor.Shared.OData;
 using EtherGizmos.SqlMonitor.Shared.Redis;
 using EtherGizmos.SqlMonitor.Shared.Utilities;
 using Microsoft.AspNetCore.OData;
@@ -89,6 +90,8 @@ builder.Services.AddHostedService<OAuth2Seeder>();
 
 // Models
 builder.Services.AddMapper();
+
+builder.Services.AddModelValidators();
 
 // Controllers
 builder.Services
