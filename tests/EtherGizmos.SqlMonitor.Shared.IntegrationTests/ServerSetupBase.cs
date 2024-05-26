@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using ApiProgram = EtherGizmos.SqlMonitor.Api.Program;
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests;
 
@@ -11,7 +12,7 @@ public abstract class ServerSetupBase
     /// <summary>
     /// The <see cref="WebApplicationFactory{TEntryPoint}"/>.
     /// </summary>
-    private WebApplicationFactory<Program>? Factory { get; set; }
+    private WebApplicationFactory<ApiProgram>? Factory { get; set; }
 
     /// <summary>
     /// Defines the override configuration values used in the integration test.
@@ -40,7 +41,7 @@ public abstract class ServerSetupBase
     {
         string projectDirectory = Directory.GetCurrentDirectory();
 
-        Factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        Factory = new WebApplicationFactory<ApiProgram>().WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((context, config) =>
             {

@@ -72,13 +72,10 @@ public static class IServiceCollectionExtensions
                 {
                     throw new InvalidOperationException(string.Format("Unknown cache type: {0}", usageOptions.Cache));
                 }
-
-                childServices.AddSingleton<IRedisHelperFactory>(e => RedisHelperFactory.Instance);
             })
             .ImportLogging()
             .ImportSingleton<IOptions<UsageOptions>>()
-            .ForwardSingleton<IDistributedRecordCache>()
-            .ForwardSingleton<IRedisHelperFactory>();
+            .ForwardSingleton<IDistributedLockProvider>();
 
         return @this;
     }

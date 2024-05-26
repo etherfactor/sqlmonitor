@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.IntegrationTests;
+using Npgsql;
 using System.Data;
 using System.Diagnostics;
 using System.Runtime.InteropServices;

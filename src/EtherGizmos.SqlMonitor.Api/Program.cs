@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using EtherGizmos.SqlMonitor.Api;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Filters;
@@ -109,7 +110,13 @@ builder.Services
     {
         opt.ReportApiVersions = true;
         opt.DefaultApiVersion = ApiVersions.V0_1;
-        //opt.ApiVersionReader = new UrlSegmentApiVersionReader();
+        opt.ApiVersionReader = new UrlSegmentApiVersionReader();
+    })
+    .AddMvc()
+    .AddApiExplorer(opt =>
+    {
+        opt.GroupNameFormat = "'v'VVV";
+        opt.SubstituteApiVersionInUrl = true;
     })
     .AddOData(opt =>
     {

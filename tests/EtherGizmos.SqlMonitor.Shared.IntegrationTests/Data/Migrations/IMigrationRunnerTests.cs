@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using EtherGizmos.Extensions.DependencyInjection;
+using EtherGizmos.SqlMonitor.Shared.Database;
+using EtherGizmos.SqlMonitor.Shared.Database.Services;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using FluentMigrator.Runner;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Data.Migrations;

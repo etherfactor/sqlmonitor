@@ -1,5 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Asp.Versioning;
+using Asp.Versioning.OData;
+using EtherGizmos.SqlMonitor.Api.Controllers.Api;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models;
+using EtherGizmos.SqlMonitor.Shared.Redis.Caching;
+using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 
@@ -47,24 +57,6 @@ internal static class Global
 
         var provider = services.BuildServiceProvider().CreateScope().ServiceProvider;
         return provider;
-    }
-
-    internal static string GetConnectionStringForMaster(this IDatabaseConnectionProvider @this)
-    {
-        string connectionString = @this.GetConnectionString();
-
-        var builder = new SqlConnectionStringBuilder(connectionString);
-        builder.InitialCatalog = "master";
-
-        return builder.ConnectionString;
-    }
-
-    internal static string GetDatabaseName(this IDatabaseConnectionProvider @this)
-    {
-        string connectionString = @this.GetConnectionString();
-
-        var builder = new SqlConnectionStringBuilder(connectionString);
-        return builder.InitialCatalog;
     }
 
     internal static IEdmModel GenerateEdmModel(this ApiVersion @this)

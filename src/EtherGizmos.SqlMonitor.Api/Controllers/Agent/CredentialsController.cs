@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EtherGizmos.SqlMonitor.Api.Controllers.Agent;
 
+[ApiController]
 public class CredentialsController : ControllerBase
 {
     private const string BasePath = "agent/v{version:apiVersion}/credentials";

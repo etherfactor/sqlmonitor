@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
+
+namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
 
 internal class StringExtensionsTests
 {

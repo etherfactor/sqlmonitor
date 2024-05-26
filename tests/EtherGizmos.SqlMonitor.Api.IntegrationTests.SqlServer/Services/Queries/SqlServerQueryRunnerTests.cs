@@ -1,4 +1,8 @@
-﻿namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.Services.Queries;
+﻿using EtherGizmos.SqlMonitor.Agent.Services.Queries;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+
+namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.Services.Queries;
 
 internal class SqlServerQueryRunnerTests
 {

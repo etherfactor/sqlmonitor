@@ -1,5 +1,14 @@
-﻿using EtherGizmos.SqlMonitor.UnitTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Controllers.Api;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models;
+using EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
+using EtherGizmos.SqlMonitor.UnitTests.Extensions;
+using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
 using MockQueryable.Moq;
 using Moq;
 using System.Net;
@@ -57,7 +66,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -88,7 +97,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -119,7 +128,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -150,7 +159,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -181,7 +190,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -212,7 +221,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -243,7 +252,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -276,7 +285,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = -1;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -309,7 +318,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -342,7 +351,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -363,7 +372,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -396,7 +405,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -417,7 +426,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -438,7 +447,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -459,7 +468,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -514,7 +523,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public void Create_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -538,7 +547,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public async Task Create_IsValid_WithSelect_Returns201Created()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -574,7 +583,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public void Create_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -598,7 +607,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public void Create_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -622,7 +631,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public void Create_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -646,7 +655,7 @@ internal class MonitoredScriptTargetsControllerTests
     [Test]
     public void Create_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -672,7 +681,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = new Random().Next(100, 10000);
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "PATCH",
@@ -708,7 +717,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "POST",
@@ -744,7 +753,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -768,7 +777,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -804,7 +813,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -828,7 +837,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -852,7 +861,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -876,7 +885,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "GET",
@@ -900,7 +909,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = -1;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "DELETE",
@@ -933,7 +942,7 @@ internal class MonitoredScriptTargetsControllerTests
     {
         int recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<MonitoredScriptTargetDTO>(
             model,
             "DELETE",

@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.Redis.Extensions;
+
+namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
 
 internal class ScoreExtensionsTests
 {

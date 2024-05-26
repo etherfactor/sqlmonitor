@@ -10,7 +10,34 @@
   <ItemGroup>
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Api.Core\EtherGizmos.SqlMonitor.Api.Core.csproj" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.Shared.IntegrationTests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>EtherGizmos.SqlMonitor.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
   <Target Name="RunAngularBuild" BeforeTargets="BeforePublish">
     <Exec Command="npm ci" WorkingDirectory="..\EtherGizmos.SqlMonitor.Web" />
     <Exec Command="ng build --output-path=&quot;$(MSBuildProjectDirectory)&quot;/wwwroot" WorkingDirectory="..\EtherGizmos.SqlMonitor.Web" />

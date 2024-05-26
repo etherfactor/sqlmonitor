@@ -1,4 +1,7 @@
-﻿namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
+using Microsoft.AspNetCore.OData.Query;
+
+namespace EtherGizmos.SqlMonitor.UnitTests.Extensions;
 
 internal class ODataQueryOptionsExtensions
 {

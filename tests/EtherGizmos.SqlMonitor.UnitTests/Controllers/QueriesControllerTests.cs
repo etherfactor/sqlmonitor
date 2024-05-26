@@ -1,5 +1,14 @@
-﻿using EtherGizmos.SqlMonitor.UnitTests.Extensions;
+﻿using EtherGizmos.SqlMonitor.Api.Controllers.Api;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models;
+using EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
+using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
+using EtherGizmos.SqlMonitor.UnitTests.Extensions;
+using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Query.Wrapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
 using MockQueryable.Moq;
 using Moq;
 using System.Net;
@@ -79,7 +88,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -110,7 +119,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithFilter_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -141,7 +150,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithSelect_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -172,7 +181,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithOrderBy_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -203,7 +212,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithTop_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -234,7 +243,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithSkip_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -265,7 +274,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Search_IsValid_WithCount_Returns200Ok()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -298,7 +307,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = new Guid();
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -331,7 +340,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -364,7 +373,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -385,7 +394,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -418,7 +427,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -439,7 +448,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -460,7 +469,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -481,7 +490,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -602,7 +611,7 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithFilter_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -626,7 +635,7 @@ internal class QueriesControllerTests
     [Test]
     public async Task Create_IsValid_WithSelect_Returns201Created()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -662,7 +671,7 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithOrderBy_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -686,7 +695,7 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithTop_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -710,7 +719,7 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithSkip_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -734,7 +743,7 @@ internal class QueriesControllerTests
     [Test]
     public void Create_IsValid_WithCount_ThrowsReturnODataErrorException()
     {
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -760,7 +769,7 @@ internal class QueriesControllerTests
     {
         var recordId = Guid.NewGuid();
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "PATCH",
@@ -896,7 +905,7 @@ internal class QueriesControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -920,7 +929,7 @@ internal class QueriesControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -956,7 +965,7 @@ internal class QueriesControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -980,7 +989,7 @@ internal class QueriesControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -1004,7 +1013,7 @@ internal class QueriesControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -1028,7 +1037,7 @@ internal class QueriesControllerTests
     {
         var recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "GET",
@@ -1052,7 +1061,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = new Guid();
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "DELETE",
@@ -1085,7 +1094,7 @@ internal class QueriesControllerTests
     {
         Guid recordId = _recordId;
 
-        var model = ApiVersions.V0_1.GenerateEdmModel(); ;
+        var model = ApiVersions.V0_1.GenerateEdmModel();
         var queryOptions = ODataQueryOptionsHelper.CreateOptions<QueryDTO>(
             model,
             "DELETE",

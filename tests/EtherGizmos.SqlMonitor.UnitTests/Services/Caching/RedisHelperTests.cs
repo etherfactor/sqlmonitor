@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using EtherGizmos.SqlMonitor.Shared.Redis.Caching;
+using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using StackExchange.Redis;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
