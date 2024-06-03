@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Services.Scripts.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Scripts;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
@@ -9,7 +9,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace EtherGizmos.SqlMonitor.Agent.Services.Scripts;
+namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
 public class PSRemotingScriptRunner : IScriptRunner
 {

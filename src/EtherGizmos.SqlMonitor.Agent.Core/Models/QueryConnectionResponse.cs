@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Agent.Models;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Core.Models;
 
 internal class QueryConnectionResponse
 {

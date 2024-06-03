@@ -1,4 +1,4 @@
-using EtherGizmos.SqlMonitor.Agent.Services.Scripts.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Api.Services.Scripts;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace EtherGizmos.SqlMonitor.Agent.Services.Scripts;
+namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
 /// <summary>
 /// Executes scripts against servers, connecting via SSH.
@@ -132,7 +132,7 @@ public partial class SshScriptRunner : IScriptRunner
     {
         var authentication = GetAuthenticationMethod(configuration);
 
-        var connectionInfo = new Renci.SshNet.ConnectionInfo(configuration.HostName, configuration.Port, configuration.Username, authentication);
+        var connectionInfo = new ConnectionInfo(configuration.HostName, configuration.Port, configuration.Username, authentication);
         var client = new SshClient(connectionInfo);
 
         return client;

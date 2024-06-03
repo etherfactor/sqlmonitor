@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Agent.Helpers;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Core.Helpers;
 
 internal static class ODataHelper
 {

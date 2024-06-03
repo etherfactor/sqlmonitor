@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Services.Queries;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 

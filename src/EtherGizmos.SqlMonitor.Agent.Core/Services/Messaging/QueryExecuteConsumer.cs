@@ -1,8 +1,8 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Services.Queries.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using MassTransit;
 
-namespace EtherGizmos.SqlMonitor.Agent.Services.Messaging;
+namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Messaging;
 
 internal class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
 {
@@ -22,8 +22,8 @@ internal class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
         var runner = await _queryRunnerFactory.GetRunnerAsync(
             message.MonitoredQueryTargetId,
             message.ConnectionRequestToken,
-            message.QueryVariant.SqlType);
+            message.SqlType);
 
-        await runner.ExecuteAsync(message.QueryVariant, context.CancellationToken);
+        await runner.ExecuteAsync(message, context.CancellationToken);
     }
 }

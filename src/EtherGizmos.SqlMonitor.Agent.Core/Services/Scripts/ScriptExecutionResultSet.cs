@@ -1,4 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Services.Scripts;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using System.Text.RegularExpressions;
 

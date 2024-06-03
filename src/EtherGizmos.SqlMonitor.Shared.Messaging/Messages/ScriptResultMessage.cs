@@ -1,31 +1,34 @@
 ﻿namespace EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 
-public class QueryResultMessage
+public class ScriptResultMessage
 {
-    public Guid QueryId { get; set; }
+    public Guid ScriptId { get; set; }
 
     public string Name { get; set; }
 
-    public int MonitoredQueryTargetId { get; set; }
+    public int MonitoredScriptTargetId { get; set; }
 
     public long ExecutionMilliseconds { get; set; }
 
-    public List<QueryResultMessageMetricValue> MetricValues { get; set; } = new();
+    public List<ScriptResultMessageMetricValue> MetricValues { get; set; } = new();
 
-    public QueryResultMessage()
+    /// <summary>
+    /// Not intended for direct use.
+    /// </summary>
+    public ScriptResultMessage()
     {
         Name = null!;
     }
 
-    public QueryResultMessage(
-        Guid queryId,
+    public ScriptResultMessage(
+        Guid scriptId,
         string name,
-        int monitoredQueryTargetId,
+        int monitoredScriptTargetId,
         long executionMilliseconds)
     {
-        QueryId = queryId;
+        ScriptId = scriptId;
         Name = name;
-        MonitoredQueryTargetId = monitoredQueryTargetId;
+        MonitoredScriptTargetId = monitoredScriptTargetId;
         ExecutionMilliseconds = executionMilliseconds;
     }
 
@@ -39,7 +42,7 @@ public class QueryResultMessage
     }
 }
 
-public class QueryResultMessageMetricValue
+public class ScriptResultMessageMetricValue
 {
     public int MetricId { get; set; }
 
@@ -52,11 +55,11 @@ public class QueryResultMessageMetricValue
     /// <summary>
     /// Not intended for direct use.
     /// </summary>
-    public QueryResultMessageMetricValue()
+    public ScriptResultMessageMetricValue()
     {
     }
 
-    public QueryResultMessageMetricValue(
+    public ScriptResultMessageMetricValue(
         int metricId,
         string? bucket,
         DateTimeOffset? timestampUtc,

@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Agent.Services.Communication.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 
 public interface IConnectionRetriever
 {

@@ -20,7 +20,7 @@ public class QueryExecuteMessage
 
     public string? TimestampUtcColumn { get; set; }
 
-    public List<Metric> Metrics { get; set; } = new();
+    public List<QueryExecuteMessageMetric> Metrics { get; set; } = new();
 
     /// <summary>
     /// Not intended for direct use.
@@ -58,27 +58,27 @@ public class QueryExecuteMessage
     {
         Metrics.Add(new(metricId, valueColumn));
     }
+}
 
-    public class Metric
+public class QueryExecuteMessageMetric
+{
+    public int MetricId { get; set; }
+
+    public string ValueColumn { get; set; }
+
+    /// <summary>
+    /// Not intended for direct use.
+    /// </summary>
+    public QueryExecuteMessageMetric()
     {
-        public int MetricId { get; set; }
+        ValueColumn = null!;
+    }
 
-        public string ValueColumn { get; set; }
-
-        /// <summary>
-        /// Not intended for direct use.
-        /// </summary>
-        public Metric()
-        {
-            ValueColumn = null!;
-        }
-
-        public Metric(
-            int metricId,
-            string valueColumn)
-        {
-            MetricId = metricId;
-            ValueColumn = valueColumn;
-        }
+    public QueryExecuteMessageMetric(
+        int metricId,
+        string valueColumn)
+    {
+        MetricId = metricId;
+        ValueColumn = valueColumn;
     }
 }

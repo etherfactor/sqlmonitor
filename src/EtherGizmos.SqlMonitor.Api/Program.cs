@@ -5,6 +5,7 @@ using EtherGizmos.SqlMonitor.Api.Core.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Database;
+using EtherGizmos.SqlMonitor.Shared.Messaging;
 using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
@@ -51,7 +52,7 @@ builder.Services.AddAuthorizationContext();
 // Messaging
 builder.Services.AddRabbitMQOptions();
 
-//builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
+builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
 
 // Authentication
 builder.Services.AddAuthentication();

@@ -1,5 +1,5 @@
-using EtherGizmos.SqlMonitor.Agent.Services.Communication;
-using EtherGizmos.SqlMonitor.Agent.Services.Communication.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using Serilog;
 
