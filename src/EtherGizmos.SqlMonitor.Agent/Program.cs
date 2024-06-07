@@ -1,6 +1,7 @@
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
+using EtherGizmos.SqlMonitor.Shared.Messaging;
 using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -32,14 +33,9 @@ builder.Services
         opt.BaseAddress = new Uri("https://localhost:7200");
     });
 
-//builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
+builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
 
 var host = builder.Build();
-
-var scope = host.Services.CreateScope().ServiceProvider;
-var connectionRetriever = scope.GetRequiredService<IConnectionRetriever>();
-
-var result = await connectionRetriever.GetConnectionStringAsync("token");
 
 //**********************************************************
 // Run Application

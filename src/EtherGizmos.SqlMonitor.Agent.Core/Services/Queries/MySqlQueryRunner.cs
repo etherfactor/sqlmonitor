@@ -28,7 +28,7 @@ public class MySqlQueryRunner : IQueryRunner
         await connection.OpenAsync(cancellationToken);
 
         var command = connection.CreateCommand();
-        command.CommandText = queryMessage.QueryText;
+        command.CommandText = queryMessage.Text;
 
         //Create a stopwatch so we know how long the script took to run
         var stopwatch = new Stopwatch();

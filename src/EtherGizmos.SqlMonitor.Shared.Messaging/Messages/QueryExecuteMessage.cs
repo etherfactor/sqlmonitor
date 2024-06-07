@@ -14,7 +14,7 @@ public class QueryExecuteMessage
 
     public SqlType SqlType { get; set; }
 
-    public string QueryText { get; set; }
+    public string Text { get; set; }
 
     public string? BucketColumn { get; set; }
 
@@ -29,7 +29,7 @@ public class QueryExecuteMessage
     {
         ConnectionRequestToken = null!;
         Name = null!;
-        QueryText = null!;
+        Text = null!;
     }
 
     public QueryExecuteMessage(
@@ -47,7 +47,7 @@ public class QueryExecuteMessage
         MonitoredQueryTargetId = monitoredQueryTargetId;
         ConnectionRequestToken = connectionRequestToken;
         SqlType = sqlType;
-        QueryText = queryText;
+        Text = queryText;
         BucketColumn = bucketColumn;
         TimestampUtcColumn = timestampUtcColumn;
     }

@@ -5,7 +5,7 @@ namespace EtherGizmos.SqlMonitor.UnitTests.Services.Background;
 internal class EnqueueMonitorQueriesServiceTests
 {
     private IServiceProvider _serviceProvider;
-    private EnqueueMonitorQueriesService _service;
+    private EnqueueQueryMessagesService _service;
 
     //private readonly IQueryable<Instance> _instances = new List<Instance>()
     //{

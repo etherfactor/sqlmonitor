@@ -15,4 +15,23 @@ public static class MessagingConstants
         /// </summary>
         public const int Port = 5672;
     }
+
+    /// <summary>
+    /// Constants for queue names.
+    /// </summary>
+    public static class Queues
+    {
+        public const string CoordinatorAgentQueryExecute = "coordinator.agent.query.execute";
+
+        public const string CoordinatorAgentScriptExecute = "coordinator.agent.script.execute";
+
+        public const string AgentCoordinatorQueryResult = "agent.coordinator.query.result";
+
+        public const string AgentCoordinatorScriptResult = "agent.coordinator.script.result";
+    }
+
+    public static class Claims
+    {
+        public const string Id = "id";
+    }
 }

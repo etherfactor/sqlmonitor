@@ -10,7 +10,9 @@ public class ScriptExecuteMessage
 
     public string ConnectionRequestToken { get; set; }
 
-    public string ScriptText { get; set; }
+    public ScriptExecuteMessageInterpreter Interpreter { get; set; }
+
+    public string Text { get; set; }
 
     public string? BucketKey { get; set; }
 
@@ -25,7 +27,8 @@ public class ScriptExecuteMessage
     {
         Name = null!;
         ConnectionRequestToken = null!;
-        ScriptText = null!;
+        Interpreter = null!;
+        Text = null!;
     }
 
     public ScriptExecuteMessage(
@@ -33,6 +36,7 @@ public class ScriptExecuteMessage
         string name,
         int monitoredScriptTargetId,
         string connectionRequestToken,
+        ScriptExecuteMessageInterpreter interpreter,
         string scriptText,
         string? bucketKey,
         string? timestampKey)
@@ -41,7 +45,8 @@ public class ScriptExecuteMessage
         Name = name;
         MonitoredScriptTargetId = monitoredScriptTargetId;
         ConnectionRequestToken = connectionRequestToken;
-        ScriptText = scriptText;
+        Interpreter = interpreter;
+        Text = scriptText;
         BucketKey = bucketKey;
         TimestampKey = timestampKey;
     }
@@ -51,6 +56,40 @@ public class ScriptExecuteMessage
         string valueKey)
     {
         Metrics.Add(new(metricId, valueKey));
+    }
+}
+
+public class ScriptExecuteMessageInterpreter
+{
+    public string Name { get; set; }
+
+    public string Command { get; set; }
+
+    public string Arguments { get; set; }
+
+    public string Extension { get; set; }
+
+    /// <summary>
+    /// Not intended for direct use.
+    /// </summary>
+    public ScriptExecuteMessageInterpreter()
+    {
+        Name = null!;
+        Command = null!;
+        Arguments = null!;
+        Extension = null!;
+    }
+
+    public ScriptExecuteMessageInterpreter(
+        string name,
+        string command,
+        string arguments,
+        string extension)
+    {
+        Name = name;
+        Command = command;
+        Arguments = arguments;
+        Extension = extension;
     }
 }
 

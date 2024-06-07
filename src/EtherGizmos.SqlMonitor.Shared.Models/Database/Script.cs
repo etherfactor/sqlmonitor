@@ -22,7 +22,11 @@ public class Script : Auditable
     public virtual TimeSpan RunFrequency { get; set; }
 
     [Column("last_run_at_utc")]
-    public virtual DateTimeOffset LastRunAtUtc { get; set; }
+    public virtual DateTimeOffset? LastRunAtUtc { get; set; }
+
+    [Column("next_run_at_utc")]
+    [Indexed]
+    public virtual DateTimeOffset NextRunAtUtc => (LastRunAtUtc ?? DateTimeOffset.MinValue).Add(RunFrequency);
 
     [Column("is_active")]
     [SqlDefaultValue]

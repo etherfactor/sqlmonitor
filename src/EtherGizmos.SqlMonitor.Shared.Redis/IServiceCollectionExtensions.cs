@@ -28,12 +28,12 @@ public static class IServiceCollectionExtensions
 
                 if (usageOptions.Cache == CacheType.InMemory)
                 {
-                    childServices.AddScoped<IDistributedRecordCache, InMemoryRecordCache>();
+                    childServices.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
                 }
                 else if (usageOptions.Cache == CacheType.Redis)
                 {
                     childServices.AddRedisServices();
-                    childServices.AddScoped<IDistributedRecordCache, RedisDistributedRecordCache>();
+                    childServices.AddSingleton<IDistributedRecordCache, RedisDistributedRecordCache>();
                 }
                 else
                 {
@@ -61,12 +61,12 @@ public static class IServiceCollectionExtensions
 
                 if (usageOptions.Cache == CacheType.InMemory)
                 {
-                    childServices.AddScoped<IDistributedLockProvider, InMemoryLockProvider>();
+                    childServices.AddSingleton<IDistributedLockProvider, InMemoryLockProvider>();
                 }
                 else if (usageOptions.Cache == CacheType.Redis)
                 {
-                    childServices.AddScoped<IMedallionDistributedLockProvider, RedisDistributedSynchronizationProvider>();
-                    childServices.AddScoped<IDistributedLockProvider, DistributedLockProvider>();
+                    childServices.AddSingleton<IMedallionDistributedLockProvider, RedisDistributedSynchronizationProvider>();
+                    childServices.AddSingleton<IDistributedLockProvider, DistributedLockProvider>();
                 }
                 else
                 {

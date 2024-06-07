@@ -245,6 +245,8 @@ public class ApplicationContext : DbContext
 
             entity.HasMany(e => e.Metrics)
                 .WithOne(e => e.Query);
+
+            entity.Ignore(e => e.NextRunAtUtc);
         });
 
         modelBuilder.Entity<QueryMetric>(entity =>
@@ -333,6 +335,8 @@ public class ApplicationContext : DbContext
 
             entity.HasMany(e => e.Metrics)
                 .WithOne(e => e.Script);
+
+            entity.Ignore(e => e.NextRunAtUtc);
         });
 
         modelBuilder.Entity<ScriptInterpreter>(entity =>

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Security\" />
+  </ItemGroup>
+
 </Project>
