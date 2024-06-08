@@ -24,7 +24,7 @@ internal class MySqlQueryRunner : IQueryRunner
         QueryExecuteMessage queryMessage,
         CancellationToken cancellationToken = default)
     {
-        var connection = new MySqlConnection(_connectionString);
+        using var connection = new MySqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
         var command = connection.CreateCommand();

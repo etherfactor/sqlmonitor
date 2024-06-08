@@ -30,7 +30,19 @@ internal class QueryRunnerFactory : IQueryRunnerFactory
             }
         }
 
-        return await _runners[monitoredQueryTargetId];
+        try
+        {
+            return await _runners[monitoredQueryTargetId];
+        }
+        catch
+        {
+            lock (_runners)
+            {
+                _runners.Remove(monitoredQueryTargetId);
+            }
+
+            throw;
+        }
     }
 
     private async Task<IQueryRunner> LoadRunnerAsync(string connectionRequestToken, SqlType sqlType)
@@ -41,7 +53,7 @@ internal class QueryRunnerFactory : IQueryRunnerFactory
         {
             SqlType.MariaDb => new MySqlQueryRunner(connectionString),
             SqlType.MySql => new MySqlQueryRunner(connectionString),
-            SqlType.MicrosoftSqlServer => new SqlServerQueryRunner(connectionString),
+            SqlType.SqlServer => new SqlServerQueryRunner(connectionString),
             SqlType.PostgreSql => new PostgreSqlQueryRunner(connectionString),
             _ => throw new InvalidOperationException("Unrecognized SQL type"),
         };

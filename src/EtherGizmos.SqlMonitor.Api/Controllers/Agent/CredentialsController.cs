@@ -5,9 +5,8 @@ using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using OpenIddict.Abstractions;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace EtherGizmos.SqlMonitor.Api.Controllers.Agent;
@@ -19,6 +18,16 @@ public class CredentialsController : ControllerBase
 
     private readonly ILogger _logger;
     private readonly ApplicationContext _context;
+
+    public const string SecurityKey =
+        "1Q3V2h3ji3GJtIqntFdelvL88CV97NxU" +
+        "lhSD6CVQVZ6WJYj9Ejcusq3XVhQANA6w" +
+        "cx3jTOm3cZCi4urBjldPgfZlwu1ORev4" +
+        "V4HNSh7MPAnd5QIxN7wed9WH5fDIDdWw" +
+        "PwnjpQNlxEdSnpWefc873LrkqilGtqjl" +
+        "XYNe6S72TL8NWyo6FjwTGDFtKglG2I0X" +
+        "uOhluEFFz1Ye9eJm2flUREN6HsxKXiL4" +
+        "8I3ncR8UvE9hcbil3On7HQ2swyfSezzE";
 
     public CredentialsController(
         ILogger<CredentialsController> logger,
@@ -37,41 +46,66 @@ public class CredentialsController : ControllerBase
         if (string.IsNullOrWhiteSpace(connectionToken))
             return BadRequest();
 
-        var handler = new JwtSecurityTokenHandler();
+        var handler = new JsonWebTokenHandler();
         var validations = new TokenValidationParameters()
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("abcdef")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecurityKey)),
             ValidateLifetime = true,
             ValidateIssuer = false,
             ValidateAudience = false,
         };
 
-        string targetType;
-        string targetIdString;
-        int targetId;
-        try
+        var result = await handler.ValidateTokenAsync(connectionToken, validations);
+
+        if (!result.IsValid)
         {
-            var claims = handler.ValidateToken(connectionToken, validations, out var tokenSecure);
-
-            targetType = claims.GetClaim(MessagingConstants.Claims.TargetType)
-                ?? throw new InvalidOperationException($"The connection token lacked claim '{MessagingConstants.Claims.TargetType}'");
-
-            targetIdString = claims.GetClaim(MessagingConstants.Claims.Id)
-                ?? throw new InvalidOperationException($"The connection token lacked claim '{MessagingConstants.Claims.Id}'");
-
-            if (!int.TryParse(targetIdString, out targetId))
-                throw new InvalidOperationException($"The connection id '{targetIdString}' was not a valid integer");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Received an invalid connection token");
+            _logger.LogWarning(result.Exception, "Received an invalid connection token");
             return BadRequest();
         }
 
+        var targetType = result.Claims.SingleOrDefault(e => e.Key == MessagingConstants.Claims.TargetType).Value?.ToString()
+            ?? throw new InvalidOperationException($"The connection token lacked claim '{MessagingConstants.Claims.TargetType}'");
+
+        var targetIdString = result.Claims.SingleOrDefault(e => e.Key == MessagingConstants.Claims.Id).Value?.ToString()
+            ?? throw new InvalidOperationException($"The connection token lacked claim '{MessagingConstants.Claims.Id}'");
+
+        if (!int.TryParse(targetIdString, out int targetId))
+            throw new InvalidOperationException($"The connection id '{targetIdString}' was not a valid integer");
+
         if (targetType == "query")
         {
-            return NotFound();
+            var target = await _context.MonitoredQueryTargets.SingleOrDefaultAsync(e => e.Id == targetId);
+            if (target is null)
+                return BadRequest();
+
+            if (target.SqlType == SqlType.MariaDb || target.SqlType == SqlType.MySql)
+            {
+                var config = new DatabaseConfiguration()
+                {
+                    ConnectionString = target.ConnectionString,
+                };
+
+                return Ok(config);
+            }
+            else if (target.SqlType == SqlType.PostgreSql)
+            {
+                var config = new DatabaseConfiguration()
+                {
+                    ConnectionString = target.ConnectionString,
+                };
+
+                return Ok(config);
+            }
+            else if (target.SqlType == SqlType.SqlServer)
+            {
+                var config = new DatabaseConfiguration()
+                {
+                    ConnectionString = target.ConnectionString,
+                };
+
+                return Ok(config);
+            }
         }
         else if (targetType == "script")
         {

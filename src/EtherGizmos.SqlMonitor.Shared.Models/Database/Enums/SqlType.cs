@@ -3,7 +3,7 @@
 public enum SqlType
 {
     Unknown = 0,
-    MicrosoftSqlServer = 10,
+    SqlServer = 10,
     MySql = 20,
     MariaDb = 25,
     PostgreSql = 30,
@@ -13,7 +13,7 @@ public static class SqlTypeConverter
 {
     private static Dictionary<SqlType, int> Mappings { get; } = new Dictionary<SqlType, int>()
     {
-        { SqlType.MicrosoftSqlServer, 10 },
+        { SqlType.SqlServer, 10 },
         { SqlType.MySql, 20 },
         { SqlType.MariaDb, 30 },
         { SqlType.PostgreSql, 35 },

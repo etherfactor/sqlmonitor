@@ -1,5 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Models;
-using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using System.Net.Http.Json;
 
@@ -26,11 +26,14 @@ public class ConnectionRetriever : IConnectionRetriever
         queryParams.Add("connectionToken", connectionToken);
         uriBuilder.SetQueryParameters(queryParams);
 
-        var request = JsonContent.Create(new QueryConnectionRequest(connectionToken));
+        var request = JsonContent.Create(new { });
         var httpResponse = await client.PostAsync(uriBuilder.Uri, request, cancellationToken);
-        var response = await httpResponse.Content.ReadFromJsonAsync<QueryConnectionResponse>(cancellationToken)
+        httpResponse.EnsureSuccessStatusCode();
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DatabaseConfiguration>(cancellationToken)
             ?? throw new InvalidOperationException("Unable to parse as JSON");
 
-        return response.Value;
+        return response.ConnectionString
+            ?? throw new InvalidOperationException("Failed to parse a connection string");
     }
 }

@@ -23,7 +23,7 @@ internal class SqlServerQueryRunnerTests
             Name = "Test Query",
             MonitoredQueryTargetId = 1,
             ConnectionRequestToken = "blah",
-            SqlType = SqlType.MicrosoftSqlServer,
+            SqlType = SqlType.SqlServer,
             Text = "select 1 as value, 'Test' as bucket;",
             BucketColumn = "bucket",
             TimestampUtcColumn = null,

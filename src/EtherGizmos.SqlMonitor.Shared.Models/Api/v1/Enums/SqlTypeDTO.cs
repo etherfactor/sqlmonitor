@@ -17,7 +17,7 @@ public static class ForSqlTypeDTO
 {
     private static readonly Expression<Func<SqlType, SqlTypeDTO?>> _toDto = @in =>
         @in == SqlType.Unknown ? SqlTypeDTO.Unknown
-        : @in == SqlType.MicrosoftSqlServer ? SqlTypeDTO.MicrosoftSqlServer
+        : @in == SqlType.SqlServer ? SqlTypeDTO.MicrosoftSqlServer
         : @in == SqlType.MySql ? SqlTypeDTO.MySql
         : @in == SqlType.MariaDb ? SqlTypeDTO.MariaDb
         : @in == SqlType.PostgreSql ? SqlTypeDTO.PostgreSql
@@ -25,7 +25,7 @@ public static class ForSqlTypeDTO
 
     private static readonly Expression<Func<SqlType?, SqlTypeDTO?>> _toDtoNull = @in =>
         @in == SqlType.Unknown ? SqlTypeDTO.Unknown
-        : @in == SqlType.MicrosoftSqlServer ? SqlTypeDTO.MicrosoftSqlServer
+        : @in == SqlType.SqlServer ? SqlTypeDTO.MicrosoftSqlServer
         : @in == SqlType.MySql ? SqlTypeDTO.MySql
         : @in == SqlType.MariaDb ? SqlTypeDTO.MariaDb
         : @in == SqlType.PostgreSql ? SqlTypeDTO.PostgreSql
@@ -33,7 +33,7 @@ public static class ForSqlTypeDTO
 
     private static readonly Expression<Func<SqlTypeDTO?, SqlType>> _fromDto = @in =>
         @in == SqlTypeDTO.Unknown ? SqlType.Unknown
-        : @in == SqlTypeDTO.MicrosoftSqlServer ? SqlType.MicrosoftSqlServer
+        : @in == SqlTypeDTO.MicrosoftSqlServer ? SqlType.SqlServer
         : @in == SqlTypeDTO.MySql ? SqlType.MySql
         : @in == SqlTypeDTO.MariaDb ? SqlType.MariaDb
         : @in == SqlTypeDTO.PostgreSql ? SqlType.PostgreSql
@@ -41,7 +41,7 @@ public static class ForSqlTypeDTO
 
     private static readonly Expression<Func<SqlTypeDTO?, SqlType?>> _fromDtoNull = @in =>
         @in == SqlTypeDTO.Unknown ? SqlType.Unknown
-        : @in == SqlTypeDTO.MicrosoftSqlServer ? SqlType.MicrosoftSqlServer
+        : @in == SqlTypeDTO.MicrosoftSqlServer ? SqlType.SqlServer
         : @in == SqlTypeDTO.MySql ? SqlType.MySql
         : @in == SqlTypeDTO.MariaDb ? SqlType.MariaDb
         : @in == SqlTypeDTO.PostgreSql ? SqlType.PostgreSql
