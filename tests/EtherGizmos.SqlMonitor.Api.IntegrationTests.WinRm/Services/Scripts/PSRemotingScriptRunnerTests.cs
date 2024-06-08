@@ -19,10 +19,10 @@ internal class PSRemotingScriptRunnerTests
             Port = 55985,
             FilePath = "C:\\",
             AuthenticationType = WinRmAuthenticationType.Basic,
-            Protocol = "https",
+            Protocol = "http",
             Username = "User",
             Password = "Password12345!",
-            Command = "pwsh",
+            Command = "powershell",
             Arguments = "-File $Script",
         };
 
