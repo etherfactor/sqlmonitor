@@ -13,6 +13,7 @@ internal static class ConnectionTokenHelper
     {
         var claims = new List<Claim>
         {
+            new(MessagingConstants.Claims.TargetType, "query"),
             new(MessagingConstants.Claims.Id, queryTarget.Id.ToString()),
         };
 
@@ -33,6 +34,7 @@ internal static class ConnectionTokenHelper
     {
         var claims = new List<Claim>
         {
+            new(MessagingConstants.Claims.TargetType, "script"),
             new(MessagingConstants.Claims.Id, scriptTarget.Id.ToString()),
         };
 

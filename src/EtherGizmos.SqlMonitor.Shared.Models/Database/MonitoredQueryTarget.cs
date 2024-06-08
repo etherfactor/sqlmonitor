@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EtherGizmos.SqlMonitor.Shared.Models.Database;
 
 [Table("monitored_query_targets")]
-public class MonitoredQueryTarget
+public class MonitoredQueryTarget : Auditable
 {
     [Column("monitored_query_target_id")]
     [Key, SqlDefaultValue]
@@ -37,5 +38,10 @@ public class MonitoredQueryTarget
         HostName = null!;
         ConnectionString = null!;
         Securable = null!;
+    }
+
+    public Task EnsureValid(IQueryable<MonitoredQueryTarget> records)
+    {
+        return Task.CompletedTask;
     }
 }

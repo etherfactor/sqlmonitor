@@ -30,6 +30,7 @@ public static class IServiceCollectionExtensions
                 //Add entities
                 opt.AddMetric();
                 opt.AddMonitoredEnvironment();
+                opt.AddMonitoredQueryTarget();
                 opt.AddMonitoredResource();
                 opt.AddMonitoredScriptTarget();
                 opt.AddMonitoredSystem();

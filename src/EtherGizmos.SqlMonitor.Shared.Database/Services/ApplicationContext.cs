@@ -30,6 +30,11 @@ public class ApplicationContext : DbContext
     public virtual DbSet<MonitoredEnvironment> MonitoredEnvironments { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="MonitoredQueryTarget"/> records, in 'dbo.monitored_query_targets'.
+    /// </summary>
+    public virtual DbSet<MonitoredQueryTarget> MonitoredQueryTargets { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="MonitoredResource"/> records, in 'dbo.monitored_resources'.
     /// </summary>
     public virtual DbSet<MonitoredResource> MonitoredResources { get; set; }

@@ -33,6 +33,7 @@ internal static class Global
 
         services.AddScoped<MetricsController>();
         services.AddScoped<MonitoredEnvironmentsController>();
+        services.AddScoped<MonitoredQueryTargetsController>();
         services.AddScoped<MonitoredResourcesController>();
         services.AddScoped<MonitoredScriptTargetsController>();
         services.AddScoped<MonitoredSystemsController>();
@@ -49,6 +50,7 @@ internal static class Global
 
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMetricService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredEnvironmentService>>().Object);
+        services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredQueryTargetService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredResourceService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredScriptTargetService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);

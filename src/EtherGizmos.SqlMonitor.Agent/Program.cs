@@ -1,3 +1,4 @@
+using EtherGizmos.SqlMonitor.Agent.Core;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
@@ -33,7 +34,7 @@ builder.Services
         opt.BaseAddress = new Uri("https://localhost:7200");
     });
 
-builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
+builder.Services.AddConfiguredMassTransit(typeof(AgentCore).Assembly);
 
 var host = builder.Build();
 

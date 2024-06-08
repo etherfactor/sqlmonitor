@@ -33,5 +33,7 @@ public static class MessagingConstants
     public static class Claims
     {
         public const string Id = "id";
+
+        public const string TargetType = "target_type";
     }
 }
