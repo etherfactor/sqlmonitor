@@ -23,6 +23,8 @@ public class MetricService : IMetricService
     {
         if (!_context.Metrics.Contains(record))
             _context.Metrics.Add(record);
+        else
+            _context.Metrics.Attach(record);
     }
 
     public IQueryable<Metric> GetQueryable()

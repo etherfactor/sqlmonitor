@@ -23,6 +23,8 @@ public class MonitoredQueryTargetService : IMonitoredQueryTargetService
     {
         if (!_context.MonitoredQueryTargets.Contains(record))
             _context.MonitoredQueryTargets.Add(record);
+        else
+            _context.MonitoredQueryTargets.Attach(record);
     }
 
     public IQueryable<MonitoredQueryTarget> GetQueryable()

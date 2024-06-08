@@ -24,6 +24,8 @@ public class ScriptInterpreterService : IScriptInterpreterService
     {
         if (!_context.ScriptInterpreters.Contains(record))
             _context.ScriptInterpreters.Add(record);
+        else
+            _context.ScriptInterpreters.Attach(record);
     }
 
     /// <inheritdoc/>

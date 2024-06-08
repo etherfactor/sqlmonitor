@@ -24,6 +24,8 @@ internal class QueryService : IQueryService
     {
         if (!_context.Queries.Contains(record))
             _context.Queries.Add(record);
+        else
+            _context.Queries.Attach(record);
     }
 
     /// <inheritdoc/>

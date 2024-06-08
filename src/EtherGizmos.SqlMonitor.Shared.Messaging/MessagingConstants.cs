@@ -25,7 +25,7 @@ public static class MessagingConstants
 
         public const string AgentScriptExecute = "agent.script.execute";
 
-        public const string AgentCoordinatorQueryResult = "coordinator.query.result";
+        public const string CoordinatorQueryResult = "coordinator.query.result";
 
         public const string AgentCoordinatorScriptResult = "coordinator.script.result";
     }

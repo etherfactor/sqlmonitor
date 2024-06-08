@@ -24,6 +24,8 @@ internal class MonitoredEnvironmentService : IMonitoredEnvironmentService
     {
         if (!_context.MonitoredEnvironments.Contains(record))
             _context.MonitoredEnvironments.Add(record);
+        else
+            _context.MonitoredEnvironments.Attach(record);
     }
 
     /// <inheritdoc/>

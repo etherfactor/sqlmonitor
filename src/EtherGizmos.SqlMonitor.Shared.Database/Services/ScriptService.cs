@@ -24,6 +24,8 @@ internal class ScriptService : IEditableQueryableService<Script>, IScriptService
     {
         if (!_context.Scripts.Contains(record))
             _context.Scripts.Add(record);
+        else
+            _context.Scripts.Attach(record);
     }
 
     /// <inheritdoc/>

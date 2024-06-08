@@ -24,6 +24,8 @@ internal class MonitoredSystemService : IMonitoredSystemService
     {
         if (!_context.MonitoredSystems.Contains(record))
             _context.MonitoredSystems.Add(record);
+        else
+            _context.MonitoredSystems.Attach(record);
     }
 
     /// <inheritdoc/>

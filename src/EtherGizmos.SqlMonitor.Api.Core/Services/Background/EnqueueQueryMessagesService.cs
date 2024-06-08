@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Api.Core.Helpers;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
@@ -59,7 +60,18 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
         var sendEndpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessagingConstants.Queues.AgentQueryExecute}"));
 
-        foreach (var queryVariant in queriesToRun.SelectMany(e => e.Variants))
+        var queryService = scope.GetRequiredService<IQueryService>();
+
+        var queryVariantsToRun = queriesToRun.SelectMany(e => e.Variants)
+            .ToList();
+
+        //Return early if there's nothing to run
+        if (queryVariantsToRun.Count == 0)
+            return;
+
+        _logger.LogInformation("Identified {QueryCount} queries scheduled to run", queriesToRun.Count);
+
+        foreach (var queryVariant in queryVariantsToRun)
         {
             if (!loadTargetTasks.ContainsKey(queryVariant.SqlType))
             {
@@ -86,5 +98,16 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
                 await sendEndpoint.Send(message, stoppingToken);
             }
         }
+
+        foreach (var query in queriesToRun)
+        {
+            queryService.Add(query);
+
+            query.LastRunAtUtc = DateTime.UtcNow;
+            await querySet.AddAsync(query, stoppingToken);
+        }
+
+        var saveService = scope.GetRequiredService<ISaveService>();
+        await saveService.SaveChangesAsync();
     }
 }

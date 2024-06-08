@@ -24,6 +24,8 @@ internal class MonitoredResourceService : IMonitoredResourceService
     {
         if (!_context.MonitoredResources.Contains(record))
             _context.MonitoredResources.Add(record);
+        else
+            _context.MonitoredResources.Attach(record);
     }
 
     /// <inheritdoc/>

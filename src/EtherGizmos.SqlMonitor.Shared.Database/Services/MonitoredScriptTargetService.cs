@@ -23,6 +23,8 @@ public class MonitoredScriptTargetService : IMonitoredScriptTargetService
     {
         if (!_context.MonitoredScriptTargets.Contains(record))
             _context.MonitoredScriptTargets.Add(record);
+        else
+            _context.MonitoredScriptTargets.Attach(record);
     }
 
     public IQueryable<MonitoredScriptTarget> GetQueryable()

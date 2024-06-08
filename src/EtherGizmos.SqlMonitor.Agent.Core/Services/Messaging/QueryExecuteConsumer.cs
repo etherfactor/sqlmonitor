@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Messaging;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using MassTransit;
 
@@ -7,11 +8,14 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Messaging;
 public class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
 {
     private readonly IQueryRunnerFactory _queryRunnerFactory;
+    private readonly ISendEndpointProvider _sendEndpointProvider;
 
     public QueryExecuteConsumer(
-        IQueryRunnerFactory queryRunnerFactory)
+        IQueryRunnerFactory queryRunnerFactory,
+        ISendEndpointProvider sendEndpointProvider)
     {
         _queryRunnerFactory = queryRunnerFactory;
+        _sendEndpointProvider = sendEndpointProvider;
     }
 
     public async Task Consume(
@@ -24,6 +28,9 @@ public class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
             message.ConnectionRequestToken,
             message.SqlType);
 
-        await runner.ExecuteAsync(message, context.CancellationToken);
+        var result = await runner.ExecuteAsync(message, context.CancellationToken);
+
+        var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessagingConstants.Queues.CoordinatorQueryResult}"));
+        await endpoint.Send(result);
     }
 }
