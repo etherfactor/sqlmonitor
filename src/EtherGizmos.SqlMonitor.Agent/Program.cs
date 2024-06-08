@@ -3,29 +3,34 @@ using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Messaging;
-using Serilog;
+using EtherGizmos.SqlMonitor.Shared.Utilities;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 //**********************************************************
 // Configuration
 
-builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
+builder.Configuration.AddJsonFile("appsettings.Local.json", true, true)
+    .AddInMemoryCollection(new Dictionary<string, string?>()
+    {
+        { "Connections:Use:Database", "MySql" },
+        { "Connections:Use:Cache", "InMemory" },
+    });
 
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
+builder.AddLoggingServices();
 
 //**********************************************************
 // Add Services
 
-builder.Services
-    .AddOptions();
-
+// General
 builder.Services.AddUsageOptions();
 
+// Messaging
 builder.Services.AddRabbitMQOptions();
 
+builder.Services.AddConfiguredMassTransit(typeof(AgentCore).Assembly);
+
+// Communication
 builder.Services.AddSingleton<IConnectionRetriever, ConnectionRetriever>();
 
 builder.Services
@@ -33,8 +38,6 @@ builder.Services
     {
         opt.BaseAddress = new Uri("https://localhost:7200");
     });
-
-builder.Services.AddConfiguredMassTransit(typeof(AgentCore).Assembly);
 
 var host = builder.Build();
 
