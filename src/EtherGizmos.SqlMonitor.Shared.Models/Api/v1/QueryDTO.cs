@@ -59,6 +59,7 @@ public static class ForQueryDTO
         toDto.MapMember(dest => dest.BucketColumn, src => src.BucketColumn);
         toDto.MapMember(dest => dest.TimestampUtcColumn, src => src.TimestampUtcColumn);
         toDto.MapMember(dest => dest.Variants, src => src.Variants);
+        toDto.MapMember(dest => dest.Metrics, src => src.Metrics);
 
         var fromDto = @this.CreateMap<QueryDTO, Query>();
         fromDto.IgnoreAllMembers();
@@ -76,6 +77,7 @@ public static class ForQueryDTO
         fromDto.MapMember(dest => dest.BucketColumn, src => src.BucketColumn);
         fromDto.MapMember(dest => dest.TimestampUtcColumn, src => src.TimestampUtcColumn);
         fromDto.MapMember(dest => dest.Variants, src => src.Variants);
+        fromDto.MapMember(dest => dest.Metrics, src => src.Metrics);
 
         return @this;
     }

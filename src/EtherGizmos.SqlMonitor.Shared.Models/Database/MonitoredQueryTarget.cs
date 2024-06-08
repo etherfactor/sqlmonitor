@@ -19,6 +19,7 @@ public class MonitoredQueryTarget : Auditable
     public virtual MonitoredTarget MonitoredTarget { get; set; }
 
     [Column("sql_type_id")]
+    [Indexed]
     public virtual SqlType SqlType { get; set; }
 
     [Column("host")]

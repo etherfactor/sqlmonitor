@@ -20,14 +20,6 @@ public class QueryMetricDTOConfiguration : IModelConfiguration
 
         if (apiVersion >= ApiVersions.V0_1)
         {
-            /* Begin Audit */
-            entity.Property(e => e.CreatedAt);
-            entity.Property(e => e.CreatedByUserId);
-            entity.Property(e => e.ModifiedAt);
-            entity.Property(e => e.ModifiedByUserId);
-            /*  End Audit  */
-            entity.Property(e => e.QueryId);
-            entity.HasRequired(e => e.Query);
             entity.Property(e => e.MetricId);
             entity.HasRequired(e => e.Metric);
             entity.Property(e => e.ValueColumn);

@@ -11,9 +11,12 @@ namespace EtherGizmos.SqlMonitor.Shared.Messaging;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddConfiguredMassTransit(this IServiceCollection @this, params Assembly[] consumerAssemblies)
+    public static IChildContainerBuilder AddConfiguredMassTransit(
+        this IServiceCollection @this,
+        Action<IBusRegistrationContext, IBusFactoryConfigurator> configureEndpoints,
+        params Assembly[] consumerAssemblies)
     {
-        @this.AddChildContainer(
+        var builder = @this.AddChildContainer(
             (childServices, parentServices) =>
             {
                 var usageOptions = parentServices
@@ -29,6 +32,8 @@ public static class IServiceCollectionExtensions
                         opt.UsingInMemory((context, conf) =>
                         {
                             conf.Host();
+
+                            configureEndpoints(context, conf);
 
                             //TODO: Configure in-memory retry and other options
                         });
@@ -76,6 +81,8 @@ public static class IServiceCollectionExtensions
                                 }
                             });
 
+                            configureEndpoints(context, conf);
+
                             //TODO: Configure retry
                         });
                     }
@@ -88,7 +95,7 @@ public static class IServiceCollectionExtensions
             .ImportLogging()
             .ForwardMassTransit();
 
-        return @this;
+        return builder;
     }
 
     /// <summary>

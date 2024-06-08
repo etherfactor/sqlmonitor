@@ -52,7 +52,12 @@ builder.Services.AddAuthorizationContext();
 // Messaging
 builder.Services.AddRabbitMQOptions();
 
-builder.Services.AddConfiguredMassTransit(typeof(Program).Assembly);
+builder.Services.AddConfiguredMassTransit(
+    (context, opt) =>
+    {
+
+    },
+    typeof(Program).Assembly);
 
 // Authentication
 builder.Services.AddAuthentication();
@@ -154,7 +159,7 @@ builder.Services
 
 // Hosted services
 builder.Services.AddHostedService<CacheLoadService>();
-//builder.Services.AddHostedService<EnqueueMonitorQueriesService>();
+builder.Services.AddHostedService<EnqueueQueryMessagesService>();
 
 //**********************************************************
 // Add Middleware

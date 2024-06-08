@@ -4,7 +4,7 @@ using MassTransit;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Messaging;
 
-internal class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
+public class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
 {
     private readonly IQueryRunnerFactory _queryRunnerFactory;
 

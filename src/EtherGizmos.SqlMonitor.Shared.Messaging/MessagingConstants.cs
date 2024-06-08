@@ -21,13 +21,13 @@ public static class MessagingConstants
     /// </summary>
     public static class Queues
     {
-        public const string CoordinatorAgentQueryExecute = "coordinator.agent.query.execute";
+        public const string AgentQueryExecute = "agent.query.execute";
 
-        public const string CoordinatorAgentScriptExecute = "coordinator.agent.script.execute";
+        public const string AgentScriptExecute = "agent.script.execute";
 
-        public const string AgentCoordinatorQueryResult = "agent.coordinator.query.result";
+        public const string AgentCoordinatorQueryResult = "coordinator.query.result";
 
-        public const string AgentCoordinatorScriptResult = "agent.coordinator.script.result";
+        public const string AgentCoordinatorScriptResult = "coordinator.script.result";
     }
 
     public static class Claims

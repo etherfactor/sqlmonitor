@@ -78,7 +78,7 @@ public class CredentialsController : ControllerBase
             var target = await _context.MonitoredScriptTargets.SingleOrDefaultAsync(e => e.Id == targetId);
             if (target is null)
                 return BadRequest();
-            
+
             if (target.ExecType == ExecType.Ssh)
             {
                 var config = new SshConfiguration()

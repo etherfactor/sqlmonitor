@@ -156,6 +156,25 @@ public class ApplicationContext : DbContext
                 .HasDefaultValueSql();
         });
 
+        modelBuilder.Entity<MonitoredQueryTarget>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_monitored_query_targets_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
+            entity.PropertyWithAnnotations(e => e.SqlType);
+            entity.PropertyWithAnnotations(e => e.HostName);
+            entity.PropertyWithAnnotations(e => e.ConnectionString);
+            entity.PropertyWithAnnotations(e => e.SecurableId)
+                .HasDefaultValueSql();
+        });
+
         modelBuilder.Entity<MonitoredResource>(entity =>
         {
             entity.ToTableWithAnnotations(buildAction: e =>

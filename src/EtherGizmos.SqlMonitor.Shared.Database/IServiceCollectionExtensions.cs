@@ -54,6 +54,7 @@ public static class IServiceCollectionExtensions
             .AddScoped<ISaveService, SaveService>()
             .AddScoped<IMetricService, MetricService>()
             .AddScoped<IMonitoredEnvironmentService, MonitoredEnvironmentService>()
+            .AddScoped<IMonitoredQueryTargetService, MonitoredQueryTargetService>()
             .AddScoped<IMonitoredResourceService, MonitoredResourceService>()
             .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
             .AddScoped<IMonitoredSystemService, MonitoredSystemService>()

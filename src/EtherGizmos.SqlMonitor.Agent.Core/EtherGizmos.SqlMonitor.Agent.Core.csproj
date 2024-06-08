@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.*" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.*" />
     <PackageReference Include="MySqlConnector" Version="2.*" />
     <PackageReference Include="Npgsql" Version="8.*" />
     <PackageReference Include="SSH.NET" Version="2024.0.0" />

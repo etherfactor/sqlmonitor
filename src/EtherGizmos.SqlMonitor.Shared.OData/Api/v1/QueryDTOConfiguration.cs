@@ -38,6 +38,7 @@ public class QueryDTOConfiguration : IModelConfiguration
             entity.Property(e => e.BucketColumn);
             entity.Property(e => e.TimestampUtcColumn);
             entity.CollectionProperty(e => e.Variants);
+            entity.CollectionProperty(e => e.Metrics);
         }
     }
 }

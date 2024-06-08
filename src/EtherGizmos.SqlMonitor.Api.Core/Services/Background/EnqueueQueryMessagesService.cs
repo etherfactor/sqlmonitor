@@ -56,8 +56,8 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
             .IsLessThanOrEqualTo(DateTimeOffset.UtcNow)
             .ToListAsync(stoppingToken);
 
-        var sendEndpointProvider = _serviceProvider.GetRequiredService<ISendEndpointProvider>();
-        var sendEndpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessagingConstants.Queues.CoordinatorAgentQueryExecute}"));
+        var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
+        var sendEndpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessagingConstants.Queues.AgentQueryExecute}"));
 
         foreach (var queryVariant in queriesToRun.SelectMany(e => e.Variants))
         {

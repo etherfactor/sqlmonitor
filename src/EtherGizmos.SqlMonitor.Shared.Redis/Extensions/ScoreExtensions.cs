@@ -32,6 +32,9 @@ public static class ScoreExtensions
             case string value:
                 return value.GetScore();
 
+            case Enum value when value.GetType().IsEnum:
+                return Convert.ToInt32(value).GetScore();
+
             default:
                 throw new InvalidOperationException($"Unrecognized type: {@this.GetType()}.");
         }

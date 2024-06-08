@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
-internal class ScriptRunnerFactory
+internal class ScriptRunnerFactory : IScriptRunnerFactory
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IConnectionRetriever _connectionRetriever;
@@ -39,7 +39,7 @@ internal class ScriptRunnerFactory
     {
         var rawData = await _connectionRetriever.GetConnectionStringAsync(connectionRequestToken);
 
-        switch(execType)
+        switch (execType)
         {
             case ExecType.Ssh:
                 var sshConfig = JsonSerializer.Deserialize<SshConfiguration>(rawData)
