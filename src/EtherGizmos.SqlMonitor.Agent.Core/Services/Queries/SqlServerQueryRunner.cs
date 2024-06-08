@@ -9,7 +9,7 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 /// <summary>
 /// Executes queries against a Microsoft SQL Server database.
 /// </summary>
-public class SqlServerQueryRunner : IQueryRunner
+internal class SqlServerQueryRunner : IQueryRunner
 {
     private readonly string _connectionString;
 

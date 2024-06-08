@@ -53,6 +53,7 @@ public abstract class MonitoredScriptTargetsControllerTests : IntegrationTestBas
             monitoredResourceId,
             monitoredEnvironmentId,
             scriptInterpreterId = 1,
+            execType = "Ssh",
             hostName = "localhost",
             filePath = "C:/",
         };
@@ -118,6 +119,7 @@ public abstract class MonitoredScriptTargetsControllerTests : IntegrationTestBas
             monitoredResourceId,
             monitoredEnvironmentId,
             scriptInterpreterId = 1,
+            execType = "Ssh",
             hostName = "localhost",
             filePath = "C:/",
         };

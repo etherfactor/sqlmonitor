@@ -9,7 +9,7 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 /// <summary>
 /// Executes queries against a PostgreSQL database.
 /// </summary>
-public class PostgreSqlQueryRunner : IQueryRunner
+internal class PostgreSqlQueryRunner : IQueryRunner
 {
     private readonly string _connectionString;
 

@@ -1,6 +1,7 @@
+using EtherGizmos.SqlMonitor.Agent.Core.Helpers;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Scripts;
-using EtherGizmos.SqlMonitor.Shared.Models.Database;
+using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
+using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Renci.SshNet;
 using System.Diagnostics;
@@ -12,69 +13,40 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 /// <summary>
 /// Executes scripts against servers, connecting via SSH.
 /// </summary>
-public partial class SshScriptRunner : IScriptRunner
+internal partial class SshScriptRunner : IScriptRunner
 {
+    private readonly SshConfiguration _configuration;
+
+    public SshScriptRunner(
+        SshConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     /// <inheritdoc/>
-    public async Task<ScriptExecutionResultSet> ExecuteAsync(
-        MonitoredScriptTarget scriptTarget,
-        ScriptVariant scriptVariant,
+    public async Task<ScriptResultMessage> ExecuteAsync(
+        ScriptExecuteMessage scriptMessage,
         CancellationToken cancellationToken = default)
     {
-        var configuration = GetSshConfiguration(scriptTarget, scriptVariant);
-
-        using var client = GetClient(configuration);
-        await client.ConnectAsync(CancellationToken.None);
+        using var client = GetClient(_configuration);
+        await client.ConnectAsync(cancellationToken);
 
         //Create a stopwatch so we know how long the script took to run
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var output = ExecuteScript(client, configuration, scriptVariant);
+        var output = ExecuteScript(client, _configuration, scriptMessage);
         var executionMilliseconds = stopwatch.ElapsedMilliseconds;
 
-        return ScriptExecutionResultSet.FromResults(scriptTarget, scriptVariant, output, executionMilliseconds);
-    }
+        var result = new ScriptResultMessage(
+            scriptMessage.ScriptId,
+            scriptMessage.Name,
+            scriptMessage.MonitoredScriptTargetId,
+            executionMilliseconds);
 
-    /// <summary>
-    /// Creates an SSH configuration based on the specified server and script.
-    /// </summary>
-    /// <param name="scriptTarget">The target server.</param>
-    /// <param name="scriptVariant">The target script.</param>
-    /// <returns>The SSH configuration.</returns>
-    internal SshConfiguration GetSshConfiguration(MonitoredScriptTarget scriptTarget, ScriptVariant scriptVariant)
-    {
-        var hostName = scriptTarget.HostName;
-        var port = scriptTarget.Port ?? 22;
-        var filePath = scriptTarget.RunInPath;
+        await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output);
 
-        var username = scriptTarget.SshUsername;
-        var password = scriptTarget.SshPassword;
-
-        var privateKey = scriptTarget.SshPrivateKey;
-        var privateKeyPassword = scriptTarget.SshPrivateKeyPassword;
-
-        var command = scriptVariant.ScriptInterpreter.Command;
-        var arguments = scriptVariant.ScriptInterpreter.Arguments;
-
-        var config = new SshConfiguration()
-        {
-            HostName = hostName,
-            Port = port,
-            FilePath = filePath,
-
-            AuthenticationType = scriptTarget.SshAuthenticationType ?? SshAuthenticationType.Unknown,
-
-            Username = username ?? throw new InvalidOperationException("Must specify a username"),
-            Password = password,
-
-            PrivateKey = privateKey,
-            PrivateKeyPassword = privateKeyPassword,
-
-            Command = command,
-            Arguments = arguments,
-        };
-
-        return config;
+        return result;
     }
 
     /// <summary>
@@ -143,18 +115,18 @@ public partial class SshScriptRunner : IScriptRunner
     /// </summary>
     /// <param name="client">The SSH client.</param>
     /// <param name="configuration">The SSH configuration.</param>
-    /// <param name="scriptVariant">The script to execute.</param>
+    /// <param name="scriptMessage">The script to execute.</param>
     /// <returns>The console output of the script.</returns>
-    internal string ExecuteScript(SshClient client, SshConfiguration configuration, ScriptVariant scriptVariant)
+    internal string ExecuteScript(SshClient client, SshConfiguration configuration, ScriptExecuteMessage scriptMessage)
     {
         //Set the script to a variable
-        var script = scriptVariant.ScriptText;
+        var script = scriptMessage.Text;
         var scriptVariableName = "script";
         var scriptVariable = EncodeScriptToVariable(scriptVariableName, script);
 
         var scriptHash = CalculateMd5Checksum(script);
 
-        var scriptExtension = scriptVariant.ScriptInterpreter.Extension;
+        var scriptExtension = scriptMessage.Interpreter.Extension;
 
         //Write the script to a file, then execute that file
         var commandText = $@"cd {configuration.FilePath}
@@ -204,28 +176,5 @@ EOF
         var scriptHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
         return scriptHash;
-    }
-
-    internal class SshConfiguration
-    {
-        public required string HostName { get; set; }
-
-        public required int Port { get; set; }
-
-        public required string FilePath { get; set; }
-
-        public required SshAuthenticationType AuthenticationType { get; set; }
-
-        public required string Username { get; set; }
-
-        public string? Password { get; set; }
-
-        public string? PrivateKey { get; set; }
-
-        public string? PrivateKeyPassword { get; set; }
-
-        public required string Command { get; set; }
-
-        public required string Arguments { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using EtherGizmos.SqlMonitor.Api.Services.Scripts;
-using EtherGizmos.SqlMonitor.Shared.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 
@@ -11,12 +10,10 @@ public interface IScriptRunner
     /// <summary>
     /// Execute a script against the specified server.
     /// </summary>
-    /// <param name="scriptTarget">The server against which to execute the script.</param>
-    /// <param name="scriptVariant">The script to execute.</param>
+    /// <param name="scriptMessage">The script to execute.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The script execution outputs.</returns>
-    Task<ScriptExecutionResultSet> ExecuteAsync(
-        MonitoredScriptTarget scriptTarget,
-        ScriptVariant scriptVariant,
+    Task<ScriptResultMessage> ExecuteAsync(
+        ScriptExecuteMessage scriptMessage,
         CancellationToken cancellationToken = default);
 }

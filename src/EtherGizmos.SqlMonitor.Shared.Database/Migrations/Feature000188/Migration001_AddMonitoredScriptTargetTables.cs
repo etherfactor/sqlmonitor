@@ -46,6 +46,19 @@ public class Migration001_AddMonitoredScriptTargetTables : MigrationExtension
             ("winrm_authentication_type_id", DbType.Int32));
 
         /*
+         * Create [dbo].[exec_types]
+         *  - the types of ways to connect and execute scripts
+         */
+        Create.Table("exec_types")
+            .WithColumn("exec_type_id").AsInt32().PrimaryKey()
+            .WithAuditColumns()
+            .WithColumn("name").AsString(200).NotNullable()
+            .WithColumn("description").AsString(int.MaxValue).Nullable();
+
+        this.AddAuditTriggerV1("exec_types",
+            ("exec_type_id", DbType.Int32));
+
+        /*
          * Create [dbo].[monitored_script_targets]
          *  - for a given target, a server & directory being targeted with monitoring scripts
          */
@@ -54,6 +67,7 @@ public class Migration001_AddMonitoredScriptTargetTables : MigrationExtension
             .WithAuditColumns()
             .WithColumn("monitored_target_id").AsInt32().NotNullable()
             .WithColumn("script_interpreter_id").AsInt32().NotNullable()
+            .WithColumn("exec_type_id").AsInt32().NotNullable()
             .WithColumn("host").AsString(255).NotNullable()
             .WithColumn("port").AsInt32().Nullable()
             .WithColumn("run_in_path").AsString(int.MaxValue).NotNullable()
@@ -84,6 +98,10 @@ public class Migration001_AddMonitoredScriptTargetTables : MigrationExtension
             .OnTable("monitored_script_targets")
             .OnColumn("script_interpreter_id");
 
+        Create.ForeignKey("FK_monitored_script_targets_exec_type_id")
+            .FromTable("monitored_script_targets").ForeignColumn("exec_type_id")
+            .ToTable("exec_types").PrimaryColumn("exec_type_id");
+
         Create.ForeignKey("FK_monitored_script_targets_securable_id")
             .FromTable("monitored_script_targets").ForeignColumn("securable_id")
             .ToTable("securables").PrimaryColumn("securable_id");
@@ -110,6 +128,8 @@ public class Migration001_AddMonitoredScriptTargetTables : MigrationExtension
     public override void Down()
     {
         Delete.Table("monitored_script_targets");
+
+        Delete.Table("exec_types");
 
         Delete.Table("ssh_authentication_types");
 

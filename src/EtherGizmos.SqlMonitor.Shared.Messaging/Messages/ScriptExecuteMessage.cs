@@ -1,4 +1,6 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
+﻿using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+
+namespace EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 
 public class ScriptExecuteMessage
 {
@@ -12,11 +14,13 @@ public class ScriptExecuteMessage
 
     public ScriptExecuteMessageInterpreter Interpreter { get; set; }
 
+    public ExecType ExecType { get; set; }
+
     public string Text { get; set; }
 
     public string? BucketKey { get; set; }
 
-    public string? TimestampKey { get; set; }
+    public string? TimestampUtcKey { get; set; }
 
     public List<ScriptExecuteMessageMetric> Metrics { get; set; } = new();
 
@@ -48,7 +52,7 @@ public class ScriptExecuteMessage
         Interpreter = interpreter;
         Text = scriptText;
         BucketKey = bucketKey;
-        TimestampKey = timestampKey;
+        TimestampUtcKey = timestampKey;
     }
 
     public void AddMetric(

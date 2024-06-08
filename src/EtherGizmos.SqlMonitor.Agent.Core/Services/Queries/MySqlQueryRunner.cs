@@ -9,7 +9,7 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 /// <summary>
 /// Executes queries against a MySQL database.
 /// </summary>
-public class MySqlQueryRunner : IQueryRunner
+internal class MySqlQueryRunner : IQueryRunner
 {
     private readonly string _connectionString;
 

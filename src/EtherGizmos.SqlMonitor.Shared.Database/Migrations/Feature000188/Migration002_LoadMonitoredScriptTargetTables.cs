@@ -17,6 +17,11 @@ public class Migration002_LoadMonitoredScriptTargetTables : MigrationExtension
             .Row(new { winrm_authentication_type_id = 10, name = "Kerberos", description = "Authenticates through a domain controller when connecting via WinRM." })
             .Row(new { winrm_authentication_type_id = 20, name = "Basic", description = "Authenticates using a username and password when connecting via WinRM." })
             .Match(t => t.winrm_authentication_type_id);
+
+        Merge.IntoTable("exec_types")
+            .Row(new { exec_type_id = 20, name = "SSH", description = "Connects to a server remotely via SSH." })
+            .Row(new { exec_type_id = 30, name = "WinRM", description = "Connects to a server remotely using WinRM." })
+            .Match(t => t.exec_type_id);
     }
 
     public override void Down()

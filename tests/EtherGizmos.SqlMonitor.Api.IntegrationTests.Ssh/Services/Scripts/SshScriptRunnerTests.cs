@@ -1,4 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
+using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
+using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 
@@ -11,124 +13,102 @@ internal class SshScriptRunnerTests
     [SetUp]
     public void SetUp()
     {
-        _runner = new SshScriptRunner();
+        var config = new SshConfiguration()
+        {
+            HostName = "localhost",
+            Port = 2222,
+            FilePath = "/home",
+            AuthenticationType = SshAuthenticationType.Password,
+            Username = "root",
+            Password = "password",
+            Command = "pwsh",
+            Arguments = "-File $Script",
+        };
+
+        _runner = new SshScriptRunner(config);
     }
 
     [Test]
     public async Task ExecuteAsync_PasswordAuthentication_ReturnsResults()
     {
-        var target = new MonitoredScriptTarget()
+        var script = new ScriptExecuteMessage()
         {
-            HostName = "localhost",
-            Port = 2222,
-            RunInPath = "/home",
-            SshAuthenticationType = SshAuthenticationType.Password,
-            SshUsername = "root",
-            SshPassword = "password",
-        };
-
-        var script = new ScriptVariant()
-        {
-            ScriptText = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
-            ScriptInterpreter = new ScriptInterpreter()
+            ScriptId = Guid.NewGuid(),
+            Name = "Test Script",
+            MonitoredScriptTargetId = 1,
+            Interpreter = new()
             {
                 Command = "pwsh",
                 Arguments = "-File $Script",
                 Extension = "ps1",
             },
+            ExecType = ExecType.Ssh,
+            Text = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
+            BucketKey = "bucket",
+            TimestampUtcKey = null,
+            Metrics =
+            [
+                new()
+                {
+                    MetricId = 1,
+                    ValueKey = "value",
+                },
+            ],
         };
 
-        var result = await _runner.ExecuteAsync(target, script);
+        var result = await _runner.ExecuteAsync(script);
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.Results.Count(), Is.EqualTo(1));
-            Assert.That(result.MonitoredScriptTarget, Is.EqualTo(target));
-            Assert.That(result.ScriptVariant, Is.EqualTo(script));
+            Assert.That(result.MetricValues.Count(), Is.EqualTo(1));
+            Assert.That(result.ScriptId, Is.EqualTo(script.ScriptId));
             Assert.That(result.ExecutionMilliseconds, Is.GreaterThan(0));
 
-            var first = result.Results.First();
-            Assert.That(first.Values["bucket"], Is.EqualTo("Test"));
-            Assert.That(first.Values["value"], Is.EqualTo("1"));
+            var first = result.MetricValues.First();
+            Assert.That(first.Bucket, Is.EqualTo("Test"));
+            Assert.That(first.Value, Is.EqualTo(1));
         });
     }
 
     [Test]
     public async Task ExecuteAsync_PrivateKeyAuthentication_ReturnsResults()
     {
-        var target = new MonitoredScriptTarget()
+        var script = new ScriptExecuteMessage()
         {
-            HostName = "localhost",
-            Port = 2222,
-            RunInPath = "/home",
-            SshAuthenticationType = SshAuthenticationType.PrivateKey,
-            SshUsername = "root",
-            SshPrivateKey = File.ReadAllText(DockerSetup.PrivateKeyFilePath),
-            SshPrivateKeyPassword = "password",
-        };
-
-        var script = new ScriptVariant()
-        {
-            ScriptText = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
-            ScriptInterpreter = new ScriptInterpreter()
+            ScriptId = Guid.NewGuid(),
+            Name = "Test Script",
+            MonitoredScriptTargetId = 1,
+            Interpreter = new ScriptExecuteMessageInterpreter()
             {
                 Command = "pwsh",
                 Arguments = "-File $Script",
                 Extension = "ps1",
             },
+            ExecType = ExecType.Ssh,
+            Text = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
+            BucketKey = "bucket",
+            TimestampUtcKey = null,
+            Metrics =
+            [
+                new()
+                {
+                    MetricId = 1,
+                    ValueKey = "value",
+                },
+            ],
         };
 
-        var result = await _runner.ExecuteAsync(target, script);
+        var result = await _runner.ExecuteAsync(script);
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.Results.Count(), Is.EqualTo(1));
-            Assert.That(result.MonitoredScriptTarget, Is.EqualTo(target));
-            Assert.That(result.ScriptVariant, Is.EqualTo(script));
+            Assert.That(result.MetricValues.Count(), Is.EqualTo(1));
+            Assert.That(result.ScriptId, Is.EqualTo(script.ScriptId));
             Assert.That(result.ExecutionMilliseconds, Is.GreaterThan(0));
 
-            var first = result.Results.First();
-            Assert.That(first.Values["bucket"], Is.EqualTo("Test"));
-            Assert.That(first.Values["value"], Is.EqualTo("1"));
-        });
-    }
-
-    [Test]
-    public void GetSshConfiguration_ReturnsValidConfiguration()
-    {
-        var target = new MonitoredScriptTarget()
-        {
-            HostName = "localhost",
-            Port = 2222,
-            RunInPath = "/home",
-            SshAuthenticationType = SshAuthenticationType.Password,
-            SshUsername = "root",
-            SshPassword = "password",
-        };
-
-        var script = new ScriptVariant()
-        {
-            ScriptText = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
-            ScriptInterpreter = new ScriptInterpreter()
-            {
-                Command = "pwsh",
-                Arguments = "-File $Script",
-                Extension = "ps1",
-            },
-        };
-
-        var configuration = _runner.GetSshConfiguration(target, script);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(configuration.HostName, Is.EqualTo(target.HostName));
-            Assert.That(configuration.Port, Is.EqualTo(target.Port));
-            Assert.That(configuration.FilePath, Is.EqualTo(target.RunInPath));
-            Assert.That(configuration.AuthenticationType, Is.EqualTo(target.SshAuthenticationType));
-            Assert.That(configuration.Username, Is.EqualTo(target.SshUsername));
-            Assert.That(configuration.Password, Is.EqualTo(target.SshPassword));
-            Assert.That(configuration.Command, Is.EqualTo(script.ScriptInterpreter.Command));
-            Assert.That(configuration.Arguments, Is.EqualTo(script.ScriptInterpreter.Arguments));
+            var first = result.MetricValues.First();
+            Assert.That(first.Bucket, Is.EqualTo("Test"));
+            Assert.That(first.Value, Is.EqualTo(1));
         });
     }
 

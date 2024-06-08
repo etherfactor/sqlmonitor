@@ -38,6 +38,7 @@ public class MonitoredScriptTargetDTOConfiguration : IModelConfiguration
             entity.HasRequired(e => e.MonitoredEnvironment);
             entity.Property(e => e.ScriptInterpreterId);
             entity.HasRequired(e => e.ScriptInterpreter);
+            entity.EnumProperty(e => e.ExecType);
             entity.Property(e => e.HostName);
             entity.Property(e => e.Port);
             entity.Property(e => e.FilePath);

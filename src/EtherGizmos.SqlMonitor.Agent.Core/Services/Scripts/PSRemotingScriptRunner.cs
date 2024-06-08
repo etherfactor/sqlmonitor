@@ -1,6 +1,7 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
-using EtherGizmos.SqlMonitor.Api.Services.Scripts;
-using EtherGizmos.SqlMonitor.Shared.Models.Database;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Helpers;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
+using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using System.Diagnostics;
 using System.Management.Automation;
@@ -11,62 +12,38 @@ using System.Text;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
-public class PSRemotingScriptRunner : IScriptRunner
+internal class PSRemotingScriptRunner : IScriptRunner
 {
-    public async Task<ScriptExecutionResultSet> ExecuteAsync(
-        MonitoredScriptTarget scriptTarget,
-        ScriptVariant scriptVariant,
+    private readonly WinRmConfiguration _configuration;
+
+    public PSRemotingScriptRunner(
+        WinRmConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    public async Task<ScriptResultMessage> ExecuteAsync(
+        ScriptExecuteMessage scriptMessage,
         CancellationToken cancellationToken = default)
     {
-        var configuration = GetWinRmConfiguration(scriptTarget, scriptVariant);
-
-        using var powershell = GetSession(configuration);
+        using var powershell = GetSession(_configuration);
 
         //Create a stopwatch so we know how long the script took to run
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var output = await ExecuteScriptAsync(powershell, configuration, scriptVariant);
+        var output = await ExecuteScriptAsync(powershell, _configuration, scriptMessage);
         var executionMilliseconds = stopwatch.ElapsedMilliseconds;
 
-        return ScriptExecutionResultSet.FromResults(scriptTarget, scriptVariant, output, executionMilliseconds);
-    }
+        var result = new ScriptResultMessage(
+            scriptMessage.ScriptId,
+            scriptMessage.Name,
+            scriptMessage.MonitoredScriptTargetId,
+            executionMilliseconds);
 
-    internal WinRmConfiguration GetWinRmConfiguration(MonitoredScriptTarget scriptTarget, ScriptVariant scriptVariant)
-    {
-        var useSsl = scriptTarget.WinRmUseSsl ?? true;
-        var protocol = useSsl ? "https" : "http";
+        await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output);
 
-        var hostName = scriptTarget.HostName;
-        var port = scriptTarget.Port ?? (useSsl ? 5986 : 5985);
-        var filePath = scriptTarget.RunInPath;
-
-        var authenticationType = scriptTarget.WinRmAuthenticationType;
-
-        var username = scriptTarget.WinRmUsername;
-        var password = scriptTarget.WinRmPassword;
-
-        var command = scriptVariant.ScriptInterpreter.Command;
-        var arguments = scriptVariant.ScriptInterpreter.Arguments;
-
-        var config = new WinRmConfiguration()
-        {
-            Protocol = protocol,
-
-            HostName = hostName,
-            Port = port,
-            FilePath = filePath,
-
-            AuthenticationType = authenticationType ?? WinRmAuthenticationType.Unknown,
-
-            Username = username,
-            Password = password,
-
-            Command = command,
-            Arguments = arguments,
-        };
-
-        return config;
+        return result;
     }
 
     internal PowerShell GetSession(WinRmConfiguration configuration)
@@ -102,7 +79,7 @@ public class PSRemotingScriptRunner : IScriptRunner
         return powershell;
     }
 
-    internal async Task<string> ExecuteScriptAsync(PowerShell session, WinRmConfiguration configuration, ScriptVariant scriptVariant)
+    internal async Task<string> ExecuteScriptAsync(PowerShell session, WinRmConfiguration configuration, ScriptExecuteMessage scriptMessage)
     {
         var outputStringBuilder = new StringBuilder();
 
@@ -157,12 +134,12 @@ public class PSRemotingScriptRunner : IScriptRunner
         session.Streams.Warning.DataAdded += Warning_DataAdded;
         session.Streams.Error.DataAdded += Error_DataAdded;
 
-        var script = scriptVariant.ScriptText;
+        var script = scriptMessage.Text;
         var scriptVariable = EncodeScriptToVariable("Script", script);
 
         var scriptHash = CalculateMd5Checksum(script);
 
-        var scriptExtension = scriptVariant.ScriptInterpreter.Extension;
+        var scriptExtension = scriptMessage.Interpreter.Extension;
 
         session.AddScript(@$"{scriptVariable}
 
@@ -213,26 +190,5 @@ if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
         var scriptHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
         return scriptHash;
-    }
-
-    internal class WinRmConfiguration
-    {
-        public required string Protocol { get; set; }
-
-        public required string HostName { get; set; }
-
-        public required int Port { get; set; }
-
-        public required string FilePath { get; set; }
-
-        public required WinRmAuthenticationType AuthenticationType { get; set; }
-
-        public string? Username { get; set; }
-
-        public string? Password { get; set; }
-
-        public required string Command { get; set; }
-
-        public required string Arguments { get; set; }
     }
 }

@@ -23,6 +23,9 @@ public class MonitoredScriptTarget : Auditable
 
     public virtual ScriptInterpreter ScriptInterpreter { get; set; }
 
+    [Column("exec_type_id")]
+    public virtual ExecType ExecType { get; set; }
+
     [Column("host")]
     public virtual string HostName { get; set; }
 

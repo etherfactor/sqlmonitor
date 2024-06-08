@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EtherGizmos.SqlMonitor.Shared.Models.Api.v1.Enums;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using System.ComponentModel.DataAnnotations;
@@ -36,6 +37,9 @@ public class MonitoredScriptTargetDTO
     public int? ScriptInterpreterId { get; set; }
 
     public ScriptInterpreterDTO? ScriptInterpreter { get; set; }
+
+    [Required]
+    public ExecTypeDTO? ExecType { get; set; }
 
     [Required]
     public string? HostName { get; set; }
@@ -78,6 +82,7 @@ public static class ForMonitoredScriptTargetDTO
         toDto.MapMember(dest => dest.MonitoredEnvironment, src => src.MonitoredTarget.MonitoredEnvironment);
         toDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
         toDto.MapMember(dest => dest.ScriptInterpreter, src => src.ScriptInterpreter);
+        toDto.MapMember(dest => dest.ExecType, src => src.ExecType);
         toDto.MapMember(dest => dest.HostName, src => src.HostName);
         toDto.MapMember(dest => dest.Port, src => src.Port);
         toDto.MapMember(dest => dest.FilePath, src => src.RunInPath);
@@ -97,6 +102,7 @@ public static class ForMonitoredScriptTargetDTO
         fromDto.MapPath(dest => dest.MonitoredTarget.MonitoredResourceId, src => src.MonitoredResourceId);
         fromDto.MapPath(dest => dest.MonitoredTarget.MonitoredEnvironmentId, src => src.MonitoredEnvironmentId);
         fromDto.MapMember(dest => dest.ScriptInterpreterId, src => src.ScriptInterpreterId);
+        fromDto.MapMember(dest => dest.ExecType, src => src.ExecType);
         fromDto.MapMember(dest => dest.HostName, src => src.HostName);
         fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.RunInPath, src => src.FilePath);

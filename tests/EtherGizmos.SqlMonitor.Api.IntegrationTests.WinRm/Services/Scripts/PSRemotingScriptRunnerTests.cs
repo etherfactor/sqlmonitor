@@ -1,4 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
+using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
+using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 
@@ -11,85 +13,61 @@ internal class PSRemotingScriptRunnerTests
     [SetUp]
     public void SetUp()
     {
-        _runner = new PSRemotingScriptRunner();
+        var config = new WinRmConfiguration()
+        {
+            HostName = "localhost",
+            Port = 55985,
+            FilePath = "C:\\",
+            AuthenticationType = WinRmAuthenticationType.Basic,
+            Protocol = "https",
+            Username = "User",
+            Password = "Password12345!",
+            Command = "pwsh",
+            Arguments = "-File $Script",
+        };
+
+        _runner = new PSRemotingScriptRunner(config);
     }
 
     [Test]
     public async Task ExecuteAsync_PasswordAuthentication_ReturnsResults()
     {
-        var target = new MonitoredScriptTarget()
+        var script = new ScriptExecuteMessage()
         {
-            HostName = "localhost",
-            Port = 55985,
-            RunInPath = "C:\\",
-            WinRmAuthenticationType = WinRmAuthenticationType.Basic,
-            WinRmUseSsl = false,
-            WinRmUsername = "User",
-            WinRmPassword = "Password12345!",
-        };
-
-        var script = new ScriptVariant()
-        {
-            ScriptText = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
-            ScriptInterpreter = new ScriptInterpreter()
+            ScriptId = Guid.NewGuid(),
+            Name = "Test Script",
+            MonitoredScriptTargetId = 1,
+            Interpreter = new()
             {
                 Command = "powershell",
                 Arguments = "-File $Script",
                 Extension = "ps1",
             },
+            ExecType = ExecType.WinRm,
+            Text = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
+            BucketKey = "bucket",
+            TimestampUtcKey = null,
+            Metrics =
+            [
+                new()
+                {
+                    MetricId = 1,
+                    ValueKey = "value",
+                },
+            ],
         };
 
-        var result = await _runner.ExecuteAsync(target, script);
+        var result = await _runner.ExecuteAsync(script);
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.Results.Count(), Is.EqualTo(1));
-            Assert.That(result.MonitoredScriptTarget, Is.EqualTo(target));
-            Assert.That(result.ScriptVariant, Is.EqualTo(script));
+            Assert.That(result.MetricValues.Count(), Is.EqualTo(1));
+            Assert.That(result.ScriptId, Is.EqualTo(script.ScriptId));
             Assert.That(result.ExecutionMilliseconds, Is.GreaterThan(0));
 
-            var first = result.Results.First();
-            Assert.That(first.Values["bucket"], Is.EqualTo("Test"));
-            Assert.That(first.Values["value"], Is.EqualTo("1"));
-        });
-    }
-
-    [Test]
-    public void GetWinRmConfiguration_ReturnsValidConfiguration()
-    {
-        var target = new MonitoredScriptTarget()
-        {
-            HostName = "localhost",
-            Port = 2222,
-            RunInPath = "/home",
-            WinRmAuthenticationType = WinRmAuthenticationType.Basic,
-            WinRmUsername = "root",
-            WinRmPassword = "password",
-        };
-
-        var script = new ScriptVariant()
-        {
-            ScriptText = "Write-Host \"##metric value=1 bucket=`\"Test`\"\"",
-            ScriptInterpreter = new ScriptInterpreter()
-            {
-                Command = "pwsh",
-                Arguments = "-File $Script",
-                Extension = "ps1",
-            },
-        };
-
-        var configuration = _runner.GetWinRmConfiguration(target, script);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(configuration.HostName, Is.EqualTo(target.HostName));
-            Assert.That(configuration.Port, Is.EqualTo(target.Port));
-            Assert.That(configuration.FilePath, Is.EqualTo(target.RunInPath));
-            Assert.That(configuration.AuthenticationType, Is.EqualTo(target.WinRmAuthenticationType));
-            Assert.That(configuration.Username, Is.EqualTo(target.WinRmUsername));
-            Assert.That(configuration.Password, Is.EqualTo(target.WinRmPassword));
-            Assert.That(configuration.Command, Is.EqualTo(script.ScriptInterpreter.Command));
-            Assert.That(configuration.Arguments, Is.EqualTo(script.ScriptInterpreter.Arguments));
+            var first = result.MetricValues.First();
+            Assert.That(first.Bucket, Is.EqualTo("Test"));
+            Assert.That(first.Value, Is.EqualTo(1));
         });
     }
 

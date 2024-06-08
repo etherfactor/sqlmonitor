@@ -23,7 +23,9 @@ public static class IServiceCollectionExtensions
             MapperConfiguration configuration = new MapperConfiguration(opt =>
             {
                 //Add enums
+                opt.AddExecType();
                 opt.AddAggregateType();
+                opt.AddSqlType();
 
                 //Add entities
                 opt.AddMetric();
