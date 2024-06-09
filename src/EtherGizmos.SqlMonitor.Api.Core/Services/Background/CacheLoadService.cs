@@ -84,5 +84,61 @@ public class CacheLoadService : OneTimeBackgroundService
                 .EntitySet<MonitoredQueryTarget>()
                 .RemoveAsync(queryTarget, stoppingToken);
         }
+
+        //**********************************************************
+        // Scripts
+
+        //Load scripts from the database and add them to the cache
+        var scriptService = scope.GetRequiredService<IScriptService>();
+        var databaseScripts = await scriptService
+            .GetQueryable()
+            .ToListAsync(stoppingToken);
+
+        foreach (var script in databaseScripts)
+        {
+            await _cache
+                .EntitySet<Script>()
+                .AddAsync(script, stoppingToken);
+        }
+
+        //Load scripts from the cache and delete the ones that don't exist in the database
+        var cacheScripts = await _cache
+            .EntitySet<Script>()
+            .ToListAsync(stoppingToken);
+
+        foreach (var script in cacheScripts.Where(c => !databaseScripts.Any(d => d.Id == c.Id)))
+        {
+            await _cache
+                .EntitySet<Script>()
+                .RemoveAsync(script, stoppingToken);
+        }
+
+        //**********************************************************
+        // Monitored script targets
+
+        //Load scripts from the database and add them to the cache
+        var scriptTargetService = scope.GetRequiredService<IMonitoredScriptTargetService>();
+        var databaseScriptTargets = await scriptTargetService
+            .GetQueryable()
+            .ToListAsync(stoppingToken);
+
+        foreach (var scriptTarget in databaseScriptTargets)
+        {
+            await _cache
+                .EntitySet<MonitoredScriptTarget>()
+                .AddAsync(scriptTarget, stoppingToken);
+        }
+
+        //Load scripts from the cache and delete the ones that don't exist in the database
+        var cacheScriptTargets = await _cache
+            .EntitySet<MonitoredScriptTarget>()
+            .ToListAsync(stoppingToken);
+
+        foreach (var scriptTarget in cacheScriptTargets.Where(c => !databaseScriptTargets.Any(d => d.Id == c.Id)))
+        {
+            await _cache
+                .EntitySet<MonitoredScriptTarget>()
+                .RemoveAsync(scriptTarget, stoppingToken);
+        }
     }
 }

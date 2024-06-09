@@ -1,8 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
-using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
-using System.Text.Json;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
@@ -37,17 +35,15 @@ internal class ScriptRunnerFactory : IScriptRunnerFactory
 
     private async Task<IScriptRunner> LoadRunnerAsync(string connectionRequestToken, ExecType execType)
     {
-        var rawData = await _connectionRetriever.GetConnectionStringAsync(connectionRequestToken);
-
         switch (execType)
         {
             case ExecType.Ssh:
-                var sshConfig = JsonSerializer.Deserialize<SshConfiguration>(rawData)
+                var sshConfig = await _connectionRetriever.GetSshConfigurationAsync(connectionRequestToken)
                     ?? throw new InvalidOperationException("Received malformed SSH config");
                 return new SshScriptRunner(sshConfig);
 
             case ExecType.WinRm:
-                var winRmConfig = JsonSerializer.Deserialize<WinRmConfiguration>(rawData)
+                var winRmConfig = await _connectionRetriever.GetWinRmConfigurationAsync(connectionRequestToken)
                     ?? throw new InvalidOperationException("Received malformed WinRM config");
                 return new PSRemotingScriptRunner(winRmConfig);
 

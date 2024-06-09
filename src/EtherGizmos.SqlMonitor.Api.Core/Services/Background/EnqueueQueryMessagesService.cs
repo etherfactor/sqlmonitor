@@ -22,7 +22,6 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
     private const string ConstantCronExpression = "0/1 * * * * *";
 
     private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
     private readonly IDistributedLockProvider _distributedLockProvider;
     private readonly IDistributedRecordCache _distributedRecordCache;
 
@@ -39,7 +38,6 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
         : base(logger, serviceProvider, distributedLockProvider, CronExpression, ConstantCronExpression)
     {
         _logger = logger;
-        _serviceProvider = serviceProvider;
         _distributedLockProvider = distributedLockProvider;
         _distributedRecordCache = distributedRecordCache;
     }

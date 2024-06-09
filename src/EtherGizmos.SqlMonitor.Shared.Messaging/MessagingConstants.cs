@@ -27,7 +27,7 @@ public static class MessagingConstants
 
         public const string CoordinatorQueryResult = "coordinator.query.result";
 
-        public const string AgentCoordinatorScriptResult = "coordinator.script.result";
+        public const string CoordinatorScriptResult = "coordinator.script.result";
     }
 
     public static class Claims

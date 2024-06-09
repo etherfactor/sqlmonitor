@@ -2,6 +2,7 @@
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Communication;
 
@@ -17,6 +18,37 @@ public class ConnectionRetriever : IConnectionRetriever
 
     public async Task<string> GetConnectionStringAsync(string connectionToken, CancellationToken cancellationToken = default)
     {
+        var response = await ExchangeConnectionTokenAsync(connectionToken, cancellationToken);
+
+        var result = JsonSerializer.Deserialize<DatabaseConfiguration>(response)
+            ?? throw new InvalidOperationException("Unable to parse as JSON");
+
+        return result.ConnectionString
+            ?? throw new InvalidOperationException("Failed to parse a connection string");
+    }
+
+    public async Task<SshConfiguration> GetSshConfigurationAsync(string connectionToken, CancellationToken cancellationToken = default)
+    {
+        var response = await ExchangeConnectionTokenAsync(connectionToken, cancellationToken);
+
+        var result = JsonSerializer.Deserialize<SshConfiguration>(response)
+            ?? throw new InvalidOperationException("Unable to parse as JSON");
+
+        return result;
+    }
+
+    public async Task<WinRmConfiguration> GetWinRmConfigurationAsync(string connectionToken, CancellationToken cancellationToken = default)
+    {
+        var response = await ExchangeConnectionTokenAsync(connectionToken, cancellationToken);
+
+        var result = JsonSerializer.Deserialize<WinRmConfiguration>(response)
+            ?? throw new InvalidOperationException("Unable to parse as JSON");
+
+        return result;
+    }
+
+    private async Task<string> ExchangeConnectionTokenAsync(string connectionToken, CancellationToken cancellationToken = default)
+    {
         using var client = _clientFactory.CreateClient("coordinator");
 
         var uriBuilder = new UriBuilder(client.BaseAddress!);
@@ -30,10 +62,9 @@ public class ConnectionRetriever : IConnectionRetriever
         var httpResponse = await client.PostAsync(uriBuilder.Uri, request, cancellationToken);
         httpResponse.EnsureSuccessStatusCode();
 
-        var response = await httpResponse.Content.ReadFromJsonAsync<DatabaseConfiguration>(cancellationToken)
-            ?? throw new InvalidOperationException("Unable to parse as JSON");
+        var response = await httpResponse.Content.ReadAsStringAsync()
+            ?? throw new InvalidOperationException("Did not receive any response content");
 
-        return response.ConnectionString
-            ?? throw new InvalidOperationException("Failed to parse a connection string");
+        return response;
     }
 }
