@@ -55,9 +55,6 @@ public class ODataModelStateInvalidError : ODataErrorBase
                 var propertyName = item.Key;
                 foreach (var error in item.Value.Errors)
                 {
-                    var property = entityType.GetProperty(propertyName)
-                        ?? throw new InvalidOperationException(string.Format("Unrecognized property: {0}", propertyName));
-
                     var propertyDisplayName = propertyName;
 
                     AddDetail(new ODataModelStateInvalidErrorDetail(Code, propertyDisplayName, error.ErrorMessage));

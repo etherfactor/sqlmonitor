@@ -4,15 +4,15 @@ namespace EtherGizmos.SqlMonitor.Shared.Models.Communication;
 
 public class SshConfiguration
 {
-    public required string HostName { get; set; }
+    public string? HostName { get; set; }
 
-    public required int Port { get; set; }
+    public int Port { get; set; }
 
-    public required string FilePath { get; set; }
+    public string? FilePath { get; set; }
 
-    public required SshAuthenticationType AuthenticationType { get; set; }
+    public SshAuthenticationType AuthenticationType { get; set; }
 
-    public required string Username { get; set; }
+    public string? Username { get; set; }
 
     public string? Password { get; set; }
 
@@ -20,7 +20,7 @@ public class SshConfiguration
 
     public string? PrivateKeyPassword { get; set; }
 
-    public required string Command { get; set; }
+    public string? Command { get; set; }
 
-    public required string Arguments { get; set; }
+    public string? Arguments { get; set; }
 }

@@ -19,6 +19,7 @@ public class MonitoredScriptTarget : Auditable
     public virtual MonitoredTarget MonitoredTarget { get; set; }
 
     [Column("script_interpreter_id")]
+    [Indexed]
     public virtual int ScriptInterpreterId { get; set; }
 
     public virtual ScriptInterpreter ScriptInterpreter { get; set; }

@@ -20,14 +20,6 @@ public class ScriptMetricDTOConfiguration : IModelConfiguration
 
         if (apiVersion >= ApiVersions.V0_1)
         {
-            /* Begin Audit */
-            entity.Property(e => e.CreatedAt);
-            entity.Property(e => e.CreatedByUserId);
-            entity.Property(e => e.ModifiedAt);
-            entity.Property(e => e.ModifiedByUserId);
-            /*  End Audit  */
-            entity.Property(e => e.ScriptId);
-            entity.HasOptional(e => e.Script);
             entity.Property(e => e.MetricId);
             entity.HasOptional(e => e.Metric);
             entity.Property(e => e.ValueKey);

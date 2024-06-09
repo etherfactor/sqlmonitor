@@ -4,21 +4,21 @@ namespace EtherGizmos.SqlMonitor.Shared.Models.Communication;
 
 public class WinRmConfiguration
 {
-    public required string Protocol { get; set; }
+    public string? Protocol { get; set; }
 
-    public required string HostName { get; set; }
+    public string? HostName { get; set; }
 
-    public required int Port { get; set; }
+    public int Port { get; set; }
 
-    public required string FilePath { get; set; }
+    public string? FilePath { get; set; }
 
-    public required WinRmAuthenticationType AuthenticationType { get; set; }
+    public WinRmAuthenticationType AuthenticationType { get; set; }
 
     public string? Username { get; set; }
 
     public string? Password { get; set; }
 
-    public required string Command { get; set; }
+    public string? Command { get; set; }
 
-    public required string Arguments { get; set; }
+    public string? Arguments { get; set; }
 }

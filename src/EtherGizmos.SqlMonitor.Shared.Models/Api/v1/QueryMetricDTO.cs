@@ -7,14 +7,6 @@ namespace EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
 
 public class QueryMetricDTO
 {
-    public DateTimeOffset? CreatedAt { get; set; }
-
-    public Guid? CreatedByUserId { get; set; }
-
-    public DateTimeOffset? ModifiedAt { get; set; }
-
-    public Guid? ModifiedByUserId { get; set; }
-
     [Required]
     public int? MetricId { get; set; }
 
