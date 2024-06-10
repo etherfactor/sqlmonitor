@@ -20,7 +20,7 @@ public class ConnectionRetriever : IConnectionRetriever
     {
         var response = await ExchangeConnectionTokenAsync(connectionToken, cancellationToken);
 
-        var result = JsonSerializer.Deserialize<DatabaseConfiguration>(response)
+        var result = JsonSerializer.Deserialize<DatabaseConfiguration>(response, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
             ?? throw new InvalidOperationException("Unable to parse as JSON");
 
         return result.ConnectionString
@@ -31,7 +31,7 @@ public class ConnectionRetriever : IConnectionRetriever
     {
         var response = await ExchangeConnectionTokenAsync(connectionToken, cancellationToken);
 
-        var result = JsonSerializer.Deserialize<SshConfiguration>(response)
+        var result = JsonSerializer.Deserialize<SshConfiguration>(response, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
             ?? throw new InvalidOperationException("Unable to parse as JSON");
 
         return result;
@@ -41,7 +41,7 @@ public class ConnectionRetriever : IConnectionRetriever
     {
         var response = await ExchangeConnectionTokenAsync(connectionToken, cancellationToken);
 
-        var result = JsonSerializer.Deserialize<WinRmConfiguration>(response)
+        var result = JsonSerializer.Deserialize<WinRmConfiguration>(response, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
             ?? throw new InvalidOperationException("Unable to parse as JSON");
 
         return result;

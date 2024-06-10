@@ -41,6 +41,7 @@ public class ScriptExecuteMessage
         int monitoredScriptTargetId,
         string connectionRequestToken,
         ScriptExecuteMessageInterpreter interpreter,
+        ExecType execType,
         string scriptText,
         string? bucketKey,
         string? timestampKey)
@@ -50,6 +51,7 @@ public class ScriptExecuteMessage
         MonitoredScriptTargetId = monitoredScriptTargetId;
         ConnectionRequestToken = connectionRequestToken;
         Interpreter = interpreter;
+        ExecType = execType;
         Text = scriptText;
         BucketKey = bucketKey;
         TimestampUtcKey = timestampKey;

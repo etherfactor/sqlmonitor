@@ -36,7 +36,7 @@ builder.Services.AddConfiguredMassTransit(
     (context, opt) =>
     {
         opt.ReceiveQueue<QueryExecuteConsumer>(context, MessagingConstants.Queues.AgentQueryExecute);
-        //opt.ReceiveQueue(MessagingConstants.Queues.AgentScriptExecute, opt => { });
+        opt.ReceiveQueue<ScriptExecuteConsumer>(context, MessagingConstants.Queues.AgentScriptExecute);
     },
     typeof(AgentCore).Assembly)
     .ImportSingleton<IQueryRunnerFactory>()

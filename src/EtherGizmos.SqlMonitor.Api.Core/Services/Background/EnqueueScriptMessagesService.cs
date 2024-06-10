@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EtherGizmos.SqlMonitor.Api.Core.Services.Background;
 
-internal class EnqueueScriptMessagesService : GlobalConstantBackgroundService
+public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
 {
     private const string CronExpression = "0/15 * * * * *";
     private const string ConstantCronExpression = "0/1 * * * * *";
@@ -91,6 +91,7 @@ internal class EnqueueScriptMessagesService : GlobalConstantBackgroundService
                         Arguments = scriptVariant.ScriptInterpreter.Arguments,
                         Extension = scriptVariant.ScriptInterpreter.Extension,
                     },
+                    instance.ExecType,
                     scriptVariant.ScriptText,
                     scriptVariant.Script.BucketKey,
                     scriptVariant.Script.TimestampUtcKey);

@@ -81,28 +81,22 @@ public class CredentialsController : ControllerBase
 
             if (target.SqlType == SqlType.MariaDb || target.SqlType == SqlType.MySql)
             {
-                var config = new DatabaseConfiguration()
-                {
-                    ConnectionString = target.ConnectionString,
-                };
+                var config = new DatabaseConfiguration(
+                    target.ConnectionString);
 
                 return Ok(config);
             }
             else if (target.SqlType == SqlType.PostgreSql)
             {
-                var config = new DatabaseConfiguration()
-                {
-                    ConnectionString = target.ConnectionString,
-                };
+                var config = new DatabaseConfiguration(
+                    target.ConnectionString);
 
                 return Ok(config);
             }
             else if (target.SqlType == SqlType.SqlServer)
             {
-                var config = new DatabaseConfiguration()
-                {
-                    ConnectionString = target.ConnectionString,
-                };
+                var config = new DatabaseConfiguration(
+                    target.ConnectionString);
 
                 return Ok(config);
             }
@@ -115,36 +109,32 @@ public class CredentialsController : ControllerBase
 
             if (target.ExecType == ExecType.Ssh)
             {
-                var config = new SshConfiguration()
-                {
-                    HostName = target.HostName,
-                    Port = target.Port ?? 22,
-                    FilePath = target.RunInPath,
-                    AuthenticationType = target.SshAuthenticationType!.Value,
-                    Username = target.SshUsername!,
-                    Password = target.SshPassword,
-                    Command = target.ScriptInterpreter.Command,
-                    Arguments = target.ScriptInterpreter.Arguments,
-                    PrivateKey = target.SshPrivateKey,
-                    PrivateKeyPassword = target.SshPrivateKeyPassword,
-                };
+                var config = new SshConfiguration(
+                    target.HostName,
+                    target.Port ?? 22,
+                    target.RunInPath,
+                    target.SshAuthenticationType ?? SshAuthenticationType.None,
+                    target.SshUsername!,
+                    target.SshPassword,
+                    target.SshPrivateKey,
+                    target.SshPrivateKeyPassword,
+                    target.ScriptInterpreter.Command,
+                    target.ScriptInterpreter.Arguments);
 
                 return Ok(config);
             }
             else if (target.ExecType == ExecType.WinRm)
             {
-                var config = new WinRmConfiguration()
-                {
-                    HostName = target.HostName,
-                    Port = target.Port ?? (target.WinRmUseSsl == true ? 5986 : 5985),
-                    Protocol = target.WinRmUseSsl == true ? "https" : "http",
-                    FilePath = target.RunInPath,
-                    AuthenticationType = target.WinRmAuthenticationType!.Value,
-                    Username = target.WinRmUsername!,
-                    Password = target.WinRmPassword,
-                    Command = target.ScriptInterpreter.Command,
-                    Arguments = target.ScriptInterpreter.Arguments,
-                };
+                var config = new WinRmConfiguration(
+                    target.WinRmUseSsl == true ? "https" : "http",
+                    target.HostName,
+                    target.Port ?? (target.WinRmUseSsl == true ? 5986 : 5985),
+                    target.RunInPath,
+                    target.WinRmAuthenticationType!.Value,
+                    target.WinRmUsername!,
+                    target.WinRmPassword,
+                    target.ScriptInterpreter.Command,
+                    target.ScriptInterpreter.Arguments);
 
                 return Ok(config);
             }

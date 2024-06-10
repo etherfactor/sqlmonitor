@@ -160,6 +160,7 @@ builder.Services
 // Hosted services
 builder.Services.AddHostedService<CacheLoadService>();
 builder.Services.AddHostedService<EnqueueQueryMessagesService>();
+builder.Services.AddHostedService<EnqueueScriptMessagesService>();
 
 //**********************************************************
 // Add Middleware
