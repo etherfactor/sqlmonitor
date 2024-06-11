@@ -18,7 +18,7 @@ public class Migration002_LoadScriptTables : MigrationExtension
                 name = "PowerShell 7",
                 description = "PowerShell 7 is a cross-platform scripting language compatible with Windows, macOS, and Linux. It runs scripts using the \"pwsh\" command, offering enhanced performance, modern language features, and improved compatibility with modules and scripts across different platforms.",
                 command = "pwsh",
-                arguments = "-NoProfile -ExecutionPolicy Unrestricted -Command $Script",
+                arguments = "-NoProfile -ExecutionPolicy Unrestricted -Command ./$Script",
                 extension = "ps1",
             })
             .Row(new

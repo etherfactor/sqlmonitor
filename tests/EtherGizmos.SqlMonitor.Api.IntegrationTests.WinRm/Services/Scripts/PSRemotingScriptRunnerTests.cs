@@ -3,6 +3,8 @@ using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.Services.Scripts;
 
@@ -13,6 +15,8 @@ internal class PSRemotingScriptRunnerTests
     [SetUp]
     public void SetUp()
     {
+        var loggerMock = new Mock<ILogger<PSRemotingScriptRunner>>();
+
         var config = new WinRmConfiguration()
         {
             HostName = "localhost",
@@ -26,7 +30,9 @@ internal class PSRemotingScriptRunnerTests
             Arguments = "-File $Script",
         };
 
-        _runner = new PSRemotingScriptRunner(config);
+        _runner = new PSRemotingScriptRunner(
+            loggerMock.Object,
+            config);
     }
 
     [Test]

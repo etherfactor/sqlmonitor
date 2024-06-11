@@ -47,8 +47,10 @@ public class Query : Auditable
 
     public virtual Securable Securable { get; set; }
 
+    [LookupIndex("variants")]
     public virtual List<QueryVariant> Variants { get; set; } = [];
 
+    [LookupIndex("metrics")]
     public virtual List<QueryMetric> Metrics { get; set; } = [];
 
     /// <summary>

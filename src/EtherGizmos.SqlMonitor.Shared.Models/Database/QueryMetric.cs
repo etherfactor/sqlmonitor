@@ -15,6 +15,8 @@ public class QueryMetric : Auditable
     [Column("query_id")]
     public virtual Guid QueryId { get; set; }
 
+    [Lookup(nameof(QueryId), nameof(Query.Id),
+        List = nameof(Query.Metrics))]
     public virtual Query Query { get; set; }
 
     [Column("metric_id")]

@@ -3,6 +3,8 @@ using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh.Services.Scripts;
 
@@ -13,6 +15,8 @@ internal class SshScriptRunnerTests
     [SetUp]
     public void SetUp()
     {
+        var loggerMock = new Mock<ILogger<SshScriptRunner>>();
+
         var config = new SshConfiguration()
         {
             HostName = "localhost",
@@ -25,7 +29,9 @@ internal class SshScriptRunnerTests
             Arguments = "-File $Script",
         };
 
-        _runner = new SshScriptRunner(config);
+        _runner = new SshScriptRunner(
+            loggerMock.Object,
+            config);
     }
 
     [Test]

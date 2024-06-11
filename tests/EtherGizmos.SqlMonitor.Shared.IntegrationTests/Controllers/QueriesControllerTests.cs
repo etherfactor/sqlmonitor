@@ -45,7 +45,7 @@ public abstract class QueriesControllerTests : IntegrationTestBase
             {
                 new
                 {
-                    sqlType = "MicrosoftSqlServer",
+                    sqlType = "SqlServer",
                     queryText = "select 1 as value;",
                 },
                 new

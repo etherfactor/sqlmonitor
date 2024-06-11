@@ -1,6 +1,8 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.Services.Queries;
 
@@ -11,7 +13,11 @@ internal class SqlServerQueryRunnerTests
     [SetUp]
     public void SetUp()
     {
-        _runner = new SqlServerQueryRunner("Server=localhost,11433; Database=performance_pulse; User Id=service; Password=LO^9ZpGB8FiA*HMMQyfN; TrustServerCertificate=true;");
+        var loggerMock = new Mock<ILogger<SqlServerQueryRunner>>();
+
+        _runner = new SqlServerQueryRunner(
+            loggerMock.Object,
+            "Server=localhost,11433; Database=performance_pulse; User Id=service; Password=LO^9ZpGB8FiA*HMMQyfN; TrustServerCertificate=true;");
     }
 
     [Test]

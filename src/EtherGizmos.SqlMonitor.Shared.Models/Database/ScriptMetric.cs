@@ -15,6 +15,8 @@ public class ScriptMetric : Auditable
     [Column("script_id")]
     public virtual Guid ScriptId { get; set; }
 
+    [Lookup(nameof(ScriptId), nameof(Script.Id),
+        List = nameof(Script.Metrics))]
     public virtual Script Script { get; set; }
 
     [Column("metric_id")]

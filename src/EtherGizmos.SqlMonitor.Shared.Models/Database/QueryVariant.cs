@@ -1,5 +1,6 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Annotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Database;
@@ -13,6 +14,8 @@ public class QueryVariant : Auditable
     [Column("query_id")]
     public virtual Guid QueryId { get; set; }
 
+    [Lookup(nameof(QueryId), nameof(Query.Id),
+        List = nameof(Query.Variants))]
     public virtual Query Query { get; set; }
 
     [Column("sql_type_id")]

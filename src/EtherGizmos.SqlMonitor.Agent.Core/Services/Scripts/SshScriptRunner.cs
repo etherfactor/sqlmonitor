@@ -3,6 +3,7 @@ using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -15,11 +16,14 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 /// </summary>
 internal partial class SshScriptRunner : IScriptRunner
 {
+    private readonly ILogger _logger;
     private readonly SshConfiguration _configuration;
 
     public SshScriptRunner(
+        ILogger<SshScriptRunner> logger,
         SshConfiguration configuration)
     {
+        _logger = logger;
         _configuration = configuration;
     }
 
@@ -30,6 +34,8 @@ internal partial class SshScriptRunner : IScriptRunner
     {
         using var client = GetClient(_configuration);
         await client.ConnectAsync(cancellationToken);
+
+        var executedAtUtc = DateTimeOffset.UtcNow;
 
         //Create a stopwatch so we know how long the script took to run
         var stopwatch = new Stopwatch();
@@ -44,7 +50,7 @@ internal partial class SshScriptRunner : IScriptRunner
             scriptMessage.MonitoredScriptTargetId,
             executionMilliseconds);
 
-        await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output);
+        await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output, executedAtUtc);
 
         return result;
     }
@@ -137,9 +143,30 @@ echo ""${scriptVariableName}"" > {scriptHash}.{scriptExtension}
 
 {configuration.Command} {configuration.Arguments.Replace("$Script", $"{scriptHash}.{scriptExtension}")}".Replace("\r", "");
 
-        //Run the command, gathering the console output and returning it
-        var result = client.RunCommand(commandText)
-            .Result;
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        _logger.LogDebug(@"Executing script
+{ScriptText}", commandText);
+
+        string result;
+        try
+        {
+            //Run the command, gathering the console output and returning it
+            result = client.RunCommand(commandText)
+                .Result;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Error, ex, @"Encountered an unexpected error while running script
+{ScriptText}", commandText);
+            throw;
+        }
+
+        var scriptDuration = stopwatch.ElapsedMilliseconds;
+
+        _logger.LogInformation(@"Executed script ({Duration}ms)
+{ScriptText}", scriptDuration, commandText);
 
         return result;
     }

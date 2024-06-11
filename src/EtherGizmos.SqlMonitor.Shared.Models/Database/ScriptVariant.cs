@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Annotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EtherGizmos.SqlMonitor.Shared.Models.Database;
@@ -12,11 +13,14 @@ public class ScriptVariant : Auditable
     [Column("script_id")]
     public virtual Guid ScriptId { get; set; }
 
+    [Lookup(nameof(ScriptId), nameof(Script.Id),
+        List = nameof(Script.Variants))]
     public virtual Script Script { get; set; }
 
     [Column("script_interpreter_id")]
     public virtual int ScriptInterpreterId { get; set; }
 
+    [Lookup(nameof(ScriptInterpreterId), nameof(ScriptInterpreter.Id))]
     public virtual ScriptInterpreter ScriptInterpreter { get; set; }
 
     [Column("script_text")]

@@ -3,6 +3,7 @@ using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -14,11 +15,14 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
 internal class PSRemotingScriptRunner : IScriptRunner
 {
+    private readonly ILogger _logger;
     private readonly WinRmConfiguration _configuration;
 
     public PSRemotingScriptRunner(
+        ILogger<PSRemotingScriptRunner> logger,
         WinRmConfiguration configuration)
     {
+        _logger = logger;
         _configuration = configuration;
     }
 
@@ -27,6 +31,8 @@ internal class PSRemotingScriptRunner : IScriptRunner
         CancellationToken cancellationToken = default)
     {
         using var powershell = GetSession(_configuration);
+
+        var executedAtUtc = DateTimeOffset.UtcNow;
 
         //Create a stopwatch so we know how long the script took to run
         var stopwatch = new Stopwatch();
@@ -41,7 +47,7 @@ internal class PSRemotingScriptRunner : IScriptRunner
             scriptMessage.MonitoredScriptTargetId,
             executionMilliseconds);
 
-        await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output);
+        await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output, executedAtUtc);
 
         return result;
     }
@@ -141,15 +147,38 @@ internal class PSRemotingScriptRunner : IScriptRunner
 
         var scriptExtension = scriptMessage.Interpreter.Extension;
 
-        session.AddScript(@$"{scriptVariable}
+        var scriptText = @$"{scriptVariable}
 
 if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
     Set-Content -Path ""{scriptHash}.{scriptExtension}"" -Value $Script | Out-Null
 }}
 
-{configuration.Command} {configuration.Arguments.Replace("$Script", $@"""{scriptHash}.{scriptExtension}""")}");
+{configuration.Command} {configuration.Arguments.Replace("$Script", $@"""{scriptHash}.{scriptExtension}""")}";
 
-        var result = await session.InvokeAsync();
+        session.AddScript(scriptText);
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        _logger.LogDebug(@"Executing script
+{ScriptText}", scriptText);
+
+        PSDataCollection<PSObject> result;
+        try
+        {
+            result = await session.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Error, ex, @"Encountered an unexpected error while running script
+{ScriptText}", scriptText);
+            throw;
+        }
+
+        var scriptDuration = stopwatch.ElapsedMilliseconds;
+
+        _logger.LogInformation(@"Executed script ({Duration}ms)
+{ScriptText}", scriptDuration, scriptText);
 
         foreach (var item in result)
         {

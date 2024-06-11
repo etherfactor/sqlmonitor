@@ -9,7 +9,8 @@ public static partial class MessageHelper
     public static async Task ReadIntoMessageAsync(
         QueryExecuteMessage executeMessage,
         QueryResultMessage resultMessage,
-        DbDataReader reader)
+        DbDataReader reader,
+        DateTimeOffset executedAtUtc)
     {
         var count = reader.FieldCount;
         while (await reader.ReadAsync())
@@ -47,7 +48,7 @@ public static partial class MessageHelper
 
             foreach (var currentValue in currentValues)
             {
-                resultMessage.AddMetricValue(currentValue.MetricId, currentBucket, currentTimestampUtc, currentValue.Value);
+                resultMessage.AddMetricValue(currentValue.MetricId, currentBucket, currentTimestampUtc ?? executedAtUtc, currentValue.Value);
             }
         }
     }
@@ -55,7 +56,8 @@ public static partial class MessageHelper
     public static Task ReadIntoMessageAsync(
         ScriptExecuteMessage executeMessage,
         ScriptResultMessage resultMessage,
-        string outputText)
+        string outputText,
+        DateTimeOffset executedAtUtc)
     {
         //Not sure which newline format the script has, so just convert to \n
         var resultLines = outputText
@@ -114,7 +116,7 @@ public static partial class MessageHelper
 
             foreach (var currentValue in currentValues)
             {
-                resultMessage.AddMetricValue(currentValue.MetricId, currentBucket, currentTimestampUtc, currentValue.Value);
+                resultMessage.AddMetricValue(currentValue.MetricId, currentBucket, currentTimestampUtc ?? executedAtUtc, currentValue.Value);
             }
         }
 

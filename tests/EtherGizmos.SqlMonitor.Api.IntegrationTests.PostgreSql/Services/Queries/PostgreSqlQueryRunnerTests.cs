@@ -1,6 +1,8 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.Services.Queries;
 
@@ -11,7 +13,11 @@ internal class PostgreSqlQueryRunnerTests
     [SetUp]
     public void SetUp()
     {
-        _runner = new PostgreSqlQueryRunner($"Host={DockerSetup.ServerHost}; Port={DockerSetup.ServerPort}; Database={DockerSetup.ServerDatabase}; User Id={DockerSetup.ServerDefaultUsername}; Password={DockerSetup.ServerDefaultPassword};");
+        var loggerMock = new Mock<ILogger<PostgreSqlQueryRunner>>();
+
+        _runner = new PostgreSqlQueryRunner(
+            loggerMock.Object,
+            $"Host={DockerSetup.ServerHost}; Port={DockerSetup.ServerPort}; Database={DockerSetup.ServerDatabase}; User Id={DockerSetup.ServerDefaultUsername}; Password={DockerSetup.ServerDefaultPassword};");
     }
 
     [Test]

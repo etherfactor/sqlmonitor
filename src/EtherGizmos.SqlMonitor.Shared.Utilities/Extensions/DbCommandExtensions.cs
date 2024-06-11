@@ -2,7 +2,7 @@
 using System.Data.Common;
 using System.Diagnostics;
 
-namespace EtherGizmos.SqlMonitor.Shared.Database.Extensions;
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 
 /// <summary>
 /// Provides extension methods for <see cref="DbCommand"/>.
@@ -29,13 +29,14 @@ public static class DbCommandExtensions
         }
         catch (Exception ex)
         {
-            logger.Log(LogLevel.Error, ex, "Encountered an unexpected error while running query {QueryText}", @this.CommandText);
+            logger.Log(LogLevel.Error, ex, @"Encountered an unexpected error while running query
+{QueryText}", @this.CommandText);
             throw;
         }
 
         var queryDuration = queryWatch.ElapsedMilliseconds;
 
-        logger.Log(LogLevel.Information, @"Executed query ({QueryDuration}ms)
+        logger.Log(LogLevel.Information, @"Executed query ({Duration}ms)
 {QueryText}", queryDuration, @this.CommandText);
 
         return reader;

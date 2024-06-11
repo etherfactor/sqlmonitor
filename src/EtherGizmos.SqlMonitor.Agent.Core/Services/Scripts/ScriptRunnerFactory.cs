@@ -1,6 +1,8 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Communication.Abstractions;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
@@ -35,17 +37,23 @@ internal class ScriptRunnerFactory : IScriptRunnerFactory
 
     private async Task<IScriptRunner> LoadRunnerAsync(string connectionRequestToken, ExecType execType)
     {
+        var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
+
         switch (execType)
         {
             case ExecType.Ssh:
                 var sshConfig = await _connectionRetriever.GetSshConfigurationAsync(connectionRequestToken)
                     ?? throw new InvalidOperationException("Received malformed SSH config");
-                return new SshScriptRunner(sshConfig);
+                return new SshScriptRunner(
+                    loggerFactory.CreateLogger<SshScriptRunner>(),
+                    sshConfig);
 
             case ExecType.WinRm:
                 var winRmConfig = await _connectionRetriever.GetWinRmConfigurationAsync(connectionRequestToken)
                     ?? throw new InvalidOperationException("Received malformed WinRM config");
-                return new PSRemotingScriptRunner(winRmConfig);
+                return new PSRemotingScriptRunner(
+                    loggerFactory.CreateLogger<PSRemotingScriptRunner>(),
+                    winRmConfig);
 
             default:
                 throw new InvalidOperationException("Unrecognized exec type");

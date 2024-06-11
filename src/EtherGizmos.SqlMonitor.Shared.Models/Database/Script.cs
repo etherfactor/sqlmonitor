@@ -47,8 +47,10 @@ public class Script : Auditable
 
     public virtual Securable Securable { get; set; }
 
+    [LookupIndex("variants")]
     public virtual List<ScriptVariant> Variants { get; set; } = [];
 
+    [LookupIndex("metrics")]
     public virtual List<ScriptMetric> Metrics { get; set; } = [];
 
     /// <summary>

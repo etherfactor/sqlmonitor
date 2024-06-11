@@ -93,6 +93,11 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
                     queryVariant.Query.BucketColumn,
                     queryVariant.Query.TimestampUtcColumn);
 
+                foreach (var queryMetric in queryVariant.Query.Metrics)
+                {
+                    message.AddMetric(queryMetric.MetricId, queryMetric.ValueColumn);
+                }
+
                 await sendEndpoint.Send(message, stoppingToken);
             }
         }

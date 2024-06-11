@@ -1,6 +1,8 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql.Services.Queries;
 
@@ -11,7 +13,11 @@ internal class MySqlQueryRunnerTests
     [SetUp]
     public void SetUp()
     {
-        _runner = new MySqlQueryRunner("Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;");
+        var loggerMock = new Mock<ILogger<MySqlQueryRunner>>();
+
+        _runner = new MySqlQueryRunner(
+            loggerMock.Object,
+            "Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;");
     }
 
     [Test]

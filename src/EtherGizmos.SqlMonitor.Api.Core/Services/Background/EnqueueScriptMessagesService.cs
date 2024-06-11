@@ -96,6 +96,11 @@ public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
                     scriptVariant.Script.BucketKey,
                     scriptVariant.Script.TimestampUtcKey);
 
+                foreach (var scriptMetric in scriptVariant.Script.Metrics)
+                {
+                    message.AddMetric(scriptMetric.MetricId, scriptMetric.ValueKey);
+                }
+
                 await sendEndpoint.Send(message, stoppingToken);
             }
         }
