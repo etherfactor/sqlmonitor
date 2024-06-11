@@ -1,5 +1,5 @@
 ﻿namespace EtherGizmos.SqlMonitor.Agent.Core;
 
-public class AgentCore
+public static class AgentCore
 {
 }

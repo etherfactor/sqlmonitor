@@ -1,11 +1,14 @@
 using Asp.Versioning;
 using EtherGizmos.SqlMonitor.Api;
+using EtherGizmos.SqlMonitor.Api.Core;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Background;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Filters;
+using EtherGizmos.SqlMonitor.Api.Core.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Database;
 using EtherGizmos.SqlMonitor.Shared.Messaging;
+using EtherGizmos.SqlMonitor.Shared.Messaging.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
@@ -55,9 +58,10 @@ builder.Services.AddRabbitMQOptions();
 builder.Services.AddConfiguredMassTransit(
     (context, opt) =>
     {
-
+        opt.ReceiveQueue<QueryResultConsumer>(context, MessagingConstants.Queues.CoordinatorQueryResult);
+        opt.ReceiveQueue<ScriptResultConsumer>(context, MessagingConstants.Queues.CoordinatorScriptResult);
     },
-    typeof(Program).Assembly);
+    typeof(ApiCore).Assembly);
 
 // Authentication
 builder.Services.AddAuthentication();
