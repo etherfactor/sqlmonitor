@@ -1,10 +1,13 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Extensions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Renci.SshNet;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh.Services.Scripts;
 
@@ -29,9 +32,21 @@ internal class SshScriptRunnerTests
             Arguments = "-File $Script",
         };
 
+        var ticketMock = new Mock<ITicket<SshClient>>();
+        ticketMock.Setup(@interface =>
+            @interface.Service)
+            .Returns(config.CreateClient());
+
         _runner = new SshScriptRunner(
             loggerMock.Object,
-            config);
+            config,
+            ticketMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _runner.Dispose();
     }
 
     [Test]

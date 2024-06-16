@@ -29,7 +29,7 @@ public class ScriptExecuteConsumer : IConsumer<ScriptExecuteMessage>
 
         _logger.LogInformation("Processing message {@ScriptExecuteMessage}", message);
 
-        var runner = await _scriptRunnerFactory.GetRunnerAsync(
+        using var runner = await _scriptRunnerFactory.GetRunnerAsync(
             message.MonitoredScriptTargetId,
             message.ConnectionRequestToken,
             message.ExecType);

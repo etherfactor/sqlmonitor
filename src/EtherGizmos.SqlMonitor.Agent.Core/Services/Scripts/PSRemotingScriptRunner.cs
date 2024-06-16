@@ -1,36 +1,40 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Helpers;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
-using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 
-internal class PSRemotingScriptRunner : IScriptRunner
+internal class PSRemotingScriptRunner : IScriptRunner, IDisposable
 {
     private readonly ILogger _logger;
     private readonly WinRmConfiguration _configuration;
+    private readonly ITicket<Runspace> _runspaceTicket;
+    private bool _disposed;
 
     public PSRemotingScriptRunner(
         ILogger<PSRemotingScriptRunner> logger,
-        WinRmConfiguration configuration)
+        WinRmConfiguration configuration,
+        ITicket<Runspace> runspaceTicket)
     {
         _logger = logger;
         _configuration = configuration;
+        _runspaceTicket = runspaceTicket;
     }
 
     public async Task<ScriptResultMessage> ExecuteAsync(
         ScriptExecuteMessage scriptMessage,
         CancellationToken cancellationToken = default)
     {
-        using var powershell = GetSession(_configuration);
+        using var powershell = PowerShell.Create();
+        powershell.Runspace = _runspaceTicket.Service;
 
         var executedAtUtc = DateTimeOffset.UtcNow;
 
@@ -50,39 +54,6 @@ internal class PSRemotingScriptRunner : IScriptRunner
         await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output, executedAtUtc);
 
         return result;
-    }
-
-    internal PowerShell GetSession(WinRmConfiguration configuration)
-    {
-        PSCredential credentials;
-        if (configuration.Username is not null && configuration.Password is not null)
-        {
-            var securePassword = new SecureString();
-            foreach (var c in configuration.Password)
-            {
-                securePassword.AppendChar(c);
-            }
-
-            credentials = new PSCredential(configuration.Username, securePassword);
-        }
-        else
-        {
-            credentials = PSCredential.Empty;
-        }
-
-        var connectionInfo = new WSManConnectionInfo(new Uri($"{configuration.Protocol}://{configuration.HostName}:{configuration.Port}"), "http://schemas.microsoft.com/powershell/Microsoft.PowerShell", credentials);
-        connectionInfo.AuthenticationMechanism =
-            configuration.AuthenticationType == WinRmAuthenticationType.Kerberos ? AuthenticationMechanism.Kerberos
-            : configuration.AuthenticationType == WinRmAuthenticationType.Basic ? AuthenticationMechanism.Basic
-            : throw new NotSupportedException($"The authentication type {configuration.AuthenticationType} is not supported.");
-
-        var runspace = RunspaceFactory.CreateRunspace(connectionInfo);
-        runspace.Open();
-
-        var powershell = PowerShell.Create();
-        powershell.Runspace = runspace;
-
-        return powershell;
     }
 
     internal async Task<string> ExecuteScriptAsync(PowerShell session, WinRmConfiguration configuration, ScriptExecuteMessage scriptMessage)
@@ -219,5 +190,25 @@ if (!(Test-Path -Path ""{scriptHash}.{scriptExtension}"")) {{
         var scriptHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
         return scriptHash;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _runspaceTicket.Dispose();
+            }
+
+            _disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

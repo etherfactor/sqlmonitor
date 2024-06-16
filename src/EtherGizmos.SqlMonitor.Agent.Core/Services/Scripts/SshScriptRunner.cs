@@ -1,8 +1,8 @@
 using EtherGizmos.SqlMonitor.Agent.Core.Helpers;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
-using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 using System.Diagnostics;
@@ -14,17 +14,21 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 /// <summary>
 /// Executes scripts against servers, connecting via SSH.
 /// </summary>
-internal partial class SshScriptRunner : IScriptRunner
+internal partial class SshScriptRunner : IScriptRunner, IDisposable
 {
     private readonly ILogger _logger;
     private readonly SshConfiguration _configuration;
+    private readonly ITicket<SshClient> _clientTicket;
+    private bool _disposed;
 
     public SshScriptRunner(
         ILogger<SshScriptRunner> logger,
-        SshConfiguration configuration)
+        SshConfiguration configuration,
+        ITicket<SshClient> clientTicket)
     {
         _logger = logger;
         _configuration = configuration;
+        _clientTicket = clientTicket;
     }
 
     /// <inheritdoc/>
@@ -32,8 +36,7 @@ internal partial class SshScriptRunner : IScriptRunner
         ScriptExecuteMessage scriptMessage,
         CancellationToken cancellationToken = default)
     {
-        using var client = GetClient(_configuration);
-        await client.ConnectAsync(cancellationToken);
+        var client = _clientTicket.Service;
 
         var executedAtUtc = DateTimeOffset.UtcNow;
 
@@ -53,67 +56,6 @@ internal partial class SshScriptRunner : IScriptRunner
         await MessageHelper.ReadIntoMessageAsync(scriptMessage, result, output, executedAtUtc);
 
         return result;
-    }
-
-    /// <summary>
-    /// Creates an authentication configuration based on the SSH configuration.
-    /// </summary>
-    /// <param name="configuration">The SSH configuration.</param>
-    /// <returns>The authentication configuration.</returns>
-    /// <exception cref="NotSupportedException"></exception>
-    internal AuthenticationMethod GetAuthenticationMethod(SshConfiguration configuration)
-    {
-        AuthenticationMethod authentication;
-        if (configuration.AuthenticationType == SshAuthenticationType.None)
-        {
-            authentication = new NoneAuthenticationMethod(
-                configuration.Username);
-        }
-        else if (configuration.AuthenticationType == SshAuthenticationType.Password)
-        {
-            authentication = new PasswordAuthenticationMethod(
-                configuration.Username,
-                configuration.Password);
-        }
-        else if (configuration.AuthenticationType == SshAuthenticationType.PrivateKey)
-        {
-            var privateKeyBytes = Encoding.UTF8.GetBytes(configuration.PrivateKey ?? "");
-            var privateKeyStream = new MemoryStream(privateKeyBytes);
-
-            if (configuration.PrivateKeyPassword is not null)
-            {
-                authentication = new PrivateKeyAuthenticationMethod(
-                    configuration.Username,
-                    new PrivateKeyFile(privateKeyStream, configuration.PrivateKeyPassword));
-            }
-            else
-            {
-                authentication = new PrivateKeyAuthenticationMethod(
-                    configuration.Username,
-                    new PrivateKeyFile(privateKeyStream));
-            }
-        }
-        else
-        {
-            throw new NotSupportedException($"The authentication type {configuration.AuthenticationType} is not supported.");
-        }
-
-        return authentication;
-    }
-
-    /// <summary>
-    /// Create an SSH client.
-    /// </summary>
-    /// <param name="configuration">The SSH configuration.</param>
-    /// <returns>The SSH client.</returns>
-    internal SshClient GetClient(SshConfiguration configuration)
-    {
-        var authentication = GetAuthenticationMethod(configuration);
-
-        var connectionInfo = new ConnectionInfo(configuration.HostName, configuration.Port, configuration.Username, authentication);
-        var client = new SshClient(connectionInfo);
-
-        return client;
     }
 
     /// <summary>
@@ -203,5 +145,25 @@ EOF
         var scriptHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
         return scriptHash;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _clientTicket.Dispose();
+            }
+
+            _disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

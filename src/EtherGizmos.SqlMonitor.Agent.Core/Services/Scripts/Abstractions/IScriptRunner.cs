@@ -5,7 +5,7 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts.Abstractions;
 /// <summary>
 /// Executes scripts against servers, either by connecting or running them locally.
 /// </summary>
-public interface IScriptRunner
+public interface IScriptRunner : IDisposable
 {
     /// <summary>
     /// Execute a script against the specified server.

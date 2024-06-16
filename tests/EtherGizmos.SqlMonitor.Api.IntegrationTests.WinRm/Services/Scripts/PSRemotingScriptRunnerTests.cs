@@ -1,10 +1,13 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Extensions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Scripts;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Communication;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Management.Automation.Runspaces;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.Services.Scripts;
 
@@ -30,9 +33,21 @@ internal class PSRemotingScriptRunnerTests
             Arguments = "-File $Script",
         };
 
+        var ticketMock=new Mock<ITicket<Runspace>>();
+        ticketMock.Setup(@interface =>
+            @interface.Service)
+            .Returns(config.CreateRunspace());
+
         _runner = new PSRemotingScriptRunner(
             loggerMock.Object,
-            config);
+            config,
+            ticketMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _runner.Dispose();
     }
 
     [Test]
