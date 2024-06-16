@@ -25,6 +25,11 @@ public class ApplicationContext : DbContext
     public virtual DbSet<Metric> Metrics { get; set; }
 
     /// <summary>
+    /// Provides access to <see cref="MetricBucket"/> records, in 'dbo.metric_buckets'.
+    /// </summary>
+    public virtual DbSet<MetricBucket> MetricBuckets { get; set; }
+
+    /// <summary>
     /// Provides access to <see cref="MonitoredEnvironment"/> records, in 'dbo.monitored_environments'.
     /// </summary>
     public virtual DbSet<MonitoredEnvironment> MonitoredEnvironments { get; set; }
@@ -53,6 +58,26 @@ public class ApplicationContext : DbContext
     /// Provides access to <see cref="MonitoredTarget"/> records, in 'dbo.monitored_targets'.
     /// </summary>
     public virtual DbSet<MonitoredTarget> MonitoredTargets { get; set; }
+
+    /// <summary>
+    /// Provides access to <see cref="MonitoredTargetMetricByDay"/> records, in 'dbo.monitored_target_metrics_by_day'.
+    /// </summary>
+    public virtual DbSet<MonitoredTargetMetricByDay> MonitoredTargetMetricsByDay { get; set; }
+
+    /// <summary>
+    /// Provides access to <see cref="MonitoredTargetMetricByHour"/> records, in 'dbo.monitored_target_metrics_by_hour'.
+    /// </summary>
+    public virtual DbSet<MonitoredTargetMetricByHour> MonitoredTargetMetricsByHour { get; set; }
+
+    /// <summary>
+    /// Provides access to <see cref="MonitoredTargetMetricByMinute"/> records, in 'dbo.monitored_target_metrics_by_minute'.
+    /// </summary>
+    public virtual DbSet<MonitoredTargetMetricByMinute> MonitoredTargetMetricsByMinute { get; set; }
+
+    /// <summary>
+    /// Provides access to <see cref="MonitoredTargetMetricBySecond"/> records, in 'dbo.monitored_target_metrics_by_second'.
+    /// </summary>
+    public virtual DbSet<MonitoredTargetMetricBySecond> MonitoredTargetMetricsBySecond { get; set; }
 
     /// <summary>
     /// Provides access to <see cref="Query"/> records, in 'dbo.queries'.
@@ -136,6 +161,21 @@ public class ApplicationContext : DbContext
             entity.PropertyWithAnnotations(e => e.IsSoftDeleted);
             entity.PropertyWithAnnotations(e => e.SecurableId)
                 .HasDefaultValueSql();
+        });
+
+        modelBuilder.Entity<MetricBucket>(entity =>
+        {
+            entity.ToTableWithAnnotations(buildAction: e =>
+            {
+                e.HasTrigger("TR_metric_buckets_audit");
+            });
+
+            entity.HasKey(e => e.Id);
+
+            entity.PropertyWithAnnotations(e => e.Id);
+            entity.AuditPropertiesWithAnnotations();
+            entity.PropertyWithAnnotations(e => e.Name);
+            entity.PropertyWithAnnotations(e => e.Description);
         });
 
         modelBuilder.Entity<MonitoredEnvironment>(entity =>
@@ -240,6 +280,62 @@ public class ApplicationContext : DbContext
             entity.PropertyWithAnnotations(e => e.MonitoredSystemId);
             entity.PropertyWithAnnotations(e => e.MonitoredResourceId);
             entity.PropertyWithAnnotations(e => e.MonitoredEnvironmentId);
+        });
+
+        modelBuilder.Entity<MonitoredTargetMetricByDay>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.MonitoredTargetId, e.MetricId, e.MetricBucketId, e.MeasuredAtUtc });
+
+            entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+        });
+
+        modelBuilder.Entity<MonitoredTargetMetricByHour>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.MonitoredTargetId, e.MetricId, e.MetricBucketId, e.MeasuredAtUtc });
+
+            entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+        });
+
+        modelBuilder.Entity<MonitoredTargetMetricByMinute>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.MonitoredTargetId, e.MetricId, e.MetricBucketId, e.MeasuredAtUtc });
+
+            entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
+        });
+
+        modelBuilder.Entity<MonitoredTargetMetricBySecond>(entity =>
+        {
+            entity.ToTableWithAnnotations();
+
+            entity.HasKey(e => new { e.MonitoredTargetId, e.MetricId, e.MetricBucketId, e.MeasuredAtUtc });
+
+            entity.PropertyWithAnnotations(e => e.MonitoredTargetId);
+            entity.PropertyWithAnnotations(e => e.MetricId);
+            entity.PropertyWithAnnotations(e => e.MetricBucketId);
+            entity.PropertyWithAnnotations(e => e.MeasuredAtUtc);
+            entity.PropertyWithAnnotations(e => e.Value);
+            entity.PropertyWithAnnotations(e => e.SeverityType);
         });
 
         modelBuilder.Entity<Query>(entity =>
