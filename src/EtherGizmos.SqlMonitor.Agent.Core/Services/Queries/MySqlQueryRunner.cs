@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Agent.Core.Helpers;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
 using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
@@ -11,17 +12,18 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 /// <summary>
 /// Executes queries against a MySQL database.
 /// </summary>
-internal class MySqlQueryRunner : IQueryRunner
+internal class MySqlQueryRunner : IQueryRunner, IDisposable
 {
     private readonly ILogger _logger;
-    private readonly string _connectionString;
+    private readonly ITicket<MySqlConnection> _connectionTicket;
+    private bool _disposed;
 
     public MySqlQueryRunner(
         ILogger<MySqlQueryRunner> logger,
-        string connectionString)
+        ITicket<MySqlConnection> connectionTicket)
     {
         _logger = logger;
-        _connectionString = connectionString;
+        _connectionTicket = connectionTicket;
     }
 
     /// <inheritdoc/>
@@ -29,8 +31,7 @@ internal class MySqlQueryRunner : IQueryRunner
         QueryExecuteMessage queryMessage,
         CancellationToken cancellationToken = default)
     {
-        using var connection = new MySqlConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
+        var connection = _connectionTicket.Service;
 
         var command = connection.CreateCommand();
         command.CommandText = queryMessage.Text;
@@ -55,5 +56,25 @@ internal class MySqlQueryRunner : IQueryRunner
         await MessageHelper.ReadIntoMessageAsync(queryMessage, result, reader, executedAtUtc);
 
         return result;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _connectionTicket.Dispose();
+            }
+
+            _disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

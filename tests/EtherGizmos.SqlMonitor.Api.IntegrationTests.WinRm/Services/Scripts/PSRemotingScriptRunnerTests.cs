@@ -33,7 +33,7 @@ internal class PSRemotingScriptRunnerTests
             Arguments = "-File $Script",
         };
 
-        var ticketMock=new Mock<ITicket<Runspace>>();
+        var ticketMock = new Mock<ITicket<Runspace>>();
         ticketMock.Setup(@interface =>
             @interface.Service)
             .Returns(config.CreateRunspace());

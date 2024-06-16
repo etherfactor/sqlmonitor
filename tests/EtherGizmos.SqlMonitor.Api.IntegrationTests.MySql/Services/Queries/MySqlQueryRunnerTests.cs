@@ -1,8 +1,10 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
+using MySqlConnector;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql.Services.Queries;
 
@@ -15,9 +17,25 @@ internal class MySqlQueryRunnerTests
     {
         var loggerMock = new Mock<ILogger<MySqlQueryRunner>>();
 
+        var ticketMock = new Mock<ITicket<MySqlConnection>>();
+        ticketMock.Setup(@interface =>
+            @interface.Service)
+            .Returns(() =>
+            {
+                var connection = new MySqlConnection("Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;");
+                connection.Open();
+                return connection;
+            });
+
         _runner = new MySqlQueryRunner(
             loggerMock.Object,
-            "Server=localhost; Port=33306; Database=performance_pulse; Uid=service; Pwd=jipEZk@7ui2lw&XUiw^W;");
+            ticketMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _runner.Dispose();
     }
 
     [Test]

@@ -1,8 +1,10 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Npgsql;
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.Services.Queries;
 
@@ -15,9 +17,25 @@ internal class PostgreSqlQueryRunnerTests
     {
         var loggerMock = new Mock<ILogger<PostgreSqlQueryRunner>>();
 
+        var ticketMock = new Mock<ITicket<NpgsqlConnection>>();
+        ticketMock.Setup(@interface =>
+            @interface.Service)
+            .Returns(() =>
+            {
+                var connection = new NpgsqlConnection($"Host={DockerSetup.ServerHost}; Port={DockerSetup.ServerPort}; Database={DockerSetup.ServerDatabase}; User Id={DockerSetup.ServerDefaultUsername}; Password={DockerSetup.ServerDefaultPassword};");
+                connection.Open();
+                return connection;
+            });
+
         _runner = new PostgreSqlQueryRunner(
             loggerMock.Object,
-            $"Host={DockerSetup.ServerHost}; Port={DockerSetup.ServerPort}; Database={DockerSetup.ServerDatabase}; User Id={DockerSetup.ServerDefaultUsername}; Password={DockerSetup.ServerDefaultPassword};");
+            ticketMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _runner.Dispose();
     }
 
     [Test]

@@ -18,9 +18,11 @@ internal class ScriptRunnerFactory : IScriptRunnerFactory
     private readonly IServiceProvider _serviceProvider;
     private readonly IConnectionRetriever _connectionRetriever;
 
+    //SSH
     private readonly ConcurrentDictionary<int, Task<SshConfiguration>> _sshConfigurations = new();
     private readonly ConcurrentDictionary<int, IServicePool<SshClient>> _sshClients = new();
 
+    //WinRM
     private readonly ConcurrentDictionary<int, Task<WinRmConfiguration>> _winRmConfigurations = new();
     private readonly ConcurrentDictionary<int, IServicePool<Runspace>> _winRmClients = new();
 

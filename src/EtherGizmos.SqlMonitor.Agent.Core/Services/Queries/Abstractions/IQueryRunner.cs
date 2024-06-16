@@ -5,7 +5,7 @@ namespace EtherGizmos.SqlMonitor.Agent.Core.Services.Queries.Abstractions;
 /// <summary>
 /// Executes queries against a server, either by connecting or running them locally.
 /// </summary>
-public interface IQueryRunner
+public interface IQueryRunner : IDisposable
 {
     /// <summary>
     /// Execute a query against the connected server.

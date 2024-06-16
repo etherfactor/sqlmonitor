@@ -1,6 +1,8 @@
-﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
+﻿using EtherGizmos.SqlMonitor.Agent.Core.Services.Pooling.Abstractions;
+using EtherGizmos.SqlMonitor.Agent.Core.Services.Queries;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -15,9 +17,25 @@ internal class SqlServerQueryRunnerTests
     {
         var loggerMock = new Mock<ILogger<SqlServerQueryRunner>>();
 
+        var ticketMock = new Mock<ITicket<SqlConnection>>();
+        ticketMock.Setup(@interface =>
+            @interface.Service)
+            .Returns(() =>
+            {
+                var connection = new SqlConnection("Server=localhost,11433; Database=performance_pulse; User Id=service; Password=LO^9ZpGB8FiA*HMMQyfN; TrustServerCertificate=true;");
+                connection.Open();
+                return connection;
+            });
+
         _runner = new SqlServerQueryRunner(
             loggerMock.Object,
-            "Server=localhost,11433; Database=performance_pulse; User Id=service; Password=LO^9ZpGB8FiA*HMMQyfN; TrustServerCertificate=true;");
+            ticketMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _runner.Dispose();
     }
 
     [Test]
