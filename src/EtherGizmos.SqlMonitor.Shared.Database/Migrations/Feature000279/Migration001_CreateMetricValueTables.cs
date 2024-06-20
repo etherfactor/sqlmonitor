@@ -23,7 +23,7 @@ public class Migration001_CreateMetricValueTables : MigrationExtension
          *  - the buckets by which metrics are grouped per target
          */
         Create.Table("metric_buckets")
-            .WithColumn("metric_bucket_id").AsInt32().PrimaryKey()
+            .WithColumn("metric_bucket_id").AsInt32().PrimaryKey().Identity()
             .WithAuditColumns()
             .WithColumn("name").AsString(200).NotNullable().Unique()
             .WithColumn("description").AsString(int.MaxValue).Nullable();

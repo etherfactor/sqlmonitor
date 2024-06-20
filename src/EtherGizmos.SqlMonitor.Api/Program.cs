@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Api.Core.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Database;
+using EtherGizmos.SqlMonitor.Shared.Database.Services;
 using EtherGizmos.SqlMonitor.Shared.Messaging;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Models;
@@ -15,6 +16,7 @@ using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Services;
 using EtherGizmos.SqlMonitor.Shared.OData;
 using EtherGizmos.SqlMonitor.Shared.Redis;
+using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Utilities;
 using Microsoft.AspNetCore.OData;
 using Microsoft.Extensions.Options;
@@ -61,7 +63,9 @@ builder.Services.AddConfiguredMassTransit(
         opt.ReceiveQueue<QueryResultConsumer>(context, MessagingConstants.Queues.CoordinatorQueryResult);
         opt.ReceiveQueue<ScriptResultConsumer>(context, MessagingConstants.Queues.CoordinatorScriptResult);
     },
-    typeof(ApiCore).Assembly);
+    typeof(ApiCore).Assembly)
+    .ImportScoped<ApplicationContext>()
+    .ImportScoped<IDistributedRecordCache>();
 
 // Authentication
 builder.Services.AddAuthentication();

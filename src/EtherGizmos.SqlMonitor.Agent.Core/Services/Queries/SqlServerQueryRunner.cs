@@ -33,7 +33,7 @@ internal class SqlServerQueryRunner : IQueryRunner, IDisposable
     {
         var connection = _connectionTicket.Service;
 
-        var command = connection.CreateCommand();
+        using var command = connection.CreateCommand();
         command.CommandText = queryMessage.Text;
 
         var executedAtUtc = DateTimeOffset.UtcNow;
@@ -42,7 +42,7 @@ internal class SqlServerQueryRunner : IQueryRunner, IDisposable
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var reader = await command.ExecuteLoggedReaderAsync(_logger, cancellationToken);
+        using var reader = await command.ExecuteLoggedReaderAsync(_logger, cancellationToken);
         var executionMilliseconds = stopwatch.ElapsedMilliseconds;
         if (stopwatch.IsRunning && executionMilliseconds == 0)
             executionMilliseconds++;

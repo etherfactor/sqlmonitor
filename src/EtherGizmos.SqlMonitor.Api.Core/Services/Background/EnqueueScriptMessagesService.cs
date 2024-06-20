@@ -6,6 +6,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -48,7 +49,7 @@ public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
         var monitoredScriptTargetSet = _distributedRecordCache.EntitySet<MonitoredScriptTarget>();
 
         var scriptsToRun = await scriptSet.Where(e => e.NextRunAtUtc)
-            .IsLessThanOrEqualTo(DateTimeOffset.UtcNow)
+            .IsLessThanOrEqualTo(DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1)))
             .ToListAsync(stoppingToken);
 
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
@@ -109,7 +110,7 @@ public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
         {
             scriptService.Add(script);
 
-            script.LastRunAtUtc = DateTime.UtcNow;
+            script.LastRunAtUtc = DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1));
             await scriptSet.AddAsync(script, stoppingToken);
         }
 

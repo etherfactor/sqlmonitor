@@ -35,7 +35,7 @@ public class ScriptResultMessage
     public void AddMetricValue(
         int metricId,
         string? bucket,
-        DateTimeOffset? timestampUtc,
+        DateTimeOffset timestampUtc,
         double value)
     {
         MetricValues.Add(new(metricId, bucket, timestampUtc, value));
@@ -48,7 +48,7 @@ public class ScriptResultMessageMetricValue
 
     public string? Bucket { get; set; }
 
-    public DateTimeOffset? TimestampUtc { get; set; }
+    public DateTimeOffset TimestampUtc { get; set; }
 
     public double Value { get; set; }
 
@@ -62,7 +62,7 @@ public class ScriptResultMessageMetricValue
     public ScriptResultMessageMetricValue(
         int metricId,
         string? bucket,
-        DateTimeOffset? timestampUtc,
+        DateTimeOffset timestampUtc,
         double value)
     {
         MetricId = metricId;

@@ -32,7 +32,7 @@ public class QueryResultMessage
     public void AddMetricValue(
         int metricId,
         string? bucket,
-        DateTimeOffset? timestampUtc,
+        DateTimeOffset timestampUtc,
         double value)
     {
         MetricValues.Add(new(metricId, bucket, timestampUtc, value));
@@ -45,7 +45,7 @@ public class QueryResultMessageMetricValue
 
     public string? Bucket { get; set; }
 
-    public DateTimeOffset? TimestampUtc { get; set; }
+    public DateTimeOffset TimestampUtc { get; set; }
 
     public double Value { get; set; }
 
@@ -59,7 +59,7 @@ public class QueryResultMessageMetricValue
     public QueryResultMessageMetricValue(
         int metricId,
         string? bucket,
-        DateTimeOffset? timestampUtc,
+        DateTimeOffset timestampUtc,
         double value)
     {
         MetricId = metricId;

@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -52,7 +53,7 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
         var monitoredQueryTargetSet = _distributedRecordCache.EntitySet<MonitoredQueryTarget>();
 
         var queriesToRun = await querySet.Where(e => e.NextRunAtUtc)
-            .IsLessThanOrEqualTo(DateTimeOffset.UtcNow)
+            .IsLessThanOrEqualTo(DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1)))
             .ToListAsync(stoppingToken);
 
         var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
@@ -106,7 +107,7 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
         {
             queryService.Add(query);
 
-            query.LastRunAtUtc = DateTime.UtcNow;
+            query.LastRunAtUtc = DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1));
             await querySet.AddAsync(query, stoppingToken);
         }
 

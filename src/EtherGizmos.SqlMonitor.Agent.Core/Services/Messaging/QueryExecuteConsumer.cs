@@ -29,7 +29,7 @@ public class QueryExecuteConsumer : IConsumer<QueryExecuteMessage>
 
         _logger.LogInformation("Processing message {@QueryExecuteMessage}", message);
 
-        var runner = await _queryRunnerFactory.GetRunnerAsync(
+        using var runner = await _queryRunnerFactory.GetRunnerAsync(
             message.MonitoredQueryTargetId,
             message.ConnectionRequestToken,
             message.SqlType);
