@@ -8,6 +8,7 @@ using EtherGizmos.SqlMonitor.Api.Core.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
 using EtherGizmos.SqlMonitor.Shared.Database;
 using EtherGizmos.SqlMonitor.Shared.Database.Services;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Models;
@@ -17,6 +18,7 @@ using EtherGizmos.SqlMonitor.Shared.OAuth.Services;
 using EtherGizmos.SqlMonitor.Shared.OData;
 using EtherGizmos.SqlMonitor.Shared.Redis;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Utilities;
 using Microsoft.AspNetCore.OData;
 using Microsoft.Extensions.Options;
@@ -65,7 +67,11 @@ builder.Services.AddConfiguredMassTransit(
     },
     typeof(ApiCore).Assembly)
     .ImportScoped<ApplicationContext>()
-    .ImportScoped<IDistributedRecordCache>();
+    .ImportScoped<ILockingCoordinator>()
+    .ImportScoped<IMetricBucketLockFactory>()
+    .ImportScoped<IMonitoredTargetMetricsBySecondService>()
+    .ImportScoped<IRecordCache>()
+    .ImportScoped<ISaveService>();
 
 // Authentication
 builder.Services.AddAuthentication();

@@ -23,7 +23,7 @@ internal class GlobalBackgroundServiceTests
     public async Task DoWorkAsync_WhenObtainsLock_DoesWork()
     {
         //Arrange
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<ILockingCoordinator>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CacheLock<JobCacheKey>(new JobCacheKey(typeof(GlobalBackgroundServiceImplemented)), new TestSynchronizationHandle()));
@@ -42,7 +42,7 @@ internal class GlobalBackgroundServiceTests
     public async Task DoWorkAsync_WhenDoesNotObtainLock_DoesNotWork()
     {
         //Arrange
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<ILockingCoordinator>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as CacheLock<JobCacheKey>);
@@ -64,7 +64,7 @@ internal class GlobalBackgroundServiceImplemented : GlobalBackgroundService
 
     public GlobalBackgroundServiceImplemented(
         ILogger<GlobalBackgroundServiceImplemented> logger,
-        IDistributedLockProvider cache,
+        ILockingCoordinator cache,
         string cronExpression)
         : base(logger, cache, cronExpression) { }
 

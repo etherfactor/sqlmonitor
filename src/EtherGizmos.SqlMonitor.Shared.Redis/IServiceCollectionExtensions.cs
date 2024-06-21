@@ -6,12 +6,14 @@ using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Locking;
 using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Utilities.Extensions;
+using Medallion.Threading;
 using Medallion.Threading.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.System.Text.Json;
-using IMedallionDistributedLockProvider = Medallion.Threading.IDistributedLockProvider;
 
 namespace EtherGizmos.SqlMonitor.Shared.Redis;
 
@@ -20,20 +22,23 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddDistributedCaching(this IServiceCollection @this)
     {
         @this
+            .AddRedisServices()
             .AddChildContainer((childServices, parentServices) =>
             {
                 var usageOptions = parentServices
                     .GetRequiredService<IOptions<UsageOptions>>()
                     .Value;
 
+                childServices.AddTransient<IDatabase>(e => e.GetRequiredService<IRedisClientFactory>().GetDefaultRedisDatabase().Database);
+
                 if (usageOptions.Cache == CacheType.InMemory)
                 {
-                    childServices.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
+                    childServices.AddScoped<IRecordCache, InMemoryRecordCache>();
                 }
                 else if (usageOptions.Cache == CacheType.Redis)
                 {
                     childServices.AddRedisServices();
-                    childServices.AddSingleton<IDistributedRecordCache, RedisDistributedRecordCache>();
+                    childServices.AddScoped<IRecordCache, RedisRecordCache>();
                 }
                 else
                 {
@@ -44,7 +49,8 @@ public static class IServiceCollectionExtensions
             })
             .ImportLogging()
             .ImportSingleton<IOptions<UsageOptions>>()
-            .ForwardSingleton<IDistributedRecordCache>()
+            .ImportSingleton<IRedisClientFactory>()
+            .ForwardSingleton<IRecordCache>()
             .ForwardSingleton<IRedisHelperFactory>();
 
         return @this;
@@ -53,20 +59,24 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddDistributedLocking(this IServiceCollection @this)
     {
         @this
+            .AddRedisServices()
+            .AddSingleton<IMetricBucketLockFactory, MetricBucketLockFactory>()
             .AddChildContainer((childServices, parentServices) =>
             {
                 var usageOptions = parentServices
                     .GetRequiredService<IOptions<UsageOptions>>()
                     .Value;
 
+                childServices.AddTransient<IDatabase>(e => e.GetRequiredService<IRedisClientFactory>().GetDefaultRedisDatabase().Database);
+
                 if (usageOptions.Cache == CacheType.InMemory)
                 {
-                    childServices.AddSingleton<IDistributedLockProvider, InMemoryLockProvider>();
+                    childServices.AddScoped<ILockingCoordinator, InMemoryLockingCoordinator>();
                 }
                 else if (usageOptions.Cache == CacheType.Redis)
                 {
-                    childServices.AddSingleton<IMedallionDistributedLockProvider, RedisDistributedSynchronizationProvider>();
-                    childServices.AddSingleton<IDistributedLockProvider, DistributedLockProvider>();
+                    childServices.AddScoped<IDistributedLockProvider, RedisDistributedSynchronizationProvider>();
+                    childServices.AddScoped<ILockingCoordinator, RedisLockCoordinator>();
                 }
                 else
                 {
@@ -75,7 +85,8 @@ public static class IServiceCollectionExtensions
             })
             .ImportLogging()
             .ImportSingleton<IOptions<UsageOptions>>()
-            .ForwardSingleton<IDistributedLockProvider>();
+            .ImportScoped<IRedisClientFactory>()
+            .ForwardSingleton<ILockingCoordinator>();
 
         return @this;
     }

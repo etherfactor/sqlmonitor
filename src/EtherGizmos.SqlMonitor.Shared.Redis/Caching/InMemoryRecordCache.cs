@@ -5,7 +5,7 @@ namespace EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 /// <summary>
 /// Provides means to cache and retrieve records and record sets, in memory.
 /// </summary>
-internal class InMemoryRecordCache : IDistributedRecordCache
+internal class InMemoryRecordCache : IRecordCache
 {
     private readonly IServiceProvider _serviceProvider;
 

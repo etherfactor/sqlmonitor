@@ -11,12 +11,12 @@ namespace EtherGizmos.SqlMonitor.Api.Core.Services.Background;
 public class CacheLoadService : OneTimeBackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
 
     public CacheLoadService(
         ILogger<CacheLoadService> logger,
         IServiceProvider serviceProvider,
-        IDistributedRecordCache distributedRecordCache)
+        IRecordCache distributedRecordCache)
         : base(logger)
     {
         _serviceProvider = serviceProvider;

@@ -23,7 +23,7 @@ public class MonitoredSystemsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/monitoredSystems";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IMonitoredSystemService _monitoredSystemService;
     private readonly ISaveService _saveService;
@@ -42,7 +42,7 @@ public class MonitoredSystemsController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredSystemsController(
         ILogger<MonitoredSystemsController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IMonitoredSystemService instanceService,
         ISaveService saveService)

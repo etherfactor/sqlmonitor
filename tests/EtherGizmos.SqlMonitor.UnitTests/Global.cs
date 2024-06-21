@@ -41,7 +41,7 @@ internal static class Global
         services.AddScoped<ScriptsController>();
         services.AddScoped<ScriptInterpretersController>();
 
-        services.AddSingleton<IDistributedRecordCache, InMemoryRecordCache>();
+        services.AddSingleton<IRecordCache, InMemoryRecordCache>();
         services.AddSingleton(e => RedisHelperFactory.Instance);
 
         services.AddModelValidators();

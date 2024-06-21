@@ -23,7 +23,7 @@ public class MonitoredScriptTargetsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/monitoredScriptTargets";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IMonitoredScriptTargetService _monitoredScriptTargetService;
     private readonly ISaveService _saveService;
@@ -42,7 +42,7 @@ public class MonitoredScriptTargetsController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredScriptTargetsController(
         ILogger<MonitoredScriptTargetsController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IMonitoredScriptTargetService instanceService,
         ISaveService saveService)

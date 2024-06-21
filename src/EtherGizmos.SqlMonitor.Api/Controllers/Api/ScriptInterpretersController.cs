@@ -23,7 +23,7 @@ public class ScriptInterpretersController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/scriptInterpreters";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IScriptInterpreterService _scriptInterpreterService;
     private readonly ISaveService _saveService;
@@ -42,7 +42,7 @@ public class ScriptInterpretersController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public ScriptInterpretersController(
         ILogger<ScriptInterpretersController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IScriptInterpreterService instanceService,
         ISaveService saveService)

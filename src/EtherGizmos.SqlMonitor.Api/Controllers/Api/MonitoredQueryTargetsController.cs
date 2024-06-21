@@ -23,7 +23,7 @@ public class MonitoredQueryTargetsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/monitoredQueryTargets";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IMonitoredQueryTargetService _monitoredQueryTargetService;
     private readonly ISaveService _saveService;
@@ -42,7 +42,7 @@ public class MonitoredQueryTargetsController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredQueryTargetsController(
         ILogger<MonitoredQueryTargetsController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IMonitoredQueryTargetService instanceService,
         ISaveService saveService)

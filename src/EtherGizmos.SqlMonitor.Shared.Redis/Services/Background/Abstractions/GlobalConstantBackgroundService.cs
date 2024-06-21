@@ -10,7 +10,7 @@ public abstract class GlobalConstantBackgroundService : PeriodicBackgroundServic
 {
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IDistributedLockProvider _distributedLockProvider;
+    private readonly ILockingCoordinator _distributedLockProvider;
     private readonly CrontabSchedule _schedule;
 
     private DateTime _lastRun;
@@ -18,7 +18,7 @@ public abstract class GlobalConstantBackgroundService : PeriodicBackgroundServic
     protected GlobalConstantBackgroundService(
         ILogger logger,
         IServiceProvider serviceProvider,
-        IDistributedLockProvider distributedLockProvider,
+        ILockingCoordinator distributedLockProvider,
         string lockCronExpression,
         string cronExpression)
         : base(logger, lockCronExpression)

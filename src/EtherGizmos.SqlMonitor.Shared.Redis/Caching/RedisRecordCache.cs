@@ -7,19 +7,19 @@ namespace EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 /// <summary>
 /// Provides means to cache and retrieve records and record sets, in Redis.
 /// </summary>
-internal class RedisDistributedRecordCache : IDistributedRecordCache
+internal class RedisRecordCache : IRecordCache
 {
     private readonly ILogger _logger;
-    private readonly IConnectionMultiplexer _multiplexer;
+    private readonly IDatabase _database;
     private readonly IRedisHelperFactory _factory;
 
-    public RedisDistributedRecordCache(
-        ILogger<RedisDistributedRecordCache> logger,
-        IConnectionMultiplexer multiplexer,
+    public RedisRecordCache(
+        ILogger<RedisRecordCache> logger,
+        IDatabase database,
         IRedisHelperFactory factory)
     {
         _logger = logger;
-        _multiplexer = multiplexer;
+        _database = database;
         _factory = factory;
     }
 
@@ -27,13 +27,13 @@ internal class RedisDistributedRecordCache : IDistributedRecordCache
     public ICacheEntity<TEntity> Entity<TEntity>(EntityCacheKey<TEntity> key)
         where TEntity : class, new()
     {
-        return new RedisCacheEntity<TEntity>(_factory, _multiplexer.GetDatabase(), key);
+        return new RedisCacheEntity<TEntity>(_factory, _database, key);
     }
 
     /// <inheritdoc/>
     public ICacheEntitySet<TEntity> EntitySet<TEntity>()
         where TEntity : class, new()
     {
-        return new RedisCacheEntitySet<TEntity>(_factory, _multiplexer.GetDatabase());
+        return new RedisCacheEntitySet<TEntity>(_factory, _database);
     }
 }

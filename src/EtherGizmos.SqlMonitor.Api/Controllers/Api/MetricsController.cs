@@ -23,7 +23,7 @@ public class MetricsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/metrics";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IMetricService _metricService;
     private readonly ISaveService _saveService;
@@ -42,7 +42,7 @@ public class MetricsController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public MetricsController(
         ILogger<MetricsController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IMetricService instanceService,
         ISaveService saveService)

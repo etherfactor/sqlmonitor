@@ -10,11 +10,11 @@ namespace EtherGizmos.SqlMonitor.Shared.Redis.Services.Background.Abstractions;
 public abstract class GlobalBackgroundService : PeriodicBackgroundService
 {
     private readonly ILogger _logger;
-    private readonly IDistributedLockProvider _distributedLockProvider;
+    private readonly ILockingCoordinator _distributedLockProvider;
 
     public GlobalBackgroundService(
         ILogger logger,
-        IDistributedLockProvider distributedLockProvider,
+        ILockingCoordinator distributedLockProvider,
         string cronExpression)
         : base(logger, cronExpression)
     {

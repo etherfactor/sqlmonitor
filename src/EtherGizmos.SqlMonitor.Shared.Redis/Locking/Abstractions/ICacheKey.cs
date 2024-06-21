@@ -8,5 +8,5 @@ public interface ICacheKey
     /// <summary>
     /// The name of the key in the distributed cache. Implementations should return this value in a single case.
     /// </summary>
-    string KeyName { get; }
+    string Name { get; }
 }

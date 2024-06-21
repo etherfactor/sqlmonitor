@@ -10,19 +10,19 @@ namespace EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 public readonly struct EntityCacheKey<TEntity> : ICacheKey
 {
     /// <inheritdoc/>
-    public readonly string KeyName { get; }
+    public readonly string Name { get; }
 
     /// <summary>
     /// Use <see cref="CacheKey.ForEntity{TEntity}(string)"/> instead!
     /// </summary>
     internal EntityCacheKey(string keyName)
     {
-        KeyName = keyName.ToSnakeCase();
+        Name = keyName.ToSnakeCase();
     }
 
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        return (KeyName, typeof(TEntity)).GetHashCode();
+        return (Name, typeof(TEntity)).GetHashCode();
     }
 }

@@ -22,7 +22,7 @@ public class ScriptsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/scripts";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IScriptService _scriptService;
@@ -44,7 +44,7 @@ public class ScriptsController : ODataController
     /// <param name="metricService">Provides access to metric records.</param>
     public ScriptsController(
         ILogger<ScriptsController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IModelValidatorFactory modelValidatorFactory,
         IScriptService scriptService,

@@ -10,7 +10,7 @@ public struct EntitySetRecordCacheKey<TEntity> : ICacheKey
     where TEntity : class, new()
 {
     /// <inheritdoc/>
-    public readonly string KeyName { get; }
+    public readonly string Name { get; }
 
     /// <summary>
     /// Use <see cref="CacheKey.ForEntitySetRecord{TEntity}(TEntity)"/> instead!
@@ -19,12 +19,12 @@ public struct EntitySetRecordCacheKey<TEntity> : ICacheKey
     {
         var helper = RedisHelperFactory.Instance.CreateHelper<TEntity>();
         var setKey = helper.GetEntitySetEntityKey(entity);
-        KeyName = setKey.ToString();
+        Name = setKey.ToString();
     }
 
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        return (KeyName, typeof(TEntity)).GetHashCode();
+        return (Name, typeof(TEntity)).GetHashCode();
     }
 }

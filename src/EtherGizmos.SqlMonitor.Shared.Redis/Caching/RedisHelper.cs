@@ -153,7 +153,7 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
     /// <returns>The Redis key for the entity.</returns>
     public RedisKey GetEntityKey(EntityCacheKey<TEntity> key)
     {
-        var keyData = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$entity:{key.KeyName}");
+        var keyData = new RedisKey($"{ServiceConstants.Cache.SchemaName}:$$entity:{key.Name}");
         return keyData;
     }
 

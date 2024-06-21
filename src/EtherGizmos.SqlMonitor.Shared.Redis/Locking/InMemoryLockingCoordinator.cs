@@ -2,7 +2,7 @@
 
 namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking;
 
-internal class InMemoryLockProvider : IDistributedLockProvider
+internal class InMemoryLockingCoordinator : ILockingCoordinator
 {
     private Dictionary<string, bool> _consumedLocks = [];
 
@@ -16,17 +16,19 @@ internal class InMemoryLockProvider : IDistributedLockProvider
         {
             lock (_consumedLocks)
             {
-                if (!_consumedLocks.ContainsKey(key.KeyName))
-                    _consumedLocks.Add(key.KeyName, true);
-
-                @lock = new CacheLock<TKey>(key, new InMemorySynchronizationHandle(() =>
+                if (!_consumedLocks.ContainsKey(key.Name))
                 {
-                    lock (_consumedLocks)
+                    _consumedLocks.Add(key.Name, true);
+
+                    @lock = new CacheLock<TKey>(key, new InMemorySynchronizationHandle(() =>
                     {
-                        if (_consumedLocks.ContainsKey(key.KeyName))
-                            _consumedLocks.Remove(key.KeyName);
-                    }
-                }));
+                        lock (_consumedLocks)
+                        {
+                            if (_consumedLocks.ContainsKey(key.Name))
+                                _consumedLocks.Remove(key.Name);
+                        }
+                    }));
+                }
             }
 
             if (@lock is null)

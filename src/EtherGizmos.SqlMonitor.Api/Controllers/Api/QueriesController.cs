@@ -22,7 +22,7 @@ public class QueriesController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/queries";
 
     private readonly ILogger _logger;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IQueryService _queryService;
@@ -44,7 +44,7 @@ public class QueriesController : ODataController
     /// <param name="metricService">Provides access to metric records.</param>
     public QueriesController(
         ILogger<QueriesController> logger,
-        IDistributedRecordCache cache,
+        IRecordCache cache,
         IMapper mapper,
         IModelValidatorFactory modelValidatorFactory,
         IQueryService queryService,

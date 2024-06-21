@@ -8,19 +8,19 @@ namespace EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 public readonly struct JobCacheKey : ICacheKey
 {
     /// <inheritdoc/>
-    public readonly string KeyName { get; }
+    public readonly string Name { get; }
 
     /// <summary>
     /// Use <see cref="CacheKey.ForJob(string)"/> instead!
     /// </summary>
     public JobCacheKey(Type jobType)
     {
-        KeyName = jobType.Name.ToSnakeCase();
+        Name = jobType.Name.ToSnakeCase();
     }
 
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        return KeyName.GetHashCode();
+        return Name.GetHashCode();
     }
 }

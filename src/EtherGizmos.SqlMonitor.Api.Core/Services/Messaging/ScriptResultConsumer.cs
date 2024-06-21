@@ -1,8 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Database.Services;
+using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Messaging.Messages;
 using EtherGizmos.SqlMonitor.Shared.Models.Database;
 using EtherGizmos.SqlMonitor.Shared.Models.Database.Enums;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,19 +16,28 @@ public class ScriptResultConsumer : IConsumer<ScriptResultMessage>
 {
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ApplicationContext _context;
-    private readonly IDistributedRecordCache _cache;
+    private readonly IRecordCache _cache;
+    private readonly ILockingCoordinator _coordinator;
+    private readonly IMetricBucketLockFactory _metricBucketLockFactory;
+    private readonly ISaveService _saveService;
+    private readonly IMonitoredTargetMetricsBySecondService _targetMetricsService;
 
     public ScriptResultConsumer(
         ILogger<ScriptResultConsumer> logger,
         IServiceProvider serviceProvider,
-        ApplicationContext context,
-        IDistributedRecordCache cache)
+        IRecordCache cache,
+        ILockingCoordinator coordinator,
+        IMetricBucketLockFactory metricBucketLockFactory,
+        ISaveService saveService,
+        IMonitoredTargetMetricsBySecondService targetMetricsService)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _context = context;
         _cache = cache;
+        _coordinator = coordinator;
+        _metricBucketLockFactory = metricBucketLockFactory;
+        _saveService = saveService;
+        _targetMetricsService = targetMetricsService;
     }
 
     public async Task Consume(ConsumeContext<ScriptResultMessage> context)
@@ -55,13 +66,13 @@ public class ScriptResultConsumer : IConsumer<ScriptResultMessage>
                 SeverityType = SeverityType.Nominal,
             };
 
-            _context.MonitoredTargetMetricsBySecond.Add(targetMetric);
+            _targetMetricsService.Add(targetMetric);
         }
 
-        await _context.SaveChangesAsync();
+        await _saveService.SaveChangesAsync();
     }
 
-    private async Task<int> GetOrCreateBucket(string? bucket)
+    private async Task<int> GetOrCreateBucket(string? bucket, CancellationToken cancellationToken = default)
     {
         var bucketName = bucket?.Trim() ?? "";
 
@@ -72,13 +83,21 @@ public class ScriptResultConsumer : IConsumer<ScriptResultMessage>
 
         if (maybeBucket is null)
         {
-            maybeBucket = new()
-            {
-                Name = bucketName,
-            };
+            var key = _metricBucketLockFactory.CreateKey(bucketName);
+            using var @lock = await _coordinator.AcquireLockAsync(key, TimeSpan.MaxValue, cancellationToken);
 
-            subContext.MetricBuckets.Add(maybeBucket);
-            await subContext.SaveChangesAsync();
+            maybeBucket = await subContext.MetricBuckets.SingleOrDefaultAsync(e => e.Name == bucketName);
+
+            if (maybeBucket is null)
+            {
+                maybeBucket = new()
+                {
+                    Name = bucketName,
+                };
+
+                subContext.MetricBuckets.Add(maybeBucket);
+                await subContext.SaveChangesAsync();
+            }
         }
 
         return maybeBucket.Id;

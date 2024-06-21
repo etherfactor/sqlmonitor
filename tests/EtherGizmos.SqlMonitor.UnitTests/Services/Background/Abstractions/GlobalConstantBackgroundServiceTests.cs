@@ -24,7 +24,7 @@ internal class GlobalConstantBackgroundServiceTests
     {
         //Arrange
         var handle = new TestSynchronizationHandle();
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<ILockingCoordinator>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CacheLock<JobCacheKey>(new JobCacheKey(typeof(GlobalConstantBackgroundServiceImplemented)), handle));
@@ -46,7 +46,7 @@ internal class GlobalConstantBackgroundServiceTests
     {
         //Arrange
         var handle = new TestSynchronizationHandle();
-        var cacheMock = _serviceProvider.GetRequiredService<Mock<IDistributedLockProvider>>();
+        var cacheMock = _serviceProvider.GetRequiredService<Mock<ILockingCoordinator>>();
         cacheMock.Setup(@interface =>
             @interface.AcquireLockAsync(It.IsAny<JobCacheKey>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as CacheLock<JobCacheKey>);
@@ -71,7 +71,7 @@ internal class GlobalConstantBackgroundServiceImplemented : GlobalConstantBackgr
     public GlobalConstantBackgroundServiceImplemented(
         ILogger<GlobalConstantBackgroundServiceImplemented> logger,
         IServiceProvider serviceProvider,
-        IDistributedLockProvider cache,
+        ILockingCoordinator cache,
         string lockCronExpression,
         string cronExpression)
         : base(logger, serviceProvider, cache, lockCronExpression, cronExpression) { }

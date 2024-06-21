@@ -16,7 +16,7 @@ internal class CacheEntitySetFilterTests
     public void SetUp()
     {
         _serviceProvider = Global.CreateScope();
-        _cache = _serviceProvider.GetRequiredService<IDistributedRecordCache>().EntitySet<FakeEntity>();
+        _cache = _serviceProvider.GetRequiredService<IRecordCache>().EntitySet<FakeEntity>();
     }
 
     [Test]
