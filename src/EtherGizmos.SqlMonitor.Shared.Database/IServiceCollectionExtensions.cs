@@ -59,6 +59,7 @@ public static class IServiceCollectionExtensions
             .AddScoped<IMonitoredScriptTargetService, MonitoredScriptTargetService>()
             .AddScoped<IMonitoredSystemService, MonitoredSystemService>()
             .AddScoped<IMonitoredTargetMetricsBySecondService, MonitoredTargetMetricsBySecondService>()
+            .AddScoped<IMonitoredTargetService, MonitoredTargetService>()
             .AddScoped<IQueryService, QueryService>()
             .AddScoped<IScriptService, ScriptService>()
             .AddScoped<IScriptInterpreterService, ScriptInterpreterService>();

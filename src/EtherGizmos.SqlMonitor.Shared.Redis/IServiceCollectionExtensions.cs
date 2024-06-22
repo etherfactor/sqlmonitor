@@ -61,6 +61,7 @@ public static class IServiceCollectionExtensions
         @this
             .AddRedisServices()
             .AddSingleton<IMetricBucketLockFactory, MetricBucketLockFactory>()
+            .AddSingleton<IMonitoredTargetLockFactory, MonitoredTargetLockFactory>()
             .AddChildContainer((childServices, parentServices) =>
             {
                 var usageOptions = parentServices

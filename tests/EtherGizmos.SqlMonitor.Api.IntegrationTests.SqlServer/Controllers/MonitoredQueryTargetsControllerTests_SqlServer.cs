@@ -2,7 +2,7 @@
 
 namespace EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.Controllers;
 
-internal class MonitoredQueryTargetsControllerTests_SqlServer : MonitoredScriptTargetsControllerTests
+internal class MonitoredQueryTargetsControllerTests_SqlServer : MonitoredQueryTargetsControllerTests
 {
     protected override HttpClient GetClient()
     {

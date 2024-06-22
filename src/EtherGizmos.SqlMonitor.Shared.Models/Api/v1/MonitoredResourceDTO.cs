@@ -23,11 +23,6 @@ public class MonitoredResourceDTO
     public string? Description { get; set; }
 
     public bool? IsActive { get; set; }
-
-    public Task EnsureValid(IQueryable<MonitoredResource> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForMonitoredResourceDTO

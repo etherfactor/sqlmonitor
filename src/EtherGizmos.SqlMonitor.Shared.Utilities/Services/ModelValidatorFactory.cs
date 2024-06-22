@@ -1,7 +1,7 @@
-﻿using EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EtherGizmos.SqlMonitor.Shared.OData.Services;
+namespace EtherGizmos.SqlMonitor.Shared.Utilities.Services;
 
 internal class ModelValidatorFactory : IModelValidatorFactory
 {

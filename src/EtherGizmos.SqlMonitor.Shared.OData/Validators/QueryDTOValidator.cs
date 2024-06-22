@@ -1,10 +1,10 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Models.Api.v1;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
-using EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using System.Linq.Expressions;
 
-namespace EtherGizmos.SqlMonitor.Shared.OData.Api.v1;
+namespace EtherGizmos.SqlMonitor.Shared.OData.Validators;
 
 internal class QueryDTOValidator : IModelValidator<QueryDTO>
 {

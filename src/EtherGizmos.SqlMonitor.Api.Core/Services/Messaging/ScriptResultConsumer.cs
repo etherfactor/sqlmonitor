@@ -54,7 +54,7 @@ public class ScriptResultConsumer : IConsumer<ScriptResultMessage>
 
         foreach (var metric in message.MetricValues)
         {
-            var metricBucketId = await GetOrCreateBucket(metric.Bucket);
+            var metricBucketId = await GetOrCreateBucketAsync(metric.Bucket);
 
             var targetMetric = new MonitoredTargetMetricBySecond()
             {
@@ -72,7 +72,7 @@ public class ScriptResultConsumer : IConsumer<ScriptResultMessage>
         await _saveService.SaveChangesAsync();
     }
 
-    private async Task<int> GetOrCreateBucket(string? bucket, CancellationToken cancellationToken = default)
+    private async Task<int> GetOrCreateBucketAsync(string? bucket, CancellationToken cancellationToken = default)
     {
         var bucketName = bucket?.Trim() ?? "";
 
@@ -84,7 +84,7 @@ public class ScriptResultConsumer : IConsumer<ScriptResultMessage>
         if (maybeBucket is null)
         {
             var key = _metricBucketLockFactory.CreateKey(bucketName);
-            using var @lock = await _coordinator.AcquireLockAsync(key, TimeSpan.MaxValue, cancellationToken);
+            using var @lock = await _coordinator.AcquireLockAsync(key, TimeSpan.FromDays(1), cancellationToken);
 
             maybeBucket = await subContext.MetricBuckets.SingleOrDefaultAsync(e => e.Name == bucketName);
 

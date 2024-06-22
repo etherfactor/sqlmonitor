@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -25,6 +26,7 @@ public class ScriptInterpretersController : ODataController
     private readonly ILogger _logger;
     private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IScriptInterpreterService _scriptInterpreterService;
     private readonly ISaveService _saveService;
 
@@ -38,19 +40,21 @@ public class ScriptInterpretersController : ODataController
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="instanceService">Provides access to the storage of records.</param>
+    /// <param name="scriptInterpreterService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
     public ScriptInterpretersController(
         ILogger<ScriptInterpretersController> logger,
         IRecordCache cache,
         IMapper mapper,
-        IScriptInterpreterService instanceService,
+        IModelValidatorFactory modelValidatorFactory,
+        IScriptInterpreterService scriptInterpreterService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _scriptInterpreterService = instanceService;
+        _modelValidatorFactory = modelValidatorFactory;
+        _scriptInterpreterService = scriptInterpreterService;
         _saveService = saveService;
     }
 
@@ -99,11 +103,14 @@ public class ScriptInterpretersController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(ScriptInterpreters);
+        var validator = _modelValidatorFactory.GetValidator<ScriptInterpreterDTO>();
+        await validator.ValidateAsync(newRecord);
 
         ScriptInterpreter record = _mapper.Map<ScriptInterpreter>(newRecord);
 
-        await record.EnsureValid(ScriptInterpreters);
+        var dbValidator = _modelValidatorFactory.GetValidator<ScriptInterpreter>();
+        await dbValidator.ValidateAsync(record);
+
         _scriptInterpreterService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -128,7 +135,8 @@ public class ScriptInterpretersController : ODataController
         var testRecord = new ScriptInterpreterDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(ScriptInterpreters);
+        var validator = _modelValidatorFactory.GetValidator<ScriptInterpreterDTO>();
+        await validator.ValidateAsync(testRecord);
 
         ScriptInterpreter? record = await ScriptInterpreters.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,7 +147,8 @@ public class ScriptInterpretersController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(ScriptInterpreters);
+        var dbValidator = _modelValidatorFactory.GetValidator<ScriptInterpreter>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<ScriptInterpreter>().AddAsync(record);

@@ -38,9 +38,4 @@ public class Metric : Auditable
         Name = null!;
         Securable = null!;
     }
-
-    public Task EnsureValid(IQueryable<Metric> records)
-    {
-        return Task.CompletedTask;
-    }
 }

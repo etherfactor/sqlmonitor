@@ -17,7 +17,7 @@ internal static class Snippets
          * MySQL
          */
         @this.IfDatabase(ProcessorId.MySql)
-            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"{table}_audit_insert")}
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"TR_{table}_audit_insert")}
 before insert on {MySqlHelper.Escape(table)}
 for each row
 begin
@@ -25,7 +25,7 @@ begin
 end;");
 
         @this.IfDatabase(ProcessorId.MySql)
-            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"{table}_audit_update")}
+            .Execute.Sql($@"create trigger {MySqlHelper.Escape($"TR_{table}_audit_update")}
 before update on {MySqlHelper.Escape(table)}
 for each row
 begin
@@ -36,7 +36,7 @@ end;");
          * PostgreSQL
          */
         @this.IfDatabase(ProcessorId.Postgres)
-            .Execute.Sql($@"create or replace function {PostgreSqlHelper.Escape($"{table}_audit")}()
+            .Execute.Sql($@"create or replace function {PostgreSqlHelper.Escape($"TR_{table}_audit")}()
 returns trigger as $$
 begin
     --Set the last modified time of the record
@@ -49,7 +49,7 @@ create trigger {PostgreSqlHelper.Escape($"TR_{table}_audit")}
 before insert or update
 on {PostgreSqlHelper.Escape(table)}
 for each row
-execute function {PostgreSqlHelper.Escape($"{table}_audit")}();");
+execute function {PostgreSqlHelper.Escape($"TR_{table}_audit")}();");
 
         /*
          * Microsoft SQL Server
@@ -146,15 +146,13 @@ begin
     declare SecurableId int;
     declare SecurableTypeId int default {securableTypeId};
 
-    if (new is null) then
-        #Get the id of the deleted record
-        select old.{MySqlHelper.Escape(securableColumn)}
-          into SecurableId;
+    #Get the id of the deleted record
+    select old.{MySqlHelper.Escape(securableColumn)}
+      into SecurableId;
 
-        #Delete the securable_id from the securables table
-        delete from `securables`
-          where `securable_id` = SecurableId;
-    end if;
+    #Delete the securable_id from the securables table
+    delete from `securables`
+      where `securable_id` = SecurableId;
 end;");
 
         /*

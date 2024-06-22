@@ -35,9 +35,4 @@ public class ScriptVariant : Auditable
         ScriptInterpreter = null!;
         ScriptText = null!;
     }
-
-    public Task EnsureValid(IQueryable<Script> records)
-    {
-        return Task.CompletedTask;
-    }
 }

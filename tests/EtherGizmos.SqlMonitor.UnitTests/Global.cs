@@ -6,6 +6,9 @@ using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OData;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,7 +47,11 @@ internal static class Global
         services.AddSingleton<IRecordCache, InMemoryRecordCache>();
         services.AddSingleton(e => RedisHelperFactory.Instance);
 
-        services.AddModelValidators();
+        services.AddSingleton<ILockingCoordinator, InMemoryLockingCoordinator>();
+        services.AddSingleton<IMetricBucketLockFactory, MetricBucketLockFactory>();
+        services.AddSingleton<IMonitoredTargetLockFactory, MonitoredTargetLockFactory>();
+
+        services.AddModelValidators(typeof(Api.Program).Assembly);
 
         services.AddSingleton(provider => provider.GetRequiredService<Mock<ISaveService>>().Object);
 
@@ -54,6 +61,7 @@ internal static class Global
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredResourceService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredScriptTargetService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredSystemService>>().Object);
+        services.AddSingleton(provider => provider.GetRequiredService<Mock<IMonitoredTargetService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IQueryService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IScriptService>>().Object);
         services.AddSingleton(provider => provider.GetRequiredService<Mock<IScriptInterpreterService>>().Object);

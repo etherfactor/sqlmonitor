@@ -40,9 +40,4 @@ public class MonitoredQueryTarget : Auditable
         ConnectionString = null!;
         Securable = null!;
     }
-
-    public Task EnsureValid(IQueryable<MonitoredQueryTarget> records)
-    {
-        return Task.CompletedTask;
-    }
 }

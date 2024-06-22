@@ -35,9 +35,4 @@ public class MonitoredTarget
         MonitoredResource = null!;
         MonitoredEnvironment = null!;
     }
-
-    public Task EnsureValid(IQueryable<MonitoredTarget> records)
-    {
-        return Task.CompletedTask;
-    }
 }

@@ -30,11 +30,6 @@ public class ScriptInterpreterDTO
 
     [Required]
     public string? Extension { get; set; }
-
-    public Task EnsureValid(IQueryable<ScriptInterpreter> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForScriptInterpreterDTO

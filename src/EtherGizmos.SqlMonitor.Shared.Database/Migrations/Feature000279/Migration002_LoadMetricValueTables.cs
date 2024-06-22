@@ -13,10 +13,6 @@ public class Migration002_LoadMetricValueTables : MigrationExtension
             .Row(new { severity_type_id = 20, name = "Error", description = "An issue requiring attention has been detected. Some functionality is at risk. Take action to resolve the issue." })
             .Row(new { severity_type_id = 30, name = "Critical", description = "A serious issue has been detected. A significant portion of functionality is at risk. Immediate intervention is required." })
             .Match(e => e.severity_type_id);
-
-        Merge.IntoTable("metric_buckets")
-            .Row(new { metric_bucket_id = 1, name = "", description = "The default bucket, if none is specified." })
-            .Match(e => e.metric_bucket_id);
     }
 
     public override void Down()

@@ -522,7 +522,7 @@ internal class ScriptInterpretersControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IScriptInterpreterService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<ScriptInterpreter>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
@@ -582,7 +582,7 @@ internal class ScriptInterpretersControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IScriptInterpreterService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<ScriptInterpreter>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());

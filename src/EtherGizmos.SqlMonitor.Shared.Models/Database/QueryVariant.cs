@@ -32,9 +32,4 @@ public class QueryVariant : Auditable
         Query = null!;
         QueryText = null!;
     }
-
-    public Task EnsureValid(IQueryable<Query> records)
-    {
-        return Task.CompletedTask;
-    }
 }

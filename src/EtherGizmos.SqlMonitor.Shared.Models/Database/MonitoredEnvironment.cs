@@ -39,9 +39,4 @@ public class MonitoredEnvironment : Auditable
         Name = null!;
         Securable = null!;
     }
-
-    public Task EnsureValid(IQueryable<MonitoredEnvironment> records)
-    {
-        return Task.CompletedTask;
-    }
 }

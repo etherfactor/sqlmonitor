@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -25,6 +26,7 @@ public class MonitoredEnvironmentsController : ODataController
     private readonly ILogger _logger;
     private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IMonitoredEnvironmentService _monitoredEnvironmentService;
     private readonly ISaveService _saveService;
 
@@ -38,19 +40,21 @@ public class MonitoredEnvironmentsController : ODataController
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="instanceService">Provides access to the storage of records.</param>
+    /// <param name="environmentService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredEnvironmentsController(
         ILogger<MonitoredEnvironmentsController> logger,
         IRecordCache cache,
         IMapper mapper,
-        IMonitoredEnvironmentService instanceService,
+        IModelValidatorFactory modelValidatorFactory,
+        IMonitoredEnvironmentService environmentService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _monitoredEnvironmentService = instanceService;
+        _modelValidatorFactory = modelValidatorFactory;
+        _monitoredEnvironmentService = environmentService;
         _saveService = saveService;
     }
 
@@ -99,11 +103,14 @@ public class MonitoredEnvironmentsController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(MonitoredEnvironments);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredEnvironmentDTO>();
+        await validator.ValidateAsync(newRecord);
 
         MonitoredEnvironment record = _mapper.Map<MonitoredEnvironment>(newRecord);
 
-        await record.EnsureValid(MonitoredEnvironments);
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredEnvironment>();
+        await dbValidator.ValidateAsync(record);
+
         _monitoredEnvironmentService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -128,7 +135,8 @@ public class MonitoredEnvironmentsController : ODataController
         var testRecord = new MonitoredEnvironmentDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(MonitoredEnvironments);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredEnvironmentDTO>();
+        await validator.ValidateAsync(testRecord);
 
         MonitoredEnvironment? record = await MonitoredEnvironments.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,7 +147,8 @@ public class MonitoredEnvironmentsController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(MonitoredEnvironments);
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredEnvironment>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<MonitoredEnvironment>().AddAsync(record);

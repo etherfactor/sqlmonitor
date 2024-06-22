@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Configuration\EtherGizmos.SqlMonitor.Shared.Configuration.csproj" />
     <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Models\EtherGizmos.SqlMonitor.Shared.Models.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Redis\EtherGizmos.SqlMonitor.Shared.Redis.csproj" />
   </ItemGroup>
 
 </Project>

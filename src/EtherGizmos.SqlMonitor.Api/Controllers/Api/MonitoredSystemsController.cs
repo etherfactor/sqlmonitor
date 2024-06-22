@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -25,6 +26,7 @@ public class MonitoredSystemsController : ODataController
     private readonly ILogger _logger;
     private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IMonitoredSystemService _monitoredSystemService;
     private readonly ISaveService _saveService;
 
@@ -38,19 +40,21 @@ public class MonitoredSystemsController : ODataController
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="instanceService">Provides access to the storage of records.</param>
+    /// <param name="systemService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredSystemsController(
         ILogger<MonitoredSystemsController> logger,
         IRecordCache cache,
         IMapper mapper,
-        IMonitoredSystemService instanceService,
+        IModelValidatorFactory modelValidatorFactory,
+        IMonitoredSystemService systemService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _monitoredSystemService = instanceService;
+        _modelValidatorFactory = modelValidatorFactory;
+        _monitoredSystemService = systemService;
         _saveService = saveService;
     }
 
@@ -99,11 +103,14 @@ public class MonitoredSystemsController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(MonitoredSystems);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredSystemDTO>();
+        await validator.ValidateAsync(newRecord);
 
         MonitoredSystem record = _mapper.Map<MonitoredSystem>(newRecord);
 
-        await record.EnsureValid(MonitoredSystems);
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredSystem>();
+        await dbValidator.ValidateAsync(record);
+
         _monitoredSystemService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -128,7 +135,8 @@ public class MonitoredSystemsController : ODataController
         var testRecord = new MonitoredSystemDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(MonitoredSystems);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredSystemDTO>();
+        await validator.ValidateAsync(testRecord);
 
         MonitoredSystem? record = await MonitoredSystems.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,7 +147,8 @@ public class MonitoredSystemsController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(MonitoredSystems);
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredSystem>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<MonitoredSystem>().AddAsync(record);

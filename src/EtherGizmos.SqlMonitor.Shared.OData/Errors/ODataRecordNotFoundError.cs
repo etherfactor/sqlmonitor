@@ -17,7 +17,7 @@ public class ODataRecordNotFoundError<TEntity> : ODataErrorBase
     /// Construct the error.
     /// </summary>
     /// <param name="keys">A set of key properties and their values that failed to find a record.</param>
-    public ODataRecordNotFoundError(params (Expression<Func<TEntity, object?>>, object)[] keys)
+    public ODataRecordNotFoundError(params (Expression<Func<TEntity, object?>>, object?)[] keys)
         : base(codeProvider: () => Code,
             targetProvider: null,
             messageProvider: () => "A record with the specified key(s)/value(s) was not found.")

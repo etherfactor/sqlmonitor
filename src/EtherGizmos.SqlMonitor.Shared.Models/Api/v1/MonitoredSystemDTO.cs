@@ -23,11 +23,6 @@ public class MonitoredSystemDTO
     public string? Description { get; set; }
 
     public bool? IsActive { get; set; }
-
-    public Task EnsureValid(IQueryable<MonitoredSystem> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForMonitoredSystemDTO

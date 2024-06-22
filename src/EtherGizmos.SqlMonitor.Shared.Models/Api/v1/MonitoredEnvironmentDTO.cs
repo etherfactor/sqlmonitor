@@ -23,11 +23,6 @@ public class MonitoredEnvironmentDTO
     public string? Description { get; set; }
 
     public bool? IsActive { get; set; }
-
-    public Task EnsureValid(IQueryable<MonitoredEnvironment> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForMonitoredEnvironmentDTO

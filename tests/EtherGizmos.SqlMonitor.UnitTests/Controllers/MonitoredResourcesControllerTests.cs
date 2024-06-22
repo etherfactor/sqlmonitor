@@ -522,7 +522,7 @@ internal class MonitoredResourcesControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<MonitoredResource>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
@@ -582,7 +582,7 @@ internal class MonitoredResourcesControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<MonitoredResource>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());

@@ -47,9 +47,4 @@ public class ScriptInterpreter : Auditable
         Extension = null!;
         Securable = null!;
     }
-
-    public Task EnsureValid(IQueryable<ScriptInterpreter> records)
-    {
-        return Task.CompletedTask;
-    }
 }

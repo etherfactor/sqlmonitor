@@ -25,11 +25,6 @@ public class MetricDTO
 
     [Required]
     public AggregateTypeDTO? AggregateType { get; set; }
-
-    public Task EnsureValid(IQueryable<Metric> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForMetricDTO

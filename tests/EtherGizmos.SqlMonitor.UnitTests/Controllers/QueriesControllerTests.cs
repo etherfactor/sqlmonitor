@@ -602,7 +602,7 @@ internal class QueriesControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IQueryService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<Query>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
@@ -662,7 +662,7 @@ internal class QueriesControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IQueryService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<Query>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());

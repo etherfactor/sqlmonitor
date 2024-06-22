@@ -41,11 +41,6 @@ public class MonitoredQueryTargetDTO
 
     [Required]
     public string? ConnectionString { get; set; }
-
-    public Task EnsureValid(IQueryable<MonitoredQueryTarget> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForMonitoredQueryTargetDTO

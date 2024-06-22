@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -25,6 +26,7 @@ public class MonitoredResourcesController : ODataController
     private readonly ILogger _logger;
     private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IMonitoredResourceService _monitoredResourceService;
     private readonly ISaveService _saveService;
 
@@ -38,19 +40,21 @@ public class MonitoredResourcesController : ODataController
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="instanceService">Provides access to the storage of records.</param>
+    /// <param name="resourceService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredResourcesController(
         ILogger<MonitoredResourcesController> logger,
         IRecordCache cache,
         IMapper mapper,
-        IMonitoredResourceService instanceService,
+        IModelValidatorFactory modelValidatorFactory,
+        IMonitoredResourceService resourceService,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _monitoredResourceService = instanceService;
+        _modelValidatorFactory = modelValidatorFactory;
+        _monitoredResourceService = resourceService;
         _saveService = saveService;
     }
 
@@ -99,11 +103,14 @@ public class MonitoredResourcesController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(MonitoredResources);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredResourceDTO>();
+        await validator.ValidateAsync(newRecord);
 
         MonitoredResource record = _mapper.Map<MonitoredResource>(newRecord);
 
-        await record.EnsureValid(MonitoredResources);
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredResource>();
+        await dbValidator.ValidateAsync(record);
+
         _monitoredResourceService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -128,7 +135,8 @@ public class MonitoredResourcesController : ODataController
         var testRecord = new MonitoredResourceDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(MonitoredResources);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredResourceDTO>();
+        await validator.ValidateAsync(testRecord);
 
         MonitoredResource? record = await MonitoredResources.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,7 +147,8 @@ public class MonitoredResourcesController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(MonitoredResources);
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredResource>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<MonitoredResource>().AddAsync(record);

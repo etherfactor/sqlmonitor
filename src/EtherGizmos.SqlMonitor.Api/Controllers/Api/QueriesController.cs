@@ -7,8 +7,8 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
-using EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -120,7 +120,9 @@ public class QueriesController : ODataController
 
         Query record = _mapper.Map<Query>(newRecord);
 
-        await record.EnsureValid(Queries);
+        var dbValidator = _modelValidatorFactory.GetValidator<Query>();
+        await dbValidator.ValidateAsync(record);
+
         _queryService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -167,7 +169,8 @@ public class QueriesController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Queries);
+        var dbValidator = _modelValidatorFactory.GetValidator<Query>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<Query>().AddAsync(record);

@@ -4,7 +4,7 @@ using System.Net;
 
 namespace EtherGizmos.SqlMonitor.Shared.IntegrationTests.Controllers;
 
-public abstract class MonitoredQueryTargetsController : IntegrationTestBase
+public abstract class MonitoredQueryTargetsControllerTests : IntegrationTestBase
 {
     private HttpClient _client = null!;
 
@@ -52,7 +52,6 @@ public abstract class MonitoredQueryTargetsController : IntegrationTestBase
             monitoredSystemId,
             monitoredResourceId,
             monitoredEnvironmentId,
-            QueryInterpreterId = 1,
             sqlType = "MySql",
             hostName = "localhost",
             connectionString = "Server=localhost; Database=app_db; Uid=username; Pwd=password;",
@@ -95,9 +94,10 @@ public abstract class MonitoredQueryTargetsController : IntegrationTestBase
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
+                var content = await response.Content.ReadAsStringAsync();
                 Console.Out.WriteLine("Returned response:"
                     + Environment.NewLine
-                    + await response.Content.ReadAsStringAsync());
+                    + content);
             }
         });
     }
@@ -118,7 +118,6 @@ public abstract class MonitoredQueryTargetsController : IntegrationTestBase
             monitoredSystemId,
             monitoredResourceId,
             monitoredEnvironmentId,
-            QueryInterpreterId = 1,
             sqlType = "MySql",
             hostName = "localhost",
             connectionString = "Server=localhost; Database=app_db; Uid=username; Pwd=password;",

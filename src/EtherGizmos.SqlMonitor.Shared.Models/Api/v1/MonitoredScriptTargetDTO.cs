@@ -54,11 +54,6 @@ public class MonitoredScriptTargetDTO
     public string? Username { get; set; }
 
     public string? Password { get; set; }
-
-    public Task EnsureValid(IQueryable<MonitoredScriptTarget> records)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class ForMonitoredScriptTargetDTO

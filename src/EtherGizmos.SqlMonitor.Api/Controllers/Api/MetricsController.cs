@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -26,6 +27,7 @@ public class MetricsController : ODataController
     private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
     private readonly IMetricService _metricService;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly ISaveService _saveService;
 
     /// <summary>
@@ -38,19 +40,21 @@ public class MetricsController : ODataController
     /// </summary>
     /// <param name="logger">The logger to utilize.</param>
     /// <param name="mapper">Allows conversion between database and DTO models.</param>
-    /// <param name="instanceService">Provides access to the storage of records.</param>
+    /// <param name="metricService">Provides access to the storage of records.</param>
     /// <param name="saveService">Provides access to saving records.</param>
     public MetricsController(
         ILogger<MetricsController> logger,
         IRecordCache cache,
         IMapper mapper,
-        IMetricService instanceService,
+        IMetricService metricService,
+        IModelValidatorFactory modelValidatorFactory,
         ISaveService saveService)
     {
         _logger = logger;
         _cache = cache;
         _mapper = mapper;
-        _metricService = instanceService;
+        _metricService = metricService;
+        _modelValidatorFactory = modelValidatorFactory;
         _saveService = saveService;
     }
 
@@ -99,11 +103,14 @@ public class MetricsController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(Metrics);
+        var validator = _modelValidatorFactory.GetValidator<MetricDTO>();
+        await validator.ValidateAsync(newRecord);
 
         Metric record = _mapper.Map<Metric>(newRecord);
 
-        await record.EnsureValid(Metrics);
+        var dbValidator = _modelValidatorFactory.GetValidator<Metric>();
+        await dbValidator.ValidateAsync(record);
+
         _metricService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -128,7 +135,8 @@ public class MetricsController : ODataController
         var testRecord = new MetricDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(Metrics);
+        var validator = _modelValidatorFactory.GetValidator<MetricDTO>();
+        await validator.ValidateAsync(testRecord);
 
         Metric? record = await Metrics.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,7 +147,8 @@ public class MetricsController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Metrics);
+        var dbValidator = _modelValidatorFactory.GetValidator<Metric>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<Metric>().AddAsync(record);

@@ -23,6 +23,10 @@ internal class MonitoredQueryTargetsControllerTests
     private MonitoredQueryTargetsController _controller;
 
     private List<MonitoredQueryTarget> _data;
+    private List<MonitoredSystem> _systemData;
+    private List<MonitoredResource> _resourceData;
+    private List<MonitoredEnvironment> _environmentData;
+    private List<MonitoredTarget> _targetData;
 
     private readonly int _recordId = new Random().Next(100, 10000);
 
@@ -31,34 +35,105 @@ internal class MonitoredQueryTargetsControllerTests
     {
         _provider = Global.CreateScope();
         _controller = _provider.GetRequiredService<MonitoredQueryTargetsController>();
-        _data = new List<MonitoredQueryTarget>()
-        {
+
+        _targetData = new();
+
+        var mockTargetData = _targetData.AsQueryable().BuildMock();
+
+        var mockTargetServ = _provider.GetRequiredService<Mock<IMonitoredTargetService>>();
+        mockTargetServ.Setup(service => service.GetQueryable()).Returns(mockTargetData);
+        mockTargetServ.Setup(service => service.GetOrCreateAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()).Result)
+            .Returns(new MonitoredTarget() { Id = 1 });
+
+        _systemData =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+            },
+        ];
+
+        var mockSystemData = _systemData.AsQueryable().BuildMock();
+
+        var mockSystemServ = _provider.GetRequiredService<Mock<IMonitoredSystemService>>();
+        mockSystemServ.Setup(service => service.GetQueryable()).Returns(mockSystemData);
+
+        _resourceData =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+            },
+        ];
+
+        var mockResourceData = _resourceData.AsQueryable().BuildMock();
+
+        var mockResourceServ = _provider.GetRequiredService<Mock<IMonitoredResourceService>>();
+        mockResourceServ.Setup(service => service.GetQueryable()).Returns(mockResourceData);
+
+        _environmentData =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+            },
+        ];
+
+        var mockEnvironmentData = _environmentData.AsQueryable().BuildMock();
+
+        var mockEnvironmentServ = _provider.GetRequiredService<Mock<IMonitoredEnvironmentService>>();
+        mockEnvironmentServ.Setup(service => service.GetQueryable()).Returns(mockEnvironmentData);
+
+        _data =
+        [
             new()
             {
                 Id = _recordId,
-                MonitoredTarget = new(),
+                MonitoredTarget = new()
+                {
+                    MonitoredSystemId = _systemData.First().Id,
+                    MonitoredResourceId = _resourceData.First().Id,
+                    MonitoredEnvironmentId = _environmentData.First().Id,
+                },
             },
             new()
             {
                 Id = new Random().Next(100, 10000),
-                MonitoredTarget = new(),
+                MonitoredTarget = new()
+                {
+                    MonitoredSystemId = _systemData.First().Id,
+                    MonitoredResourceId = _resourceData.First().Id,
+                    MonitoredEnvironmentId = _environmentData.First().Id,
+                },
             },
             new()
             {
                 Id = new Random().Next(100, 10000),
-                MonitoredTarget = new(),
+                MonitoredTarget = new()
+                {
+                    MonitoredSystemId = _systemData.First().Id,
+                    MonitoredResourceId = _resourceData.First().Id,
+                    MonitoredEnvironmentId = _environmentData.First().Id,
+                },
             },
             new()
             {
                 Id = new Random().Next(100, 10000),
-                MonitoredTarget = new(),
+                MonitoredTarget = new()
+                {
+                    MonitoredSystemId = _systemData.First().Id,
+                    MonitoredResourceId = _resourceData.First().Id,
+                    MonitoredEnvironmentId = _environmentData.First().Id,
+                },
             }
-        };
+        ];
 
         var mockData = _data.AsQueryable().BuildMock();
 
         var mockServ = _provider.GetRequiredService<Mock<IMonitoredQueryTargetService>>();
         mockServ.Setup(service => service.GetQueryable()).Returns(mockData);
+        mockServ.Setup(service => service.Add(It.IsAny<MonitoredQueryTarget>()))
+            .Callback((MonitoredQueryTarget record) => record.MonitoredTarget = new() { Id = 1 });
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Setup(service => service.SaveChangesAsync()).Returns(Task.CompletedTask);
@@ -501,6 +576,9 @@ internal class MonitoredQueryTargetsControllerTests
         var record = new MonitoredQueryTargetDTO()
         {
             SqlType = SqlTypeDTO.MySql,
+            MonitoredSystemId = _systemData.First().Id,
+            MonitoredResourceId = _resourceData.First().Id,
+            MonitoredEnvironmentId = _environmentData.First().Id,
         };
 
         var result = await _controller.Create(record, queryOptions);
@@ -515,7 +593,7 @@ internal class MonitoredQueryTargetsControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IMonitoredQueryTargetService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<MonitoredQueryTarget>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());
@@ -561,6 +639,9 @@ internal class MonitoredQueryTargetsControllerTests
         var record = new MonitoredQueryTargetDTO()
         {
             SqlType = SqlTypeDTO.MySql,
+            MonitoredSystemId = _systemData.First().Id,
+            MonitoredResourceId = _resourceData.First().Id,
+            MonitoredEnvironmentId = _environmentData.First().Id,
         };
 
         var result = await _controller.Create(record, queryOptions);
@@ -575,7 +656,7 @@ internal class MonitoredQueryTargetsControllerTests
         });
 
         var mockServ = _provider.GetRequiredService<Mock<IMonitoredQueryTargetService>>();
-        mockServ.Verify(service => service.GetQueryable(), Times.AtLeastOnce());
+        mockServ.Verify(service => service.Add(It.IsAny<MonitoredQueryTarget>()), Times.AtLeastOnce());
 
         var mockSave = _provider.GetRequiredService<Mock<ISaveService>>();
         mockSave.Verify(service => service.SaveChangesAsync(), Times.Once());

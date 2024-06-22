@@ -80,9 +80,4 @@ public class MonitoredScriptTarget : Auditable
         SshUsername = null!;
         Securable = null!;
     }
-
-    public Task EnsureValid(IQueryable<MonitoredScriptTarget> records)
-    {
-        return Task.CompletedTask;
-    }
 }

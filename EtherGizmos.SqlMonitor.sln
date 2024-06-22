@@ -40,13 +40,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Agen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.OAuth", "src\EtherGizmos.SqlMonitor.Shared.OAuth\EtherGizmos.SqlMonitor.Shared.OAuth.csproj", "{4D35C427-3D3E-460D-BBAD-6352CA3568A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Shared.Database", "src\EtherGizmos.SqlMonitor.Shared.Database\EtherGizmos.SqlMonitor.Shared.Database.csproj", "{2757EEDB-CEBB-486C-B78C-34941D0B0640}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Database", "src\EtherGizmos.SqlMonitor.Shared.Database\EtherGizmos.SqlMonitor.Shared.Database.csproj", "{2757EEDB-CEBB-486C-B78C-34941D0B0640}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Shared.Utilities", "src\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj", "{691AC928-9109-4283-85F7-8C4A2B219C54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Utilities", "src\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj", "{691AC928-9109-4283-85F7-8C4A2B219C54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Shared.OData", "src\EtherGizmos.SqlMonitor.Shared.OData\EtherGizmos.SqlMonitor.Shared.OData.csproj", "{0673AD0E-8912-4E75-8506-4484CB3D077D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.OData", "src\EtherGizmos.SqlMonitor.Shared.OData\EtherGizmos.SqlMonitor.Shared.OData.csproj", "{0673AD0E-8912-4E75-8506-4484CB3D077D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Shared.Redis", "src\EtherGizmos.SqlMonitor.Shared.Redis\EtherGizmos.SqlMonitor.Shared.Redis.csproj", "{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Redis", "src\EtherGizmos.SqlMonitor.Shared.Redis\EtherGizmos.SqlMonitor.Shared.Redis.csproj", "{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

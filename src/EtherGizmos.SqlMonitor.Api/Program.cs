@@ -15,7 +15,6 @@ using EtherGizmos.SqlMonitor.Shared.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Models;
 using EtherGizmos.SqlMonitor.Shared.OAuth.Services;
-using EtherGizmos.SqlMonitor.Shared.OData;
 using EtherGizmos.SqlMonitor.Shared.Redis;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;

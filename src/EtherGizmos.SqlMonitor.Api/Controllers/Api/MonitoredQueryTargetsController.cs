@@ -7,6 +7,7 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -23,9 +24,11 @@ public class MonitoredQueryTargetsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/monitoredQueryTargets";
 
     private readonly ILogger _logger;
-    private readonly IRecordCache _cache;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IMonitoredQueryTargetService _monitoredQueryTargetService;
+    private readonly IMonitoredTargetService _monitoredTargetService;
+    private readonly IRecordCache _cache;
     private readonly ISaveService _saveService;
 
     /// <summary>
@@ -42,15 +45,19 @@ public class MonitoredQueryTargetsController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredQueryTargetsController(
         ILogger<MonitoredQueryTargetsController> logger,
-        IRecordCache cache,
         IMapper mapper,
+        IModelValidatorFactory modelValidatorFactory,
         IMonitoredQueryTargetService instanceService,
+        IMonitoredTargetService targetService,
+        IRecordCache cache,
         ISaveService saveService)
     {
         _logger = logger;
-        _cache = cache;
         _mapper = mapper;
+        _modelValidatorFactory = modelValidatorFactory;
         _monitoredQueryTargetService = instanceService;
+        _monitoredTargetService = targetService;
+        _cache = cache;
         _saveService = saveService;
     }
 
@@ -99,14 +106,26 @@ public class MonitoredQueryTargetsController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(MonitoredQueryTargets);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredQueryTargetDTO>();
+        await validator.ValidateAsync(newRecord);
 
         MonitoredQueryTarget record = _mapper.Map<MonitoredQueryTarget>(newRecord);
 
-        await record.EnsureValid(MonitoredQueryTargets);
+        var target = await _monitoredTargetService.GetOrCreateAsync(
+            record.MonitoredTarget.MonitoredSystemId,
+            record.MonitoredTarget.MonitoredResourceId,
+            record.MonitoredTarget.MonitoredEnvironmentId);
+
+        record.MonitoredTargetId = target.Id;
+        record.MonitoredTarget = null!;
+
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredQueryTarget>();
+        await dbValidator.ValidateAsync(record);
+
         _monitoredQueryTargetService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        record.MonitoredTarget = target;
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
@@ -128,7 +147,8 @@ public class MonitoredQueryTargetsController : ODataController
         var testRecord = new MonitoredQueryTargetDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(MonitoredQueryTargets);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredQueryTargetDTO>();
+        await validator.ValidateAsync(testRecord);
 
         MonitoredQueryTarget? record = await MonitoredQueryTargets.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,10 +159,19 @@ public class MonitoredQueryTargetsController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(MonitoredQueryTargets);
+        var target = await _monitoredTargetService.GetOrCreateAsync(
+            record.MonitoredTarget.MonitoredSystemId,
+            record.MonitoredTarget.MonitoredResourceId,
+            record.MonitoredTarget.MonitoredEnvironmentId);
+
+        record.MonitoredTargetId = target.Id;
+        record.MonitoredTarget = null!;
+
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredQueryTarget>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<MonitoredQueryTarget>().AddAsync(record);
+        record.MonitoredTarget = target;
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);

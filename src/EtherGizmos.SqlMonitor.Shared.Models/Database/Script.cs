@@ -61,9 +61,4 @@ public class Script : Auditable
         Name = null!;
         Securable = null!;
     }
-
-    public Task EnsureValid(IQueryable<Script> records)
-    {
-        return Task.CompletedTask;
-    }
 }

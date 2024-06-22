@@ -7,6 +7,8 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Redis.Locking.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -23,9 +25,13 @@ public class MonitoredScriptTargetsController : ODataController
     private const string BasePath = "api/v{version:apiVersion}/monitoredScriptTargets";
 
     private readonly ILogger _logger;
-    private readonly IRecordCache _cache;
+    private readonly ILockingCoordinator _coordinator;
     private readonly IMapper _mapper;
+    private readonly IModelValidatorFactory _modelValidatorFactory;
     private readonly IMonitoredScriptTargetService _monitoredScriptTargetService;
+    private readonly IMonitoredTargetLockFactory _monitoredTargetLockFactory;
+    private readonly IMonitoredTargetService _monitoredTargetService;
+    private readonly IRecordCache _cache;
     private readonly ISaveService _saveService;
 
     /// <summary>
@@ -42,15 +48,23 @@ public class MonitoredScriptTargetsController : ODataController
     /// <param name="saveService">Provides access to saving records.</param>
     public MonitoredScriptTargetsController(
         ILogger<MonitoredScriptTargetsController> logger,
-        IRecordCache cache,
+        ILockingCoordinator coordinator,
         IMapper mapper,
+        IModelValidatorFactory modelValidatorFactory,
         IMonitoredScriptTargetService instanceService,
+        IMonitoredTargetLockFactory targetLockFactory,
+        IMonitoredTargetService targetService,
+        IRecordCache cache,
         ISaveService saveService)
     {
         _logger = logger;
-        _cache = cache;
+        _coordinator = coordinator;
         _mapper = mapper;
+        _modelValidatorFactory = modelValidatorFactory;
         _monitoredScriptTargetService = instanceService;
+        _monitoredTargetLockFactory = targetLockFactory;
+        _monitoredTargetService = targetService;
+        _cache = cache;
         _saveService = saveService;
     }
 
@@ -99,14 +113,26 @@ public class MonitoredScriptTargetsController : ODataController
     {
         queryOptions.EnsureValidForSingle();
 
-        await newRecord.EnsureValid(MonitoredScriptTargets);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredScriptTargetDTO>();
+        await validator.ValidateAsync(newRecord);
 
         MonitoredScriptTarget record = _mapper.Map<MonitoredScriptTarget>(newRecord);
 
-        await record.EnsureValid(MonitoredScriptTargets);
+        var target = await _monitoredTargetService.GetOrCreateAsync(
+            record.MonitoredTarget.MonitoredSystemId,
+            record.MonitoredTarget.MonitoredResourceId,
+            record.MonitoredTarget.MonitoredEnvironmentId);
+
+        record.MonitoredTargetId = target.Id;
+        record.MonitoredTarget = null!;
+
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredScriptTarget>();
+        await dbValidator.ValidateAsync(record);
+
         _monitoredScriptTargetService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        record.MonitoredTarget = target;
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
@@ -128,7 +154,8 @@ public class MonitoredScriptTargetsController : ODataController
         var testRecord = new MonitoredScriptTargetDTO();
         patchRecord.Patch(testRecord);
 
-        await testRecord.EnsureValid(MonitoredScriptTargets);
+        var validator = _modelValidatorFactory.GetValidator<MonitoredScriptTargetDTO>();
+        await validator.ValidateAsync(testRecord);
 
         MonitoredScriptTarget? record = await MonitoredScriptTargets.SingleOrDefaultAsync(e => e.Id == id);
         if (record == null)
@@ -139,10 +166,19 @@ public class MonitoredScriptTargetsController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(MonitoredScriptTargets);
+        var target = await _monitoredTargetService.GetOrCreateAsync(
+            record.MonitoredTarget.MonitoredSystemId,
+            record.MonitoredTarget.MonitoredResourceId,
+            record.MonitoredTarget.MonitoredEnvironmentId);
+
+        record.MonitoredTargetId = target.Id;
+        record.MonitoredTarget = null!;
+
+        var dbValidator = _modelValidatorFactory.GetValidator<MonitoredScriptTarget>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
-        await _cache.EntitySet<MonitoredScriptTarget>().AddAsync(record);
+        record.MonitoredTarget = target;
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);

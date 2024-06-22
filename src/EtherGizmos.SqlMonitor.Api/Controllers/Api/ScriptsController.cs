@@ -7,8 +7,8 @@ using EtherGizmos.SqlMonitor.Shared.Models.Extensions;
 using EtherGizmos.SqlMonitor.Shared.OData.Errors;
 using EtherGizmos.SqlMonitor.Shared.OData.Exceptions;
 using EtherGizmos.SqlMonitor.Shared.OData.Extensions;
-using EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+using EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
@@ -120,7 +120,9 @@ public class ScriptsController : ODataController
 
         Script record = _mapper.Map<Script>(newRecord);
 
-        await record.EnsureValid(Scripts);
+        var dbValidator = _modelValidatorFactory.GetValidator<Script>();
+        await dbValidator.ValidateAsync(record);
+
         _scriptService.Add(record);
 
         await _saveService.SaveChangesAsync();
@@ -167,7 +169,8 @@ public class ScriptsController : ODataController
 
         _mapper.MergeInto(record).Using(recordAsDto);
 
-        await record.EnsureValid(Scripts);
+        var dbValidator = _modelValidatorFactory.GetValidator<Script>();
+        await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
         await _cache.EntitySet<Script>().AddAsync(record);

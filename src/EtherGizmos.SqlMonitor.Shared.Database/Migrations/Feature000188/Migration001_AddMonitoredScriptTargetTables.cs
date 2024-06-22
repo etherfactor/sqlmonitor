@@ -19,6 +19,43 @@ public class Migration001_AddMonitoredScriptTargetTables : MigrationExtension
             .WithColumn("monitored_resource_id").AsGuid().NotNullable()
             .WithColumn("monitored_environment_id").AsGuid().NotNullable();
 
+        Create.Index("IX_monitored_targets_monitored_system_id_monitored_resource_id_m")
+            .OnTable("monitored_targets")
+            .OnColumn("monitored_system_id")
+            .Ascending()
+            .OnColumn("monitored_resource_id")
+            .Ascending()
+            .OnColumn("monitored_environment_id")
+            .Ascending()
+            .WithOptions().Unique();
+
+        Create.ForeignKey("FK_monitored_targets_monitored_system_id")
+            .FromTable("monitored_targets").ForeignColumn("monitored_system_id")
+            .ToTable("monitored_systems").PrimaryColumn("monitored_system_id");
+
+        Create.Index("IX_monitored_targets_monitored_system_id")
+            .OnTable("monitored_targets")
+            .OnColumn("monitored_system_id")
+            .Ascending();
+
+        Create.ForeignKey("FK_monitored_targets_monitored_resource_id")
+            .FromTable("monitored_targets").ForeignColumn("monitored_resource_id")
+            .ToTable("monitored_resources").PrimaryColumn("monitored_resource_id");
+
+        Create.Index("IX_monitored_targets_monitored_resource_id")
+            .OnTable("monitored_targets")
+            .OnColumn("monitored_resource_id")
+            .Ascending();
+
+        Create.ForeignKey("FK_monitored_targets_monitored_environment_id")
+            .FromTable("monitored_targets").ForeignColumn("monitored_environment_id")
+            .ToTable("monitored_environments").PrimaryColumn("monitored_environment_id");
+
+        Create.Index("IX_monitored_targets_monitored_environment_id")
+            .OnTable("monitored_targets")
+            .OnColumn("monitored_environment_id")
+            .Ascending();
+
         /*
          * Create [dbo].[ssh_authentication_types]
          *  - the types of authentication that can be used for SSH

@@ -1,4 +1,4 @@
-﻿namespace EtherGizmos.SqlMonitor.Shared.OData.Services.Abstractions;
+﻿namespace EtherGizmos.SqlMonitor.Shared.Utilities.Abstractions;
 
 public interface IModelValidatorFactory
 {
