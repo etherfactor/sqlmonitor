@@ -275,6 +275,7 @@ public class ApplicationContext : DbContext
             entity.ToTableWithAnnotations();
 
             entity.HasKey(e => e.Id);
+            entity.HasAlternateKey(e => new { e.MonitoredSystemId, e.MonitoredResourceId, e.MonitoredEnvironmentId });
 
             entity.PropertyWithAnnotations(e => e.Id);
             entity.PropertyWithAnnotations(e => e.MonitoredSystemId);

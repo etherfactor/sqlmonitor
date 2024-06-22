@@ -123,8 +123,7 @@ public class MonitoredScriptTargetsController : ODataController
             record.MonitoredTarget.MonitoredResourceId,
             record.MonitoredTarget.MonitoredEnvironmentId);
 
-        record.MonitoredTargetId = target.Id;
-        record.MonitoredTarget = null!;
+        record.MonitoredTarget = target;
 
         var dbValidator = _modelValidatorFactory.GetValidator<MonitoredScriptTarget>();
         await dbValidator.ValidateAsync(record);
@@ -132,7 +131,6 @@ public class MonitoredScriptTargetsController : ODataController
         _monitoredScriptTargetService.Add(record);
 
         await _saveService.SaveChangesAsync();
-        record.MonitoredTarget = target;
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
@@ -171,14 +169,12 @@ public class MonitoredScriptTargetsController : ODataController
             record.MonitoredTarget.MonitoredResourceId,
             record.MonitoredTarget.MonitoredEnvironmentId);
 
-        record.MonitoredTargetId = target.Id;
-        record.MonitoredTarget = null!;
+        record.MonitoredTarget = target;
 
         var dbValidator = _modelValidatorFactory.GetValidator<MonitoredScriptTarget>();
         await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
-        record.MonitoredTarget = target;
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);
