@@ -129,13 +129,13 @@ stages:
       displayName: 'Install NPM Packages' 
       inputs: 
         command: 'ci' 
-        workingDir: '$(Build.Projects.Web)' 
+        workingDir: 'src/$(Build.Projects.Web)' 
 
     - task: Npm@1
       displayName: 'Perform Angular Tests'
       inputs:
         command: 'custom'
-        workingDir: '$(Build.Projects.Web)'
+        workingDir: 'src/$(Build.Projects.Web)'
         customCommand: 'run test-headless'
 
     - task: PublishTestResults@2
