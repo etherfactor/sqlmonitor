@@ -17,13 +17,13 @@ public static class ForExecTypeDTO
         @in == ExecType.Unknown ? ExecTypeDTO.Unknown
         : @in == ExecType.Ssh ? ExecTypeDTO.Ssh
         : @in == ExecType.WinRm ? ExecTypeDTO.WinRm
-        : default;
+        : null;
 
     private static readonly Expression<Func<ExecType?, ExecTypeDTO?>> _toDtoNull = @in =>
         @in == ExecType.Unknown ? ExecTypeDTO.Unknown
         : @in == ExecType.Ssh ? ExecTypeDTO.Ssh
         : @in == ExecType.WinRm ? ExecTypeDTO.WinRm
-        : default;
+        : null;
 
     private static readonly Expression<Func<ExecTypeDTO?, ExecType>> _fromDto = @in =>
         @in == ExecTypeDTO.Unknown ? ExecType.Unknown
@@ -35,7 +35,7 @@ public static class ForExecTypeDTO
         @in == ExecTypeDTO.Unknown ? ExecType.Unknown
         : @in == ExecTypeDTO.Ssh ? ExecType.Ssh
         : @in == ExecTypeDTO.WinRm ? ExecType.WinRm
-        : default;
+        : null;
 
     public static IProfileExpression AddExecType(this IProfileExpression @this)
     {

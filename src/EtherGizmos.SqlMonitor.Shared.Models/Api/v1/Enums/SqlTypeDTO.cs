@@ -21,7 +21,7 @@ public static class ForSqlTypeDTO
         : @in == SqlType.MySql ? SqlTypeDTO.MySql
         : @in == SqlType.MariaDb ? SqlTypeDTO.MariaDb
         : @in == SqlType.PostgreSql ? SqlTypeDTO.PostgreSql
-        : default;
+        : null;
 
     private static readonly Expression<Func<SqlType?, SqlTypeDTO?>> _toDtoNull = @in =>
         @in == SqlType.Unknown ? SqlTypeDTO.Unknown
@@ -29,7 +29,7 @@ public static class ForSqlTypeDTO
         : @in == SqlType.MySql ? SqlTypeDTO.MySql
         : @in == SqlType.MariaDb ? SqlTypeDTO.MariaDb
         : @in == SqlType.PostgreSql ? SqlTypeDTO.PostgreSql
-        : default;
+        : null;
 
     private static readonly Expression<Func<SqlTypeDTO?, SqlType>> _fromDto = @in =>
         @in == SqlTypeDTO.Unknown ? SqlType.Unknown
@@ -45,7 +45,7 @@ public static class ForSqlTypeDTO
         : @in == SqlTypeDTO.MySql ? SqlType.MySql
         : @in == SqlTypeDTO.MariaDb ? SqlType.MariaDb
         : @in == SqlTypeDTO.PostgreSql ? SqlType.PostgreSql
-        : default;
+        : null;
 
     public static IProfileExpression AddSqlType(this IProfileExpression @this)
     {

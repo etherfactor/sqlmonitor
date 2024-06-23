@@ -126,6 +126,7 @@ public class ScriptsController : ODataController
         _scriptService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Script>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);

@@ -131,6 +131,7 @@ public class MonitoredScriptTargetsController : ODataController
         _monitoredScriptTargetService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<MonitoredScriptTarget>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
@@ -175,6 +176,7 @@ public class MonitoredScriptTargetsController : ODataController
         await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<MonitoredScriptTarget>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);

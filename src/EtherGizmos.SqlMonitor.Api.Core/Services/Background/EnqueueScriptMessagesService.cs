@@ -40,7 +40,7 @@ public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
     }
 
     /// <inheritdoc/>
-    protected override async Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
+    protected override async Task DoConstantGlobalWorkAsync(IServiceProvider provider, CancellationToken stoppingToken)
     {
         var now = DateTimeOffset.Now;
         var loadTargetTasks = new Dictionary<int, Task<List<MonitoredScriptTarget>>>();
@@ -52,10 +52,8 @@ public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
             .IsLessThanOrEqualTo(DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1)))
             .ToListAsync(stoppingToken);
 
-        var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
+        var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
         var sendEndpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessagingConstants.Queues.AgentScriptExecute}"));
-
-        var scriptService = scope.GetRequiredService<IScriptService>();
 
         var scriptVariantsToRun = scriptsToRun.SelectMany(e => e.Variants)
             .ToList();
@@ -106,15 +104,24 @@ public class EnqueueScriptMessagesService : GlobalConstantBackgroundService
             }
         }
 
-        foreach (var script in scriptsToRun)
+        var parallelOptions = new ParallelOptions()
         {
+            MaxDegreeOfParallelism = 8,
+        };
+
+        await Parallel.ForEachAsync(scriptsToRun, parallelOptions, async (script, cancellationToken) =>
+        {
+            using var subScope = provider.CreateScope();
+            var subProvider = subScope.ServiceProvider;
+
+            var scriptService = subProvider.GetRequiredService<IScriptService>();
             scriptService.Add(script);
+
+            var saveService = provider.GetRequiredService<ISaveService>();
+            await saveService.SaveChangesAsync();
 
             script.LastRunAtUtc = DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1));
             await scriptSet.AddAsync(script, stoppingToken);
-        }
-
-        var saveService = scope.GetRequiredService<ISaveService>();
-        await saveService.SaveChangesAsync();
+        });
     }
 }

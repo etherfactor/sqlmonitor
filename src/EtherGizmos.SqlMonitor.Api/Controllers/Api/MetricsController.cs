@@ -114,6 +114,7 @@ public class MetricsController : ODataController
         _metricService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Metric>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);

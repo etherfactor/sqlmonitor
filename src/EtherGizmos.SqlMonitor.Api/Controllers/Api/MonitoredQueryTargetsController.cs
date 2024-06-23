@@ -124,6 +124,7 @@ public class MonitoredQueryTargetsController : ODataController
         _monitoredQueryTargetService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<MonitoredQueryTarget>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);
@@ -168,6 +169,7 @@ public class MonitoredQueryTargetsController : ODataController
         await dbValidator.ValidateAsync(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<MonitoredQueryTarget>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Ok(finished);

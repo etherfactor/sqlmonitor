@@ -39,9 +39,6 @@ public class MonitoredScriptTargetDTO
     public ScriptInterpreterDTO? ScriptInterpreter { get; set; }
 
     [Required]
-    public ExecTypeDTO? ExecType { get; set; }
-
-    [Required]
     public string? HostName { get; set; }
 
     public int? Port { get; set; }
@@ -49,11 +46,26 @@ public class MonitoredScriptTargetDTO
     [Required]
     public string? FilePath { get; set; }
 
-    public bool? UseSsl { get; set; }
+    [Required]
+    public ExecTypeDTO? ExecType { get; set; }
 
-    public string? Username { get; set; }
+    public virtual SshAuthenticationTypeDTO? SshAuthenticationType { get; set; }
 
-    public string? Password { get; set; }
+    public virtual string? SshUsername { get; set; }
+
+    public virtual string? SshPassword { get; set; }
+
+    public virtual string? SshPrivateKey { get; set; }
+
+    public virtual string? SshPrivateKeyPassword { get; set; }
+
+    public virtual WinRmAuthenticationTypeDTO? WinRmAuthenticationType { get; set; }
+
+    public virtual bool? WinRmUseSsl { get; set; }
+
+    public virtual string? WinRmUsername { get; set; }
+
+    public virtual string? WinRmPassword { get; set; }
 }
 
 public static class ForMonitoredScriptTargetDTO
@@ -81,8 +93,15 @@ public static class ForMonitoredScriptTargetDTO
         toDto.MapMember(dest => dest.HostName, src => src.HostName);
         toDto.MapMember(dest => dest.Port, src => src.Port);
         toDto.MapMember(dest => dest.FilePath, src => src.RunInPath);
-        toDto.MapMember(dest => dest.Username, src => src.SshUsername);
-        toDto.MapMember(dest => dest.Password, src => src.SshPassword);
+        toDto.MapMember(dest => dest.SshAuthenticationType, src => src.SshAuthenticationType);
+        toDto.MapMember(dest => dest.SshUsername, src => src.SshUsername);
+        toDto.MapMember(dest => dest.SshPassword, src => src.SshPassword);
+        toDto.MapMember(dest => dest.SshPrivateKey, src => src.SshPrivateKey);
+        toDto.MapMember(dest => dest.SshPrivateKeyPassword, src => src.SshPrivateKeyPassword);
+        toDto.MapMember(dest => dest.WinRmAuthenticationType, src => src.WinRmAuthenticationType);
+        toDto.MapMember(dest => dest.WinRmUseSsl, src => src.WinRmUseSsl);
+        toDto.MapMember(dest => dest.WinRmUsername, src => src.WinRmUsername);
+        toDto.MapMember(dest => dest.WinRmPassword, src => src.WinRmPassword);
 
         var fromDto = @this.CreateMap<MonitoredScriptTargetDTO, MonitoredScriptTarget>();
         fromDto.IgnoreAllMembers();
@@ -101,8 +120,15 @@ public static class ForMonitoredScriptTargetDTO
         fromDto.MapMember(dest => dest.HostName, src => src.HostName);
         fromDto.MapMember(dest => dest.Port, src => src.Port);
         fromDto.MapMember(dest => dest.RunInPath, src => src.FilePath);
-        fromDto.MapMember(dest => dest.SshUsername, src => src.Username);
-        fromDto.MapMember(dest => dest.SshPassword, src => src.Password);
+        fromDto.MapMember(dest => dest.SshAuthenticationType, src => src.SshAuthenticationType);
+        fromDto.MapMember(dest => dest.SshUsername, src => src.SshUsername);
+        fromDto.MapMember(dest => dest.SshPassword, src => src.SshPassword);
+        fromDto.MapMember(dest => dest.SshPrivateKey, src => src.SshPrivateKey);
+        fromDto.MapMember(dest => dest.SshPrivateKeyPassword, src => src.SshPrivateKeyPassword);
+        fromDto.MapMember(dest => dest.WinRmAuthenticationType, src => src.WinRmAuthenticationType);
+        fromDto.MapMember(dest => dest.WinRmUseSsl, src => src.WinRmUseSsl);
+        fromDto.MapMember(dest => dest.WinRmUsername, src => src.WinRmUsername);
+        fromDto.MapMember(dest => dest.WinRmPassword, src => src.WinRmPassword);
 
         return @this;
     }

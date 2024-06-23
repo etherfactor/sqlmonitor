@@ -25,7 +25,9 @@ public static class IServiceCollectionExtensions
                 //Add enums
                 opt.AddExecType();
                 opt.AddAggregateType();
+                opt.AddSshAuthenticationType();
                 opt.AddSqlType();
+                opt.AddWinRmAuthenticationType();
 
                 //Add entities
                 opt.AddMetric();

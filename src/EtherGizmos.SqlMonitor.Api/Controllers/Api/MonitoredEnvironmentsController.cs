@@ -114,6 +114,7 @@ public class MonitoredEnvironmentsController : ODataController
         _monitoredEnvironmentService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<MonitoredEnvironment>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);

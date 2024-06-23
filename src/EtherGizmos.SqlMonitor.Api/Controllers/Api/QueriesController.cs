@@ -126,6 +126,7 @@ public class QueriesController : ODataController
         _queryService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<Query>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);

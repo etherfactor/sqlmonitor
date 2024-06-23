@@ -42,8 +42,15 @@ public class MonitoredScriptTargetDTOConfiguration : IModelConfiguration
             entity.Property(e => e.HostName);
             entity.Property(e => e.Port);
             entity.Property(e => e.FilePath);
-            entity.Property(e => e.Username);
-            entity.Property(e => e.Password);
+            entity.EnumProperty(e => e.SshAuthenticationType);
+            entity.Property(e => e.SshUsername);
+            entity.Property(e => e.SshPassword);
+            entity.Property(e => e.SshPrivateKey);
+            entity.Property(e => e.SshPrivateKeyPassword);
+            entity.EnumProperty(e => e.WinRmAuthenticationType);
+            entity.Property(e => e.WinRmUseSsl);
+            entity.Property(e => e.WinRmUsername);
+            entity.Property(e => e.WinRmPassword);
         }
     }
 }

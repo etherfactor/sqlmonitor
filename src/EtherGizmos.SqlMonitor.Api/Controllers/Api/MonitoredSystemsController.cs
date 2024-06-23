@@ -114,6 +114,7 @@ public class MonitoredSystemsController : ODataController
         _monitoredSystemService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<MonitoredSystem>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);

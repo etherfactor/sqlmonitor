@@ -63,16 +63,34 @@ public abstract class GlobalConstantBackgroundService : PeriodicBackgroundServic
             await Task.Delay(nextWait, stoppingToken);
 
             _lastRun = nextTime;
-            var scope = _serviceProvider.CreateScope().ServiceProvider;
-            await DoConstantGlobalWorkAsync(scope, stoppingToken);
+            var scope = _serviceProvider.CreateScope();
+            var provider = scope.ServiceProvider;
+
+            await DoConstantGlobalWorkAsync(provider, stoppingToken);
+
+            //For some reason, MassTransit doesn't like the scope being disposed, so throw it away once MassTransit is
+            //absolutely done with it
+            _ = DelayDispose(scope, TimeSpan.FromSeconds(30));
         }
     }
 
     /// <summary>
     /// Performs continuous background work on a single instance.
     /// </summary>
-    /// <param name="scope">The scope for this run.</param>
+    /// <param name="provider">The scoped provider for this run.</param>
     /// <param name="stoppingToken">The cancellation instruction.</param>
     /// <returns>An awaitable task.</returns>
-    protected internal abstract Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken);
+    protected internal abstract Task DoConstantGlobalWorkAsync(IServiceProvider provider, CancellationToken stoppingToken);
+
+    /// <summary>
+    /// Disposes an object after a delay.
+    /// </summary>
+    /// <param name="disposable">The object to dispose.</param>
+    /// <param name="delay">The delay before disposing.</param>
+    /// <returns>An awaitable task.</returns>
+    private async Task DelayDispose(IDisposable disposable, TimeSpan delay)
+    {
+        await Task.Delay(delay);
+        disposable.Dispose();
+    }
 }

@@ -21,7 +21,7 @@ public static class ForAggregateTypeDTO
         : @in == AggregateType.Maximum ? AggregateTypeDTO.Maximum
         : @in == AggregateType.Minimum ? AggregateTypeDTO.Minimum
         : @in == AggregateType.Sum ? AggregateTypeDTO.Sum
-        : default;
+        : null;
 
     private static readonly Expression<Func<AggregateType?, AggregateTypeDTO?>> _toDtoNull = @in =>
         @in == AggregateType.Unknown ? AggregateTypeDTO.Unknown
@@ -29,7 +29,7 @@ public static class ForAggregateTypeDTO
         : @in == AggregateType.Maximum ? AggregateTypeDTO.Maximum
         : @in == AggregateType.Minimum ? AggregateTypeDTO.Minimum
         : @in == AggregateType.Sum ? AggregateTypeDTO.Sum
-        : default;
+        : null;
 
     private static readonly Expression<Func<AggregateTypeDTO?, AggregateType>> _fromDto = @in =>
         @in == AggregateTypeDTO.Unknown ? AggregateType.Unknown
@@ -45,7 +45,7 @@ public static class ForAggregateTypeDTO
         : @in == AggregateTypeDTO.Maximum ? AggregateType.Maximum
         : @in == AggregateTypeDTO.Minimum ? AggregateType.Minimum
         : @in == AggregateTypeDTO.Sum ? AggregateType.Sum
-        : default;
+        : null;
 
     public static IProfileExpression AddAggregateType(this IProfileExpression @this)
     {

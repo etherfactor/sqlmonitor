@@ -114,6 +114,7 @@ public class ScriptInterpretersController : ODataController
         _scriptInterpreterService.Add(record);
 
         await _saveService.SaveChangesAsync();
+        await _cache.EntitySet<ScriptInterpreter>().AddAsync(record);
 
         var finished = record.MapExplicitlyAndApplyQueryOptions(_mapper, queryOptions);
         return Created(finished);

@@ -44,7 +44,7 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
     }
 
     /// <inheritdoc/>
-    protected override async Task DoConstantGlobalWorkAsync(IServiceProvider scope, CancellationToken stoppingToken)
+    protected override async Task DoConstantGlobalWorkAsync(IServiceProvider provider, CancellationToken stoppingToken)
     {
         var now = DateTimeOffset.Now;
         var loadTargetTasks = new Dictionary<SqlType, Task<List<MonitoredQueryTarget>>>();
@@ -56,10 +56,8 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
             .IsLessThanOrEqualTo(DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1)))
             .ToListAsync(stoppingToken);
 
-        var sendEndpointProvider = scope.GetRequiredService<ISendEndpointProvider>();
+        var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
         var sendEndpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessagingConstants.Queues.AgentQueryExecute}"));
-
-        var queryService = scope.GetRequiredService<IQueryService>();
 
         var queryVariantsToRun = queriesToRun.SelectMany(e => e.Variants)
             .ToList();
@@ -103,15 +101,24 @@ public class EnqueueQueryMessagesService : GlobalConstantBackgroundService
             }
         }
 
-        foreach (var query in queriesToRun)
+        var parallelOptions = new ParallelOptions()
         {
+            MaxDegreeOfParallelism = 8,
+        };
+
+        await Parallel.ForEachAsync(queriesToRun, parallelOptions, async (query, cancellationToken) =>
+        {
+            using var subScope = provider.CreateScope();
+            var subProvider = subScope.ServiceProvider;
+
+            var queryService = subProvider.GetRequiredService<IQueryService>();
             queryService.Add(query);
+
+            var saveService = provider.GetRequiredService<ISaveService>();
+            await saveService.SaveChangesAsync();
 
             query.LastRunAtUtc = DateTimeOffset.UtcNow.Round(TimeSpan.FromSeconds(1));
             await querySet.AddAsync(query, stoppingToken);
-        }
-
-        var saveService = scope.GetRequiredService<ISaveService>();
-        await saveService.SaveChangesAsync();
+        });
     }
 }
