@@ -8,29 +8,45 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.runsettings = .runsettings
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api", "EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj", "{2F466962-D42B-434D-B854-745E3DE16F6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api", "src\EtherGizmos.SqlMonitor.Api\EtherGizmos.SqlMonitor.Api.csproj", "{2F466962-D42B-434D-B854-745E3DE16F6E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.Extensions", "EtherGizmos.SqlMonitor.Api.Extensions\EtherGizmos.SqlMonitor.Api.Extensions.csproj", "{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.IntegrationTests.Ssh", "tests\EtherGizmos.SqlMonitor.IntegrationTests.Ssh\EtherGizmos.SqlMonitor.IntegrationTests.Ssh.csproj", "{8AC84FCC-9855-4C1A-A627-5095A006E8C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh", "EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh\EtherGizmos.SqlMonitor.Api.IntegrationTests.Ssh.csproj", "{8AC84FCC-9855-4C1A-A627-5095A006E8C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.IntegrationTests.WinRm", "tests\EtherGizmos.SqlMonitor.IntegrationTests.WinRm\EtherGizmos.SqlMonitor.IntegrationTests.WinRm.csproj", "{71920C7C-55FE-43BE-837E-1FD1F371C0EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm", "EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm\EtherGizmos.SqlMonitor.Api.IntegrationTests.WinRm.csproj", "{71920C7C-55FE-43BE-837E-1FD1F371C0EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.UnitTests", "tests\EtherGizmos.SqlMonitor.UnitTests\EtherGizmos.SqlMonitor.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.UnitTests", "EtherGizmos.SqlMonitor.Api.UnitTests\EtherGizmos.SqlMonitor.Api.UnitTests.csproj", "{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EtherGizmos.SqlMonitor.Web", "src\EtherGizmos.SqlMonitor.Web\EtherGizmos.SqlMonitor.Web.esproj", "{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Database", "EtherGizmos.SqlMonitor.Database\EtherGizmos.SqlMonitor.Database.csproj", "{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.IntegrationTests.MySql", "tests\EtherGizmos.SqlMonitor.IntegrationTests.MySql\EtherGizmos.SqlMonitor.IntegrationTests.MySql.csproj", "{C544AFEF-400D-4029-8FF7-6A6BE8CF2950}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Models", "EtherGizmos.SqlMonitor.Models\EtherGizmos.SqlMonitor.Models.csproj", "{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.IntegrationTests.SqlServer", "tests\EtherGizmos.SqlMonitor.IntegrationTests.SqlServer\EtherGizmos.SqlMonitor.IntegrationTests.SqlServer.csproj", "{8F18A559-59B2-4C76-80CE-E9CE89E7DFA7}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EtherGizmos.SqlMonitor.Web", "EtherGizmos.SqlMonitor.Web\EtherGizmos.SqlMonitor.Web.esproj", "{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.IntegrationTests", "tests\EtherGizmos.SqlMonitor.Shared.IntegrationTests\EtherGizmos.SqlMonitor.Shared.IntegrationTests.csproj", "{16A4A613-0998-41D0-A135-82017A909FEE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql", "EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql\EtherGizmos.SqlMonitor.Api.IntegrationTests.MySql.csproj", "{C544AFEF-400D-4029-8FF7-6A6BE8CF2950}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.IntegrationTests.PostgreSql", "tests\EtherGizmos.SqlMonitor.IntegrationTests.PostgreSql\EtherGizmos.SqlMonitor.IntegrationTests.PostgreSql.csproj", "{A334CE52-C2E7-432A-B1D5-D23D048752B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer", "EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer\EtherGizmos.SqlMonitor.Api.IntegrationTests.SqlServer.csproj", "{8F18A559-59B2-4C76-80CE-E9CE89E7DFA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Agent", "src\EtherGizmos.SqlMonitor.Agent\EtherGizmos.SqlMonitor.Agent.csproj", "{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.IntegrationTests", "EtherGizmos.SqlMonitor.Shared.IntegrationTests\EtherGizmos.SqlMonitor.Shared.IntegrationTests.csproj", "{16A4A613-0998-41D0-A135-82017A909FEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Models", "src\EtherGizmos.SqlMonitor.Shared.Models\EtherGizmos.SqlMonitor.Shared.Models.csproj", "{1E89DF18-5000-4A70-B6AB-2FB882D2A86A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql", "EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql\EtherGizmos.SqlMonitor.Api.IntegrationTests.PostgreSql.csproj", "{A334CE52-C2E7-432A-B1D5-D23D048752B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Messaging", "src\EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Shared.Messaging.csproj", "{43BDB08D-4872-4DF6-82F9-9501160E8D08}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Configuration", "src\EtherGizmos.SqlMonitor.Shared.Configuration\EtherGizmos.SqlMonitor.Shared.Configuration.csproj", "{1C538538-8F6F-45EB-AE12-A8E3B32D38CE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Api.Core", "src\EtherGizmos.SqlMonitor.Api.Core\EtherGizmos.SqlMonitor.Api.Core.csproj", "{48792A8E-B1AD-4B96-8530-1E3491887DFF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Agent.Core", "src\EtherGizmos.SqlMonitor.Agent.Core\EtherGizmos.SqlMonitor.Agent.Core.csproj", "{00A18510-4082-4D77-8516-7A66DA2ACDBD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.OAuth", "src\EtherGizmos.SqlMonitor.Shared.OAuth\EtherGizmos.SqlMonitor.Shared.OAuth.csproj", "{4D35C427-3D3E-460D-BBAD-6352CA3568A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Database", "src\EtherGizmos.SqlMonitor.Shared.Database\EtherGizmos.SqlMonitor.Shared.Database.csproj", "{2757EEDB-CEBB-486C-B78C-34941D0B0640}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Utilities", "src\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj", "{691AC928-9109-4283-85F7-8C4A2B219C54}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.OData", "src\EtherGizmos.SqlMonitor.Shared.OData\EtherGizmos.SqlMonitor.Shared.OData.csproj", "{0673AD0E-8912-4E75-8506-4484CB3D077D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EtherGizmos.SqlMonitor.Shared.Redis", "src\EtherGizmos.SqlMonitor.Shared.Redis\EtherGizmos.SqlMonitor.Shared.Redis.csproj", "{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +58,6 @@ Global
 		{2F466962-D42B-434D-B854-745E3DE16F6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F466962-D42B-434D-B854-745E3DE16F6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F466962-D42B-434D-B854-745E3DE16F6E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BE33275-A20E-47D6-BB7E-6DB416E9F9C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AC84FCC-9855-4C1A-A627-5095A006E8C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,14 +70,6 @@ Global
 		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D6F2873-5F2B-4B9D-8F7F-7F4F3A4C1F1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8EB46369-23A6-4BCF-AD61-9F7BA4E3D1F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EFD8CF05-C5D4-42A5-8741-281C4A4EF57C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{594EA8F8-773F-4D0D-BD8A-5276204FCBAA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
@@ -88,6 +92,50 @@ Global
 		{A334CE52-C2E7-432A-B1D5-D23D048752B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A334CE52-C2E7-432A-B1D5-D23D048752B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A334CE52-C2E7-432A-B1D5-D23D048752B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D95DF1F0-34EA-49C3-89FC-8388D1F496D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E89DF18-5000-4A70-B6AB-2FB882D2A86A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E89DF18-5000-4A70-B6AB-2FB882D2A86A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E89DF18-5000-4A70-B6AB-2FB882D2A86A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E89DF18-5000-4A70-B6AB-2FB882D2A86A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43BDB08D-4872-4DF6-82F9-9501160E8D08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43BDB08D-4872-4DF6-82F9-9501160E8D08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43BDB08D-4872-4DF6-82F9-9501160E8D08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43BDB08D-4872-4DF6-82F9-9501160E8D08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C538538-8F6F-45EB-AE12-A8E3B32D38CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C538538-8F6F-45EB-AE12-A8E3B32D38CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C538538-8F6F-45EB-AE12-A8E3B32D38CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C538538-8F6F-45EB-AE12-A8E3B32D38CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48792A8E-B1AD-4B96-8530-1E3491887DFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48792A8E-B1AD-4B96-8530-1E3491887DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48792A8E-B1AD-4B96-8530-1E3491887DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48792A8E-B1AD-4B96-8530-1E3491887DFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00A18510-4082-4D77-8516-7A66DA2ACDBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00A18510-4082-4D77-8516-7A66DA2ACDBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00A18510-4082-4D77-8516-7A66DA2ACDBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00A18510-4082-4D77-8516-7A66DA2ACDBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D35C427-3D3E-460D-BBAD-6352CA3568A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D35C427-3D3E-460D-BBAD-6352CA3568A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D35C427-3D3E-460D-BBAD-6352CA3568A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D35C427-3D3E-460D-BBAD-6352CA3568A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2757EEDB-CEBB-486C-B78C-34941D0B0640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2757EEDB-CEBB-486C-B78C-34941D0B0640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2757EEDB-CEBB-486C-B78C-34941D0B0640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2757EEDB-CEBB-486C-B78C-34941D0B0640}.Release|Any CPU.Build.0 = Release|Any CPU
+		{691AC928-9109-4283-85F7-8C4A2B219C54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{691AC928-9109-4283-85F7-8C4A2B219C54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{691AC928-9109-4283-85F7-8C4A2B219C54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{691AC928-9109-4283-85F7-8C4A2B219C54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0673AD0E-8912-4E75-8506-4484CB3D077D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0673AD0E-8912-4E75-8506-4484CB3D077D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0673AD0E-8912-4E75-8506-4484CB3D077D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0673AD0E-8912-4E75-8506-4484CB3D077D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3B4D1AE-3C0F-4B6E-8EB2-1731F5E49986}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

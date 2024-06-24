@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.Abstractions" Version="5.*" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore.Models" Version="5.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Database\EtherGizmos.SqlMonitor.Shared.Database.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EtherGizmos.Extensions.DependencyInjection.ChildContainers" Version="0.1.0-ci.2" />
+    <PackageReference Include="FluentMigrator.Runner.MySql" Version="5.*" />
+    <PackageReference Include="FluentMigrator.Runner.Postgres" Version="5.*" />
+    <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="5.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.*" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="8.*" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Configuration\EtherGizmos.SqlMonitor.Shared.Configuration.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Models\EtherGizmos.SqlMonitor.Shared.Models.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Redis\EtherGizmos.SqlMonitor.Shared.Redis.csproj" />
+  </ItemGroup>
+
+</Project>

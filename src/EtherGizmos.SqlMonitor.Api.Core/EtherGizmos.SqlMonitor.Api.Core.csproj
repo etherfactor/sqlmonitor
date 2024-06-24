@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.*" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.*" />
+    <PackageReference Include="OpenIddict.Server.AspNetCore" Version="5.*" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="5.*" />
+    <PackageReference Include="OpenIddict.Validation.ServerIntegration" Version="5.*" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.*" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Configuration\EtherGizmos.SqlMonitor.Shared.Configuration.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Database\EtherGizmos.SqlMonitor.Shared.Database.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Messaging\EtherGizmos.SqlMonitor.Shared.Messaging.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Models\EtherGizmos.SqlMonitor.Shared.Models.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.OAuth\EtherGizmos.SqlMonitor.Shared.OAuth.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.OData\EtherGizmos.SqlMonitor.Shared.OData.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Redis\EtherGizmos.SqlMonitor.Shared.Redis.csproj" />
+    <ProjectReference Include="..\EtherGizmos.SqlMonitor.Shared.Utilities\EtherGizmos.SqlMonitor.Shared.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>
