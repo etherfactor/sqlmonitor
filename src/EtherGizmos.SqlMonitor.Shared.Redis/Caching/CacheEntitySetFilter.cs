@@ -1,4 +1,5 @@
-﻿using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
+﻿using EtherGizmos.SqlMonitor.Shared.Redis.Annotations;
+using EtherGizmos.SqlMonitor.Shared.Redis.Caching.Abstractions;
 using EtherGizmos.SqlMonitor.Shared.Redis.Extensions;
 using System.Reflection;
 
@@ -82,7 +83,9 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     /// <inheritdoc/>
     public ICacheFiltered<TEntity> IsBetween(TProperty valueStart, TProperty valueEnd)
     {
-        SetScore(true, valueStart!.TryGetScore(), true, valueEnd!.TryGetScore());
+        var minScore = GetScore(valueStart);
+        var maxScore = GetScore(valueEnd);
+        SetScore(true, minScore, true, maxScore);
 
         return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
@@ -90,7 +93,8 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     /// <inheritdoc/>
     public ICacheFiltered<TEntity> IsEqualTo(TProperty value)
     {
-        SetScore(true, value!.TryGetScore(), true, value!.TryGetScore());
+        var score = GetScore(value);
+        SetScore(true, score, true, score);
 
         return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
@@ -98,7 +102,8 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     /// <inheritdoc/>
     public ICacheFiltered<TEntity> IsGreaterThan(TProperty value)
     {
-        SetScore(false, value!.TryGetScore(), true, double.MaxValue);
+        var score = GetScore(value);
+        SetScore(false, score, true, double.MaxValue);
 
         return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
@@ -106,7 +111,8 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     /// <inheritdoc/>
     public ICacheFiltered<TEntity> IsGreaterThanOrEqualTo(TProperty value)
     {
-        SetScore(true, value!.TryGetScore(), true, double.MaxValue);
+        var score = GetScore(value);
+        SetScore(true, score, true, double.MaxValue);
 
         return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
@@ -114,7 +120,8 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     /// <inheritdoc/>
     public ICacheFiltered<TEntity> IsLessThan(TProperty value)
     {
-        SetScore(true, double.MinValue, false, value!.TryGetScore());
+        var score = GetScore(value);
+        SetScore(true, double.MinValue, false, score);
 
         return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
     }
@@ -122,8 +129,25 @@ internal class CacheEntitySetFilter<TEntity, TProperty> : CacheEntitySetFilter<T
     /// <inheritdoc/>
     public ICacheFiltered<TEntity> IsLessThanOrEqualTo(TProperty value)
     {
-        SetScore(true, double.MinValue, true, value!.TryGetScore());
+        var score = GetScore(value);
+        SetScore(true, double.MinValue, true, score);
 
         return new CacheEntitySetFiltered<TEntity>(Cache, CurrentFilters.Append(this));
+    }
+
+    private double GetScore(TProperty value)
+    {
+        double score;
+        if (value?.GetType()?.IsAssignableTo(typeof(string)) == true
+            && GetProperty().GetCustomAttribute<CaseSensitiveAttribute>() is null)
+        {
+            score = (value as string)?.ToUpper()?.TryGetScore() ?? 0;
+        }
+        else
+        {
+            score = value?.TryGetScore() ?? 0;
+        }
+
+        return score;
     }
 }

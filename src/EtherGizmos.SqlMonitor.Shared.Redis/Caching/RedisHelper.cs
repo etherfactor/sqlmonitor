@@ -525,18 +525,23 @@ public class RedisHelper<TEntity> : IRedisHelper<TEntity>
             }
             else
             {
-                if (entityInCache is not null)
-                {
-                    var entityInCacheValue = lookup.GetValue(entityInCache);
-                    if (entityInCacheValue is not null)
-                    {
-                        var removeHelper = typeof(RedisHelper<TEntity>)
-                            .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
-                            .MakeGenericMethod(lookupType);
+                ////Don't delete single lookup records if they are no longer on the object, as single lookup records are
+                ////typically distinct entities. To remove them, they need to be removed from their own entity set. To
+                ////dissociate them, alter the foreign key properties on the entity being cached, which will indirectly
+                ////disable the lookup.
 
-                        removeHelper.Invoke(this, new object[] { database, transaction, entityInCacheValue, new ConcurrentDictionary<string, object>() });
-                    }
-                }
+                //if (entityInCache is not null)
+                //{
+                //    var entityInCacheValue = lookup.GetValue(entityInCache);
+                //    if (entityInCacheValue is not null)
+                //    {
+                //        var removeHelper = typeof(RedisHelper<TEntity>)
+                //            .GetMethod(nameof(BuildRemoveActionLookup), BindingFlags.NonPublic | BindingFlags.Instance)!
+                //            .MakeGenericMethod(lookupType);
+
+                //        removeHelper.Invoke(this, new object[] { database, transaction, entityInCacheValue, new ConcurrentDictionary<string, object>() });
+                //    }
+                //}
             }
         }
 
