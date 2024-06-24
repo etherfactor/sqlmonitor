@@ -12,13 +12,17 @@ public class ImportOptions : IValidatableOptions
 
     public ImportType Type { get; set; }
 
+    #region File
     public ImportFileOptions File { get; set; } = new();
+    #endregion File
 
+    #region Database
     public ImportMySqlOptions MySql { get; set; } = new();
 
     public ImportPostgreSqlOptions PostgreSql { get; set; } = new();
 
     public ImportSqlServerOptions SqlServer { get; set; } = new();
+    #endregion Database
 
     public void AssertValid(string rootPath)
     {

@@ -11,13 +11,13 @@ namespace EtherGizmos.SqlMonitor.Shared.Database.Services;
 /// </summary>
 public class PostgreSqlDatabaseConnectionProvider : IDatabaseConnectionProvider
 {
-    private readonly IOptions<PostgreSqlOptions> _options;
+    private readonly IOptions<ConnectionPostgreSqlOptions> _options;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="configuration">The application's configuration.</param>
-    public PostgreSqlDatabaseConnectionProvider(IOptions<PostgreSqlOptions> options)
+    public PostgreSqlDatabaseConnectionProvider(IOptions<ConnectionPostgreSqlOptions> options)
     {
         _options = options;
     }

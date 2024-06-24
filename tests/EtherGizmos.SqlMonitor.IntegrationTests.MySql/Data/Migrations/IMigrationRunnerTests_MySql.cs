@@ -22,14 +22,14 @@ internal class IMigrationRunnerTests_MySql : IMigrationRunnerTests
     protected override void AddDatabaseConnectionProvider(IServiceCollection serviceCollection)
     {
         serviceCollection
-            .AddOptions<MySqlOptions>()
+            .AddOptions<ConnectionMySqlOptions>()
             .Configure<IConfiguration>((opt, conf) =>
             {
                 var section = conf.GetSection(ConfigurationNamespace);
 
                 section.Bind(opt);
-                opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(MySqlOptions).GetProperties().Any(p => p.Name == e.Key))
+                opt.ConnectionValues = section.GetChildren()
+                    .Where(e => !typeof(ConnectionMySqlOptions).GetProperties().Any(p => p.Name == e.Key))
                     .ToDictionary(e => e.Key, e => e.Value);
 
                 opt.AssertValid(ConfigurationNamespace);
@@ -40,7 +40,7 @@ internal class IMigrationRunnerTests_MySql : IMigrationRunnerTests
             {
                 childServices.AddTransient<IDatabaseConnectionProvider, MySqlDatabaseConnectionProvider>();
             })
-            .ImportSingleton<IOptions<MySqlOptions>>()
+            .ImportSingleton<IOptions<ConnectionMySqlOptions>>()
             .ForwardTransient<IDatabaseConnectionProvider>();
     }
 

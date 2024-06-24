@@ -36,9 +36,9 @@ public static class IServiceCollectionExtensions
                     childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
                 }
             })
-            .ImportSingleton<IOptions<MySqlOptions>>()
-            .ImportSingleton<IOptions<PostgreSqlOptions>>()
-            .ImportSingleton<IOptions<SqlServerOptions>>()
+            .ImportSingleton<IOptions<ConnectionMySqlOptions>>()
+            .ImportSingleton<IOptions<ConnectionPostgreSqlOptions>>()
+            .ImportSingleton<IOptions<ConnectionSqlServerOptions>>()
             .ForwardTransient<IDatabaseConnectionProvider>();
 
         return @this;

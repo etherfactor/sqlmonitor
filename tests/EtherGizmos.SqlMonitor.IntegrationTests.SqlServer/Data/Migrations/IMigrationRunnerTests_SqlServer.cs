@@ -20,14 +20,14 @@ internal class IMigrationRunnerTests_SqlServer : IMigrationRunnerTests
     protected override void AddDatabaseConnectionProvider(IServiceCollection serviceCollection)
     {
         serviceCollection
-            .AddOptions<SqlServerOptions>()
+            .AddOptions<ConnectionSqlServerOptions>()
             .Configure<IConfiguration>((opt, conf) =>
             {
                 var section = conf.GetSection(ConfigurationNamespace);
 
                 section.Bind(opt);
                 opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(SqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
+                    .Where(e => !typeof(ConnectionSqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
                     .ToDictionary(e => e.Key, e => e.Value);
 
                 opt.AssertValid(ConfigurationNamespace);
@@ -38,7 +38,7 @@ internal class IMigrationRunnerTests_SqlServer : IMigrationRunnerTests
             {
                 childServices.AddTransient<IDatabaseConnectionProvider, SqlServerDatabaseConnectionProvider>();
             })
-            .ImportSingleton<IOptions<SqlServerOptions>>()
+            .ImportSingleton<IOptions<ConnectionSqlServerOptions>>()
             .ForwardTransient<IDatabaseConnectionProvider>();
     }
 

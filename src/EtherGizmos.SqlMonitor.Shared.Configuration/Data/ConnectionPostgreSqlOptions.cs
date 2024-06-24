@@ -3,9 +3,9 @@
 namespace EtherGizmos.SqlMonitor.Shared.Configuration.Data;
 
 /// <summary>
-/// Provides configuration options for a SQL Server connection string builder.
+/// Provides configuration options for a PostgreSQL connection string builder.
 /// </summary>
-public class SqlServerOptions
+public class ConnectionPostgreSqlOptions
 {
     public Dictionary<string, string?> AllProperties { get; set; } = new();
 
@@ -25,9 +25,13 @@ public class SqlServerOptions
     /// <param name="rootPath">The root of the configuration in which these settings are located.</param>
     public void AssertValid(string rootPath)
     {
-        if (GetProperty("Data Source") is null && GetProperty("Server") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Data Source", typeof(string));
-        if (GetProperty("Initial Catalog") is null && GetProperty("Database") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Initial Catalog", typeof(string));
+        if (GetProperty("Host") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Host", typeof(string));
+        if (GetProperty("Database") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Database", typeof(string));
+        if (GetProperty("User Id") is null && GetProperty("User ID") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "User Id", typeof(string));
+        if (GetProperty("Password") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Password", typeof(string));
     }
 }

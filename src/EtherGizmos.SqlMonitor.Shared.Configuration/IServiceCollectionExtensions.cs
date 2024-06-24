@@ -48,14 +48,14 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddMySqlOptions(this IServiceCollection @this, string path = "Connections:MySql")
     {
         @this.AddOptions()
-            .AddOptions<MySqlOptions>()
+            .AddOptions<ConnectionMySqlOptions>()
             .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
             {
                 var section = conf.GetSection(path);
 
                 section.Bind(opt);
-                opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(MySqlOptions).GetProperties().Any(p => p.Name == e.Key))
+                opt.ConnectionValues = section.GetChildren()
+                    .Where(e => !typeof(ConnectionMySqlOptions).GetProperties().Any(p => p.Name == e.Key))
                     .ToDictionary(e => e.Key, e => e.Value);
 
                 if (usage.Value.Database == DatabaseType.MySql)
@@ -70,14 +70,14 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddPostgreSqlOptions(this IServiceCollection @this, string path = "Connections:PostgreSql")
     {
         @this.AddOptions()
-            .AddOptions<PostgreSqlOptions>()
+            .AddOptions<ConnectionPostgreSqlOptions>()
             .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
             {
                 var section = conf.GetSection(path);
 
                 section.Bind(opt);
                 opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(PostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
+                    .Where(e => !typeof(ConnectionPostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
                     .ToDictionary(e => e.Key, e => e.Value);
 
                 if (usage.Value.Database == DatabaseType.PostgreSql)
@@ -92,14 +92,14 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddSqlServerOptions(this IServiceCollection @this, string path = "Connections:SqlServer")
     {
         @this.AddOptions()
-            .AddOptions<SqlServerOptions>()
+            .AddOptions<ConnectionSqlServerOptions>()
             .Configure<IConfiguration, IOptions<UsageOptions>>((opt, conf, usage) =>
             {
                 var section = conf.GetSection(path);
 
                 section.Bind(opt);
                 opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(SqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
+                    .Where(e => !typeof(ConnectionSqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
                     .ToDictionary(e => e.Key, e => e.Value);
 
                 if (usage.Value.Database == DatabaseType.SqlServer)

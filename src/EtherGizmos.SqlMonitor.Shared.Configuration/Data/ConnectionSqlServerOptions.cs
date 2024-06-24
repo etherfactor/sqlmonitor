@@ -3,9 +3,9 @@
 namespace EtherGizmos.SqlMonitor.Shared.Configuration.Data;
 
 /// <summary>
-/// Provides configuration options for a <see cref="MySqlConnectionStringBuilder"/>.
+/// Provides configuration options for a SQL Server connection string builder.
 /// </summary>
-public class MySqlOptions
+public class ConnectionSqlServerOptions
 {
     public Dictionary<string, string?> AllProperties { get; set; } = new();
 
@@ -25,13 +25,9 @@ public class MySqlOptions
     /// <param name="rootPath">The root of the configuration in which these settings are located.</param>
     public void AssertValid(string rootPath)
     {
-        if (GetProperty("Server") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Server", typeof(string));
-        if (GetProperty("Database") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Database", typeof(string));
-        if (GetProperty("Uid") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Uid", typeof(string));
-        if (GetProperty("Pwd") is null)
-            ThrowHelper.ForMissingConfiguration(rootPath, this, "Pwd", typeof(string));
+        if (GetProperty("Data Source") is null && GetProperty("Server") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Data Source", typeof(string));
+        if (GetProperty("Initial Catalog") is null && GetProperty("Database") is null)
+            ThrowHelper.ForMissingConfiguration(rootPath, this, "Initial Catalog", typeof(string));
     }
 }

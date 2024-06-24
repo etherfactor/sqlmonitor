@@ -25,10 +25,10 @@ internal class DatabaseConnectionProviderTests
             { "Application Name", "Unit Test" }
         };
 
-        var optionsMock = new Mock<IOptions<SqlServerOptions>>();
+        var optionsMock = new Mock<IOptions<ConnectionSqlServerOptions>>();
         optionsMock.Setup(@interface =>
             @interface.Value)
-            .Returns(new SqlServerOptions()
+            .Returns(new ConnectionSqlServerOptions()
             {
                 AllProperties = configData
             });

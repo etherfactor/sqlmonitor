@@ -11,13 +11,13 @@ namespace EtherGizmos.SqlMonitor.Shared.Database.Services;
 /// </summary>
 public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
 {
-    private readonly IOptions<SqlServerOptions> _options;
+    private readonly IOptions<ConnectionSqlServerOptions> _options;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="options">The application's configuration.</param>
-    public SqlServerDatabaseConnectionProvider(IOptions<SqlServerOptions> options)
+    public SqlServerDatabaseConnectionProvider(IOptions<ConnectionSqlServerOptions> options)
     {
         _options = options;
     }

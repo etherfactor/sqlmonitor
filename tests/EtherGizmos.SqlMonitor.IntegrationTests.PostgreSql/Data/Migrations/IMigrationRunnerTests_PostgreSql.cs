@@ -22,14 +22,14 @@ internal class IMigrationRunnerTests_PostgreSql : IMigrationRunnerTests
     protected override void AddDatabaseConnectionProvider(IServiceCollection serviceCollection)
     {
         serviceCollection
-            .AddOptions<PostgreSqlOptions>()
+            .AddOptions<ConnectionPostgreSqlOptions>()
             .Configure<IConfiguration>((opt, conf) =>
             {
                 var section = conf.GetSection(ConfigurationNamespace);
 
                 section.Bind(opt);
                 opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(PostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
+                    .Where(e => !typeof(ConnectionPostgreSqlOptions).GetProperties().Any(p => p.Name == e.Key))
                     .ToDictionary(e => e.Key, e => e.Value);
 
                 opt.AssertValid(ConfigurationNamespace);
@@ -40,7 +40,7 @@ internal class IMigrationRunnerTests_PostgreSql : IMigrationRunnerTests
             {
                 childServices.AddTransient<IDatabaseConnectionProvider, PostgreSqlDatabaseConnectionProvider>();
             })
-            .ImportSingleton<IOptions<PostgreSqlOptions>>()
+            .ImportSingleton<IOptions<ConnectionPostgreSqlOptions>>()
             .ForwardTransient<IDatabaseConnectionProvider>();
     }
 

@@ -11,13 +11,13 @@ namespace EtherGizmos.SqlMonitor.Shared.Database.Services;
 /// </summary>
 public class MySqlDatabaseConnectionProvider : IDatabaseConnectionProvider
 {
-    private readonly IOptions<MySqlOptions> _options;
+    private readonly IOptions<ConnectionMySqlOptions> _options;
 
     /// <summary>
     /// Construct the service.
     /// </summary>
     /// <param name="options">The application's configuration.</param>
-    public MySqlDatabaseConnectionProvider(IOptions<MySqlOptions> options)
+    public MySqlDatabaseConnectionProvider(IOptions<ConnectionMySqlOptions> options)
     {
         _options = options;
     }
@@ -36,9 +36,9 @@ public class MySqlDatabaseConnectionProvider : IDatabaseConnectionProvider
 
         var builder = new MySqlConnectionStringBuilder();
 
-        foreach (string key in optionsValue.AllProperties.Keys)
+        foreach (string key in optionsValue.ConnectionValues.Keys)
         {
-            string? value = optionsValue.AllProperties[key];
+            string? value = optionsValue.ConnectionValues[key];
             if (value is not null)
             {
                 builder.Add(key, value);
