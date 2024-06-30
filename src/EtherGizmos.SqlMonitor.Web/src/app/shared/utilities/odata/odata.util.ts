@@ -85,66 +85,171 @@ export class o {
 
   //Logical operators
 
+  //(... and ...)
   static and(...conditions: Value<boolean>[]): Value<boolean> {
     return new AndGroupValue(...conditions);
   }
 
+  //(... or ...)
   static or(...conditions: Value<boolean>[]): Value<boolean> {
     return new OrGroupValue(...conditions);
   }
 
+  //not (...)
   static not(condition: Value<boolean>): Value<boolean> {
     return new NotValue(condition);
   }
 
   //Comparison operators
 
+  //... eq ...
   static eq<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
     return new EqualsComparisonValue(left, right);
   }
 
+  //... ne ...
   static ne<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
     return new NotEqualsComparisonValue(left, right);
   }
 
+  //... lt ...
   static lt<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
     return new LessThanComparisonValue(left, right);
   }
 
+  //... le ...
   static le<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
     return new LessThanOrEqualsComparisonValue(left, right);
   }
 
+  //... gt ...
   static gt<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
     return new GreaterThanComparisonValue(left, right);
   }
 
+  //... ge ...
   static ge<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
     return new GreaterThanOrEqualsComparisonValue(left, right);
   }
 
   //String operators
 
+  //contains(..., ...)
+  static contains(string: Value<string>, contains: Value<string>): Value<boolean> {
+    return new ContainsFunctionValue(string, contains);
+  }
+
+  //startswith(..., ...)
+  static startsWith(string: Value<string>, startsWith: Value<string>): Value<boolean> {
+    return new StartsWithFunctionValue(string, startsWith);
+  }
+
+  //endswith(..., ...)
+  static endsWith(string: Value<string>, endsWith: Value<string>): Value<boolean> {
+    return new EndsWithFunctionValue(string, endsWith);
+  }
+
+  //concat(..., ...)
+  static concat(left: Value<string>, right: Value<string>): Value<string> {
+    return new ConcatFunctionValue(left, right);
+  }
+
+  //indexof(..., ...)
+  static indexOf(string: Value<string>, indexOf: Value<string>): Value<number> {
+    return new IndexOfFunctionValue(string, indexOf);
+  }
+
+  //length(...)
+  static lengthOf(value: Value<string>): Value<number> {
+    return new LengthFunctionValue(value);
+  }
+
+  //substring(..., ...)
+  //substring(..., ..., ...)
+  static substring(value: Value<string>, start: Value<number>, finish?: Value<number>) {
+    return new SubstringFunctionValue(value, start, finish);
+  }
+
+  //tolower(...)
+  static toLower(value: Value<string>): Value<string> {
+    return new ToLowerFunctionValue(value);
+  }
+
+  //toupper(...)
+  static toUpper(value: Value<string>): Value<string> {
+    return new ToUpperFunctionValue(value);
+  }
+
+  //trim(...)
+  static trim(value: Value<string>): Value<string> {
+    return new TrimFunctionValue(value);
+  }
+
   //Arithmetic operators
+
+  //(... add ...)
+  static add(left: Value<number>, right: Value<number>): Value<number> {
+    return new AddOperatorValue(left, right);
+  }
+
+  //(... sub ...)
+  static subtract(left: Value<number>, right: Value<number>): Value<number> {
+    return new SubtractOperatorValue(left, right);
+  }
+
+  //(... mul ...)
+  static multiply(left: Value<number>, right: Value<number>): Value<number> {
+    return new MultiplyOperatorValue(left, right);
+  }
+
+  //(... div ...)
+  static divide(left: Value<number>, right: Value<number>): Value<number> {
+    return new DivideOperatorValue(left, right);
+  }
+
+  //(... mod ...)
+  static modulo(left: Value<number>, right: Value<number>): Value<number> {
+    return new ModuloOperatorValue(left, right);
+  }
+
+  //ceiling(...)
+  static ceiling(value: Value<number>): Value<number> {
+    return new CeilingFunctionValue(value);
+  }
+
+  //floor(...)
+  static floor(value: Value<number>): Value<number> {
+    return new FloorFunctionValue(value);
+  }
+
+  //round(...)
+  static round(value: Value<number>): Value<number> {
+    return new RoundFunctionValue(value);
+  }
 
   //Constant values
 
+  //'...'
   static string(value: string): Value<string> {
     return new StringConstantValue(value);
   }
 
+  //...
   static bool(value: boolean): Value<boolean> {
     return new BooleanConstantValue(value);
   }
 
+  //...
   static int(value: number): Value<number> {
     return new IntegerConstantValue(value);
   }
 
+  //...
   static guid(value: Guid): Value<Guid> {
     return new GuidConstantValue(value);
   }
 
+  //...
   static date(value: Date | DateTime): Value<DateTime> {
     if (DateTime.isDateTime(value)) {
       return new DateConstantValue(value);
@@ -154,6 +259,7 @@ export class o {
     }
   }
 
+  //...
   static dateTime(value: Date | DateTime): Value<DateTime> {
     if (DateTime.isDateTime(value)) {
       return new DateTimeConstantValue(value);
@@ -163,6 +269,7 @@ export class o {
     }
   }
 
+  //...
   static time(value: Interval): Value<Interval> {
     return new TimeConstantValue(value);
   }
@@ -430,36 +537,39 @@ class AnyArrayValue extends ArrayValue {
   }
 }
 
-interface Model {
-  id: Guid;
-  identity: number;
-  name: string;
-  description?: string;
-  values: SubModel[];
+abstract class FunctionValue<TValue> extends Value<TValue> {
+
+  private readonly name: string;
+  private readonly args: Value<unknown>[];
+
+  constructor(name: string, ...args: Value<unknown>[]) {
+    super();
+    this.name = name;
+    this.args = args;
+  }
+
+  override toString(): string {
+    return `${this.name}(${this.args.map(item => item.toString()).join(', ')})`;
+  }
 }
 
-interface SubModel {
-  key: string;
-  value?: string;
+class ContainsFunctionValue extends FunctionValue<boolean> {
+
+  constructor(string: Value<string>, contains: Value<string>) {
+    super('contains', string, contains);
+  }
 }
 
-const set = new EntitySet<Model>();
+class StartsWithFunctionValue extends FunctionValue<boolean> {
 
-set.filter(e =>
-  o.and(
-    o.eq(
-      e.prop('id'),
-      o.guid('00000000-0000-0000-0000-000000000000' as Guid)
-    ),
-    o.eq(
-      e.prop('identity'),
-      o.int(1)
-    ),
-    e.any('values', e2 =>
-      o.ne(
-        e2.prop('value'),
-        o.string('hello')
-      )
-    )
-  )
-);
+  constructor(string: Value<string>, startsWith: Value<string>) {
+    super('startswith', string, startsWith);
+  }
+}
+
+class EndsWithFunctionValue extends FunctionValue<boolean> {
+
+  constructor(string: Value<string>, endsWith: Value<string>) {
+    super('endswith', string, endsWith);
+  }
+}
