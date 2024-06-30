@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { NavbarActionSearchDirective } from './shared/directives/navbar-action-search/navbar-action-search.directive';
 import { BodyContainerType, BodyService } from './shared/services/body/body.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuCallback, NavbarMenuService, NavbarMenuSubAction } from './shared/services/navbar-menu/navbar-menu.service';
@@ -22,6 +24,7 @@ export class AppComponent implements OnInit {
 
   private readonly $body: BodyService;
   private readonly $navbarMenu: NavbarMenuService;
+  private readonly $offcanvas: NgbOffcanvas;
 
   @ViewChildren(NavbarActionSearchDirective) searchActions: QueryList<NavbarActionSearchDirective> = undefined!;
 
@@ -35,9 +38,11 @@ export class AppComponent implements OnInit {
   constructor(
     $body: BodyService,
     $navbarMenu: NavbarMenuService,
+    $offcanvas: NgbOffcanvas,
   ) {
     this.$body = $body;
     this.$navbarMenu = $navbarMenu;
+    this.$offcanvas = $offcanvas;
   }
 
   ngOnInit(): void {
@@ -80,5 +85,10 @@ export class AppComponent implements OnInit {
     } else {
       return of(label);
     }
+  }
+
+  openSidebar() {
+    const offcanvas = this.$offcanvas.open(SidebarComponent, { panelClass: 'sidebar' });
+    const component = offcanvas.componentInstance as SidebarComponent;
   }
 }
