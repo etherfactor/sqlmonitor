@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, S
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChartConfiguration, Point } from 'chart.js';
 import { DateTime } from 'luxon';
-import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { Observable, Subject, Subscription, asyncScheduler, bufferTime, filter, first, interval, observeOn, shareReplay } from 'rxjs';
 import { AggregateType } from '../../../../shared/models/aggregate-type';
 import { Instance } from '../../../../shared/models/instance';
@@ -24,7 +24,7 @@ import { EditChartWidgetModalComponent } from '../edit-chart-widget-modal/edit-c
   standalone: true,
   imports: [
     CommonModule,
-    NgChartsModule,
+    BaseChartDirective,
   ],
   templateUrl: './chart-widget.component.html',
   styleUrl: './chart-widget.component.scss'

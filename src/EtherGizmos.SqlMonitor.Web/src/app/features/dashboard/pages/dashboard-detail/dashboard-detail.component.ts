@@ -7,7 +7,7 @@ import 'chartjs-adapter-luxon';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import { GridstackModule, nodesCB } from 'gridstack/dist/angular';
 import { DateTime } from 'luxon';
-import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { QuillModule } from 'ngx-quill';
 import { Observable, Subscription, asyncScheduler, first, interval, map, observeOn, of, shareReplay } from 'rxjs';
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
@@ -30,11 +30,11 @@ import { DashboardWidget, DashboardWidgetChartScaleType, DashboardWidgetChartTyp
   selector: 'app-dashboard',
   standalone: true,
   imports: [
+    BaseChartDirective,
     ChartWidgetComponent,
     CommonModule,
     GridstackModule,
     NgbModalModule,
-    NgChartsModule,
     QuillModule,
     TextWidgetComponent,
   ],
