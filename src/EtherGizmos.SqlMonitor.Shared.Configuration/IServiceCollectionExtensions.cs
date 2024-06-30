@@ -98,9 +98,6 @@ public static class IServiceCollectionExtensions
                 var section = conf.GetSection(path);
 
                 section.Bind(opt);
-                opt.AllProperties = section.GetChildren()
-                    .Where(e => !typeof(ConnectionSqlServerOptions).GetProperties().Any(p => p.Name == e.Key))
-                    .ToDictionary(e => e.Key, e => e.Value);
 
                 if (usage.Value.Database == DatabaseType.SqlServer)
                 {

@@ -34,18 +34,9 @@ public class SqlServerDatabaseConnectionProvider : IDatabaseConnectionProvider
     {
         var optionsValue = _options.Value;
 
-        var builder = new SqlConnectionStringBuilder();
+        var connectionString  = optionsValue.ConnectionString;
 
-        foreach (string key in optionsValue.AllProperties.Keys)
-        {
-            string? value = optionsValue.AllProperties[key];
-            if (value is not null)
-            {
-                builder.Add(key, value);
-            }
-        }
-
-        return builder.ConnectionString;
+        return connectionString!;
     }
 
     /// <inheritdoc/>

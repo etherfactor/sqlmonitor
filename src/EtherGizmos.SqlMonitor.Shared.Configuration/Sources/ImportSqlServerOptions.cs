@@ -6,6 +6,8 @@ public class ImportSqlServerOptions : IValidatableOptions
 {
     public string ConnectionId { get; set; } = null!;
 
+    public string? Query { get; set; }
+
     public void AssertValid(string rootPath)
     {
         if (string.IsNullOrWhiteSpace(ConnectionId))

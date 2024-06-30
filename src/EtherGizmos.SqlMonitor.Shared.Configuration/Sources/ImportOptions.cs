@@ -6,7 +6,7 @@ public class ImportOptions : IValidatableOptions
 {
     public string? Name { get; set; }
 
-    public int Priority { get; set; } = -1;
+    public int Priority { get; set; } = 1;
 
     public bool Optional { get; set; } = false;
 

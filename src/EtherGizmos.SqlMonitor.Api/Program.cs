@@ -6,6 +6,8 @@ using EtherGizmos.SqlMonitor.Api.Core.Services.Filters;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Messaging;
 using EtherGizmos.SqlMonitor.Api.Core.Services.Validation;
 using EtherGizmos.SqlMonitor.Shared.Configuration;
+using EtherGizmos.SqlMonitor.Shared.Configuration.Data;
+using EtherGizmos.SqlMonitor.Shared.Configuration.Sources;
 using EtherGizmos.SqlMonitor.Shared.Database;
 using EtherGizmos.SqlMonitor.Shared.Database.Services;
 using EtherGizmos.SqlMonitor.Shared.Database.Services.Abstractions;
@@ -28,7 +30,30 @@ var builder = WebApplication.CreateBuilder(args);
 //**********************************************************
 // Configuration
 
-builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
+builder.Configuration
+    .AddInMemoryCollection(new Dictionary<string, string?>()
+    {
+        { "Imports:DefaultEnvironment:Priority", "0" },
+        { "Imports:DefaultEnvironment:Optional", "false" },
+        { "Imports:DefaultEnvironment:Type", "Environment" },
+        { "Imports:DefaultFileAppSettings:Priority", "-10" },
+        { "Imports:DefaultFileAppSettings:Optional", "false" },
+        { "Imports:DefaultFileAppSettings:Type", "File" },
+        { "Imports:DefaultFileAppSettings:File:Path", "appsettings.json" },
+        { "Imports:DefaultFileAppSettingsLocal:Priority", "-9" },
+        { "Imports:DefaultFileAppSettingsLocal:Optional", "false" },
+        { "Imports:DefaultFileAppSettingsLocal:Type", "File" },
+        { "Imports:DefaultFileAppSettingsLocal:File:Path", "appsettings.Local.json" },
+    })
+    .AddJsonFile("appsettings.Local.json", true, true);
+
+var connectionRoot = new ConnectionRoot();
+builder.Configuration.Bind(connectionRoot);
+
+var importRoot = new ImportRoot(connectionRoot);
+builder.Configuration.Bind(importRoot);
+
+importRoot.Apply(builder.Configuration);
 
 builder.AddLoggingServices();
 

@@ -1,4 +1,5 @@
 ﻿using EtherGizmos.SqlMonitor.Shared.Configuration.Helpers;
+using Microsoft.Data.SqlClient;
 
 namespace EtherGizmos.SqlMonitor.Shared.Configuration.Data;
 
@@ -7,16 +8,40 @@ namespace EtherGizmos.SqlMonitor.Shared.Configuration.Data;
 /// </summary>
 public class ConnectionSqlServerOptions
 {
-    public Dictionary<string, string?> AllProperties { get; set; } = new();
+    public string? ConnectionString { get; set; }
+
+    public Dictionary<string, string?> ConnectionValues { get; set; } = new();
+
+    public string ConnectionStringValue => ConnectionStringBuilder.ConnectionString;
+
+    private SqlConnectionStringBuilder ConnectionStringBuilder
+    {
+        get
+        {
+            var builder = new SqlConnectionStringBuilder();
+            if (ConnectionString is not null)
+            {
+                builder.ConnectionString = ConnectionString;
+            }
+
+            if (ConnectionValues is not null)
+            {
+                foreach (var pair in ConnectionValues)
+                {
+                    builder.Add(pair.Key, pair.Value!);
+                }
+            }
+
+            return builder;
+        }
+    }
 
     private string? GetProperty(string name)
     {
-        if (AllProperties.TryGetValue(name, out string? value))
-        {
-            return value;
-        }
+        var builder = ConnectionStringBuilder;
+        var maybeValue = builder.TryGetValue(name, out var value) ? value : null;
 
-        return null;
+        return maybeValue?.ToString();
     }
 
     /// <summary>
