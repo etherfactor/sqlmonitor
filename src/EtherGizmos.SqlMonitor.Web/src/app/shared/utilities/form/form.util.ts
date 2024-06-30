@@ -19,7 +19,7 @@ export function formFactoryForModel<TModel, TControlTypes = never>(builder: ($fo
 
 type RequiredIsh<TType> = { [K in keyof Required<TType>]: TType[K]; };
 
-type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
+export type InferArrayType<TData> = TData extends (infer UData)[] ? UData : never;
 
 type NoUndefined<TType> = TType extends undefined ? never : TType;
 type IfUndefined<TType> = TType extends undefined ? undefined : never;
