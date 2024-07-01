@@ -1,13 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 
 @Component({
   selector: 'app-monitored-system-detail',
   standalone: true,
-  imports: [],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgSelectModule,
+  ],
   templateUrl: './monitored-system-detail.component.html',
   styleUrl: './monitored-system-detail.component.scss'
 })

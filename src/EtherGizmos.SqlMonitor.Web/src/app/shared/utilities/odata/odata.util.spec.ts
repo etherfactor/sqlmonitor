@@ -22,7 +22,7 @@ describe('EntitySet', () => {
     set = new EntitySet<Model>();
   });
 
-  it('should1', () => {
+  it('should compare simple properties', () => {
     const filtered = set.filter(e =>
       o.eq(
         e.prop('id'),
@@ -34,7 +34,7 @@ describe('EntitySet', () => {
     expect(params.filter).toBe("id eq 00000000-0000-0000-0000-000000000000");
   });
 
-  it('should2', () => {
+  it('should compare multiple properties', () => {
     const filtered = set.filter(e =>
       o.and(
         o.eq(
@@ -52,7 +52,7 @@ describe('EntitySet', () => {
     expect(params.filter).toBe("(quantity eq 1 and isActive eq true)");
   });
 
-  it('should3', () => {
+  it('should handle nested and/or', () => {
     const filtered = set.filter(e =>
       o.or(
         o.and(
@@ -82,7 +82,7 @@ describe('EntitySet', () => {
     expect(params.filter).toBe("((quantity eq 1 and isActive eq true) or (quantity eq 0 and isActive eq false))");
   });
 
-  it('should4', () => {
+  it('should handle any operand', () => {
     const filtered = set.filter(e =>
       e.any('values', a =>
         o.and(
