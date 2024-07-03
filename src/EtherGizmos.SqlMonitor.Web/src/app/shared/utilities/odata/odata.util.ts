@@ -1,4 +1,5 @@
 import { DateTime, Interval } from "luxon";
+import { Observable } from "rxjs";
 import { Guid } from "../../types/guid/guid";
 import { InferArrayType } from "../form/form.util";
 
@@ -6,32 +7,108 @@ interface ODataQueryOptions {
   filter?: string;
 }
 
+interface ODataOptions {
+  filter?: Value<boolean>[];
+  orderBy?: OrderBy[];
+  select?: string[];
+  skip?: number;
+  top?: number;
+}
+
+interface OrderBy {
+  property: string;
+  direction: 'asc' | 'desc';
+}
+
 export class EntitySet<TEntity> {
 
-  private readonly filters?: Value<boolean>[];
+  private readonly filterValue?: Value<boolean>[];
+  private readonly orderByValue?: OrderBy[];
+  private readonly selectValue?: string[];
+  private readonly skipValue?: number;
+  private readonly topValue?: number;
 
-  constructor(filters?: Value<boolean>[]) {
-    this.filters = filters;
+  constructor(options?: ODataOptions) {
+    this.filterValue = options?.filter;
+    this.orderByValue = options?.orderBy;
+    this.selectValue = options?.select;
+    this.skipValue = options?.skip;
+    this.topValue = options?.top;
   }
+
+  //expand - TODO complicated
 
   filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntitySet<TEntity> {
     const generator = new PrefixGenerator();
     const accessor = new EntityAccessor<TEntity>(generator);
 
     const filter = builder(accessor);
-    const newFilters = [...(this.filters ?? []), filter];
+    const newFilters = [...(this.filterValue ?? []), filter];
 
-    return new EntitySet<TEntity>(newFilters);
+    const options = this.getOptions();
+    options.filter = newFilters;
+
+    return new EntitySet<TEntity>(options);
+  }
+
+  orderBy(property: keyof TEntity & string, direction: 'asc' | 'desc' = 'asc'): EntitySet<TEntity> {
+    const options = this.getOptions();
+    options.orderBy = [{ property, direction }];
+
+    return new EntitySet<TEntity>(options);
+  }
+
+  thenBy(property: keyof TEntity & string, direction: 'asc' | 'desc' = 'asc'): EntitySet<TEntity> {
+    const options = this.getOptions();
+    options.orderBy?.push({ property, direction });
+
+    return new EntitySet<TEntity>(options);
+  }
+
+  select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>> {
+    const options = this.getOptions();
+    options.select ??= [];
+    options.select = [...options.select, ...properties];
+
+    return new EntitySet<Pick<TEntity, TSelected>>(options);
+  }
+
+  skip(count: number): EntitySet<TEntity> {
+    const options = this.getOptions();
+    options.skip = count;
+
+    return new EntitySet<TEntity>(options);
+  }
+
+  top(count: number): EntitySet<TEntity> {
+    const options = this.getOptions();
+    options.top = count;
+
+    return new EntitySet<TEntity>(options);
+  }
+
+  private getOptions(): ODataOptions {
+    return {
+      filter: this.filterValue,
+      orderBy: this.orderByValue,
+      select: this.selectValue,
+      skip: this.skipValue,
+      top: this.topValue,
+    };
+  }
+
+  execute(): Observable<TEntity> {
+    throw new Error('Not implemented');
   }
 
   getParams(): ODataQueryOptions {
     const params: ODataQueryOptions = {};
-    if (this.filters) {
+    if (this.filterValue) {
       let useValue: Value<boolean>;
-      if (this.filters.length > 1) {
-        useValue = o.and(...this.filters);
+      if (this.filterValue.length > 1) {
+        useValue = o.and(...this.filterValue);
       } else {
-        useValue = this.filters[0];
+        useValue = this.filterValue[0];
       }
 
       params.filter = useValue.toString();
@@ -467,6 +544,59 @@ class LessThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 }
 
+abstract class OperatorValue extends Value<number> {
+
+  private readonly left: Value<number>;
+  private readonly operator: string;
+  private readonly right: Value<number>;
+
+  constructor(left: Value<number>, operator: string, right: Value<number>) {
+    super();
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+  }
+
+  override toString(): string {
+    return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`;
+  }
+}
+
+class AddOperatorValue extends OperatorValue {
+
+  constructor(left: Value<number>, right: Value<number>) {
+    super(left, 'add', right);
+  }
+}
+
+class SubtractOperatorValue extends OperatorValue {
+
+  constructor(left: Value<number>, right: Value<number>) {
+    super(left, 'sub', right);
+  }
+}
+
+class MultiplyOperatorValue extends OperatorValue {
+
+  constructor(left: Value<number>, right: Value<number>) {
+    super(left, 'mul', right);
+  }
+}
+
+class DivideOperatorValue extends OperatorValue {
+
+  constructor(left: Value<number>, right: Value<number>) {
+    super(left, 'div', right);
+  }
+}
+
+class ModuloOperatorValue extends OperatorValue {
+
+  constructor(left: Value<number>, right: Value<number>) {
+    super(left, 'mod', right);
+  }
+}
+
 abstract class GroupValue extends Value<boolean> {
 
   private readonly operand: string;
@@ -571,5 +701,79 @@ class EndsWithFunctionValue extends FunctionValue<boolean> {
 
   constructor(string: Value<string>, endsWith: Value<string>) {
     super('endswith', string, endsWith);
+  }
+}
+
+class ConcatFunctionValue extends FunctionValue<string> {
+
+  constructor(left: Value<string>, right: Value<string>) {
+    super('concat', left, right);
+  }
+}
+
+class IndexOfFunctionValue extends FunctionValue<number> {
+
+  constructor(string: Value<string>, indexOf: Value<string>) {
+    super('indexof', string, indexOf);
+  }
+}
+
+class LengthFunctionValue extends FunctionValue<number> {
+
+  constructor(string: Value<string>) {
+    super('length', string);
+  }
+}
+
+class SubstringFunctionValue extends FunctionValue<string> {
+
+  constructor(value: Value<string>, start: Value<number>, finish?: Value<number>) {
+    if (finish) {
+      super('substring', value, start, finish);
+    } else {
+      super('substring', value, start);
+    }
+  }
+}
+
+class ToLowerFunctionValue extends FunctionValue<string> {
+
+  constructor(value: Value<string>) {
+    super('tolower', value);
+  }
+}
+
+class ToUpperFunctionValue extends FunctionValue<string> {
+
+  constructor(value: Value<string>) {
+    super('toupper', value);
+  }
+}
+
+class TrimFunctionValue extends FunctionValue<string> {
+
+  constructor(value: Value<string>) {
+    super('trim', value);
+  }
+}
+
+class CeilingFunctionValue extends FunctionValue<number> {
+
+  constructor(value: Value<number>) {
+    super('ceiling', value);
+  }
+}
+
+class FloorFunctionValue extends FunctionValue<number> {
+
+  constructor(value: Value<number>) {
+    super('floor', value);
+  }
+}
+
+class RoundFunctionValue extends FunctionValue<number> {
+
+  constructor(value: Value<number>) {
+    super('round', value);
   }
 }
