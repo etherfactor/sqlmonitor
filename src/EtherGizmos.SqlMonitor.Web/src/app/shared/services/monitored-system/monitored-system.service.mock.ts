@@ -13,7 +13,7 @@ cache['fca5315f-6e2f-4a78-baac-bdb061e6d8fc' as Guid] = {
   modifiedAt: undefined,
   modifiedByUserId: undefined,
   name: 'Example System',
-  descripion: 'I am an example system.',
+  description: 'I am an example system.',
   isActive: true,
 };
 

@@ -3,12 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { EditableComponent } from '../../../../shared/components/_base/editable/editable.component';
+import { InputLuxonDatetimeComponent } from '../../../../shared/components/input-luxon-datetime/input-luxon-datetime.component';
 import { MonitoredSystem, monitoredSystemForm } from '../../../../shared/models/monitored-system';
-import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
+import { BodyService } from '../../../../shared/services/body/body.service';
 import { MonitoredSystemService } from '../../../../shared/services/monitored-system/monitored-system.service';
-import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
-import { Guid } from '../../../../shared/types/guid/guid';
-import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
+import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
+import { Guid, GuidZ } from '../../../../shared/types/guid/guid';
 
 @Component({
   selector: 'app-monitored-system-detail',
@@ -16,51 +17,70 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
   imports: [
     CommonModule,
     FormsModule,
+    InputLuxonDatetimeComponent,
     NgSelectModule,
     ReactiveFormsModule,
   ],
   templateUrl: './monitored-system-detail.component.html',
   styleUrl: './monitored-system-detail.component.scss'
 })
-export class MonitoredSystemDetailComponent implements OnInit {
+export class MonitoredSystemDetailComponent extends EditableComponent<MonitoredSystem, Guid> implements OnInit {
 
-  private readonly $activatedRoute: ActivatedRoute;
-  private readonly $body: BodyService;
   private readonly $form: FormBuilder;
   private readonly $monitoredSystem: MonitoredSystemService;
-  private readonly $navbarMenu: NavbarMenuService;
-
-  id?: Guid;
-  isLoading: boolean = true;
-  isEditing: boolean = false;
-  form?: TypedFormGroup<MonitoredSystem, DefaultControlTypes>;
 
   constructor(
     $activatedRoute: ActivatedRoute,
     $body: BodyService,
+    $navbarMenu: NavbarMenuService,
     $form: FormBuilder,
     $monitoredSystem: MonitoredSystemService,
-    $navbarMenu: NavbarMenuService,
   ) {
-    this.$activatedRoute = $activatedRoute;
-    this.$body = $body;
+    super($activatedRoute, $body, $navbarMenu, GuidZ);
     this.$form = $form;
     this.$monitoredSystem = $monitoredSystem;
-    this.$navbarMenu = $navbarMenu;
   }
 
-  ngOnInit(): void {
-    this.$body.setContainer(BodyContainerType.Normal);
-    this.updateBreadcrumbs();
-    this.updateActions();
-
-    this.id = this.$activatedRoute.snapshot.paramMap.get('id') as Guid;
-
-    this.loadRecord(this.id);
+  protected loadRecord(id: Guid) {
+    return this.$monitoredSystem.get(id);
   }
 
-  private updateBreadcrumbs() {
-    this.$navbarMenu.setBreadcrumbs([
+  protected loadForm(record: MonitoredSystem) {
+    const form = monitoredSystemForm(this.$form, record);
+    return form;
+  }
+
+  override get actions(): NavbarMenuAction[] {
+    const actions: NavbarMenuAction[] = [];
+
+    if (this.isEditing) {
+      actions.push({
+        icon: 'bi-save',
+        label: 'Save',
+        callback: this.save,
+      });
+      actions.push({
+        icon: 'bi-x-square',
+        label: 'Cancel',
+        callback: this.cancel,
+      });
+    } else {
+      actions.push({
+        icon: 'bi-pencil',
+        label: 'Edit',
+        callback: this.edit,
+      });
+      actions.push({
+        icon: 'bi-trash',
+        label: 'Delete',
+      });
+    }
+
+    return actions;
+  }
+
+  override get breadcrumbs(): NavbarMenuBreadcrumb[] {
+    const breadcrumbs: NavbarMenuBreadcrumb[] = [
       {
         label: 'Home',
         link: '/',
@@ -69,46 +89,20 @@ export class MonitoredSystemDetailComponent implements OnInit {
         label: 'Monitored Systems',
         link: '/monitored-systems',
       },
-      {
-        label: this.getDashboardBreadcrumbName(),
-        link: this.getDashboardBreadcrumbPath(),
-      },
-    ]);
-  }
+    ];
 
-  private updateActions() {
-    this.$navbarMenu.setActions([
-      {
-        icon: 'bi-save',
-        label: 'Save',
-      },
-      {
-        icon: 'bi-x-square',
-        label: 'Cancel',
-      },
-    ]);
-  }
+    if (!this.isNew) {
+      breadcrumbs.push({
+        label: this.entity.name,
+        link: `/monitored-systems/${this.id}`,
+      });
+    } else {
+      breadcrumbs.push({
+        label: 'New Record',
+        link: `/monitored-systems/new`,
+      });
+    }
 
-  getDashboardBreadcrumbName() {
-    return 'System';
-  }
-
-  getDashboardBreadcrumbPath() {
-    return `/monitored-systems/${this.id}`;
-  }
-
-  private loadRecord(id: Guid) {
-    this.isLoading = true;
-
-    this.$monitoredSystem.get(id).subscribe(record => {
-      this.isLoading = false;
-      this.loadForm(record);
-    });
-  }
-
-  private loadForm(record: MonitoredSystem) {
-    this.form = monitoredSystemForm(this.$form, record);
-
-    console.log(this.form);
+    return breadcrumbs;
   }
 }

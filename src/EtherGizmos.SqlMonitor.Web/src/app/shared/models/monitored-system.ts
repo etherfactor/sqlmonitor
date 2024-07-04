@@ -10,7 +10,7 @@ export const MonitoredSystemZ = z.object({
   modifiedAt: DateTimeZ.nullish(),
   modifiedByUserId: GuidZ.nullish(),
   name: z.string(),
-  descripion: z.string().nullish(),
+  description: z.string().nullish(),
   isActive: z.boolean(),
 });
 
@@ -25,7 +25,7 @@ export const monitoredSystemForm = formFactoryForModel<MonitoredSystem, DefaultC
     modifiedAt: [model.modifiedAt],
     modifiedByUserId: [model.modifiedByUserId],
     name: [model.name],
-    descripion: [model.descripion],
+    description: [model.description],
     isActive: [model.isActive],
   };
 });

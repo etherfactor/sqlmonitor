@@ -1,12 +1,12 @@
-<ng-container *ngIf="isLoading || !form; else notLoading">
+<ng-template #loading>
   <div style="position: absolute; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%);">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
-</ng-container>
+</ng-template>
 
-<ng-template #notLoading [formGroup]="form!">
+<ng-container *ngIf="!isLoading && form; else loading" [formGroup]="form">
   <div class="top-spacer"></div>
 
   <h4 class="mt-3" style="font-weight: bold;">
@@ -17,7 +17,7 @@
       <div class="row">
         <label for="systemName" class="col-sm-4 col-form-label">Name</label>
         <div class="col-sm-8">
-          <input id="systemName" type="text" class="form-control" value="Example System" />
+          <input id="systemName" type="text" class="form-control" formControlName="name" />
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@
       <div class="row">
         <label for="systemDescription" class="col-sm-2 col-form-label">Description</label>
         <div class="col-sm-10">
-          <textarea id="systemDescription" class="form-control" rows="4">I am an example system.</textarea>
+          <textarea id="systemDescription" class="form-control" rows="4" formControlName="description"></textarea>
         </div>
       </div>
     </div>
@@ -56,13 +56,13 @@
       <div class="row mt-3">
         <label for="systemCreatedAt" class="col-sm-4 col-form-label">Created at</label>
         <div class="col-sm-8">
-          <input id="systemCreatedAt" type="text" readonly class="form-control-plaintext" value="06/30/2024 19:37" />
+          <input-luxon-datetime id="systemCreatedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="createdAt"></input-luxon-datetime>
         </div>
       </div>
       <div class="row mt-3">
         <label for="systemCreatedBy" class="col-sm-4 col-form-label">Created by</label>
         <div class="col-sm-8">
-          <input id="systemCreatedBy" type="text" readonly class="form-control-plaintext" value="Administrator" />
+          <input id="systemCreatedBy" type="text" readonly class="form-control-plaintext" formControlName="createdByUserId" />
         </div>
       </div>
     </div>
@@ -81,7 +81,7 @@
       </div>
     </div>
   </div>
-</ng-template>
+</ng-container>
 
 <!--<ng-container *ngIf="false">
   <h5 class="mt-3">
