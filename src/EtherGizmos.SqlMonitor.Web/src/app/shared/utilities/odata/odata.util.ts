@@ -17,7 +17,7 @@ export abstract class Value<TValue> {
 
 export interface EntitySet<TEntity> {
   execute(): Observable<TEntity>;
-  //expand
+  expand<TExpanded extends keyof TEntity & string>(property: TExpanded): EntityExpand<TEntity[TExpanded]>;
   filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntitySet<TEntity>;
   orderBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntitySet<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
@@ -27,6 +27,19 @@ export interface EntitySet<TEntity> {
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
   thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): EntitySet<TEntity>;
+}
+
+export interface EntityExpand<TEntity> {
+  expand<TExpanded extends keyof TEntity & string>(property: TExpanded): EntityExpand<TEntity[TExpanded]>;
+  filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntityExpand<TEntity>;
+  orderBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity>;
+  select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
+  skip(count: number): EntityExpand<TEntity>;
+  top(count: number): EntityExpand<TEntity>;
+}
+
+export interface OrderedEntityExpand<TEntity> extends EntityExpand<TEntity> {
+  thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity>;
 }
 
 export class o {
