@@ -1,17 +1,16 @@
 import { Value } from "../odata.util";
 
-abstract class FunctionValue<TValue> extends Value<TValue> {
+abstract class FunctionValue<TValue> implements Value<TValue> {
 
   private readonly name: string;
   private readonly args: Value<unknown>[];
 
   constructor(name: string, ...args: Value<unknown>[]) {
-    super();
     this.name = name;
     this.args = args;
   }
 
-  override toString(): string {
+  toString(): string {
     return `${this.name}(${this.args.map(item => item.toString()).join(', ')})`;
   }
 }

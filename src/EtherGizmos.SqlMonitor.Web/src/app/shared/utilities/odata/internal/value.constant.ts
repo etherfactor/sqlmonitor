@@ -1,11 +1,10 @@
 import { DateTime, Interval } from "luxon";
-import { Guid } from "../../../types/guid/guid.js";
-import { Value } from "../odata.util.js";
+import { Guid } from "../../../types/guid/guid";
+import { Value } from "../odata.util";
 
-abstract class ConstantValue<TValue> extends Value<TValue> {
+abstract class ConstantValue<TValue> implements Value<TValue> {
 
   constructor() {
-    super();
   }
 }
 

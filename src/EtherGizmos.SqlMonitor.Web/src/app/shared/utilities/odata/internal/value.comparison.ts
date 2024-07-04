@@ -1,19 +1,18 @@
 import { Value } from "../odata.util";
 
-abstract class ComparisonValue<TValue> extends Value<boolean> {
+abstract class ComparisonValue<TValue> implements Value<boolean> {
 
   private readonly left: Value<TValue>;
   private readonly comparator: string;
   private readonly right: Value<TValue>;
 
   constructor(left: Value<TValue>, comparator: string, right: Value<TValue>) {
-    super();
     this.left = left;
     this.comparator = comparator;
     this.right = right;
   }
 
-  override toString(): string {
+  toString(): string {
     return `${this.left.toString()} ${this.comparator} ${this.right.toString()}`;
   }
 }

@@ -1,31 +1,22 @@
+import { Params } from "@angular/router";
 import { Observable } from "rxjs";
-import { EntityExpand, EntitySet, OrderedEntitySet, Value } from "../odata.util";
+import { InferArrayType } from "../../form/form.util";
+import { EntityExpand, EntitySet, Expand, Filter, ODataOptions, OrderBy, OrderedEntitySet, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
 import { ɵEntityAccessor } from "./entity-accessor";
 import { ɵEntityExpand } from "./entity-expand";
 import { ɵPrefixGenerator } from "./prefix-generator";
 
-interface ODataOptions {
-  filter?: Value<boolean>[];
-  orderBy?: OrderBy[];
-  select?: string[];
-  skip?: number;
-  top?: number;
-}
-
-interface OrderBy {
-  property: string;
-  direction: 'asc' | 'desc';
-}
-
 class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
 
-  private readonly filterValue?: Value<boolean>[];
+  private readonly expandValue?: Expand[];
+  private readonly filterValue?: Filter[];
   private readonly orderByValue?: OrderBy[];
-  private readonly selectValue?: string[];
-  private readonly skipValue?: number;
-  private readonly topValue?: number;
+  private readonly selectValue?: Select[];
+  private readonly skipValue?: Skip;
+  private readonly topValue?: Top;
 
   constructor(options?: ODataOptions) {
+    this.expandValue = options?.expand;
     this.filterValue = options?.filter;
     this.orderByValue = options?.orderBy;
     this.selectValue = options?.select;
@@ -33,10 +24,19 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     this.topValue = options?.top;
   }
 
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded): EntityExpand<TEntity[TExpanded]> {
-    const options = this.getOptions();
+  expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity> {
+    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new ɵEntityExpand.Implementation<InferArrayType<TEntity[TExpanded]>>(property);
+    if (builder) {
+      expander = builder(expander);
+    }
 
-    return new ɵEntityExpand.Implementation<TEntity[TExpanded]>(property, options);
+    const expand: Expand = { property, value: expander };
+    const newExpand = [...(this.expandValue ?? []), expand];
+
+    const options = this.getOptions();
+    options.expand = newExpand;
+
+    return new Implementation<TEntity>(options);
   }
 
   filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntitySet<TEntity> {
@@ -90,6 +90,7 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
 
   private getOptions(): ODataOptions {
     return {
+      expand: this.expandValue,
       filter: this.filterValue,
       orderBy: this.orderByValue,
       select: this.selectValue,
@@ -102,21 +103,35 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     throw new Error('Not implemented');
   }
 
-  //getParams(): ODataQueryOptions {
-  //  const params: ODataQueryOptions = {};
-  //  if (this.filterValue) {
-  //    let useValue: Value<boolean>;
-  //    if (this.filterValue.length > 1) {
-  //      useValue = o.and(...this.filterValue);
-  //    } else {
-  //      useValue = this.filterValue[0];
-  //    }
+  getParams(): Params {
+    const params: Params = {};
 
-  //    params.filter = useValue.toString();
-  //  }
+    if (this.expandValue) {
+      params['$expand'] = expandToString(this.expandValue);
+    }
 
-  //  return params;
-  //}
+    if (this.filterValue) {
+      params['$filter'] = filterToString(this.filterValue);
+    }
+
+    if (this.orderByValue) {
+      params['$orderby'] = orderByToString(this.orderByValue);
+    }
+
+    if (this.selectValue) {
+      params['$select'] = selectToString(this.selectValue);
+    }
+
+    if (this.skipValue) {
+      params['$skip'] = skipToString(this.skipValue);
+    }
+
+    if (this.topValue) {
+      params['$top'] = topToString(this.topValue);
+    }
+
+    return params;
+  }
 }
 
 export const ɵEntitySet = {

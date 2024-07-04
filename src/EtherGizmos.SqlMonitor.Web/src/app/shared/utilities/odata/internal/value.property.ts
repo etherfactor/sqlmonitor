@@ -1,17 +1,16 @@
 import { Value } from "../odata.util";
 
-abstract class PropertyValue<TEntity, TKey extends keyof TEntity> extends Value<TEntity[TKey]> {
+abstract class PropertyValue<TEntity, TKey extends keyof TEntity> implements Value<TEntity[TKey]> {
 
   private readonly path?: string;
   private readonly property: TKey;
 
   constructor(path: string | undefined, property: TKey) {
-    super();
     this.path = path;
     this.property = property;
   }
 
-  override toString(): string {
+  toString(): string {
     if (this.path) {
       return `${this.path}/${this.property.toString()}`;
     } else {

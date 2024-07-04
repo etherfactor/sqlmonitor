@@ -1,6 +1,8 @@
+import { Params } from "@angular/router";
 import { DateTime, Interval } from "luxon";
 import { Observable } from "rxjs";
 import { Guid } from "../../types/guid/guid";
+import { InferArrayType } from "../form/form.util";
 import { ɵEntityAccessor } from "./internal/entity-accessor";
 import { ɵComparison } from "./internal/value.comparison";
 import { ɵConstant } from "./internal/value.constant";
@@ -8,38 +10,112 @@ import { ɵFunction } from "./internal/value.function";
 import { ɵLogical } from "./internal/value.logical";
 import { ɵOperator } from "./internal/value.operator";
 
-export abstract class Value<TValue> {
+export interface Value<TValue> {
 
-  readonly _: TValue = undefined!;
+  readonly _?: TValue;
 
-  abstract toString(): string;
+  toString(): string;
 }
+
+export interface ODataOptions {
+  expand?: Expand[];
+  filter?: Filter[];
+  orderBy?: OrderBy[];
+  select?: Select[];
+  skip?: Skip;
+  top?: Top;
+}
+
+export interface Expand {
+  property: string;
+  value: EntityExpand<unknown>;
+}
+
+export function expandToString(expand: Expand[]): string {
+  const useValue = expand.map(expand => expand.value.toString()).join(', ');
+  return useValue;
+}
+
+export type Filter = Value<boolean>;
+
+export function filterToString(filter: Filter[]): string {
+  let useValue: string;
+  if (filter.length > 1) {
+    useValue = o.and(...filter).toString();
+  } else {
+    useValue = filter[0].toString();
+  }
+
+  return useValue;
+}
+
+export type Direction = 'asc' | 'desc';
+
+export interface OrderBy {
+  property: string;
+  direction: Direction;
+}
+
+export function orderByToString(orderBy: OrderBy[]): string {
+  const useValue = orderBy.map(orderBy => `${orderBy.property} ${orderBy.direction}`).join(', ');
+  return useValue;
+}
+
+export type Select = string;
+
+export function selectToString(select: Select[]): string {
+  const useValue = select.join(', ');
+  return useValue;
+}
+
+export type Skip = number;
+
+export function skipToString(skip: Skip): string {
+  const useValue = skip.toFixed(0);
+  return useValue;
+}
+
+export type Top = number;
+
+export function topToString(top: Top): string {
+  const useValue = top.toFixed(0);
+  return useValue;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type IsObjectOrArray<TValue> = TValue extends object ? (TValue extends Array<any> ? (TValue[number] extends object ? TValue : never) : TValue): never;
 
 export interface EntitySet<TEntity> {
   execute(): Observable<TEntity>;
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded): EntityExpand<TEntity[TExpanded]>;
+  expand<TExpanded extends keyof TEntity & string>(
+    property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity>;
   filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntitySet<TEntity>;
-  orderBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntitySet<TEntity>;
+  orderBy(property: keyof TEntity & string, direction?: Direction): OrderedEntitySet<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
   skip(count: number): EntitySet<TEntity>;
   top(count: number): EntitySet<TEntity>;
+  getParams(): Params;
 }
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
-  thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): EntitySet<TEntity>;
+  thenBy(property: keyof TEntity & string, direction?: Direction): EntitySet<TEntity>;
 }
 
 export interface EntityExpand<TEntity> {
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded): EntityExpand<TEntity[TExpanded]>;
+  expand<TExpanded extends keyof TEntity & string>(
+    property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity>;
   filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntityExpand<TEntity>;
-  orderBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity>;
+  orderBy(property: keyof TEntity & string, direction?: Direction): OrderedEntityExpand<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
   skip(count: number): EntityExpand<TEntity>;
   top(count: number): EntityExpand<TEntity>;
+  toString(): string;
 }
 
 export interface OrderedEntityExpand<TEntity> extends EntityExpand<TEntity> {
-  thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity>;
+  thenBy(property: keyof TEntity & string, direction?: Direction): OrderedEntityExpand<TEntity>;
 }
 
 export class o {

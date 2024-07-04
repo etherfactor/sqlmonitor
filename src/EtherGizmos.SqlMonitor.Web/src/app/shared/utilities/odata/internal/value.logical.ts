@@ -1,17 +1,16 @@
 import { Value } from "../odata.util";
 
-abstract class LogicalValue extends Value<boolean> {
+abstract class LogicalValue implements Value<boolean> {
 
   private readonly operand: string;
   private readonly conditions: Value<boolean>[];
 
   constructor(operand: string, ...conditions: Value<boolean>[]) {
-    super();
     this.operand = operand;
     this.conditions = conditions;
   }
 
-  override toString(): string {
+  toString(): string {
     return `(${this.conditions.map(item => item.toString()).join(` ${this.operand} `)})`;
   }
 }
@@ -30,15 +29,14 @@ class OrLogicalValue extends LogicalValue {
   }
 }
 
-class NotLogicalValue extends Value<boolean> {
+class NotLogicalValue implements Value<boolean> {
   private readonly condition: Value<boolean>;
 
   constructor(condition: Value<boolean>) {
-    super();
     this.condition = condition;
   }
 
-  override toString(): string {
+  toString(): string {
     return `not ${this.condition.toString()}`;
   }
 }

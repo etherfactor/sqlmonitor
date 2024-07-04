@@ -1,33 +1,23 @@
-import { EntityExpand, OrderedEntityExpand, Value } from "../odata.util";
+import { InferArrayType } from "../../form/form.util";
+import { EntityExpand, Expand, Filter, ODataOptions, OrderBy, OrderedEntityExpand, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
 import { ɵEntityAccessor } from "./entity-accessor";
 import { ɵPrefixGenerator } from "./prefix-generator";
-
-interface ODataOptions {
-  filter?: Value<boolean>[];
-  orderBy?: OrderBy[];
-  select?: string[];
-  skip?: number;
-  top?: number;
-}
-
-interface OrderBy {
-  property: string;
-  direction: 'asc' | 'desc';
-}
 
 class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExpand<TEntity> {
 
   private readonly property: string;
 
-  private readonly filterValue?: Value<boolean>[];
+  private readonly expandValue?: Expand[];
+  private readonly filterValue?: Filter[];
   private readonly orderByValue?: OrderBy[];
-  private readonly selectValue?: string[];
-  private readonly skipValue?: number;
-  private readonly topValue?: number;
+  private readonly selectValue?: Select[];
+  private readonly skipValue?: Skip;
+  private readonly topValue?: Top;
 
   constructor(property: string, options?: ODataOptions) {
     this.property = property;
 
+    this.expandValue = options?.expand;
     this.filterValue = options?.filter;
     this.orderByValue = options?.orderBy;
     this.selectValue = options?.select;
@@ -35,10 +25,19 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
     this.topValue = options?.top;
   }
 
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded): EntityExpand<TEntity[TExpanded]> {
-    const options = this.getOptions();
+  expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity> {
+    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new ɵEntityExpand.Implementation<InferArrayType<TEntity[TExpanded]>>(property);
+    if (builder) {
+      expander = builder(expander);
+    }
 
-    return new Implementation<TEntity[TExpanded]>(property, options);
+    const expand: Expand = { property, value: expander };
+    const newExpand = [...(this.expandValue ?? []), expand];
+
+    const options = this.getOptions();
+    options.expand = newExpand;
+
+    return new Implementation<TEntity>(property, options);
   }
 
   filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntityExpand<TEntity> {
@@ -92,12 +91,50 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
 
   private getOptions(): ODataOptions {
     return {
+      expand: this.expandValue,
       filter: this.filterValue,
       orderBy: this.orderByValue,
       select: this.selectValue,
       skip: this.skipValue,
       top: this.topValue,
     };
+  }
+
+  toString(): string {
+    let result = this.property;
+    let extra = '';
+
+    if (this.filterValue) {
+      extra += `; $filter=${filterToString(this.filterValue)}`;
+    }
+
+    if (this.orderByValue) {
+      extra += `; $orderby=${orderByToString(this.orderByValue)}`;
+    }
+
+    if (this.selectValue) {
+      extra += `; $select=${selectToString(this.selectValue)}`;
+    }
+
+    if (this.skipValue) {
+      extra += `; $skip=${skipToString(this.skipValue)}`;
+    }
+
+    if (this.topValue) {
+      extra += `; $top=${topToString(this.topValue)}`;
+    }
+
+    if (this.expandValue) {
+      extra += `; $expand=${expandToString(this.expandValue)}`;
+    }
+
+    extra = '(' + extra.substring(2) + ')';
+
+    if (extra !== '()') {
+      result += extra;
+    }
+
+    return result;
   }
 }
 

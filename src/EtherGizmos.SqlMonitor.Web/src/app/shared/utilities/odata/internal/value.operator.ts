@@ -1,19 +1,18 @@
 import { Value } from "../odata.util";
 
-abstract class OperatorValue extends Value<number> {
+abstract class OperatorValue implements Value<number> {
 
   private readonly left: Value<number>;
   private readonly operator: string;
   private readonly right: Value<number>;
 
   constructor(left: Value<number>, operator: string, right: Value<number>) {
-    super();
     this.left = left;
     this.operator = operator;
     this.right = right;
   }
 
-  override toString(): string {
+  toString(): string {
     return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`;
   }
 }
