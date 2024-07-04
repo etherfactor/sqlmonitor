@@ -1,0 +1,79 @@
+import { Injectable, Provider } from "@angular/core";
+import { DateTime } from "luxon";
+import { Observable, of, throwError } from "rxjs";
+import { MonitoredSystem } from "../../models/monitored-system";
+import { Guid, generateGuid } from "../../types/guid/guid";
+import { MonitoredSystemService } from "./monitored-system.service";
+
+const cache: { [key: Guid]: MonitoredSystem } = {};
+cache['fca5315f-6e2f-4a78-baac-bdb061e6d8fc' as Guid] = {
+  id: 'fca5315f-6e2f-4a78-baac-bdb061e6d8fc' as Guid,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: undefined,
+  modifiedByUserId: undefined,
+  name: 'Example System',
+  descripion: 'I am an example system.',
+  isActive: true,
+};
+
+@Injectable({
+  providedIn: 'root'
+})
+class MockMonitoredSystemService extends MonitoredSystemService {
+
+  override get(id: Guid): Observable<MonitoredSystem> {
+    const maybeRecord = cache[id];
+
+    if (!maybeRecord) {
+      return throwError(() => new Error('Record does not exist'));
+    }
+
+    return of({ ...maybeRecord });
+  }
+
+  override search(): Observable<MonitoredSystem[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  override create(record: MonitoredSystem): Observable<MonitoredSystem> {
+    record = { ...record };
+    record.id = generateGuid();
+
+    cache[record.id] = record;
+
+    return of({ ...record });
+  }
+
+  override update(id: Guid, record: MonitoredSystem): Observable<MonitoredSystem> {
+    const maybeRecord = cache[id];
+
+    if (!maybeRecord) {
+      return throwError(() => new Error('Record does not exist'));
+    }
+
+    record = { ...record };
+    cache[id] = record;
+
+    return of({ ...record });
+  }
+
+  override delete(id: Guid): Observable<void> {
+    const maybeRecord = cache[id];
+
+    if (!maybeRecord) {
+      return throwError(() => new Error('Record does not exist'));
+    }
+
+    delete cache[id];
+
+    return of(void 0);
+  }
+}
+
+export function provideMonitoredSystemServiceMock(): Provider {
+  return {
+    provide: MonitoredSystemService,
+    useClass: MockMonitoredSystemService,
+  };
+}

@@ -3,8 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { MonitoredSystem, monitoredSystemForm } from '../../../../shared/models/monitored-system';
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
+import { MonitoredSystemService } from '../../../../shared/services/monitored-system/monitored-system.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
+import { Guid } from '../../../../shared/types/guid/guid';
+import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 
 @Component({
   selector: 'app-monitored-system-detail',
@@ -22,17 +26,24 @@ export class MonitoredSystemDetailComponent implements OnInit {
   private readonly $activatedRoute: ActivatedRoute;
   private readonly $body: BodyService;
   private readonly $form: FormBuilder;
+  private readonly $monitoredSystem: MonitoredSystemService;
   private readonly $navbarMenu: NavbarMenuService;
+
+  id?: Guid;
+  isLoading: boolean = true;
+  form?: TypedFormGroup<MonitoredSystem, DefaultControlTypes>;
 
   constructor(
     $activatedRoute: ActivatedRoute,
     $body: BodyService,
     $form: FormBuilder,
+    $monitoredSystem: MonitoredSystemService,
     $navbarMenu: NavbarMenuService,
   ) {
     this.$activatedRoute = $activatedRoute;
     this.$body = $body;
     this.$form = $form;
+    this.$monitoredSystem = $monitoredSystem;
     this.$navbarMenu = $navbarMenu;
   }
 
@@ -40,6 +51,10 @@ export class MonitoredSystemDetailComponent implements OnInit {
     this.$body.setContainer(BodyContainerType.Normal);
     this.updateBreadcrumbs();
     this.updateActions();
+
+    this.id = this.$activatedRoute.snapshot.paramMap.get('id') as Guid;
+
+    this.loadRecord(this.id);
   }
 
   private updateBreadcrumbs() {
@@ -77,6 +92,19 @@ export class MonitoredSystemDetailComponent implements OnInit {
   }
 
   getDashboardBreadcrumbPath() {
-    return '/monitored-systems/1';
+    return `/monitored-systems/${this.id}`;
+  }
+
+  private loadRecord(id: Guid) {
+    this.isLoading = true;
+
+    this.$monitoredSystem.get(id).subscribe(record => {
+      this.isLoading = false;
+      this.loadForm(record);
+    });
+  }
+
+  private loadForm(record: MonitoredSystem) {
+    this.form = monitoredSystemForm(this.$form, record);
   }
 }

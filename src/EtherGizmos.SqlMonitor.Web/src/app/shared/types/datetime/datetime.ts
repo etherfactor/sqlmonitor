@@ -23,6 +23,14 @@ export function parseDateTime(value: unknown): DateTime {
   throw new Error(`Value ${value} is not a valid datetime.`);
 }
 
-export const DateTimeZ = z.custom<DateTime>(value => {
+const DateTimeZ_Type = z.custom<DateTime>(value => {
   return isDateTime(value);
+});
+
+export const DateTimeZ = DateTimeZ_Type.transform(value => {
+  if (typeof value === 'string') {
+    return DateTime.fromISO(value);
+  } else {
+    return value;
+  }
 });

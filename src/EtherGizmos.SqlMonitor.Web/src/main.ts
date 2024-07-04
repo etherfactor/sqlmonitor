@@ -12,6 +12,7 @@ import { provideDashboardServiceMock } from './app/shared/services/dashboard/das
 import { provideInstanceServiceMock } from './app/shared/services/instance/instance.service.mock';
 import { provideMetricDataServiceMock } from './app/shared/services/metric-data/metric-data.service.mock';
 import { provideMetricServiceMock } from './app/shared/services/metric/metric.service.mock';
+import { provideMonitoredSystemServiceMock } from './app/shared/services/monitored-system/monitored-system.service.mock';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -30,6 +31,7 @@ bootstrapApplication(
       provideInstanceServiceMock(),
       provideMetricServiceMock(),
       provideMetricDataServiceMock(),
+      provideMonitoredSystemServiceMock(),
     ]
   })
   .catch(err => console.error(err));

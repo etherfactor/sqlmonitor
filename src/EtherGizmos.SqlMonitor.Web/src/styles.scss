@@ -88,3 +88,8 @@ $navbar-sub-height-m: 62px;
 ul.pagination {
   margin-bottom: 0px;
 }
+
+.top-spacer {
+  @extend .mt-3;
+  height: 0.1px;
+}
