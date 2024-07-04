@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MonitoredSystem, monitoredSystemForm } from '../../../../shared/models/monitored-system';
@@ -17,6 +17,7 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
     CommonModule,
     FormsModule,
     NgSelectModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './monitored-system-detail.component.html',
   styleUrl: './monitored-system-detail.component.scss'
@@ -31,6 +32,7 @@ export class MonitoredSystemDetailComponent implements OnInit {
 
   id?: Guid;
   isLoading: boolean = true;
+  isEditing: boolean = false;
   form?: TypedFormGroup<MonitoredSystem, DefaultControlTypes>;
 
   constructor(
@@ -106,5 +108,7 @@ export class MonitoredSystemDetailComponent implements OnInit {
 
   private loadForm(record: MonitoredSystem) {
     this.form = monitoredSystemForm(this.$form, record);
+
+    console.log(this.form);
   }
 }

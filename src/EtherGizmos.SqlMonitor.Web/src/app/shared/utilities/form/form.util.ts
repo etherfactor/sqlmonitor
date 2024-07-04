@@ -28,14 +28,14 @@ type ControlConfigMap<TModel, TControlTypes = never> = RequiredIsh<{
   [K in keyof TModel]:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   NonNullable<TModel[K]> extends Array<any> ? (
-    InferArrayType<TModel[K]> extends (TControlTypes | undefined) ? (
+    InferArrayType<TModel[K]> extends (TControlTypes | undefined | null) ? (
       FormArray<FormControl<InferArrayType<TModel[K]>>>
     ) :
     InferArrayType<TModel[K]> extends object ?
     FormArray<TypedFormGroup<NoUndefined<InferArrayType<TModel[K]>>, TControlTypes>> :
     FormArray<FormControl<InferArrayType<TModel[K]>>>
   ) :
-  TModel[K] extends (TControlTypes | undefined) ? (
+  TModel[K] extends (TControlTypes | undefined | null) ? (
     ControlConfig<TModel[K]>
   ) :
   NonNullable<TModel[K]> extends object ?
@@ -46,6 +46,10 @@ type ControlConfigMap<TModel, TControlTypes = never> = RequiredIsh<{
 export type TypedFormGroup<TModel, TControlTypes = never> = FormGroup<{
   [K in keyof ControlConfigMap<TModel, TControlTypes>]: ɵElement<ControlConfigMap<TModel, TControlTypes>[K], never>;
 }>
+
+export type TestFormGroup<TModel, TControlTypes> = {
+  [K in keyof TypedFormGroup<TModel, TControlTypes>]: RequiredIsh<TypedFormGroup<TModel, TControlTypes>>
+}
 
 export type FormFunction<TModel, TControlTypes = never> = {
   ($form: FormBuilder, model: TModel): TypedFormGroup<TModel, TControlTypes>;
