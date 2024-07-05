@@ -1,1 +1,23 @@
-<p>monitored-system-list works!</p>
+<div class="top-spacer"></div>
+
+<h4 class="mt-3" style="font-weight: bold;">
+  Monitored Systems List
+</h4>
+
+<div class="top-spacer"></div>
+
+<app-table [data]="records">
+  <ng-template #headers>
+    <th>Name</th>
+    <th>Active?</th>
+    <th>Created at</th>
+    <th>Actions</th>
+  </ng-template>
+
+  <ng-template #rows let-row>
+    <td>{{row.name}}</td>
+    <td>{{row.isActive ? 'Active' : 'Inactive'}}</td>
+    <td>{{row.createdAt.startOf('minute').toLocaleString()}}</td>
+    <td><a [routerLink]="['/monitored-system/', row.id]">Edit</a></td>
+  </ng-template>
+</app-table>

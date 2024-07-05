@@ -1,0 +1,28 @@
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <ng-container *ngTemplateOutlet="
+                    headers || defaultHeaders;
+                    context: { $implicit: data }"></ng-container>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    <tr *ngFor="let datum of data">
+      <ng-container *ngTemplateOutlet="
+                    rows || defaultRows;
+                    context: { $implicit: datum }"></ng-container>
+    </tr>
+  </tbody>
+</table>
+
+<ng-template #defaultHeaders>
+  <th *ngFor="let header of getDefaultHeaders()">
+    {{header}}
+  </th>
+</ng-template>
+
+<ng-template #defaultRows let-datum>
+  <td *ngFor="let header of getDefaultHeaders()">
+    {{datum[header]}}
+  </td>
+</ng-template>
