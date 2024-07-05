@@ -1,14 +1,23 @@
 <!--<div style="height: 2px; background-color: var(--bs-body-color); position: relative; "></div>-->
 <ng-container *ngIf="isFilterGroup(filter)">
-  <div>{{filter.operator}}</div>
+  <div>
+    <ng-select [(ngModel)]="filter.operator"
+               [clearable]="false"
+               [selectOnTab]="true"
+               style="width: 100px;">
+      <ng-option value="and">And</ng-option>
+      <ng-option value="or">Or</ng-option>
+    </ng-select>
+  </div>
   <div class="d-flex flex-row" style="position: relative;">
     <div style="width: 30px; position: relative;">
       <div style="position: relative; left: 50%; transform: translateX(-50%); width: 2px; background-color: var(--bs-body-color); height: calc(100%); top: 0px;"></div>
     </div>
-    <div>
+    <div class="w-100">
       <ng-container *ngFor="let condition of conditions; let i = index">
         <div class="offshoot">
-          <filter-builder-group [(filter)]="conditions[i]"></filter-builder-group>
+          <filter-builder-group [(filter)]="conditions[i]"
+                                [properties]="properties"></filter-builder-group>
         </div>
       </ng-container>
     </div>
@@ -22,6 +31,60 @@
 </ng-container>
 <ng-container *ngIf="!isFilterGroup(filter)">
   <div>
-    {{filter.property}} {{filter.operator}} {{filter.value}}
+    <!--{{filter.property}} {{filter.operator}} {{filter.value}}
+    <ng-select [(ngModel)]="filter.property"
+               [clearable]="false"
+               [selectOnTab]="true"
+               style="width: 150px;">
+      <ng-option *ngFor="let property of properties" [value]="property.name">{{property.displayName}}</ng-option>
+    </ng-select>
+    <ng-container [ngSwitch]="selectedProperty.type">
+      <ng-select *ngSwitchCase="'datetime'"
+                 [clearable]="false"
+                 [selectOnTab]="true"
+                 style="width: 150px;">
+        <ng-option value="equals">Equals</ng-option>
+        <ng-option value="notequals">Does not equal</ng-option>
+        <ng-option value="before">Before</ng-option>
+        <ng-option value="after">After</ng-option>
+        <ng-option value="empty">Empty</ng-option>
+        <ng-option value="notempty">Not empty</ng-option>
+      </ng-select>
+      <ng-select *ngSwitchCase="'guid'"
+                 [clearable]="false"
+                 [selectOnTab]="true"
+                 style="width: 150px;">
+        <ng-option value="equals">Equals</ng-option>
+        <ng-option value="notequals">Does not equal</ng-option>
+        <ng-option value="empty">Empty</ng-option>
+        <ng-option value="notempty">Not empty</ng-option>
+      </ng-select>
+      <ng-select *ngSwitchCase="'number'"
+                 [clearable]="false"
+                 [selectOnTab]="true"
+                 style="width: 150px;">
+        <ng-option value="equals">Equals</ng-option>
+        <ng-option value="notequals">Does not equal</ng-option>
+        <ng-option value="greater">Greater than</ng-option>
+        <ng-option value="greaterequals">Greater than or equal to</ng-option>
+        <ng-option value="less">Less than</ng-option>
+        <ng-option value="lessequals">Less than or equal to</ng-option>
+        <ng-option value="empty">Empty</ng-option>
+        <ng-option value="notempty">Not empty</ng-option>
+      </ng-select>
+      <ng-select *ngSwitchCase="'string'"
+                 [clearable]="false"
+                 [selectOnTab]="true"
+                 style="width: 150px;">
+        <ng-option value="equals">Equals</ng-option>
+        <ng-option value="notequals">Does not equal</ng-option>
+        <ng-option value="startswith">Starts with</ng-option>
+        <ng-option value="endswith">Ends with</ng-option>
+        <ng-option value="contains">Contains</ng-option>
+        <ng-option value="notcontains">Does not contain</ng-option>
+        <ng-option value="empty">Empty</ng-option>
+        <ng-option value="notempty">Not empty</ng-option>
+      </ng-select>
+    </ng-container>-->
   </div>
 </ng-container>

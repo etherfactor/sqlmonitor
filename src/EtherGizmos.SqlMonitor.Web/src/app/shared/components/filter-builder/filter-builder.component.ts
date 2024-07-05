@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FilterBuilderGroupComponent } from '../filter-builder-group/filter-builder-group.component';
 
-export type FilterOperator = 'AND' | 'OR';
+export type FilterOperator = 'and' | 'or';
 
 export interface FilterCondition {
   property: string;
@@ -12,6 +12,14 @@ export interface FilterCondition {
 export interface FilterGroup {
   operator: FilterOperator;
   conditions: (FilterCondition | FilterGroup)[];
+}
+
+export type FilterType = 'datetime' | 'guid' | 'number' | 'string';
+
+export interface FilterProperty {
+  name: string;
+  displayName: string;
+  type: FilterType;
 }
 
 export function isFilterGroup(condition: FilterCondition | FilterGroup): condition is FilterGroup {
@@ -31,4 +39,6 @@ export class FilterBuilderComponent {
 
   @Input({ required: true }) filter!: FilterGroup;
   @Output() filterChange = new EventEmitter<FilterGroup>();
+
+  @Input({ required: true }) properties!: FilterProperty[];
 }

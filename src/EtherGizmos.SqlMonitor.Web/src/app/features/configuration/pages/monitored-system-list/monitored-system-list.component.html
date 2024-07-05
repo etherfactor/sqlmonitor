@@ -7,15 +7,19 @@
 <div class="top-spacer"></div>
 
 <filter-builder [filter]="{
-                operator: 'AND',
+                operator: 'and',
                 conditions: [
-                { property: 'test', operator: 'STARTSWITH', value: 'A' },
-                { operator: 'OR', conditions: [
-                { property: 'a', operator: 'EQUALS', value: 'A' },
-                { property: 'b', operator: 'NOTEQUALS', value: 'B' }
+                { property: 'name', operator: 'STARTSWITH', value: 'A' },
+                { operator: 'or', conditions: [
+                { property: 'name', operator: 'EQUALS', value: 'A' },
+                { property: 'name', operator: 'NOTEQUALS', value: 'B' }
                 ] }
                 ]
-                }"></filter-builder>
+                }"
+                [properties]="[
+                { name: 'name', displayName: 'Name', type: 'string' },
+                { name: 'createdAt', displayName: 'Created at', type: 'datetime' }
+                ]"></filter-builder>
 
 <app-table [data]="records">
   <ng-template #headers>
