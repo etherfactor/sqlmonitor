@@ -15,9 +15,9 @@ export abstract class MonitoredSystemService {
 
   abstract search(): Observable<MonitoredSystem[]>;
 
-  abstract create(record: MonitoredSystem): Observable<MonitoredSystem>;
+  abstract create(record: Partial<MonitoredSystem>): Observable<MonitoredSystem>;
 
-  abstract update(id: Guid, record: MonitoredSystem): Observable<MonitoredSystem>;
+  abstract update(id: Guid, record: Partial<MonitoredSystem>): Observable<MonitoredSystem>;
 
   abstract delete(id: Guid): Observable<void>;
 }

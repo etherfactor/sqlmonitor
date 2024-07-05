@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { DateTime } from 'luxon';
+import { Observable } from 'rxjs';
 import { EditableComponent } from '../../../../shared/components/_base/editable/editable.component';
 import { InputLuxonDatetimeComponent } from '../../../../shared/components/input-luxon-datetime/input-luxon-datetime.component';
 import { MonitoredSystem, monitoredSystemForm } from '../../../../shared/models/monitored-system';
@@ -32,22 +34,45 @@ export class MonitoredSystemDetailComponent extends EditableComponent<MonitoredS
   constructor(
     $activatedRoute: ActivatedRoute,
     $body: BodyService,
-    $navbarMenu: NavbarMenuService,
     $form: FormBuilder,
     $monitoredSystem: MonitoredSystemService,
+    $navbarMenu: NavbarMenuService,
+    $router: Router,
   ) {
-    super($activatedRoute, $body, $navbarMenu, GuidZ);
+    super($activatedRoute, $body, $navbarMenu, $router, GuidZ);
     this.$form = $form;
     this.$monitoredSystem = $monitoredSystem;
   }
 
-  protected loadRecord(id: Guid) {
+  protected override loadRecord(id: Guid) {
     return this.$monitoredSystem.get(id);
   }
 
-  protected loadForm(record: MonitoredSystem) {
+  protected override createEmptyRecord(): MonitoredSystem {
+    return {
+      createdAt: DateTime.now(),
+      isActive: true,
+    } as MonitoredSystem;
+  }
+
+  protected override loadForm(record: MonitoredSystem) {
     const form = monitoredSystemForm(this.$form, record);
+    if (!record.id) {
+      form.controls.isActive.markAsDirty();
+    }
     return form;
+  }
+
+  protected override createRecord(record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
+    return this.$monitoredSystem.create(record);
+  }
+
+  protected override updateRecord(id: Guid, record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
+    return this.$monitoredSystem.update(id, record);
+  }
+
+  protected override navigateToRecord(record: MonitoredSystem): void {
+    this.$router.navigate(['/monitored-systems', record.id]);
   }
 
   override get actions(): NavbarMenuAction[] {

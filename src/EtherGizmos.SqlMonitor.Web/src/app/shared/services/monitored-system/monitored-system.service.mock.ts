@@ -36,16 +36,18 @@ class MockMonitoredSystemService extends MonitoredSystemService {
     throw new Error("Method not implemented.");
   }
 
-  override create(record: MonitoredSystem): Observable<MonitoredSystem> {
+  override create(record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
     record = { ...record };
     record.id = generateGuid();
+    record.createdAt = DateTime.now();
+    record.createdByUserId = generateGuid();
 
-    cache[record.id] = record;
+    cache[record.id] = record as MonitoredSystem;
 
-    return of({ ...record });
+    return of({ ...record } as MonitoredSystem);
   }
 
-  override update(id: Guid, record: MonitoredSystem): Observable<MonitoredSystem> {
+  override update(id: Guid, record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
     const maybeRecord = cache[id];
 
     if (!maybeRecord) {
@@ -53,9 +55,10 @@ class MockMonitoredSystemService extends MonitoredSystemService {
     }
 
     record = { ...record };
-    cache[id] = record;
+    Object.assign(maybeRecord, record);
+    cache[id] = maybeRecord;
 
-    return of({ ...record });
+    return of({ ...maybeRecord });
   }
 
   override delete(id: Guid): Observable<void> {

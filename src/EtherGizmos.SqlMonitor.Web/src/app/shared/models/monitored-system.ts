@@ -1,3 +1,4 @@
+import { Validators } from "@angular/forms";
 import { z } from "zod";
 import { DateTimeZ } from "../types/datetime/datetime";
 import { GuidZ } from "../types/guid/guid";
@@ -24,8 +25,8 @@ export const monitoredSystemForm = formFactoryForModel<MonitoredSystem, DefaultC
     createdByUserId: [model.createdByUserId],
     modifiedAt: [model.modifiedAt],
     modifiedByUserId: [model.modifiedByUserId],
-    name: [model.name],
+    name: [model.name, Validators.required],
     description: [model.description],
-    isActive: [model.isActive],
+    isActive: [model.isActive, Validators.required],
   };
 });
