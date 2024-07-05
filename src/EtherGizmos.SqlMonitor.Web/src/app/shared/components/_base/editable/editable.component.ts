@@ -20,7 +20,9 @@ export abstract class EditableComponent<TEntity, TKey> implements OnInit {
   protected readonly keyParse: ZodType;
 
   id?: TKey;
-  isLoading: boolean = true;
+
+  get isLoading(): boolean { return this.isLoadingStack > 0; }
+  private isLoadingStack: number = 0;
   isEditing: boolean = false;
   isNew: boolean = true;
 
@@ -80,13 +82,11 @@ export abstract class EditableComponent<TEntity, TKey> implements OnInit {
       this.keyParse.parse(testId);
       this.id = testId;
 
-      this.isLoading = true;
       this.isEditing = false;
       this.isNew = false;
     } else {
       this.id = undefined;
 
-      this.isLoading = false;
       this.isEditing = true;
       this.isNew = true;
     }
@@ -98,15 +98,15 @@ export abstract class EditableComponent<TEntity, TKey> implements OnInit {
     this.refresh();
 
     if (this.id) {
-      this.isLoading = true;
+      this.isLoadingStack++;
       this.loadRecord(this.id).pipe(
         catchError(err => {
-          this.isLoading = false;
+          this.isLoadingStack--;
           return throwError(() => err);
         })
       ).subscribe(entity => {
         this.initializeForm(entity);
-        this.isLoading = false;
+        this.isLoadingStack--;
       });
     } else {
       const entity = this.createEmptyRecord();
@@ -156,15 +156,29 @@ export abstract class EditableComponent<TEntity, TKey> implements OnInit {
     }
 
     const data = getDirtyFormValues(this.form);
+
     if (this.isNew) {
-      this.createRecord(data).subscribe(entity => {
+      this.isLoadingStack++;
+      this.createRecord(data).pipe(
+        catchError(err => {
+          this.isLoadingStack--;
+          return throwError(() => err);
+        })
+      ).subscribe(entity => {
         this.navigateToRecord(entity);
       });
     } else {
       if (!this.id)
         return;
 
-      this.updateRecord(this.id, data).subscribe(entity => {
+      this.isLoadingStack++;
+      this.updateRecord(this.id, data).pipe(
+        catchError(err => {
+          this.isLoadingStack--;
+          return throwError(() => err);
+        })
+      ).subscribe(entity => {
+        this.isLoadingStack--;
         this.initializeForm(entity);
         this.refresh();
       });

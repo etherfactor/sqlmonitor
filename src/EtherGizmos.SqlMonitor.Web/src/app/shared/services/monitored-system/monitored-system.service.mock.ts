@@ -1,6 +1,6 @@
 import { Injectable, Provider } from "@angular/core";
 import { DateTime } from "luxon";
-import { Observable, of, throwError } from "rxjs";
+import { Observable, delay, of, throwError } from "rxjs";
 import { MonitoredSystem } from "../../models/monitored-system";
 import { Guid, generateGuid } from "../../types/guid/guid";
 import { MonitoredSystemService } from "./monitored-system.service";
@@ -29,7 +29,9 @@ class MockMonitoredSystemService extends MonitoredSystemService {
       return throwError(() => new Error('Record does not exist'));
     }
 
-    return of({ ...maybeRecord });
+    return of({ ...maybeRecord }).pipe(
+      delay(1000)
+    );
   }
 
   override search(): Observable<MonitoredSystem[]> {
@@ -44,7 +46,9 @@ class MockMonitoredSystemService extends MonitoredSystemService {
 
     cache[record.id] = record as MonitoredSystem;
 
-    return of({ ...record } as MonitoredSystem);
+    return of({ ...record } as MonitoredSystem).pipe(
+      delay(1000)
+    );
   }
 
   override update(id: Guid, record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
@@ -58,7 +62,9 @@ class MockMonitoredSystemService extends MonitoredSystemService {
     Object.assign(maybeRecord, record);
     cache[id] = maybeRecord;
 
-    return of({ ...maybeRecord });
+    return of({ ...maybeRecord }).pipe(
+      delay(1000)
+    );
   }
 
   override delete(id: Guid): Observable<void> {
@@ -70,7 +76,9 @@ class MockMonitoredSystemService extends MonitoredSystemService {
 
     delete cache[id];
 
-    return of(void 0);
+    return of(void 0).pipe(
+      delay(1000)
+    );
   }
 }
 

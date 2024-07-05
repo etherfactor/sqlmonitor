@@ -119,12 +119,12 @@ export class MonitoredSystemDetailComponent extends EditableComponent<MonitoredS
     if (!this.isNew) {
       breadcrumbs.push({
         label: this.entity.name,
-        link: `/monitored-systems/${this.id}`,
+        link: `/monitored-system/${this.id}`,
       });
     } else {
       breadcrumbs.push({
         label: 'New Record',
-        link: `/monitored-systems/new`,
+        link: `/monitored-system/new`,
       });
     }
 
