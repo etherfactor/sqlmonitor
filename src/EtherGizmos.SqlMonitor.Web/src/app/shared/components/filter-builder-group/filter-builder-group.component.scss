@@ -1,0 +1,14 @@
+.offshoot {
+  position: relative;
+
+  &::before {
+    height: 2px;
+    width: 12px;
+    background-color: var(--bs-body-color);
+    content: '';
+    position: relative;
+    left: -16px;
+    top: 12px;
+    display: block;
+  }
+}

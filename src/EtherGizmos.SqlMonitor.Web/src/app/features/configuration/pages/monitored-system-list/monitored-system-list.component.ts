@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DateTime } from 'luxon';
+import { FilterBuilderComponent } from '../../../../shared/components/filter-builder/filter-builder.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { MonitoredSystem } from '../../../../shared/models/monitored-system';
 import { generateGuid } from '../../../../shared/types/guid/guid';
@@ -11,6 +12,7 @@ import { generateGuid } from '../../../../shared/types/guid/guid';
   standalone: true,
   imports: [
     CommonModule,
+    FilterBuilderComponent,
     RouterModule,
     TableComponent,
   ],

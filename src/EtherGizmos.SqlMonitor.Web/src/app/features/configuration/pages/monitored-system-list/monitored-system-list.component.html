@@ -6,6 +6,17 @@
 
 <div class="top-spacer"></div>
 
+<filter-builder [filter]="{
+                operator: 'AND',
+                conditions: [
+                { property: 'test', operator: 'STARTSWITH', value: 'A' },
+                { operator: 'OR', conditions: [
+                { property: 'a', operator: 'EQUALS', value: 'A' },
+                { property: 'b', operator: 'NOTEQUALS', value: 'B' }
+                ] }
+                ]
+                }"></filter-builder>
+
 <app-table [data]="records">
   <ng-template #headers>
     <th>Name</th>
