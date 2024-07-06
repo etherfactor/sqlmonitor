@@ -1,9 +1,9 @@
 <!-- Filter group -->
-<ng-container *ngIf="isFilterGroup(filter)">
+<ng-container *ngIf="isFilterGroupForm(filter)" [formGroup]="filter">
   <div class="container-fluid">
     <div class="row">
       <div class="col-auto">
-        <ng-select [(ngModel)]="filter.operator"
+        <ng-select formControlName="operator"
                    [clearable]="false"
                    [selectOnTab]="true"
                    style="width: 100px;">
@@ -20,9 +20,9 @@
         </div>
       </div>
       <div class="col">
-        <div *ngFor="let condition of conditions; let i = index" class="row offshoot" style="position: relative;">
+        <div *ngFor="let condition of conditions.controls; let i = index" class="row offshoot" style="position: relative;" [formGroup]="condition">
           <div class="col">
-            <filter-builder-group [(filter)]="conditions[i]"
+            <filter-builder-group [filter]="condition"
                                   [properties]="properties"></filter-builder-group>
           </div>
           <button *ngIf="conditions.length > 1" class="btn btn-link" style="position: absolute; right: 0; width: fit-content;" (click)="removeCondition(i)">
@@ -46,11 +46,11 @@
 </ng-container>
 
 <!-- Filter property -->
-<ng-container *ngIf="!isFilterGroup(filter)">
+<ng-container *ngIf="!isFilterGroupForm(filter)" [formGroup]="filter">
   <div class="container-fluid" style="padding: 0; width: calc(100% - 32px); display: inline-block;">
     <div class="row">
       <div class="col-md-auto">
-        <ng-select [(ngModel)]="filter.property"
+        <ng-select formControlName="property"
                    [clearable]="false"
                    [selectOnTab]="true"
                    class="auto-grow">
@@ -58,7 +58,7 @@
         </ng-select>
       </div>
       <div class="col-md-auto">
-        <ng-select [(ngModel)]="filter.operator"
+        <ng-select formControlName="operator"
                    [clearable]="false"
                    [selectOnTab]="true"
                    class="auto-grow">
@@ -67,10 +67,10 @@
       </div>
       <div class="col-md">
         <ng-container [ngSwitch]="selectedProperty?.type ?? 'string'">
-          <input-luxon-datetime *ngSwitchCase="'datetime'" [(ngModel)]="filter.value"></input-luxon-datetime>
-          <input *ngSwitchCase="'guid'" type="text" class="form-control" [(ngModel)]="filter.value" />
-          <input *ngSwitchCase="'number'" type="number" class="form-control" [(ngModel)]="filter.value" />
-          <input *ngSwitchCase="'string'" type="text" class="form-control" [(ngModel)]="filter.value" />
+          <input-luxon-datetime *ngSwitchCase="'datetime'" formControlName="value"></input-luxon-datetime>
+          <input *ngSwitchCase="'guid'" type="text" class="form-control" formControlName="value" />
+          <input *ngSwitchCase="'number'" type="number" class="form-control" formControlName="value" />
+          <input *ngSwitchCase="'string'" type="text" class="form-control" formControlName="value" />
         </ng-container>
       </div>
     </div>

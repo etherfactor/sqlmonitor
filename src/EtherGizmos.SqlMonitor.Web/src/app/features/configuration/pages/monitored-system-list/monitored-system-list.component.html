@@ -6,16 +6,7 @@
 
 <div class="top-spacer"></div>
 
-<filter-builder [filter]="{
-                operator: 'and',
-                conditions: [
-                { property: 'name', operator: 'starts_with', value: 'A' },
-                { operator: 'or', conditions: [
-                { property: 'name', operator: 'equals', value: 'A' },
-                { property: 'name', operator: 'not_equals', value: 'B' }
-                ] }
-                ]
-                }"
+<filter-builder [filter]="filterForm"
                 [properties]="[
                 { name: 'name', displayName: 'Name', type: 'string' },
                 { name: 'createdAt', displayName: 'Created at', type: 'datetime' }

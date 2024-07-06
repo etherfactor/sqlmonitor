@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { FormArray, FormBuilder } from '@angular/forms';
+import { DefaultControlTypes, TypedFormGroup, formFactoryForModel } from '../../utilities/form/form.util';
 import { FilterBuilderGroupComponent } from '../filter-builder-group/filter-builder-group.component';
 
 export type FilterOperator = 'and' | 'or';
@@ -112,6 +114,33 @@ export function isFilterGroup(condition: FilterCondition | FilterGroup): conditi
   return (condition as FilterGroup).conditions !== undefined;
 }
 
+export const filterGroupForm = formFactoryForModel<FilterGroup, DefaultControlTypes>(($form, model) => {
+  return {
+    operator: [model.operator],
+    conditions: $form.nonNullable.array(model.conditions.map(item => {
+      if (isFilterGroup(item)) {
+        const subForm: TypedFormGroup<FilterGroup, DefaultControlTypes> = filterGroupForm($form, item);
+        return subForm;
+      } else {
+        const subForm = filterConditionForm($form, item);
+        return subForm;
+      }
+    })) as unknown as FormArray<TypedFormGroup<FilterGroup, DefaultControlTypes> | TypedFormGroup<FilterCondition, DefaultControlTypes>>,
+  };
+});
+
+export const filterConditionForm = formFactoryForModel<FilterCondition, DefaultControlTypes>(($form: FormBuilder, model: FilterCondition) => {
+  return {
+    operator: [model.operator],
+    property: [model.property],
+    value: [model.value],
+  };
+});
+
+export function isFilterGroupForm(condition: TypedFormGroup<FilterCondition, DefaultControlTypes> | TypedFormGroup<FilterGroup, DefaultControlTypes>): condition is TypedFormGroup<FilterGroup, DefaultControlTypes> {
+  return (condition as TypedFormGroup<FilterGroup, DefaultControlTypes>).controls.conditions !== undefined;
+}
+
 @Component({
   selector: 'filter-builder',
   standalone: true,
@@ -123,8 +152,7 @@ export function isFilterGroup(condition: FilterCondition | FilterGroup): conditi
 })
 export class FilterBuilderComponent {
 
-  @Input({ required: true }) filter!: FilterGroup;
-  @Output() filterChange = new EventEmitter<FilterGroup>();
+  @Input({ required: true }) filter!: TypedFormGroup<FilterGroup>;
 
   @Input({ required: true }) properties!: FilterProperty[];
 }

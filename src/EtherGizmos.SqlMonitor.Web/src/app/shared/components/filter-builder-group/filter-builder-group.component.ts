@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, Input } from '@angular/core';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { FilterCondition, FilterGroup, FilterProperty, FilterPropertyOperator, defaultOperators, displayText, isFilterGroup } from '../filter-builder/filter-builder.component';
+import { DefaultControlTypes, TypedFormGroup } from '../../utilities/form/form.util';
+import { FilterCondition, FilterGroup, FilterProperty, FilterPropertyOperator, defaultOperators, displayText, filterConditionForm, filterGroupForm, isFilterGroupForm } from '../filter-builder/filter-builder.component';
 import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon-datetime.component';
 
 @Component({
@@ -13,35 +14,43 @@ import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon
     FormsModule,
     InputLuxonDatetimeComponent,
     NgSelectModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './filter-builder-group.component.html',
   styleUrl: './filter-builder-group.component.scss'
 })
 export class FilterBuilderGroupComponent {
 
+  private readonly $form: FormBuilder;
+
   @Input() root: boolean = false;
 
-  @Input({ required: true }) filter!: FilterCondition | FilterGroup;
-  @Output() filterChange = new EventEmitter<FilterCondition | FilterGroup>;
+  @Input({ required: true }) filter!: TypedFormGroup<FilterCondition, DefaultControlTypes> | TypedFormGroup<FilterGroup, DefaultControlTypes>;
 
   @Input({ required: true }) properties!: FilterProperty[];
 
-  get conditions() {
-    const group = this.asFilterGroup(this.filter);
-    return group.conditions;
+  constructor(
+    $form: FormBuilder,
+  ) {
+    this.$form = $form;
   }
 
-  readonly isFilterGroup = isFilterGroup;
+  get conditions() {
+    const group = this.asFilterGroup(this.filter);
+    return group.controls.conditions;
+  }
 
-  asFilterGroup(condition: FilterCondition | FilterGroup): FilterGroup {
-    if (!isFilterGroup(condition))
+  readonly isFilterGroupForm = isFilterGroupForm;
+
+  asFilterGroup(condition: TypedFormGroup<FilterCondition, DefaultControlTypes> | TypedFormGroup<FilterGroup, DefaultControlTypes>): TypedFormGroup<FilterGroup, DefaultControlTypes> {
+    if (!isFilterGroupForm(condition))
       throw new Error('Not a filter group');
 
     return condition;
   }
 
-  asFilterCondition(condition: FilterCondition | FilterGroup): FilterCondition {
-    if (isFilterGroup(condition))
+  asFilterCondition(condition: TypedFormGroup<FilterCondition, DefaultControlTypes> | TypedFormGroup<FilterGroup, DefaultControlTypes>): TypedFormGroup<FilterCondition, DefaultControlTypes> {
+    if (isFilterGroupForm(condition))
       throw new Error('Not a filter condition');
 
     return condition;
@@ -49,7 +58,7 @@ export class FilterBuilderGroupComponent {
 
   get selectedProperty() {
     const condition = this.asFilterCondition(this.filter);
-    return this.properties.find(e => e.name === condition.property);
+    return this.properties.find(e => e.name === condition.value.property);
   }
 
   getOperators(): FilterPropertyOperator[] {
@@ -78,7 +87,9 @@ export class FilterBuilderGroupComponent {
       ],
     };
 
-    group.conditions.push(newGroup);
+    const newGroupForm = filterGroupForm(this.$form, newGroup);
+
+    group.controls.conditions.push(newGroupForm);
   }
 
   addProperty() {
@@ -90,10 +101,14 @@ export class FilterBuilderGroupComponent {
       value: undefined,
     };
 
-    group.conditions.push(newCondition);
+    const newConditionForm = filterConditionForm(this.$form, newCondition);
+
+    group.controls.conditions.push(newConditionForm);
   }
 
   removeCondition(index: number) {
-    this.conditions.splice(index, 1);
+    const group = this.asFilterGroup(this.filter);
+
+    group.controls.conditions.removeAt(index);
   }
 }
