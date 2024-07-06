@@ -72,4 +72,18 @@ $ng-select-height: 38px;
       }
     }
   }
+
+  &.auto-grow {
+    display: flex;
+
+    .ng-select-container {
+      min-width: 100px;
+      width: auto;
+    }
+
+    .ng-dropdown-panel {
+      min-width: 100px;
+      width: auto;
+    }
+  }
 }

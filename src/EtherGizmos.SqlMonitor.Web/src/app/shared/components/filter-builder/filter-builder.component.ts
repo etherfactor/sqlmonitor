@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { FilterBuilderGroupComponent } from '../filter-builder-group/filter-builder-group.component';
 
 export type FilterOperator = 'and' | 'or';
 
 export interface FilterCondition {
   property: string;
-  operator: string;
+  operator: FilterPropertyOperator;
   value: any;
 }
 
@@ -20,6 +20,92 @@ export interface FilterProperty {
   name: string;
   displayName: string;
   type: FilterType;
+  operators?: FilterPropertyOperator[];
+}
+
+export type FilterPropertyOperator = 'equals' | 'not_equals' | 'greater' | 'greater_equals'
+  | 'less' | 'less_equals' | 'starts_with' | 'ends_with' | 'contains' | 'not_contains'
+  | 'null' | 'not_null';
+
+export const defaultOperators: { [key in FilterType]: FilterPropertyOperator[] } = {
+  datetime: ['equals', 'not_equals', 'greater_equals', 'less_equals', 'null', 'not_null'],
+  guid: ['equals', 'not_equals', 'null', 'not_null'],
+  number: ['equals', 'not_equals', 'greater', 'greater_equals', 'less', 'less_equals', 'null', 'not_null'],
+  string: ['equals', 'not_equals', 'starts_with', 'ends_with', 'contains', 'not_contains', 'null', 'not_null'],
+}
+
+export const showInput: { [key in FilterPropertyOperator]: boolean } = {
+  contains: true,
+  ends_with: true,
+  equals: true,
+  greater: true,
+  greater_equals: true,
+  less: true,
+  less_equals: true,
+  not_contains: true,
+  not_equals: true,
+  not_null: false,
+  null: false,
+  starts_with: true,
+}
+
+export const displayText: { [key in FilterType]: { [key in FilterPropertyOperator]: string } } = {
+  datetime: {
+    contains: '',
+    ends_with: '',
+    equals: 'At',
+    greater: '',
+    greater_equals: 'After',
+    less: '',
+    less_equals: 'Before',
+    not_contains: '',
+    not_equals: 'Not at',
+    not_null: 'Is not null',
+    null: 'Is null',
+    starts_with: '',
+  },
+  guid: {
+    contains: '',
+    ends_with: '',
+    equals: 'Equals',
+    greater: '',
+    greater_equals: '',
+    less: '',
+    less_equals: '',
+    not_contains: '',
+    not_equals: 'Does not equal',
+    not_null: 'Is not null',
+    null: 'Is null',
+    starts_with: '',
+  },
+  number: {
+    contains: '',
+    ends_with: '',
+    equals: 'Is equal to',
+    greater: 'Greater than',
+    greater_equals: 'Greater than or equal to',
+    less: 'Less than',
+    less_equals: 'Less than or equal to',
+    not_contains: '',
+    not_equals: 'Does not equal',
+    not_null: 'Is not null',
+    null: 'Is null',
+    starts_with: '',
+  },
+  string: {
+    contains: 'Contains',
+    ends_with: 'Ends with',
+    equals: 'Is equal to',
+    greater: '',
+    greater_equals: '',
+    less: '',
+    less_equals: '',
+    not_contains: 'Does not contain',
+    not_equals: 'Does not equal',
+    not_null: 'Is not null',
+    null: 'Is null',
+    starts_with: 'Starts with',
+  },
 }
 
 export function isFilterGroup(condition: FilterCondition | FilterGroup): condition is FilterGroup {

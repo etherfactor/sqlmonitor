@@ -9,10 +9,10 @@
 <filter-builder [filter]="{
                 operator: 'and',
                 conditions: [
-                { property: 'name', operator: 'STARTSWITH', value: 'A' },
+                { property: 'name', operator: 'starts_with', value: 'A' },
                 { operator: 'or', conditions: [
-                { property: 'name', operator: 'EQUALS', value: 'A' },
-                { property: 'name', operator: 'NOTEQUALS', value: 'B' }
+                { property: 'name', operator: 'equals', value: 'A' },
+                { property: 'name', operator: 'not_equals', value: 'B' }
                 ] }
                 ]
                 }"

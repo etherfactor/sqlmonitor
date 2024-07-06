@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { FilterCondition, FilterGroup, FilterProperty, isFilterGroup } from '../filter-builder/filter-builder.component';
+import { FilterCondition, FilterGroup, FilterProperty, FilterPropertyOperator, defaultOperators, displayText, isFilterGroup } from '../filter-builder/filter-builder.component';
+import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon-datetime.component';
 
 @Component({
   selector: 'filter-builder-group',
@@ -10,6 +11,7 @@ import { FilterCondition, FilterGroup, FilterProperty, isFilterGroup } from '../
   imports: [
     CommonModule,
     FormsModule,
+    InputLuxonDatetimeComponent,
     NgSelectModule,
   ],
   templateUrl: './filter-builder-group.component.html',
@@ -46,5 +48,15 @@ export class FilterBuilderGroupComponent {
   get selectedProperty() {
     const condition = this.asFilterCondition(this.filter);
     return this.properties.find(e => e.name === condition.property)!;
+  }
+
+  getOperators(): FilterPropertyOperator[] {
+    const property = this.selectedProperty;
+    return property.operators ?? defaultOperators[property.type];
+  }
+
+  getOperatorDisplayName(operator: FilterPropertyOperator) {
+    const property = this.selectedProperty;
+    return displayText[property.type][operator];
   }
 }

@@ -30,61 +30,87 @@
   </div>
 </ng-container>
 <ng-container *ngIf="!isFilterGroup(filter)">
-  <div>
+  <div class="container-fluid" style="padding: 0;">
+    <div class="row">
+      <div class="col-auto-md">
+        <ng-select [(ngModel)]="filter.property"
+                   [clearable]="false"
+                   [selectOnTab]="true"
+                   class="auto-grow">
+          <ng-option *ngFor="let property of properties" [value]="property.name">{{property.displayName}}</ng-option>
+        </ng-select>
+      </div>
+      <div class="col-md-auto">
+        <ng-select [(ngModel)]="filter.operator"
+                   [clearable]="false"
+                   [selectOnTab]="true"
+                   class="auto-grow">
+          <ng-option *ngFor="let operator of getOperators()" [value]="operator">{{getOperatorDisplayName(operator)}}</ng-option>
+        </ng-select>
+      </div>
+      <div class="col-md-auto">
+        <ng-container [ngSwitch]="selectedProperty.type">
+          <input-luxon-datetime *ngSwitchCase="'datetime'" [(ngModel)]="filter.value" style="width: 200px;"></input-luxon-datetime>
+          <input *ngSwitchCase="'guid'" type="text" class="form-control" [(ngModel)]="filter.value" style="width: 200px;" />
+          <input *ngSwitchCase="'number'" type="number" class="form-control" [(ngModel)]="filter.value" style="width: 200px;" />
+          <input *ngSwitchCase="'string'" type="text" class="form-control" [(ngModel)]="filter.value" style="width: 200px;" />
+        </ng-container>
+      </div>
+    </div>
     <!--{{filter.property}} {{filter.operator}} {{filter.value}}
-    <ng-select [(ngModel)]="filter.property"
+  <ng-select [(ngModel)]="filter.property"
+             [clearable]="false"
+             [selectOnTab]="true"
+             style="width: 150px;">
+    <ng-option *ngFor="let property of properties" [value]="property.name">{{property.displayName}}</ng-option>
+  </ng-select>
+  <ng-container [ngSwitch]="selectedProperty.type">
+    <ng-select *ngSwitchCase="'datetime'"
                [clearable]="false"
                [selectOnTab]="true"
                style="width: 150px;">
-      <ng-option *ngFor="let property of properties" [value]="property.name">{{property.displayName}}</ng-option>
+      <ng-option value="equals">Equals</ng-option>
+      <ng-option value="notequals">Does not equal</ng-option>
+      <ng-option value="before">Before</ng-option>
+      <ng-option value="after">After</ng-option>
+      <ng-option value="empty">Empty</ng-option>
+      <ng-option value="notempty">Not empty</ng-option>
     </ng-select>
-    <ng-container [ngSwitch]="selectedProperty.type">
-      <ng-select *ngSwitchCase="'datetime'"
-                 [clearable]="false"
-                 [selectOnTab]="true"
-                 style="width: 150px;">
-        <ng-option value="equals">Equals</ng-option>
-        <ng-option value="notequals">Does not equal</ng-option>
-        <ng-option value="before">Before</ng-option>
-        <ng-option value="after">After</ng-option>
-        <ng-option value="empty">Empty</ng-option>
-        <ng-option value="notempty">Not empty</ng-option>
-      </ng-select>
-      <ng-select *ngSwitchCase="'guid'"
-                 [clearable]="false"
-                 [selectOnTab]="true"
-                 style="width: 150px;">
-        <ng-option value="equals">Equals</ng-option>
-        <ng-option value="notequals">Does not equal</ng-option>
-        <ng-option value="empty">Empty</ng-option>
-        <ng-option value="notempty">Not empty</ng-option>
-      </ng-select>
-      <ng-select *ngSwitchCase="'number'"
-                 [clearable]="false"
-                 [selectOnTab]="true"
-                 style="width: 150px;">
-        <ng-option value="equals">Equals</ng-option>
-        <ng-option value="notequals">Does not equal</ng-option>
-        <ng-option value="greater">Greater than</ng-option>
-        <ng-option value="greaterequals">Greater than or equal to</ng-option>
-        <ng-option value="less">Less than</ng-option>
-        <ng-option value="lessequals">Less than or equal to</ng-option>
-        <ng-option value="empty">Empty</ng-option>
-        <ng-option value="notempty">Not empty</ng-option>
-      </ng-select>
-      <ng-select *ngSwitchCase="'string'"
-                 [clearable]="false"
-                 [selectOnTab]="true"
-                 style="width: 150px;">
-        <ng-option value="equals">Equals</ng-option>
-        <ng-option value="notequals">Does not equal</ng-option>
-        <ng-option value="startswith">Starts with</ng-option>
-        <ng-option value="endswith">Ends with</ng-option>
-        <ng-option value="contains">Contains</ng-option>
-        <ng-option value="notcontains">Does not contain</ng-option>
-        <ng-option value="empty">Empty</ng-option>
-        <ng-option value="notempty">Not empty</ng-option>
-      </ng-select>
-    </ng-container>-->
+    <ng-select *ngSwitchCase="'guid'"
+               [clearable]="false"
+               [selectOnTab]="true"
+               style="width: 150px;">
+      <ng-option value="equals">Equals</ng-option>
+      <ng-option value="notequals">Does not equal</ng-option>
+      <ng-option value="empty">Empty</ng-option>
+      <ng-option value="notempty">Not empty</ng-option>
+    </ng-select>
+    <ng-select *ngSwitchCase="'number'"
+               [clearable]="false"
+               [selectOnTab]="true"
+               style="width: 150px;">
+      <ng-option value="equals">Equals</ng-option>
+      <ng-option value="notequals">Does not equal</ng-option>
+      <ng-option value="greater">Greater than</ng-option>
+      <ng-option value="greaterequals">Greater than or equal to</ng-option>
+      <ng-option value="less">Less than</ng-option>
+      <ng-option value="lessequals">Less than or equal to</ng-option>
+      <ng-option value="empty">Empty</ng-option>
+      <ng-option value="notempty">Not empty</ng-option>
+    </ng-select>
+    <ng-select *ngSwitchCase="'string'"
+               [clearable]="false"
+               [selectOnTab]="true"
+               style="width: 150px;">
+      <ng-option value="equals">Equals</ng-option>
+      <ng-option value="notequals">Does not equal</ng-option>
+      <ng-option value="startswith">Starts with</ng-option>
+      <ng-option value="endswith">Ends with</ng-option>
+      <ng-option value="contains">Contains</ng-option>
+      <ng-option value="notcontains">Does not contain</ng-option>
+      <ng-option value="empty">Empty</ng-option>
+      <ng-option value="notempty">Not empty</ng-option>
+    </ng-select>
+  </ng-container>-->
   </div>
 </ng-container>

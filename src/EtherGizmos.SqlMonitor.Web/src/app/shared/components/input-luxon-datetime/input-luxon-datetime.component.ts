@@ -49,7 +49,7 @@ export class InputLuxonDatetimeComponent implements ControlValueAccessor {
   writeValue(obj: DateTime | null): void {
     let newValue: string | null;
     console.log('write', obj);
-    if (obj) {
+    if (obj && DateTime.isDateTime(obj)) {
       newValue = obj
         .startOf('minute')
         .toISO({
