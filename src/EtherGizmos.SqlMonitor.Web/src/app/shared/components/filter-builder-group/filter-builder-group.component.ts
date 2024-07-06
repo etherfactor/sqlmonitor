@@ -92,4 +92,8 @@ export class FilterBuilderGroupComponent {
 
     group.conditions.push(newCondition);
   }
+
+  removeCondition(index: number) {
+    this.conditions.splice(index, 1);
+  }
 }

@@ -3,15 +3,6 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-auto">
-        <!--<button class="btn btn-link btn-sm">
-          <span class="bi bi-x-lg"></span>
-        </button>-->
-        <span class="bi bi-circle"></span>
-        <div class="h-100" style="position: relative;">
-          <div style="position: absolute; left: 50%; transform: translateX(-50%); width: 2px; background-color: var(--bs-body-color); height: calc(100% + 22px); top: 0px;"></div>
-        </div>
-      </div>
-      <div class="col">
         <ng-select [(ngModel)]="filter.operator"
                    [clearable]="false"
                    [selectOnTab]="true"
@@ -19,29 +10,37 @@
           <ng-option value="and">And</ng-option>
           <ng-option value="or">Or</ng-option>
         </ng-select>
-        <div *ngFor="let condition of conditions; let i = index" class="row" style="position: relative;">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-auto">
+        <!--<span class="bi bi-circle"></span>-->
+        <div class="h-100" style="position: relative; margin-left: 10px; width: 10px;">
+          <div style="position: absolute; left: 50%; transform: translateX(-50%); width: 2px; background-color: var(--bs-body-color); height: calc(100% - 16px); top: 0px;"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div *ngFor="let condition of conditions; let i = index" class="row offshoot" style="position: relative;">
           <div class="col">
             <filter-builder-group [(filter)]="conditions[i]"
                                   [properties]="properties"></filter-builder-group>
           </div>
-          <button class="btn btn-link" style="position: absolute; right: 0; width: fit-content;">
+          <button *ngIf="conditions.length > 1" class="btn btn-link" style="position: absolute; right: 0; width: fit-content;" (click)="removeCondition(i)">
             <span class="bi bi-x-lg"></span>
           </button>
         </div>
+        <div class="row offshoot">
+          <div class="dropdown col">
+            <a class="dropdown-toggle d-block" style="margin-top: 7px; margin-bottom: 7px; width: fit-content;" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="bi bi-plus-square">Add</span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="javascript:void(0);" (click)="addGroup()">Group</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" (click)="addProperty()">Property</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  <div>
-  </div>
-  <div>
-    <div class="dropdown" style="margin-left: 30px;">
-      <a class="dropdown-toggle d-block" style="margin-top: 6px;" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="bi bi-plus-square">Add</span>
-      </a>
-      <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="javascript:void(0);" (click)="addGroup()">Group</a></li>
-        <li><a class="dropdown-item" href="javascript:void(0);" (click)="addProperty()">Property</a></li>
-      </ul>
     </div>
   </div>
 </ng-container>
