@@ -19,6 +19,8 @@ import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon
 })
 export class FilterBuilderGroupComponent {
 
+  @Input() root: boolean = false;
+
   @Input({ required: true }) filter!: FilterCondition | FilterGroup;
   @Output() filterChange = new EventEmitter<FilterCondition | FilterGroup>;
 
@@ -47,16 +49,47 @@ export class FilterBuilderGroupComponent {
 
   get selectedProperty() {
     const condition = this.asFilterCondition(this.filter);
-    return this.properties.find(e => e.name === condition.property)!;
+    return this.properties.find(e => e.name === condition.property);
   }
 
   getOperators(): FilterPropertyOperator[] {
     const property = this.selectedProperty;
-    return property.operators ?? defaultOperators[property.type];
+    return property?.operators ?? defaultOperators[property?.type ?? 'string'];
   }
 
   getOperatorDisplayName(operator: FilterPropertyOperator) {
     const property = this.selectedProperty;
-    return displayText[property.type][operator];
+    return displayText[property?.type ?? 'string'][operator];
+  }
+
+  addGroup() {
+    const group = this.asFilterGroup(this.filter);
+
+    const newCondition: FilterCondition = {
+      property: null!,
+      operator: 'equals',
+      value: undefined,
+    };
+
+    const newGroup: FilterGroup = {
+      operator: 'and',
+      conditions: [
+        newCondition,
+      ],
+    };
+
+    group.conditions.push(newGroup);
+  }
+
+  addProperty() {
+    const group = this.asFilterGroup(this.filter);
+
+    const newCondition: FilterCondition = {
+      property: null!,
+      operator: 'equals',
+      value: undefined,
+    };
+
+    group.conditions.push(newCondition);
   }
 }

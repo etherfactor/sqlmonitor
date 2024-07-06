@@ -1,6 +1,7 @@
 <!--<div style="height: 2px; background-color: var(--bs-body-color); position: relative; "></div>-->
 <ng-container *ngIf="isFilterGroup(filter)">
-  <div>
+  <div class="d-flex flex-row" style="gap: 10px;">
+    <span class="bi bi-x-lg" style="margin-top: 7px; margin-left: 6.5px;"></span>
     <ng-select [(ngModel)]="filter.operator"
                [clearable]="false"
                [selectOnTab]="true"
@@ -11,8 +12,9 @@
   </div>
   <div class="d-flex flex-row" style="position: relative;">
     <div style="width: 30px; position: relative;">
-      <div style="position: relative; left: 50%; transform: translateX(-50%); width: 2px; background-color: var(--bs-body-color); height: calc(100%); top: 0px;"></div>
+      <div style="position: relative; left: 50%; transform: translateX(-50%); width: 2px; background-color: var(--bs-body-color); height: calc(100% + 22px); top: 0px;"></div>
     </div>
+    <span class="bi bi-x-lg" style="margin-top: 7px; margin-left: 6.5px;"></span>
     <div class="w-100">
       <ng-container *ngFor="let condition of conditions; let i = index">
         <div class="offshoot">
@@ -22,17 +24,20 @@
       </ng-container>
     </div>
   </div>
-  <div>
-    <a href="javascript:void(0);">
-      <span class="bi bi-plus-square"></span>
-      Add
+  <div class="dropdown offshoot" style="margin-left: 30px;">
+    <a class="dropdown-toggle d-block" style="margin-top: 6px;" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+      <span class="bi bi-plus-square">Add</span>
     </a>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="javascript:void(0);" (click)="addGroup()">Group</a></li>
+      <li><a class="dropdown-item" href="javascript:void(0);" (click)="addProperty()">Property</a></li>
+    </ul>
   </div>
 </ng-container>
 <ng-container *ngIf="!isFilterGroup(filter)">
   <div class="container-fluid" style="padding: 0;">
     <div class="row">
-      <div class="col-auto-md">
+      <div class="col-md-auto">
         <ng-select [(ngModel)]="filter.property"
                    [clearable]="false"
                    [selectOnTab]="true"
@@ -48,69 +53,14 @@
           <ng-option *ngFor="let operator of getOperators()" [value]="operator">{{getOperatorDisplayName(operator)}}</ng-option>
         </ng-select>
       </div>
-      <div class="col-md-auto">
-        <ng-container [ngSwitch]="selectedProperty.type">
-          <input-luxon-datetime *ngSwitchCase="'datetime'" [(ngModel)]="filter.value" style="width: 200px;"></input-luxon-datetime>
-          <input *ngSwitchCase="'guid'" type="text" class="form-control" [(ngModel)]="filter.value" style="width: 200px;" />
-          <input *ngSwitchCase="'number'" type="number" class="form-control" [(ngModel)]="filter.value" style="width: 200px;" />
-          <input *ngSwitchCase="'string'" type="text" class="form-control" [(ngModel)]="filter.value" style="width: 200px;" />
+      <div class="col-md">
+        <ng-container [ngSwitch]="selectedProperty?.type ?? 'string'">
+          <input-luxon-datetime *ngSwitchCase="'datetime'" [(ngModel)]="filter.value"></input-luxon-datetime>
+          <input *ngSwitchCase="'guid'" type="text" class="form-control" [(ngModel)]="filter.value" />
+          <input *ngSwitchCase="'number'" type="number" class="form-control" [(ngModel)]="filter.value" />
+          <input *ngSwitchCase="'string'" type="text" class="form-control" [(ngModel)]="filter.value" />
         </ng-container>
       </div>
     </div>
-    <!--{{filter.property}} {{filter.operator}} {{filter.value}}
-  <ng-select [(ngModel)]="filter.property"
-             [clearable]="false"
-             [selectOnTab]="true"
-             style="width: 150px;">
-    <ng-option *ngFor="let property of properties" [value]="property.name">{{property.displayName}}</ng-option>
-  </ng-select>
-  <ng-container [ngSwitch]="selectedProperty.type">
-    <ng-select *ngSwitchCase="'datetime'"
-               [clearable]="false"
-               [selectOnTab]="true"
-               style="width: 150px;">
-      <ng-option value="equals">Equals</ng-option>
-      <ng-option value="notequals">Does not equal</ng-option>
-      <ng-option value="before">Before</ng-option>
-      <ng-option value="after">After</ng-option>
-      <ng-option value="empty">Empty</ng-option>
-      <ng-option value="notempty">Not empty</ng-option>
-    </ng-select>
-    <ng-select *ngSwitchCase="'guid'"
-               [clearable]="false"
-               [selectOnTab]="true"
-               style="width: 150px;">
-      <ng-option value="equals">Equals</ng-option>
-      <ng-option value="notequals">Does not equal</ng-option>
-      <ng-option value="empty">Empty</ng-option>
-      <ng-option value="notempty">Not empty</ng-option>
-    </ng-select>
-    <ng-select *ngSwitchCase="'number'"
-               [clearable]="false"
-               [selectOnTab]="true"
-               style="width: 150px;">
-      <ng-option value="equals">Equals</ng-option>
-      <ng-option value="notequals">Does not equal</ng-option>
-      <ng-option value="greater">Greater than</ng-option>
-      <ng-option value="greaterequals">Greater than or equal to</ng-option>
-      <ng-option value="less">Less than</ng-option>
-      <ng-option value="lessequals">Less than or equal to</ng-option>
-      <ng-option value="empty">Empty</ng-option>
-      <ng-option value="notempty">Not empty</ng-option>
-    </ng-select>
-    <ng-select *ngSwitchCase="'string'"
-               [clearable]="false"
-               [selectOnTab]="true"
-               style="width: 150px;">
-      <ng-option value="equals">Equals</ng-option>
-      <ng-option value="notequals">Does not equal</ng-option>
-      <ng-option value="startswith">Starts with</ng-option>
-      <ng-option value="endswith">Ends with</ng-option>
-      <ng-option value="contains">Contains</ng-option>
-      <ng-option value="notcontains">Does not contain</ng-option>
-      <ng-option value="empty">Empty</ng-option>
-      <ng-option value="notempty">Not empty</ng-option>
-    </ng-select>
-  </ng-container>-->
   </div>
 </ng-container>
