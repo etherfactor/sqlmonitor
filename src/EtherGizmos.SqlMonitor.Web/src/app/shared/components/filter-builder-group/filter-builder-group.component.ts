@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NgxMaskDirective } from 'ngx-mask';
 import { Subscription } from 'rxjs';
 import { DefaultControlTypes, TypedFormGroup } from '../../utilities/form/form.util';
 import { FilterCondition, FilterGroup, FilterProperty, FilterPropertyOperator, defaultOperators, displayText, filterConditionForm, filterGroupForm, isFilterGroupForm, showInput } from '../filter-builder-modal/filter-builder-modal.component';
@@ -15,6 +16,7 @@ import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon
     FormsModule,
     InputLuxonDatetimeComponent,
     NgSelectModule,
+    NgxMaskDirective,
     ReactiveFormsModule,
   ],
   templateUrl: './filter-builder-group.component.html',
@@ -31,6 +33,12 @@ export class FilterBuilderGroupComponent implements OnChanges {
   @Input({ required: true }) properties!: FilterProperty[];
 
   private filterSubscriptions: Subscription[] = [];
+
+  guidPatterns = {
+    'X': { pattern: /[0-9A-Fa-f]/ },
+    '4': { pattern: /4/ },
+    '8': { pattern: /[8-9A-Ba-b]/ }
+  };
 
   constructor(
     $form: FormBuilder,
@@ -58,10 +66,10 @@ export class FilterBuilderGroupComponent implements OnChanges {
           const value = newFilter.controls.value;
           value.setValue(undefined);
 
-          if (operator === 'null' || operator === 'not_null') {
-            value.setValidators([]);
-          } else {
+          if (showInput[operator ?? 'equals']) {
             value.setValidators([Validators.required]);
+          } else {
+            value.setValidators([]);
           }
 
           value.updateValueAndValidity();
@@ -116,8 +124,8 @@ export class FilterBuilderGroupComponent implements OnChanges {
     const group = this.asFilterGroup(this.filter);
 
     const newCondition: FilterCondition = {
-      property: null!,
-      operator: 'equals',
+      property: undefined!,
+      operator: undefined!,
       value: undefined,
     };
 
@@ -137,8 +145,8 @@ export class FilterBuilderGroupComponent implements OnChanges {
     const group = this.asFilterGroup(this.filter);
 
     const newCondition: FilterCondition = {
-      property: null!,
-      operator: 'equals',
+      property: undefined!,
+      operator: undefined!,
       value: undefined,
     };
 

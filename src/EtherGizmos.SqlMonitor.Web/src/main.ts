@@ -5,6 +5,7 @@ import { InjectionToken, Provider, enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
 import { provideQuillConfig } from 'ngx-quill';
 import { AppComponent } from './app/app.component';
 import { APP_ROUTES } from './app/app.routes';
@@ -27,6 +28,7 @@ bootstrapApplication(
       provideQuillConfig({}),
       provideCharts(withDefaultRegisterables()),
       provideSimpleConfig(CDK_DRAG_CONFIG, { zIndex: 1100 }),
+      provideEnvironmentNgxMask(),
       provideDashboardServiceMock(),
       provideInstanceServiceMock(),
       provideMetricServiceMock(),

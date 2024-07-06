@@ -8,8 +8,19 @@
     content: '';
     position: absolute;
     left: -14px;
-    top: 20px;
     display: block;
+  }
+
+  &.offshoot-prop {
+    &::before {
+      top: 26px;
+    }
+  }
+
+  &.offshoot-btn {
+    &::before {
+      top: 22px;
+    }
   }
 }
 
@@ -18,5 +29,36 @@
   padding-right: 0px;
 }
 
-.row > * {
+.group-line {
+  position: relative;
+  margin-left: 10px;
+  width: 10px;
+
+  .group-line-bar {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background-color: var(--bs-body-color);
+    height: calc(100% - 11px);
+    top: 0px;
+  }
+}
+
+.add-condition {
+  margin-top: 7px;
+  width: fit-content;
+}
+
+.remove-condition {
+  position: absolute;
+  right: 0;
+  width: fit-content;
+  margin-top: 0.5rem;
+}
+
+.filter-property {
+  padding: 0;
+  width: calc(100% - 32px);
+  display: inline-block;
 }

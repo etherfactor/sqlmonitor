@@ -60,8 +60,14 @@ export class MonitoredSystemListComponent {
     };
 
     this.properties = [
+      { name: 'id', displayName: 'Id', type: 'guid' },
       { name: 'name', displayName: 'Name', type: 'string' },
-      { name: 'createdAt', displayName: 'Created at', type: 'datetime' }
+      { name: 'description', displayName: 'Description', type: 'string' },
+      { name: 'isActive', displayName: 'Is active', type: 'boolean' },
+      { name: 'createdAt', displayName: 'Created at', type: 'datetime' },
+      { name: 'createdByUserId', displayName: 'Created by user id', type: 'guid' },
+      { name: 'modifiedAt', displayName: 'Modified at', type: 'datetime' },
+      { name: 'modifiedByUserId', displayName: 'Modified by user id', type: 'guid' },
     ];
 
     this.filterForm = filterGroupForm(this.$form, this.filter);
@@ -69,8 +75,16 @@ export class MonitoredSystemListComponent {
 
   openFilters() {
     const modalInstance = this.$modal.open(FilterBuilderModalComponent, { size: 'lg', centered: true, backdrop: 'static', keyboard: false });
-    const component = modalInstance.componentInstance as FilterBuilderModalComponent;
 
+    const component = modalInstance.componentInstance as FilterBuilderModalComponent;
     component.setFilter(this.filter, this.properties);
+
+    modalInstance.result.then(
+      (result: FilterGroup) => {
+        console.log(result);
+        this.filter = result;
+      },
+      dismissed => { }
+    );
   }
 }

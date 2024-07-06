@@ -18,7 +18,7 @@ export interface FilterGroup {
   conditions: (FilterCondition | FilterGroup)[];
 }
 
-export type FilterType = 'datetime' | 'guid' | 'number' | 'string';
+export type FilterType = 'boolean' | 'datetime' | 'guid' | 'number' | 'string';
 
 export interface FilterProperty {
   name: string;
@@ -29,9 +29,10 @@ export interface FilterProperty {
 
 export type FilterPropertyOperator = 'equals' | 'not_equals' | 'greater' | 'greater_equals'
   | 'less' | 'less_equals' | 'starts_with' | 'ends_with' | 'contains' | 'not_contains'
-  | 'null' | 'not_null';
+  | 'true' | 'false' | 'null' | 'not_null';
 
 export const defaultOperators: { [key in FilterType]: FilterPropertyOperator[] } = {
+  boolean: ['true', 'false', 'null', 'not_null'],
   datetime: ['equals', 'not_equals', 'greater_equals', 'less_equals', 'null', 'not_null'],
   guid: ['equals', 'not_equals', 'null', 'not_null'],
   number: ['equals', 'not_equals', 'greater', 'greater_equals', 'less', 'less_equals', 'null', 'not_null'],
@@ -42,6 +43,7 @@ export const showInput: { [key in FilterPropertyOperator]: boolean } = {
   contains: true,
   ends_with: true,
   equals: true,
+  false: false,
   greater: true,
   greater_equals: true,
   less: true,
@@ -51,64 +53,89 @@ export const showInput: { [key in FilterPropertyOperator]: boolean } = {
   not_null: false,
   null: false,
   starts_with: true,
+  true: false,
 }
 
 export const displayText: { [key in FilterType]: { [key in FilterPropertyOperator]: string } } = {
+  boolean: {
+    contains: '',
+    ends_with: '',
+    equals: '',
+    false: 'is false',
+    greater: '',
+    greater_equals: '',
+    less: '',
+    less_equals: '',
+    not_contains: '',
+    not_equals: '',
+    not_null: 'is not null',
+    null: 'is null',
+    starts_with: '',
+    true: 'is true',
+  },
   datetime: {
     contains: '',
     ends_with: '',
-    equals: 'At',
+    equals: 'at',
+    false: '',
     greater: '',
-    greater_equals: 'After',
+    greater_equals: 'after',
     less: '',
-    less_equals: 'Before',
+    less_equals: 'before',
     not_contains: '',
-    not_equals: 'Not at',
-    not_null: 'Is not null',
-    null: 'Is null',
+    not_equals: 'not at',
+    not_null: 'is not null',
+    null: 'is null',
     starts_with: '',
+    true: '',
   },
   guid: {
     contains: '',
     ends_with: '',
-    equals: 'Equals',
+    equals: 'equals',
+    false: '',
     greater: '',
     greater_equals: '',
     less: '',
     less_equals: '',
     not_contains: '',
-    not_equals: 'Does not equal',
-    not_null: 'Is not null',
-    null: 'Is null',
+    not_equals: 'does not equal',
+    not_null: 'is not null',
+    null: 'is null',
     starts_with: '',
+    true: '',
   },
   number: {
     contains: '',
     ends_with: '',
-    equals: 'Is equal to',
-    greater: 'Greater than',
-    greater_equals: 'Greater than or equal to',
-    less: 'Less than',
-    less_equals: 'Less than or equal to',
+    equals: 'is equal to',
+    false: '',
+    greater: 'greater than',
+    greater_equals: 'greater than or equal to',
+    less: 'less than',
+    less_equals: 'less than or equal to',
     not_contains: '',
-    not_equals: 'Does not equal',
-    not_null: 'Is not null',
-    null: 'Is null',
+    not_equals: 'does not equal',
+    not_null: 'is not null',
+    null: 'is null',
     starts_with: '',
+    true: '',
   },
   string: {
-    contains: 'Contains',
-    ends_with: 'Ends with',
-    equals: 'Is equal to',
+    contains: 'contains',
+    ends_with: 'ends with',
+    equals: 'is equal to',
+    false: '',
     greater: '',
     greater_equals: '',
     less: '',
     less_equals: '',
-    not_contains: 'Does not contain',
-    not_equals: 'Does not equal',
-    not_null: 'Is not null',
-    null: 'Is null',
-    starts_with: 'Starts with',
+    not_contains: 'does not contain',
+    not_equals: 'does not equal',
+    not_null: 'is not null',
+    null: 'is null',
+    starts_with: 'starts with',
+    true: '',
   },
 }
 
