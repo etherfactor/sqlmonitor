@@ -1,0 +1,17 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Editing Filters
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="$activeModal.dismiss()" data-testid="x-button"></button>
+</div>
+<div class="modal-body">
+  <ng-container *ngIf="filter">
+    <filter-builder-group [root]="true"
+                          [filter]="filter"
+                          [properties]="properties"></filter-builder-group>
+  </ng-container>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="$activeModal.dismiss()" data-testid="cancel-button"><span class="bi bi-x-lg"></span> Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="trySubmit()" data-testid="delete-button"><span class="bi bi-trash"></span> OK</button>
+</div>

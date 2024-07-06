@@ -6,11 +6,7 @@
 
 <div class="top-spacer"></div>
 
-<filter-builder [filter]="filterForm"
-                [properties]="[
-                { name: 'name', displayName: 'Name', type: 'string' },
-                { name: 'createdAt', displayName: 'Created at', type: 'datetime' }
-                ]"></filter-builder>
+<button class="btn btn-primary" (click)="openFilters()">Filters...</button>
 
 <app-table [data]="records">
   <ng-template #headers>

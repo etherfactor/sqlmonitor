@@ -1,5 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { FormArray, FormBuilder } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { FormArray, FormBuilder, Validators } from '@angular/forms';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { DefaultControlTypes, TypedFormGroup, formFactoryForModel } from '../../utilities/form/form.util';
 import { FilterBuilderGroupComponent } from '../filter-builder-group/filter-builder-group.component';
 
@@ -116,7 +118,7 @@ export function isFilterGroup(condition: FilterCondition | FilterGroup): conditi
 
 export const filterGroupForm = formFactoryForModel<FilterGroup, DefaultControlTypes>(($form, model) => {
   return {
-    operator: [model.operator],
+    operator: [model.operator, Validators.required],
     conditions: $form.nonNullable.array(model.conditions.map(item => {
       if (isFilterGroup(item)) {
         const subForm: TypedFormGroup<FilterGroup, DefaultControlTypes> = filterGroupForm($form, item);
@@ -131,9 +133,9 @@ export const filterGroupForm = formFactoryForModel<FilterGroup, DefaultControlTy
 
 export const filterConditionForm = formFactoryForModel<FilterCondition, DefaultControlTypes>(($form: FormBuilder, model: FilterCondition) => {
   return {
-    operator: [model.operator],
-    property: [model.property],
-    value: [model.value],
+    operator: [model.operator, Validators.required],
+    property: [model.property, Validators.required],
+    value: [model.value, Validators.required],
   };
 });
 
@@ -145,14 +147,43 @@ export function isFilterGroupForm(condition: TypedFormGroup<FilterCondition, Def
   selector: 'filter-builder',
   standalone: true,
   imports: [
+    CommonModule,
     FilterBuilderGroupComponent,
   ],
-  templateUrl: './filter-builder.component.html',
-  styleUrl: './filter-builder.component.scss'
+  templateUrl: './filter-builder-modal.component.html',
+  styleUrl: './filter-builder-modal.component.scss'
 })
-export class FilterBuilderComponent {
+export class FilterBuilderModalComponent {
 
-  @Input({ required: true }) filter!: TypedFormGroup<FilterGroup>;
+  readonly $activeModal: NgbActiveModal;
+  private readonly $form: FormBuilder;
 
-  @Input({ required: true }) properties!: FilterProperty[];
+  filter?: TypedFormGroup<FilterGroup>;
+
+  properties: FilterProperty[] = [];
+
+  constructor(
+    $activeModal: NgbActiveModal,
+    $form: FormBuilder,
+  ) {
+    this.$activeModal = $activeModal;
+    this.$form = $form;
+  }
+
+  setFilter(filter: FilterGroup, properties: FilterProperty[]) {
+    this.filter = filterGroupForm(this.$form, filter);
+    this.properties = properties;
+  }
+
+  trySubmit() {
+    if (!this.filter)
+      return;
+
+    if (this.filter.invalid) {
+      this.filter.markAllAsTouched();
+      return;
+    }
+
+    this.$activeModal.close(this.filter.value);
+  }
 }

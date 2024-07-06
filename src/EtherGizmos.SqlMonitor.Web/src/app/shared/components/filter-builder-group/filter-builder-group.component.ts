@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { Subscription } from 'rxjs';
 import { DefaultControlTypes, TypedFormGroup } from '../../utilities/form/form.util';
-import { FilterCondition, FilterGroup, FilterProperty, FilterPropertyOperator, defaultOperators, displayText, filterConditionForm, filterGroupForm, isFilterGroupForm } from '../filter-builder/filter-builder.component';
+import { FilterCondition, FilterGroup, FilterProperty, FilterPropertyOperator, defaultOperators, displayText, filterConditionForm, filterGroupForm, isFilterGroupForm, showInput } from '../filter-builder-modal/filter-builder-modal.component';
 import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon-datetime.component';
 
 @Component({
@@ -19,7 +20,7 @@ import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon
   templateUrl: './filter-builder-group.component.html',
   styleUrl: './filter-builder-group.component.scss'
 })
-export class FilterBuilderGroupComponent {
+export class FilterBuilderGroupComponent implements OnChanges {
 
   private readonly $form: FormBuilder;
 
@@ -29,10 +30,45 @@ export class FilterBuilderGroupComponent {
 
   @Input({ required: true }) properties!: FilterProperty[];
 
+  private filterSubscriptions: Subscription[] = [];
+
   constructor(
     $form: FormBuilder,
   ) {
     this.$form = $form;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filter']) {
+      for (const sub of this.filterSubscriptions) {
+        sub.unsubscribe();
+      }
+      this.filterSubscriptions = [];
+
+      const newFilter = changes['filter'].currentValue as TypedFormGroup<FilterCondition, DefaultControlTypes> | TypedFormGroup<FilterGroup, DefaultControlTypes>;
+      if (!isFilterGroupForm(newFilter)) {
+        const propertySub = newFilter.controls.property.valueChanges.subscribe(() => {
+          const operator = newFilter.controls.operator;
+          operator.setValue(undefined);
+          operator.updateValueAndValidity();
+        });
+        this.filterSubscriptions.push(propertySub);
+
+        const operatorSub = newFilter.controls.operator.valueChanges.subscribe(operator => {
+          const value = newFilter.controls.value;
+          value.setValue(undefined);
+
+          if (operator === 'null' || operator === 'not_null') {
+            value.setValidators([]);
+          } else {
+            value.setValidators([Validators.required]);
+          }
+
+          value.updateValueAndValidity();
+        });
+        this.filterSubscriptions.push(operatorSub);
+      }
+    }
   }
 
   get conditions() {
@@ -69,6 +105,11 @@ export class FilterBuilderGroupComponent {
   getOperatorDisplayName(operator: FilterPropertyOperator) {
     const property = this.selectedProperty;
     return displayText[property?.type ?? 'string'][operator];
+  }
+
+  showOperatorValue() {
+    const condition = this.asFilterCondition(this.filter);
+    return showInput[condition.controls.operator.value ?? '' as FilterPropertyOperator] ?? false;
   }
 
   addGroup() {

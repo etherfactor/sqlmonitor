@@ -2,8 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
-import { FilterBuilderComponent, FilterGroup, filterGroupForm } from '../../../../shared/components/filter-builder/filter-builder.component';
+import { FilterBuilderModalComponent, FilterGroup, FilterProperty, filterGroupForm } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { MonitoredSystem } from '../../../../shared/models/monitored-system';
 import { generateGuid } from '../../../../shared/types/guid/guid';
@@ -14,7 +15,7 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
   standalone: true,
   imports: [
     CommonModule,
-    FilterBuilderComponent,
+    FilterBuilderModalComponent,
     RouterModule,
     TableComponent,
   ],
@@ -24,8 +25,12 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
 export class MonitoredSystemListComponent {
 
   private readonly $form: FormBuilder;
+  private readonly $modal: NgbModal;
 
   filterForm: TypedFormGroup<FilterGroup, DefaultControlTypes>;
+
+  filter: FilterGroup;
+  properties: FilterProperty[];
 
   records: MonitoredSystem[] = [
     {
@@ -42,22 +47,30 @@ export class MonitoredSystemListComponent {
 
   constructor(
     $form: FormBuilder,
+    $modal: NgbModal,
   ) {
     this.$form = $form;
+    this.$modal = $modal;
 
-    const newFilter: FilterGroup = {
+    this.filter = {
       operator: 'and',
       conditions: [
-        { property: 'name', operator: 'starts_with', value: 'A' },
-        {
-          operator: 'or', conditions: [
-            { property: 'name', operator: 'equals', value: 'A' },
-            { property: 'name', operator: 'not_equals', value: 'B' }
-          ]
-        }
+        { property: undefined!, operator: undefined!, value: undefined! },
       ]
     };
 
-    this.filterForm = filterGroupForm(this.$form, newFilter);
+    this.properties = [
+      { name: 'name', displayName: 'Name', type: 'string' },
+      { name: 'createdAt', displayName: 'Created at', type: 'datetime' }
+    ];
+
+    this.filterForm = filterGroupForm(this.$form, this.filter);
+  }
+
+  openFilters() {
+    const modalInstance = this.$modal.open(FilterBuilderModalComponent, { size: 'lg', centered: true, backdrop: 'static', keyboard: false });
+    const component = modalInstance.componentInstance as FilterBuilderModalComponent;
+
+    component.setFilter(this.filter, this.properties);
   }
 }
