@@ -6,9 +6,17 @@
     width: 12px;
     background-color: var(--bs-body-color);
     content: '';
-    position: relative;
+    position: absolute;
     left: -15px;
     top: 20px;
     display: block;
   }
+}
+
+.container-fluid {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.row > * {
 }
