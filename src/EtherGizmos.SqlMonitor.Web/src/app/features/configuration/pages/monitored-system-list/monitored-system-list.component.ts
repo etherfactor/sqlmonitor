@@ -7,7 +7,7 @@ import { DateTime } from 'luxon';
 import { FilterBuilderModalComponent, FilterGroup, FilterProperty, filterGroupForm } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { MonitoredSystem } from '../../../../shared/models/monitored-system';
-import { generateGuid } from '../../../../shared/types/guid/guid';
+import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 
 @Component({
@@ -34,12 +34,12 @@ export class MonitoredSystemListComponent {
 
   records: MonitoredSystem[] = [
     {
-      id: generateGuid(),
+      id: 'fca5315f-6e2f-4a78-baac-bdb061e6d8fc' as Guid,
       createdAt: DateTime.now(),
       createdByUserId: generateGuid(),
       modifiedAt: undefined,
       modifiedByUserId: undefined,
-      name: 'Test',
+      name: 'Example System',
       description: 'Desc',
       isActive: true,
     }

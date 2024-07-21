@@ -86,4 +86,14 @@ $ng-select-height: 38px;
       width: auto;
     }
   }
+
+  &.plaintext {
+    > .ng-select-container {
+      border-color: transparent !important;
+
+      > .ng-arrow-wrapper {
+        opacity: 0;
+      }
+    }
+  }
 }

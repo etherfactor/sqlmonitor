@@ -30,7 +30,8 @@
           <ng-select id="systemIsActive"
                      formControlName="isActive"
                      [clearable]="false"
-                     [selectOnTab]="true">
+                     [selectOnTab]="true"
+                     [class]="isEditing ? '' : 'plaintext'">
             <ng-option [value]="true">Active</ng-option>
             <ng-option [value]="false">Inactive</ng-option>
           </ng-select>
