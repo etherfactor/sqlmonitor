@@ -1,0 +1,10 @@
+<div class="container-fluid p-0">
+  <div class="row">
+    <div class="col">
+      <ng-content></ng-content>
+    </div>
+    <div class="col-auto">
+      <span class="bi" [class]="direction === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill'" [style]="direction ? { opacity: 1 } : { opacity: 0 }"></span>
+    </div>
+  </div>
+</div>

@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
 import { FilterBuilderModalComponent, FilterGroup, FilterProperty, filterGroupForm } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
+import { TableSortHeaderComponent } from '../../../../shared/components/table-sort-header/table-sort-header.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { MonitoredSystem } from '../../../../shared/models/monitored-system';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
@@ -18,6 +19,7 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
     FilterBuilderModalComponent,
     RouterModule,
     TableComponent,
+    TableSortHeaderComponent,
   ],
   templateUrl: './monitored-system-list.component.html',
   styleUrl: './monitored-system-list.component.scss'

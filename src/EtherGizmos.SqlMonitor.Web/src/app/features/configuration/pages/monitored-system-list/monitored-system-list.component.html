@@ -6,13 +6,24 @@
 
 <div class="top-spacer"></div>
 
-<button class="btn btn-primary" (click)="openFilters()">Filters...</button>
+<div class="input-group">
+  <div class="floating-label">
+    <input id="search" type="text" class="form-control" placeholder=" " />
+    <label for="search">Name</label>
+  </div>
+  <button class="btn btn-primary">
+    <span class="bi bi-search"></span>
+  </button>
+  <button class="btn btn-primary" (click)="openFilters()">
+    <span class="bi bi-caret-down-fill"></span>
+  </button>
+</div>
 
 <app-table [data]="records">
   <ng-template #headers>
-    <th>Name</th>
-    <th>Active?</th>
-    <th>Created at</th>
+    <th app-table-sort-header>Name</th>
+    <th app-table-sort-header>Active?</th>
+    <th app-table-sort-header>Created at</th>
     <th>Actions</th>
   </ng-template>
 
