@@ -6,7 +6,7 @@
 
 <div class="top-spacer"></div>
 
-<div class="input-group">
+<!--<div class="input-group">
   <div class="floating-label">
     <input id="search" type="text" class="form-control" placeholder=" " />
     <label for="search">Name</label>
@@ -17,13 +17,13 @@
   <button class="btn btn-primary" (click)="openFilters()">
     <span class="bi bi-caret-down-fill"></span>
   </button>
-</div>
+</div>-->
 
 <app-table [data]="records">
   <ng-template #headers>
-    <th app-table-sort-header>Name</th>
-    <th app-table-sort-header>Active?</th>
-    <th app-table-sort-header>Created at</th>
+    <th app-table-header="name" type="string" [sortable]="true" [filterable]="true">Name</th>
+    <th app-table-header="isActive" type="boolean" [sortable]="true" [filterable]="true">Active?</th>
+    <th app-table-header="createdAt" type="datetime" [sortable]="true" [filterable]="true">Created at</th>
     <th>Actions</th>
   </ng-template>
 

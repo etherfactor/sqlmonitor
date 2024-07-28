@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
 import { FilterBuilderModalComponent, FilterGroup, FilterProperty, filterGroupForm } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
-import { TableSortHeaderComponent } from '../../../../shared/components/table-sort-header/table-sort-header.component';
+import { TableHeaderComponent } from '../../../../shared/components/table-header/table-header.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { MonitoredSystem } from '../../../../shared/models/monitored-system';
+import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
+import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 
@@ -19,15 +21,17 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
     FilterBuilderModalComponent,
     RouterModule,
     TableComponent,
-    TableSortHeaderComponent,
+    TableHeaderComponent,
   ],
   templateUrl: './monitored-system-list.component.html',
   styleUrl: './monitored-system-list.component.scss'
 })
-export class MonitoredSystemListComponent {
+export class MonitoredSystemListComponent implements OnInit {
 
+  private readonly $body: BodyService;
   private readonly $form: FormBuilder;
   private readonly $modal: NgbModal;
+  private readonly $navbarMenu: NavbarMenuService;
 
   filterForm: TypedFormGroup<FilterGroup, DefaultControlTypes>;
 
@@ -48,11 +52,15 @@ export class MonitoredSystemListComponent {
   ];
 
   constructor(
+    $body: BodyService,
     $form: FormBuilder,
     $modal: NgbModal,
+    $navbarMenu: NavbarMenuService,
   ) {
+    this.$body = $body;
     this.$form = $form;
     this.$modal = $modal;
+    this.$navbarMenu = $navbarMenu;
 
     this.filter = {
       operator: 'and',
@@ -75,6 +83,12 @@ export class MonitoredSystemListComponent {
     this.filterForm = filterGroupForm(this.$form, this.filter);
   }
 
+  ngOnInit(): void {
+    this.$body.setContainer(BodyContainerType.Normal);
+    this.updateBreadcrumbs();
+    this.updateActions();
+  }
+
   openFilters() {
     const modalInstance = this.$modal.open(FilterBuilderModalComponent, { size: 'lg', centered: true, backdrop: 'static', keyboard: false });
 
@@ -88,5 +102,27 @@ export class MonitoredSystemListComponent {
       },
       dismissed => { }
     );
+  }
+
+  private updateBreadcrumbs() {
+    this.$navbarMenu.setBreadcrumbs([
+      {
+        label: 'Home',
+        link: '/',
+      },
+      {
+        label: 'Monitored Systems',
+        link: '/monitored-systems',
+      },
+    ]);
+  }
+
+  private updateActions() {
+    this.$navbarMenu.setActions([
+      {
+        icon: 'bi-plus-square',
+        label: 'Add',
+      },
+    ]);
   }
 }

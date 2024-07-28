@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ContentChild, Input, TemplateRef } from '@angular/core';
+import { SortTableService } from '../../services/sort-table/sort-table.service';
+import { generateGuid } from '../../types/guid/guid';
 
 @Component({
   selector: 'app-table',
@@ -17,6 +19,16 @@ export class TableComponent<TData extends object> {
   @ContentChild('headers') headers!: TemplateRef<any>;
 
   @ContentChild('rows') rows!: TemplateRef<any>;
+
+  private readonly $sortTable: SortTableService;
+
+  id = generateGuid();
+
+  constructor(
+    $sortTable: SortTableService,
+  ) {
+    this.$sortTable = $sortTable;
+  }
 
   getDefaultHeaders(): string[] {
     if (this.data[0]) {
