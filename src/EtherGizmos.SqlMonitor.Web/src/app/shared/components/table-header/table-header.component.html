@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col">
       <ng-container *ngIf="sortable; else notSortableContent">
-        <a href="javascript:void(0);" (click)="onClick()">
+        <a href="javascript:void(0);" (click)="onClick()" class="d-inline-block w-100">
           <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
       </ng-container>
@@ -14,9 +14,15 @@
       <span class="bi" [class]="direction === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill'" [style]="direction ? { opacity: 1 } : { opacity: 0 }"></span>
     </div>
     <div class="col-auto" *ngIf="filterable" ngbDropdown placement="bottom-end" autoClose="outside">
-      <a href="javascript:void(0);" class="bi bi-funnel" ngbDropdownToggle (click)="stopPropagation($event)"></a>
-      <div ngbDropdownMenu aria-labelledby="dropdownBasic1" (click)="stopPropagation($event)">
+      <a href="javascript:void(0);" class="bi" [class]="getFilterCondition() ? 'bi-funnel-fill' : 'bi-funnel'" ngbDropdownToggle (click)="stopPropagation($event)"></a>
+      <div ngbDropdownMenu aria-labelledby="dropdownBasic1" (click)="stopPropagation($event)" [formGroup]="filterForm">
         <div ngbDropdownItem style="width: 240px;">
+          <ng-select formControlName="operator"
+                     [selectOnTab]="true">
+            <ng-option *ngFor="let operator of getOperators()" [value]="operator">{{getOperatorDisplayName(operator)}}</ng-option>
+          </ng-select>
+        </div>
+        <div ngbDropdownItem style="width: 240px;" *ngIf="showOperatorValue()">
           <ng-container [ngSwitch]="type ?? 'string'">
             <input-luxon-datetime *ngSwitchCase="'datetime'" formControlName="value"></input-luxon-datetime>
             <input *ngSwitchCase="'guid'" type="text" mask="XXXXXXXX-XXXX-4XXX-8XXX-XXXXXXXXXXXX" [patterns]="guidPatterns" class="form-control" formControlName="value" />
