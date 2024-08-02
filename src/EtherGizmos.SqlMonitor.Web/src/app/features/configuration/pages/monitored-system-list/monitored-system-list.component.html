@@ -19,7 +19,7 @@
   </button>
 </div>-->
 
-<app-table [data]="records">
+<app-table [data]="records" (filterChange)="onFilterChange($event)">
   <ng-template #headers>
     <th app-table-header="name" type="string" [sortable]="true" [filterable]="true">Name</th>
     <th app-table-header="isActive" type="boolean" [sortable]="true" [filterable]="true">Active?</th>

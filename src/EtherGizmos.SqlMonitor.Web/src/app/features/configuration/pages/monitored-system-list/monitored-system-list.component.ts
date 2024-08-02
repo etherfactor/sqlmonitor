@@ -11,6 +11,7 @@ import { MonitoredSystem } from '../../../../shared/models/monitored-system';
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
+import { FilterColumnCondition } from '../../../../shared/utilities/filter/filter.util';
 import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
 
 @Component({
@@ -124,5 +125,9 @@ export class MonitoredSystemListComponent implements OnInit {
         label: 'Add',
       },
     ]);
+  }
+
+  onFilterChange(filters: FilterColumnCondition[]) {
+    console.log(filters);
   }
 }

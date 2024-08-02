@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, Input, TemplateRef } from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
+import { isEqual } from 'moderndash';
+import { Observable, Subscription, combineLatest, debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { SortTableService } from '../../services/sort-table/sort-table.service';
 import { generateGuid } from '../../types/guid/guid';
+import { FilterColumnCondition, FilterCondition } from '../../utilities/filter/filter.util';
 
 @Component({
   selector: 'app-table',
@@ -20,6 +23,10 @@ export class TableComponent<TData extends object> {
 
   @ContentChild('rows') rows!: TemplateRef<any>;
 
+  private filters: { [name: string]: Observable<FilterColumnCondition> } = {};
+  private filterSubscription?: Subscription;
+  @Output() filterChange = new EventEmitter<FilterColumnCondition[]>();
+
   private readonly $sortTable: SortTableService;
 
   id = generateGuid();
@@ -37,5 +44,37 @@ export class TableComponent<TData extends object> {
     } else {
       return [];
     }
+  }
+
+  bindFilter(name: string, filter: Observable<FilterCondition>) {
+    this.filters[name] = filter.pipe(
+      startWith({ column: name, operator: undefined, value: undefined }),
+      map(item => ({ column: name, ...item })),
+    );
+
+    this.regenerateFilters();
+  }
+
+  unbindFilter(name: string) {
+    delete this.filters[name];
+
+    this.regenerateFilters();
+  }
+
+  regenerateFilters() {
+    this.filterSubscription?.unsubscribe();
+    this.filterSubscription = undefined;
+
+    const observables = Object.keys(this.filters)
+      .map(key => this.filters[key].pipe(
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+      ));
+
+    this.filterSubscription = combineLatest(observables).pipe(
+      debounceTime(0),
+      map(filters => filters.filter(item => item.operator)),
+    ).subscribe(value => {
+      this.filterChange.emit(value);
+    });
   }
 }

@@ -4,11 +4,11 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgxMaskDirective } from 'ngx-mask';
-import { Subscription } from 'rxjs';
+import { Subscription, map } from 'rxjs';
 import { SortTableService } from '../../services/sort-table/sort-table.service';
 import { generateGuid } from '../../types/guid/guid';
 import { FilterCondition, FilterPropertyOperator, FilterType, defaultOperators, displayText, filterConditionForm, showInput } from '../../utilities/filter/filter.util';
-import { TypedFormGroup } from '../../utilities/form/form.util';
+import { DefaultControlTypes, TypedFormGroup } from '../../utilities/form/form.util';
 import { Direction } from '../../utilities/odata/odata.util';
 import { InputLuxonDatetimeComponent } from '../input-luxon-datetime/input-luxon-datetime.component';
 import { TableComponent } from '../table/table.component';
@@ -49,7 +49,7 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
 
   private id = generateGuid();
 
-  filterForm: TypedFormGroup<FilterCondition>;
+  filterForm: TypedFormGroup<FilterCondition, DefaultControlTypes>;
   filterSubscriptions: Subscription[] = [];
 
   get direction() {
@@ -86,9 +86,7 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
     if (this.table) {
       this.id = this.table.id;
     }
-  }
 
-  ngOnChanges(changes: SimpleChanges): void {
     const condition = this.filterForm;
     const operatorSub = condition.controls.operator.valueChanges.subscribe(operator => {
       const value = condition.controls.value;
@@ -104,6 +102,18 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
     });
 
     this.filterSubscriptions.push(operatorSub);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["name"]) {
+      const name = changes["name"];
+      this.table.unbindFilter(name.previousValue);
+
+      const filter = this.filterForm.valueChanges.pipe(
+        map(() => this.getFilterCondition() as FilterCondition ?? { operator: undefined, value: undefined }),
+      );
+      this.table.bindFilter(name.currentValue, filter);
+    }
   }
 
   ngOnDestroy(): void {

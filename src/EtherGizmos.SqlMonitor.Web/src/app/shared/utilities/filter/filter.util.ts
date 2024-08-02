@@ -1,11 +1,16 @@
 import { FormBuilder, Validators } from "@angular/forms";
+import { Guid } from "../../types/guid/guid";
 import { DefaultControlTypes, formFactoryForModel } from "../form/form.util";
 
 export type FilterOperator = 'and' | 'or';
 
 export interface FilterCondition {
-  operator: FilterPropertyOperator;
-  value: any;
+  operator: FilterPropertyOperator | undefined;
+  value: string | number | Guid | undefined;
+}
+
+export interface FilterColumnCondition extends FilterCondition {
+  column: string;
 }
 
 export type FilterType = 'boolean' | 'datetime' | 'guid' | 'number' | 'string';
