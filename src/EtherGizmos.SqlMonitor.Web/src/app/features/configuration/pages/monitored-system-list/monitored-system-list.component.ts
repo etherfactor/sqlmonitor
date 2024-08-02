@@ -121,6 +121,10 @@ export class MonitoredSystemListComponent implements OnInit {
   private updateActions() {
     this.$navbarMenu.setActions([
       {
+        icon: 'bi-layout-three-columns',
+        label: 'Edit Columns',
+      },
+      {
         icon: 'bi-plus-square',
         label: 'Add',
       },
