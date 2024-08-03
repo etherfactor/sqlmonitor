@@ -1,18 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
-import { FilterBuilderModalComponent, FilterGroup, FilterProperty, filterGroupForm } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
+import { ListComponent, TableColumn } from '../../../../shared/components/_base/list/list.component';
+import { FilterBuilderModalComponent } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
 import { TableHeaderComponent } from '../../../../shared/components/table-header/table-header.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { MonitoredSystem } from '../../../../shared/models/monitored-system';
-import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
-import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
+import { BodyService } from '../../../../shared/services/body/body.service';
+import { MonitoredSystemService } from '../../../../shared/services/monitored-system/monitored-system.service';
+import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
-import { FilterColumnCondition } from '../../../../shared/utilities/filter/filter.util';
-import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';
+import { Bound } from '../../../../shared/utilities/bound/bound.util';
+import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
 
 @Component({
   selector: 'app-monitored-system-list',
@@ -27,17 +29,10 @@ import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilitie
   templateUrl: './monitored-system-list.component.html',
   styleUrl: './monitored-system-list.component.scss'
 })
-export class MonitoredSystemListComponent implements OnInit {
+export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem> implements OnInit {
 
-  private readonly $body: BodyService;
-  private readonly $form: FormBuilder;
-  private readonly $modal: NgbModal;
-  private readonly $navbarMenu: NavbarMenuService;
-
-  filterForm: TypedFormGroup<FilterGroup, DefaultControlTypes>;
-
-  filter: FilterGroup;
-  properties: FilterProperty[];
+  private readonly $monitoredSystem: MonitoredSystemService;
+  private readonly $router: Router;
 
   records: MonitoredSystem[] = [
     {
@@ -56,21 +51,48 @@ export class MonitoredSystemListComponent implements OnInit {
     $body: BodyService,
     $form: FormBuilder,
     $modal: NgbModal,
+    $monitoredSystem: MonitoredSystemService,
     $navbarMenu: NavbarMenuService,
+    $router: Router,
   ) {
-    this.$body = $body;
-    this.$form = $form;
-    this.$modal = $modal;
-    this.$navbarMenu = $navbarMenu;
+    super($body, $form, $modal, $navbarMenu);
+    this.$monitoredSystem = $monitoredSystem;
+    this.$router = $router;
+  }
 
-    this.filter = {
-      operator: 'and',
-      conditions: [
-        { property: undefined!, operator: undefined!, value: undefined! },
-      ]
-    };
+  protected override get actions(): NavbarMenuAction[] {
+    const actions: NavbarMenuAction[] = [
+      {
+        icon: 'bi-layout-three-columns',
+        label: 'Edit Columns',
+      },
+      {
+        icon: 'bi-plus-square',
+        label: 'Add',
+        callback: this.new,
+      },
+    ];
 
-    this.properties = [
+    return actions;
+  }
+
+  protected override get breadcrumbs(): NavbarMenuBreadcrumb[] {
+    const breadcrumbs: NavbarMenuBreadcrumb[] = [
+      {
+        label: 'Home',
+        link: '/',
+      },
+      {
+        label: 'Monitored Systems',
+        link: '/monitored-systems',
+      },
+    ];
+
+    return breadcrumbs;
+  }
+
+  protected override get columns() {
+    const columns: TableColumn[] = [
       { name: 'id', displayName: 'Id', type: 'guid' },
       { name: 'name', displayName: 'Name', type: 'string' },
       { name: 'description', displayName: 'Description', type: 'string' },
@@ -81,57 +103,14 @@ export class MonitoredSystemListComponent implements OnInit {
       { name: 'modifiedByUserId', displayName: 'Modified by user id', type: 'guid' },
     ];
 
-    this.filterForm = filterGroupForm(this.$form, this.filter);
+    return columns;
   }
 
-  ngOnInit(): void {
-    this.$body.setContainer(BodyContainerType.Normal);
-    this.updateBreadcrumbs();
-    this.updateActions();
+  protected override getEntitySet(): EntitySet<MonitoredSystem> {
+    return this.$monitoredSystem.set;
   }
 
-  openFilters() {
-    const modalInstance = this.$modal.open(FilterBuilderModalComponent, { size: 'lg', centered: true, backdrop: 'static', keyboard: false });
-
-    const component = modalInstance.componentInstance as FilterBuilderModalComponent;
-    component.setFilter(this.filter, this.properties);
-
-    modalInstance.result.then(
-      (result: FilterGroup) => {
-        console.log(result);
-        this.filter = result;
-      },
-      dismissed => { }
-    );
-  }
-
-  private updateBreadcrumbs() {
-    this.$navbarMenu.setBreadcrumbs([
-      {
-        label: 'Home',
-        link: '/',
-      },
-      {
-        label: 'Monitored Systems',
-        link: '/monitored-systems',
-      },
-    ]);
-  }
-
-  private updateActions() {
-    this.$navbarMenu.setActions([
-      {
-        icon: 'bi-layout-three-columns',
-        label: 'Edit Columns',
-      },
-      {
-        icon: 'bi-plus-square',
-        label: 'Add',
-      },
-    ]);
-  }
-
-  onFilterChange(filters: FilterColumnCondition[]) {
-    console.log(filters);
+  @Bound new() {
+    this.$router.navigate(['/monitored-system/new']);
   }
 }

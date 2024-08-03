@@ -4,7 +4,9 @@ import { isEqual } from 'moderndash';
 import { Observable, Subscription, combineLatest, debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { SortTableService } from '../../services/sort-table/sort-table.service';
 import { generateGuid } from '../../types/guid/guid';
-import { FilterColumnCondition, FilterCondition } from '../../utilities/filter/filter.util';
+import { FilterColumnCondition, FilterCondition, FilterType } from '../../utilities/filter/filter.util';
+import { Direction } from '../../utilities/odata/odata.util';
+import { SortColumn } from '../../utilities/sort/sort.util';
 
 @Component({
   selector: 'app-table',
@@ -22,6 +24,9 @@ export class TableComponent<TData extends object> {
   @ContentChild('headers') headers!: TemplateRef<any>;
 
   @ContentChild('rows') rows!: TemplateRef<any>;
+
+  private sort?: SortColumn;
+  @Output() sortChange = new EventEmitter<SortColumn>();
 
   private filters: { [name: string]: Observable<FilterColumnCondition> } = {};
   private filterSubscription?: Subscription;
@@ -46,10 +51,23 @@ export class TableComponent<TData extends object> {
     }
   }
 
-  bindFilter(name: string, filter: Observable<FilterCondition>) {
+  getSortDirection(column: string): Direction | undefined {
+    if (this.sort?.column === column) {
+      return this.sort.direction;
+    } else {
+      return undefined;
+    }
+  }
+
+  setSortDirection(column: string, sorting: SortColumn | undefined) {
+    this.sort = sorting;
+    this.sortChange.emit(this.sort);
+  }
+
+  bindFilter(name: string, type: FilterType, filter: Observable<FilterCondition>) {
     this.filters[name] = filter.pipe(
-      startWith({ column: name, operator: undefined, value: undefined }),
-      map(item => ({ column: name, ...item })),
+      startWith({ column: name, type: type, operator: undefined, value: undefined }),
+      map(item => ({ column: name, type: type, ...item })),
     );
 
     this.regenerateFilters();

@@ -53,14 +53,20 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
   filterSubscriptions: Subscription[] = [];
 
   get direction() {
-    return this.$sortTable.getSortDirection(this.id, this.name);
+    //return this.$sortTable.getSortDirection(this.id, this.name);
+    return this.table.getSortDirection(this.name);
   }
 
   set direction(value: Direction | undefined) {
+    //if (value) {
+    //  this.$sortTable.setSortDirection(this.id, { column: this.name, direction: value });
+    //} else {
+    //  this.$sortTable.setSortDirection(this.id, undefined);
+    //}
     if (value) {
-      this.$sortTable.setSortDirection(this.id, { column: this.name, direction: value });
+      this.table.setSortDirection(this.name, { column: this.name, direction: value });
     } else {
-      this.$sortTable.setSortDirection(this.id, undefined);
+      this.table.setSortDirection(this.name, undefined);
     }
   }
 
@@ -112,7 +118,7 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
       const filter = this.filterForm.valueChanges.pipe(
         map(() => this.getFilterCondition() as FilterCondition ?? { operator: undefined, value: undefined }),
       );
-      this.table.bindFilter(name.currentValue, filter);
+      this.table.bindFilter(name.currentValue, this.type ?? 'string', filter);
     }
   }
 

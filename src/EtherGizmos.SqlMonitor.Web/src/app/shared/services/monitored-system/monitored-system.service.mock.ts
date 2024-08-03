@@ -3,6 +3,8 @@ import { DateTime } from "luxon";
 import { Observable, delay, of, throwError } from "rxjs";
 import { MonitoredSystem } from "../../models/monitored-system";
 import { Guid, generateGuid } from "../../types/guid/guid";
+import { ɵEntitySet } from "../../utilities/odata/internal/entity-set";
+import { EntitySet } from "../../utilities/odata/odata.util";
 import { MonitoredSystemService } from "./monitored-system.service";
 
 const cache: { [key: Guid]: MonitoredSystem } = {};
@@ -32,6 +34,10 @@ class MockMonitoredSystemService extends MonitoredSystemService {
     return of({ ...maybeRecord }).pipe(
       delay(1000)
     );
+  }
+
+  override get set(): EntitySet<MonitoredSystem> {
+    return new ɵEntitySet.Implementation<MonitoredSystem>();
   }
 
   override search(): Observable<MonitoredSystem[]> {
