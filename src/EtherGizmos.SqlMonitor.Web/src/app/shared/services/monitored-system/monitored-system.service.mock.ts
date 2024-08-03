@@ -37,7 +37,9 @@ class MockMonitoredSystemService extends MonitoredSystemService {
   }
 
   override get set(): EntitySet<MonitoredSystem> {
-    return new ɵEntitySet.Implementation<MonitoredSystem>();
+    return new ɵEntitySet.MockImplementation<MonitoredSystem>(() => {
+      return Object.keys(cache).map(key => cache[key as Guid]);
+    });
   }
 
   override search(): Observable<MonitoredSystem[]> {

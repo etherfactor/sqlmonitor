@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DateTime } from 'luxon';
 import { ListComponent, TableColumn } from '../../../../shared/components/_base/list/list.component';
 import { FilterBuilderModalComponent } from '../../../../shared/components/filter-builder-modal/filter-builder-modal.component';
 import { TableHeaderComponent } from '../../../../shared/components/table-header/table-header.component';
@@ -12,7 +11,6 @@ import { MonitoredSystem } from '../../../../shared/models/monitored-system';
 import { BodyService } from '../../../../shared/services/body/body.service';
 import { MonitoredSystemService } from '../../../../shared/services/monitored-system/monitored-system.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
-import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
 
@@ -34,18 +32,18 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
   private readonly $monitoredSystem: MonitoredSystemService;
   private readonly $router: Router;
 
-  records: MonitoredSystem[] = [
-    {
-      id: 'fca5315f-6e2f-4a78-baac-bdb061e6d8fc' as Guid,
-      createdAt: DateTime.now(),
-      createdByUserId: generateGuid(),
-      modifiedAt: undefined,
-      modifiedByUserId: undefined,
-      name: 'Example System',
-      description: 'Desc',
-      isActive: true,
-    }
-  ];
+  //records: MonitoredSystem[] = [
+  //  {
+  //    id: 'fca5315f-6e2f-4a78-baac-bdb061e6d8fc' as Guid,
+  //    createdAt: DateTime.now(),
+  //    createdByUserId: generateGuid(),
+  //    modifiedAt: undefined,
+  //    modifiedByUserId: undefined,
+  //    name: 'Example System',
+  //    description: 'Desc',
+  //    isActive: true,
+  //  }
+  //];
 
   constructor(
     $body: BodyService,
@@ -58,6 +56,11 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
     super($body, $form, $modal, $navbarMenu);
     this.$monitoredSystem = $monitoredSystem;
     this.$router = $router;
+  }
+
+  override ngOnInit() {
+    super.ngOnInit();
+    this.onSortChange({ column: 'name', direction: 'asc' });
   }
 
   protected override get actions(): NavbarMenuAction[] {

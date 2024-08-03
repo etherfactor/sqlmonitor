@@ -25,7 +25,7 @@ export class TableComponent<TData extends object> {
 
   @ContentChild('rows') rows!: TemplateRef<any>;
 
-  private sort?: SortColumn;
+  @Input() sort?: SortColumn;
   @Output() sortChange = new EventEmitter<SortColumn>();
 
   private filters: { [name: string]: Observable<FilterColumnCondition> } = {};

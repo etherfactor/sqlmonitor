@@ -1,21 +1,24 @@
 import { Params } from "@angular/router";
-import { Observable } from "rxjs";
+import { sort } from "moderndash";
+import { Observable, of } from "rxjs";
 import { InferArrayType } from "../../form/form.util";
 import { EntityExpand, EntitySet, Expand, Filter, ODataOptions, OrderBy, OrderedEntitySet, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
 import { ɵEntityAccessor } from "./entity-accessor";
 import { ɵEntityExpand } from "./entity-expand";
 import { ɵPrefixGenerator } from "./prefix-generator";
 
-class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
+abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
 
-  private readonly expandValue?: Expand[];
-  private readonly filterValue?: Filter[];
-  private readonly orderByValue?: OrderBy[];
-  private readonly selectValue?: Select[];
-  private readonly skipValue?: Skip;
-  private readonly topValue?: Top;
+  protected readonly worker: EntitySetWorker<TEntity>;
+  protected readonly expandValue?: Expand[];
+  protected readonly filterValue?: Filter[];
+  protected readonly orderByValue?: OrderBy[];
+  protected readonly selectValue?: Select[];
+  protected readonly skipValue?: Skip;
+  protected readonly topValue?: Top;
 
-  constructor(options?: ODataOptions) {
+  constructor(worker: EntitySetWorker<TEntity>, options?: ODataOptions) {
+    this.worker = worker;
     this.expandValue = options?.expand;
     this.filterValue = options?.filter;
     this.orderByValue = options?.orderBy;
@@ -23,6 +26,8 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     this.skipValue = options?.skip;
     this.topValue = options?.top;
   }
+
+  protected abstract new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity>;
 
   expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity> {
     let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new ɵEntityExpand.Implementation<InferArrayType<TEntity[TExpanded]>>(property);
@@ -36,7 +41,7 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     const options = this.getOptions();
     options.expand = newExpand;
 
-    return new Implementation<TEntity>(options);
+    return this.new<TEntity>(this.worker, options);
   }
 
   filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntitySet<TEntity> {
@@ -49,21 +54,21 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     const options = this.getOptions();
     options.filter = newFilters;
 
-    return new Implementation<TEntity>(options);
+    return this.new<TEntity>(this.worker, options);
   }
 
   orderBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntitySet<TEntity> {
     const options = this.getOptions();
     options.orderBy = [{ property, direction: direction ?? 'asc' }];
 
-    return new Implementation<TEntity>(options);
+    return this.new<TEntity>(this.worker, options);
   }
 
   thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntitySet<TEntity> {
     const options = this.getOptions();
     options.orderBy?.push({ property, direction: direction ?? 'asc' });
 
-    return new Implementation<TEntity>(options);
+    return this.new<TEntity>(this.worker, options);
   }
 
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>> {
@@ -71,21 +76,21 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     options.select ??= [];
     options.select = [...options.select, ...properties];
 
-    return new Implementation<Pick<TEntity, TSelected>>(options);
+    return this.new<Pick<TEntity, TSelected>>(this.worker, options);
   }
 
   skip(count: number): EntitySet<TEntity> {
     const options = this.getOptions();
     options.skip = count;
 
-    return new Implementation<TEntity>(options);
+    return this.new(this.worker, options);
   }
 
   top(count: number): EntitySet<TEntity> {
     const options = this.getOptions();
     options.top = count;
 
-    return new Implementation<TEntity>(options);
+    return this.new<TEntity>(this.worker, options);
   }
 
   private getOptions(): ODataOptions {
@@ -99,8 +104,8 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
     };
   }
 
-  execute(): Observable<TEntity> {
-    throw new Error('Not implemented');
+  execute(): Observable<TEntity[]> {
+    return this.worker.execute(this.getOptions());
   }
 
   getParams(): Params {
@@ -134,6 +139,105 @@ class Implementation<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TE
   }
 }
 
+class Implementation<TEntity> extends Base<TEntity> {
+
+  constructor(options?: ODataOptions) {
+    super(new ConcreteEntitySetWorker(), options);
+  }
+
+  protected override new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity> {
+    return new Implementation(options);
+  }
+}
+
+class MockImplementation<TEntity> extends Base<TEntity> {
+
+  private getData: () => TEntity[];
+
+  constructor(getData: () => TEntity[], worker?: EntitySetWorker<TEntity>, options?: ODataOptions) {
+    super(worker ?? new MockEntitySetWorker(getData), options);
+    this.getData = getData;
+  }
+
+  protected override new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity> {
+    return new MockImplementation<TNewEntity>(this.getData as unknown as () => TNewEntity[], worker, options);
+  }
+}
+
+abstract class EntitySetWorker<TEntity> {
+  abstract execute(options: ODataOptions): Observable<TEntity[]>;
+}
+
+class MockEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
+
+  private getData: () => TEntity[];
+
+  constructor(
+    getData: () => TEntity[],
+  ) {
+    super();
+    this.getData = getData;
+  }
+
+  override execute(options: ODataOptions): Observable<TEntity[]> {
+    let data = this.getData();
+    data = this.applyFilters(data, options.filter ?? []);
+    data = this.applyOrderBy(data, options.orderBy ?? []);
+    data = this.applySkipTop(data, options.skip ?? 0, options.top ?? 100);
+    data = this.applySelect(data, options.select ?? []);
+
+    return of(data);
+  }
+
+  private applyFilters(data: TEntity[], filters: Filter[]): TEntity[] {
+    let finalData = data;
+    for (const filter of filters) {
+      finalData = finalData.filter(datum => filter._eval(datum));
+    }
+
+    return finalData;
+  }
+
+  private applyOrderBy(data: TEntity[], orderBy: OrderBy[]): TEntity[] {
+    const rules = orderBy.map(order => ({ order: order.direction, by: (entity: TEntity) => entity[order.property as keyof TEntity] as string }));
+    const finalData = sort(data, ...rules);
+
+    return finalData;
+  }
+
+  private applySkipTop(data: TEntity[], skip: Skip, top: Top) {
+    const startAt = skip;
+    const endAt = startAt + top;
+    const finalData = data.slice(startAt, endAt);
+
+    return finalData;
+  }
+
+  private applySelect(data: TEntity[], select: Select[]) {
+    if (select.length === 0)
+      return data;
+
+    const finalData = data.map(datum => {
+      const newObj: TEntity = {} as TEntity;
+      for (const property of select) {
+        newObj[property as keyof TEntity] = datum[property as keyof TEntity];
+      }
+
+      return newObj;
+    });
+
+    return finalData;
+  }
+}
+
+class ConcreteEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
+
+  override execute(options: ODataOptions): Observable<TEntity[]> {
+    throw new Error("Method not implemented.");
+  }
+}
+
 export const ɵEntitySet = {
   Implementation,
+  MockImplementation,
 };

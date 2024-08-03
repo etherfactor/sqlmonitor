@@ -22,10 +22,12 @@ export abstract class ListComponent<TEntity> implements OnInit {
   protected readonly $modal: NgbModal;
   protected readonly $navbarMenu: NavbarMenuService;
 
-  private activeSort?: SortColumn;
+  activeSort?: SortColumn;
   private activeFilters: FilterColumnCondition[] = [];
 
   private searchSubject = new Subject<void>();
+
+  protected records: TEntity[] = [];
 
   constructor(
     $body: BodyService,
@@ -237,6 +239,9 @@ export abstract class ListComponent<TEntity> implements OnInit {
     }
 
     console.log(set.getParams());
+    set.execute().subscribe(values => {
+      this.records = values;
+    });
   }
 
   protected abstract get actions(): NavbarMenuAction[];
@@ -263,6 +268,7 @@ export abstract class ListComponent<TEntity> implements OnInit {
   onSortChange(sort: SortColumn) {
     this.activeSort = sort;
     this.searchSubject.next();
+    console.log('sort', sort);
   }
 
   onFilterChange(filters: FilterColumnCondition[]) {

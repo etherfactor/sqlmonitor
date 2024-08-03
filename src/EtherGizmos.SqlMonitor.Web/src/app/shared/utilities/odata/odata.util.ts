@@ -15,6 +15,8 @@ export interface Value<TValue> {
   readonly _?: TValue;
 
   toString(): string;
+
+  _eval(data?: unknown): TValue;
 }
 
 export interface ODataOptions {
@@ -24,6 +26,12 @@ export interface ODataOptions {
   select?: Select[];
   skip?: Skip;
   top?: Top;
+}
+
+export interface ODataResultSet<TEntity> {
+  "@odata.count"?: number;
+  "@odata.context": string;
+  value: TEntity[];
 }
 
 export interface Expand {
@@ -86,7 +94,7 @@ export function topToString(top: Top): string {
 export type IsObjectOrArray<TValue> = TValue extends object ? (TValue extends Array<any> ? (TValue[number] extends object ? TValue : never) : TValue): never;
 
 export interface EntitySet<TEntity> {
-  execute(): Observable<TEntity>;
+  execute(): Observable<TEntity[]>;
   expand<TExpanded extends keyof TEntity & string>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity>;

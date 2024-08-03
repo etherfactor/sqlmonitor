@@ -6,11 +6,13 @@ abstract class ConstantValue<TValue> implements Value<TValue> {
 
   constructor() {
   }
+
+  abstract _eval(): TValue;
 }
 
 class BooleanConstantValue extends ConstantValue<boolean> {
 
-  private readonly value: boolean;
+  protected readonly value: boolean;
 
   constructor(value: boolean) {
     super();
@@ -19,6 +21,10 @@ class BooleanConstantValue extends ConstantValue<boolean> {
 
   override toString(): string {
     return this.value.toString();
+  }
+
+  override _eval(): boolean {
+    return this.value;
   }
 }
 
@@ -34,6 +40,10 @@ class DateConstantValue extends ConstantValue<DateTime> {
   override toString(): string {
     return this.value.toISODate()!;
   }
+
+  override _eval(): DateTime {
+    return this.value;
+  }
 }
 
 class DateTimeConstantValue extends ConstantValue<DateTime> {
@@ -48,6 +58,10 @@ class DateTimeConstantValue extends ConstantValue<DateTime> {
   override toString(): string {
     return this.value.toISO()!;
   }
+
+  override _eval(): DateTime {
+    return this.value;
+  }
 }
 
 class GuidConstantValue extends ConstantValue<Guid> {
@@ -60,6 +74,10 @@ class GuidConstantValue extends ConstantValue<Guid> {
   }
 
   override toString(): string {
+    return this.value;
+  }
+
+  override _eval(): Guid {
     return this.value;
   }
 }
@@ -76,6 +94,10 @@ class IntegerConstantValue extends ConstantValue<number> {
   override toString(): string {
     return this.value.toString();
   }
+
+  override _eval(): number {
+    return this.value;
+  }
 }
 
 class StringConstantValue extends ConstantValue<string> {
@@ -90,6 +112,10 @@ class StringConstantValue extends ConstantValue<string> {
   override toString() {
     return `'${this.value.replace("'", "''")}'`;
   }
+
+  override _eval(): string {
+    return this.value;
+  }
 }
 
 class TimeConstantValue extends ConstantValue<Interval> {
@@ -103,6 +129,10 @@ class TimeConstantValue extends ConstantValue<Interval> {
 
   override toString(): string {
     return this.value.toISOTime()!;
+  }
+
+  override _eval(): Interval {
+    return this.value;
   }
 }
 
