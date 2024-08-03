@@ -210,6 +210,24 @@ export abstract class ListComponent<TEntity> implements OnInit {
           );
           break;
 
+        case 'not_null':
+          set = set.filter(b =>
+            o.ne(
+              b.prop(filter.column as keyof TEntity & string),
+              o.null(),
+            ),
+          );
+          break;
+
+        case 'null':
+          set = set.filter(b =>
+            o.eq(
+              b.prop(filter.column as keyof TEntity & string),
+              o.null(),
+            ),
+          );
+          break;
+
         case 'starts_with':
           if (filter.type !== 'string')
             throw new Error(`Unable to filter on ${filter.column} of type ${filter.type}; requires ${'string'}`);

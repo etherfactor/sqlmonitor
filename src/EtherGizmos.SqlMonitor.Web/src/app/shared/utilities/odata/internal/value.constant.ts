@@ -100,6 +100,17 @@ class IntegerConstantValue extends ConstantValue<number> {
   }
 }
 
+class NullConstantValue extends ConstantValue<any> {
+
+  override toString() {
+    return 'null';
+  }
+
+  override _eval(): any {
+    return null;
+  }
+}
+
 class StringConstantValue extends ConstantValue<string> {
 
   private readonly value: string;
@@ -143,6 +154,7 @@ export const ɵConstant = {
   DateTimeConstantValue,
   GuidConstantValue,
   IntegerConstantValue,
+  NullConstantValue,
   StringConstantValue,
   TimeConstantValue,
 };

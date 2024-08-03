@@ -274,6 +274,11 @@ export class o {
 
   //Constant values
 
+  //null
+  static null() {
+    return new ɵConstant.NullConstantValue();
+  }
+
   //'...'
   static string(value: string): Value<string> {
     return new ɵConstant.StringConstantValue(value);
