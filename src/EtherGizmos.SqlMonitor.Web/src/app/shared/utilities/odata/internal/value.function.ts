@@ -24,8 +24,8 @@ class ContainsFunctionValue extends FunctionValue<boolean> {
   }
 
   override _eval(data?: unknown): boolean {
-    const root = (this.args[0] as Value<string>)._eval(data);
-    const arg1 = (this.args[1] as Value<string>)._eval(data);
+    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
     return root.includes(arg1);
   }
 }
@@ -37,8 +37,8 @@ class StartsWithFunctionValue extends FunctionValue<boolean> {
   }
 
   override _eval(data?: unknown): boolean {
-    const root = (this.args[0] as Value<string>)._eval(data);
-    const arg1 = (this.args[1] as Value<string>)._eval(data);
+    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
     return root.startsWith(arg1);
   }
 }
@@ -50,8 +50,8 @@ class EndsWithFunctionValue extends FunctionValue<boolean> {
   }
 
   override _eval(data?: unknown): boolean {
-    const root = (this.args[0] as Value<string>)._eval(data);
-    const arg1 = (this.args[1] as Value<string>)._eval(data);
+    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
     return root.endsWith(arg1);
   }
 }
@@ -76,8 +76,8 @@ class IndexOfFunctionValue extends FunctionValue<number> {
   }
 
   override _eval(data?: unknown): number {
-    const root = (this.args[0] as Value<string>)._eval(data);
-    const arg1 = (this.args[1] as Value<string>)._eval(data);
+    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
     return root.indexOf(arg1);
   }
 }

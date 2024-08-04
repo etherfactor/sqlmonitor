@@ -26,7 +26,15 @@ class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 
   _eval(data?: unknown): boolean {
-    return this.left._eval(data) === this.right._eval(data);
+    let left = this.left._eval(data);
+    if (typeof left === 'string')
+      left = left.toLowerCase() as TValue;
+
+    let right = this.right._eval(data);
+    if (typeof right === 'string')
+      right = right.toLowerCase() as TValue;
+
+    return left === right;
   }
 }
 
@@ -37,7 +45,15 @@ class NotEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 
   _eval(data?: unknown): boolean {
-    return this.left._eval(data) !== this.right._eval(data);
+    let left = this.left._eval(data);
+    if (typeof left === 'string')
+      left = left.toLowerCase() as TValue;
+
+    let right = this.right._eval(data);
+    if (typeof right === 'string')
+      right = right.toLowerCase() as TValue;
+
+    return left !== right;
   }
 }
 
@@ -48,7 +64,15 @@ class GreaterThanComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 
   _eval(data?: unknown): boolean {
-    return this.left._eval(data) > this.right._eval(data);
+    let left = this.left._eval(data);
+    if (typeof left === 'string')
+      left = left.toLowerCase() as TValue;
+
+    let right = this.right._eval(data);
+    if (typeof right === 'string')
+      right = right.toLowerCase() as TValue;
+
+    return left > right;
   }
 }
 
@@ -59,7 +83,15 @@ class GreaterThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue>
   }
 
   _eval(data?: unknown): boolean {
-    return this.left._eval(data) >= this.right._eval(data);
+    let left = this.left._eval(data);
+    if (typeof left === 'string')
+      left = left.toLowerCase() as TValue;
+
+    let right = this.right._eval(data);
+    if (typeof right === 'string')
+      right = right.toLowerCase() as TValue;
+
+    return left >= right;
   }
 }
 
@@ -70,7 +102,15 @@ class LessThanComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 
   _eval(data?: unknown): boolean {
-    return this.left._eval(data) < this.right._eval(data);
+    let left = this.left._eval(data);
+    if (typeof left === 'string')
+      left = left.toLowerCase() as TValue;
+
+    let right = this.right._eval(data);
+    if (typeof right === 'string')
+      right = right.toLowerCase() as TValue;
+
+    return left < right;
   }
 }
 
@@ -81,7 +121,15 @@ class LessThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 
   _eval(data?: unknown): boolean {
-    return this.left._eval(data) <= this.right._eval(data);
+    let left = this.left._eval(data);
+    if (typeof left === 'string')
+      left = left.toLowerCase() as TValue;
+
+    let right = this.right._eval(data);
+    if (typeof right === 'string')
+      right = right.toLowerCase() as TValue;
+
+    return left <= right;
   }
 }
 

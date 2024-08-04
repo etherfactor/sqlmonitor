@@ -1,6 +1,6 @@
 import { Params } from "@angular/router";
 import { sort } from "moderndash";
-import { Observable, of } from "rxjs";
+import { Observable, delay, of } from "rxjs";
 import { InferArrayType } from "../../form/form.util";
 import { EntityExpand, EntitySet, Expand, Filter, ODataOptions, OrderBy, OrderedEntitySet, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
 import { ɵEntityAccessor } from "./entity-accessor";
@@ -186,7 +186,9 @@ class MockEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
     data = this.applySkipTop(data, options.skip ?? 0, options.top ?? 100);
     data = this.applySelect(data, options.select ?? []);
 
-    return of(data);
+    return of(data).pipe(
+      delay(1000),
+    );
   }
 
   private applyFilters(data: TEntity[], filters: Filter[]): TEntity[] {
