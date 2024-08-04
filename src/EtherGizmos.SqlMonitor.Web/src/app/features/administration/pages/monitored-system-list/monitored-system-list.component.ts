@@ -91,7 +91,7 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
       },
       {
         label: 'Systems',
-        link: '/systems',
+        link: '/admin/systems',
       },
     ];
 
