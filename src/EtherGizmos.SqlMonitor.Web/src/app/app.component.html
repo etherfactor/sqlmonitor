@@ -1,57 +1,59 @@
-<nav class="navbar navbar-main bg-body-tertiary sticky-top">
-  <div class="container-fluid">
-    <div class="navbar-grow d-flex flex-row align-items-center">
-      <button class="navbar-toggler" type="button" aria-label="Toggle navigation" (click)="openSidebar()">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <a class="navbar-brand ms-3" style="font-size: 1.25rem;" routerLink="/">(Logo)</a>
+<div class="d-flex flex-column" style="min-height: 100vh;">
+  <nav class="navbar navbar-main bg-body-tertiary sticky-top">
+    <div class="container-fluid">
+      <div class="navbar-grow d-flex flex-row align-items-center">
+        <button class="navbar-toggler" type="button" aria-label="Toggle navigation" (click)="openSidebar()">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand ms-3" style="font-size: 1.25rem;" routerLink="/">(Logo)</a>
+      </div>
+      <input type="text" style="width: 400px;" class="form-control d-none d-md-block" id="exampleInputEmail1">
+      <button type="button" class="btn btn-link d-sm-block d-md-none"><span class="bi bi-search"></span></button>
+      <div class="navbar-grow d-flex flex-row-reverse align-items-center">
+        <ul class="navbar-nav mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0);"><span class="bi bi-box-arrow-in-right"></span> Sign In</a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <input type="text" style="width: 400px;" class="form-control d-none d-md-block" id="exampleInputEmail1">
-    <button type="button" class="btn btn-link d-sm-block d-md-none"><span class="bi bi-search"></span></button>
-    <div class="navbar-grow d-flex flex-row-reverse align-items-center">
-      <ul class="navbar-nav mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="javascript:void(0);"><span class="bi bi-box-arrow-in-right"></span> Sign In</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+  </nav>
 
-<nav class="navbar navbar-sub bg-body-tertiary sticky-top" aria-expanded="true" data-testid="navbar-sub">
-  <div class="container-fluid" style="min-height: 32px;">
+  <nav class="navbar navbar-sub bg-body-tertiary sticky-top" aria-expanded="true" data-testid="navbar-sub">
+    <div class="container-fluid" style="min-height: 32px;">
 
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb mb-0" data-testid="breadcrumbs">
-        <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
-          <ng-container *ngIf="!last; else lastBreadcrumb">
-            <li class="breadcrumb-item" data-testid="breadcrumb-item"><a [routerLink]="safe(breadcrumb.link) | async">{{safe(breadcrumb.label) | async}}</a></li>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0" data-testid="breadcrumbs">
+          <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
+            <ng-container *ngIf="!last; else lastBreadcrumb">
+              <li class="breadcrumb-item" data-testid="breadcrumb-item"><a [routerLink]="safe(breadcrumb.link) | async">{{safe(breadcrumb.label) | async}}</a></li>
+            </ng-container>
+            <ng-template #lastBreadcrumb>
+              <li class="breadcrumb-item active" [attr.aria-current]="breadcrumb.link" data-testid="breadcrumb-item">{{safe(breadcrumb.label) | async}}</li>
+            </ng-template>
           </ng-container>
-          <ng-template #lastBreadcrumb>
-            <li class="breadcrumb-item active" [attr.aria-current]="breadcrumb.link" data-testid="breadcrumb-item">{{safe(breadcrumb.label) | async}}</li>
-          </ng-template>
-        </ng-container>
-      </ol>
-    </nav>
+        </ol>
+      </nav>
 
-    <div class="d-none d-md-block" data-testid="actions">
-      <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
+      <div class="d-none d-md-block" data-testid="actions">
+        <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
+      </div>
+
     </div>
 
-  </div>
+    <div class="container-fluid flex-row-reverse">
 
-  <div class="container-fluid flex-row-reverse">
+      <div class="d-md-none" data-testid="actions">
+        <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
+      </div>
 
-    <div class="d-md-none" data-testid="actions">
-      <ng-template [ngTemplateOutlet]="navbarActions"></ng-template>
     </div>
+  </nav>
 
+  <div [class]="containerClass" style="padding-top: 0.1px; flex-grow: 1;" data-testid="body-container">
+    <router-outlet></router-outlet>
+    <div class="mt-3">&nbsp;</div>
   </div>
-</nav>
-
-<div [class]="containerClass" style="min-height: calc(100vh - var(--navbar-height) - var(--navbar-sub-height)); padding-top: 0.1px;" data-testid="body-container">
-  <router-outlet></router-outlet>
-  <div class="mt-3">&nbsp;</div>
 </div>
 
 <ng-template #navbarActions>
