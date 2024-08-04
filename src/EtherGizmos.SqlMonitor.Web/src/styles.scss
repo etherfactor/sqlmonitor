@@ -38,7 +38,7 @@ $navbar-sub-height-m: 62px;
 
   &.navbar-sub {
     top: 0;
-    height: var(--navbar-sub-height);
+    height: unset;
 
     .navbar-nav {
       gap: 10px;

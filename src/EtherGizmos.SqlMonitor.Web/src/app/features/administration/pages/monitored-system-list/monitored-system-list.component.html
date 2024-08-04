@@ -31,6 +31,6 @@
     <td>{{row.name}}</td>
     <td>{{row.isActive ? 'Active' : 'Inactive'}}</td>
     <td>{{row.createdAt.startOf('minute').toLocaleString({ weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}}</td>
-    <td><a [routerLink]="['/monitored-system/', row.id]">Edit</a></td>
+    <td><a [routerLink]="['/admin/system/', row.id]">Edit</a></td>
   </ng-template>
 </app-table>
