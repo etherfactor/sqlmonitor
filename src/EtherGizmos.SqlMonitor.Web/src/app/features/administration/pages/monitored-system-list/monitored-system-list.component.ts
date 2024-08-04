@@ -59,8 +59,12 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
   }
 
   override ngOnInit() {
-    super.ngOnInit();
     this.onSortChange({ column: 'name', direction: 'asc' });
+    super.ngOnInit();
+  }
+
+  override get perPage(): number {
+    return 10;
   }
 
   protected override get actions(): NavbarMenuAction[] {
@@ -118,6 +122,6 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
   }
 
   @Bound new() {
-    this.$router.navigate(['/monitored-system/new']);
+    this.$router.navigate(['/admin/system', 'new']);
   }
 }

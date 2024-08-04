@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 import { isEqual } from 'moderndash';
 import { Observable, Subscription, combineLatest, debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
-import { SortTableService } from '../../services/sort-table/sort-table.service';
+import { IteratePipe } from '../../pipes/iterate/iterate.pipe';
 import { generateGuid } from '../../types/guid/guid';
 import { FilterColumnCondition, FilterCondition, FilterType } from '../../utilities/filter/filter.util';
 import { Direction } from '../../utilities/odata/odata.util';
@@ -13,6 +13,7 @@ import { SortColumn } from '../../utilities/sort/sort.util';
   standalone: true,
   imports: [
     CommonModule,
+    IteratePipe,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss'
@@ -32,15 +33,11 @@ export class TableComponent<TData extends object> {
   private filterSubscription?: Subscription;
   @Output() filterChange = new EventEmitter<FilterColumnCondition[]>();
 
-  private readonly $sortTable: SortTableService;
+  @Input() minRows: number = 1;
 
   id = generateGuid();
 
-  constructor(
-    $sortTable: SortTableService,
-  ) {
-    this.$sortTable = $sortTable;
-  }
+  constructor() { }
 
   getDefaultHeaders(): string[] {
     if (this.data[0]) {

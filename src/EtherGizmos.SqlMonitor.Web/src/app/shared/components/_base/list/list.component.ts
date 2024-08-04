@@ -256,11 +256,17 @@ export abstract class ListComponent<TEntity> implements OnInit {
       set = set.orderBy(this.activeSort.column as keyof TEntity & string, this.activeSort.direction);
     }
 
+    set = set
+      .top(this.perPage)
+      .skip((1 - 1) * this.perPage);
+
     console.log(set.getParams());
     set.execute().subscribe(values => {
       this.records = values;
     });
   }
+
+  abstract get perPage(): number;
 
   protected abstract get actions(): NavbarMenuAction[];
 

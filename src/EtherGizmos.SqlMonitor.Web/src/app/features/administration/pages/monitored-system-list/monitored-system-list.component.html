@@ -6,20 +6,7 @@
 
 <div class="top-spacer"></div>
 
-<!--<div class="input-group">
-  <div class="floating-label">
-    <input id="search" type="text" class="form-control" placeholder=" " />
-    <label for="search">Name</label>
-  </div>
-  <button class="btn btn-primary">
-    <span class="bi bi-search"></span>
-  </button>
-  <button class="btn btn-primary" (click)="openFilters()">
-    <span class="bi bi-caret-down-fill"></span>
-  </button>
-</div>-->
-
-<app-table [data]="records" [sort]="activeSort" (sortChange)="onSortChange($event)" (filterChange)="onFilterChange($event)">
+<app-table [data]="records" [minRows]="perPage" [sort]="activeSort" (sortChange)="onSortChange($event)" (filterChange)="onFilterChange($event)">
   <ng-template #headers>
     <th app-table-header="name" type="string" [sortable]="true" [filterable]="true">Name</th>
     <th app-table-header="isActive" type="boolean" [sortable]="true" [filterable]="true">Active?</th>

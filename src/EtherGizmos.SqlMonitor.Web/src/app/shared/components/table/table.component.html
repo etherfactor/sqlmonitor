@@ -12,6 +12,9 @@
                     rows || defaultRows;
                     context: { $implicit: datum }"></ng-container>
     </tr>
+    <tr *ngFor="let n of minRows - data.length | iterate">
+      <td colspan="999" class="unselectable">&nbsp;</td>
+    </tr>
   </tbody>
 </table>
 
