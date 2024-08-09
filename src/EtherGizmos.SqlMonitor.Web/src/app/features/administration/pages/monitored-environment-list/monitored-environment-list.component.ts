@@ -6,15 +6,15 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ListComponent, TableColumn } from '../../../../shared/components/_base/list/list.component';
 import { TableHeaderComponent } from '../../../../shared/components/table-header/table-header.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { MonitoredSystem } from '../../../../shared/models/monitored-system';
+import { MonitoredEnvironment } from '../../../../shared/models/monitored-environment';
 import { BodyService } from '../../../../shared/services/body/body.service';
-import { MonitoredSystemService } from '../../../../shared/services/monitored-system/monitored-system.service';
+import { MonitoredEnvironmentService } from '../../../../shared/services/monitored-environment/monitored-environment.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
 
 @Component({
-  selector: 'app-monitored-system-list',
+  selector: 'app-monitored-environment-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -22,24 +22,24 @@ import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
     TableComponent,
     TableHeaderComponent,
   ],
-  templateUrl: './monitored-system-list.component.html',
-  styleUrl: './monitored-system-list.component.scss'
+  templateUrl: './monitored-environment-list.component.html',
+  styleUrl: './monitored-environment-list.component.scss'
 })
-export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem> implements OnInit {
+export class MonitoredEnvironmentListComponent extends ListComponent<MonitoredEnvironment> implements OnInit {
 
-  private readonly $monitoredSystem: MonitoredSystemService;
+  private readonly $MonitoredEnvironment: MonitoredEnvironmentService;
   private readonly $router: Router;
-  
+
   constructor(
     $body: BodyService,
     $form: FormBuilder,
     $modal: NgbModal,
-    $monitoredSystem: MonitoredSystemService,
+    $MonitoredEnvironment: MonitoredEnvironmentService,
     $navbarMenu: NavbarMenuService,
     $router: Router,
   ) {
     super($body, $form, $modal, $navbarMenu);
-    this.$monitoredSystem = $monitoredSystem;
+    this.$MonitoredEnvironment = $MonitoredEnvironment;
     this.$router = $router;
   }
 
@@ -79,8 +79,8 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
         link: '/admin',
       },
       {
-        label: 'Systems',
-        link: '/admin/systems',
+        label: 'Environments',
+        link: '/admin/environments',
       },
     ];
 
@@ -102,11 +102,11 @@ export class MonitoredSystemListComponent extends ListComponent<MonitoredSystem>
     return columns;
   }
 
-  protected override getEntitySet(): EntitySet<MonitoredSystem> {
-    return this.$monitoredSystem.set;
+  protected override getEntitySet(): EntitySet<MonitoredEnvironment> {
+    return this.$MonitoredEnvironment.set;
   }
 
   @Bound new() {
-    this.$router.navigate(['/admin/system', 'new']);
+    this.$router.navigate(['/admin/environment', 'new']);
   }
 }

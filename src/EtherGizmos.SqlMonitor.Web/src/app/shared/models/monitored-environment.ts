@@ -4,7 +4,7 @@ import { DateTimeZ } from "../types/datetime/datetime";
 import { GuidZ } from "../types/guid/guid";
 import { DefaultControlTypes, formFactoryForModel } from "../utilities/form/form.util";
 
-export const MonitoredSystemZ = z.object({
+export const MonitoredEnvironmentZ = z.object({
   id: GuidZ,
   createdAt: DateTimeZ,
   createdByUserId: GuidZ,
@@ -15,9 +15,9 @@ export const MonitoredSystemZ = z.object({
   isActive: z.boolean(),
 });
 
-export interface MonitoredSystem extends z.infer<typeof MonitoredSystemZ> { }
+export interface MonitoredEnvironment extends z.infer<typeof MonitoredEnvironmentZ> { }
 
-export const monitoredSystemForm = formFactoryForModel<MonitoredSystem, DefaultControlTypes>(($form, model) => {
+export const monitoredEnvironmentForm = formFactoryForModel<MonitoredEnvironment, DefaultControlTypes>(($form, model) => {
   return {
     id: [model.id],
     createdAt: [model.createdAt],

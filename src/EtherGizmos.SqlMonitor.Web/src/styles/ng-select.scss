@@ -89,6 +89,7 @@ $ng-select-height: 38px;
 
   &.plaintext {
     > .ng-select-container {
+      background-color: transparent !important;
       border-color: transparent !important;
 
       > .ng-arrow-wrapper {

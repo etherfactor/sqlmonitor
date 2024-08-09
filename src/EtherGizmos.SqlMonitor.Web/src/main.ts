@@ -13,6 +13,8 @@ import { provideDashboardServiceMock } from './app/shared/services/dashboard/das
 import { provideInstanceServiceMock } from './app/shared/services/instance/instance.service.mock';
 import { provideMetricDataServiceMock } from './app/shared/services/metric-data/metric-data.service.mock';
 import { provideMetricServiceMock } from './app/shared/services/metric/metric.service.mock';
+import { provideMonitoredEnvironmentServiceMock } from './app/shared/services/monitored-environment/monitored-environment.mock';
+import { provideMonitoredResourceServiceMock } from './app/shared/services/monitored-resource/monitored-resource.service.mock';
 import { provideMonitoredSystemServiceMock } from './app/shared/services/monitored-system/monitored-system.service.mock';
 import { environment } from './environments/environment';
 
@@ -33,6 +35,8 @@ bootstrapApplication(
       provideInstanceServiceMock(),
       provideMetricServiceMock(),
       provideMetricDataServiceMock(),
+      provideMonitoredEnvironmentServiceMock(),
+      provideMonitoredResourceServiceMock(),
       provideMonitoredSystemServiceMock(),
     ]
   })

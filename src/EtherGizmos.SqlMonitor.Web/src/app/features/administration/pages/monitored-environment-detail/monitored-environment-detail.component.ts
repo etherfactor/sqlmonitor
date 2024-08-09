@@ -7,14 +7,14 @@ import { DateTime } from 'luxon';
 import { Observable } from 'rxjs';
 import { EditableComponent } from '../../../../shared/components/_base/editable/editable.component';
 import { InputLuxonDatetimeComponent } from '../../../../shared/components/input-luxon-datetime/input-luxon-datetime.component';
-import { MonitoredSystem, monitoredSystemForm } from '../../../../shared/models/monitored-system';
+import { MonitoredEnvironment, monitoredEnvironmentForm } from '../../../../shared/models/monitored-environment';
 import { BodyService } from '../../../../shared/services/body/body.service';
-import { MonitoredSystemService } from '../../../../shared/services/monitored-system/monitored-system.service';
+import { MonitoredEnvironmentService } from '../../../../shared/services/monitored-environment/monitored-environment.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Guid, GuidZ } from '../../../../shared/types/guid/guid';
 
 @Component({
-  selector: 'app-monitored-system-detail',
+  selector: 'app-monitored-environment-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,56 +23,56 @@ import { Guid, GuidZ } from '../../../../shared/types/guid/guid';
     NgSelectModule,
     ReactiveFormsModule,
   ],
-  templateUrl: './monitored-system-detail.component.html',
-  styleUrl: './monitored-system-detail.component.scss'
+  templateUrl: './monitored-environment-detail.component.html',
+  styleUrl: './monitored-environment-detail.component.scss'
 })
-export class MonitoredSystemDetailComponent extends EditableComponent<MonitoredSystem, Guid> implements OnInit {
+export class MonitoredEnvironmentDetailComponent extends EditableComponent<MonitoredEnvironment, Guid> implements OnInit {
 
   private readonly $form: FormBuilder;
-  private readonly $monitoredSystem: MonitoredSystemService;
+  private readonly $MonitoredEnvironment: MonitoredEnvironmentService;
 
   constructor(
     $activatedRoute: ActivatedRoute,
     $body: BodyService,
     $form: FormBuilder,
-    $monitoredSystem: MonitoredSystemService,
+    $MonitoredEnvironment: MonitoredEnvironmentService,
     $navbarMenu: NavbarMenuService,
     $router: Router,
   ) {
     super($activatedRoute, $body, $navbarMenu, $router, GuidZ);
     this.$form = $form;
-    this.$monitoredSystem = $monitoredSystem;
+    this.$MonitoredEnvironment = $MonitoredEnvironment;
   }
 
   protected override loadRecord(id: Guid) {
-    return this.$monitoredSystem.get(id);
+    return this.$MonitoredEnvironment.get(id);
   }
 
-  protected override createEmptyRecord(): MonitoredSystem {
+  protected override createEmptyRecord(): MonitoredEnvironment {
     return {
       createdAt: DateTime.now(),
       isActive: true,
-    } as MonitoredSystem;
+    } as MonitoredEnvironment;
   }
 
-  protected override loadForm(record: MonitoredSystem) {
-    const form = monitoredSystemForm(this.$form, record);
+  protected override loadForm(record: MonitoredEnvironment) {
+    const form = monitoredEnvironmentForm(this.$form, record);
     if (!record.id) {
       form.controls.isActive.markAsDirty();
     }
     return form;
   }
 
-  protected override createRecord(record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
-    return this.$monitoredSystem.create(record);
+  protected override createRecord(record: Partial<MonitoredEnvironment>): Observable<MonitoredEnvironment> {
+    return this.$MonitoredEnvironment.create(record);
   }
 
-  protected override updateRecord(id: Guid, record: Partial<MonitoredSystem>): Observable<MonitoredSystem> {
-    return this.$monitoredSystem.update(id, record);
+  protected override updateRecord(id: Guid, record: Partial<MonitoredEnvironment>): Observable<MonitoredEnvironment> {
+    return this.$MonitoredEnvironment.update(id, record);
   }
 
-  protected override navigateToRecord(record: MonitoredSystem): void {
-    this.$router.navigate(['/admin/systems', record.id]);
+  protected override navigateToRecord(record: MonitoredEnvironment): void {
+    this.$router.navigate(['/admin/environments', record.id]);
   }
 
   override get actions(): NavbarMenuAction[] {
@@ -115,20 +115,20 @@ export class MonitoredSystemDetailComponent extends EditableComponent<MonitoredS
         link: '/admin',
       },
       {
-        label: 'Systems',
-        link: '/admin/systems',
+        label: 'Environments',
+        link: '/admin/environments',
       },
     ];
 
     if (!this.isNew) {
       breadcrumbs.push({
         label: this.entity.name,
-        link: `/admin/system/${this.id}`,
+        link: `/admin/environment/${this.id}`,
       });
     } else {
       breadcrumbs.push({
         label: 'New Record',
-        link: `/admin/system/new`,
+        link: `/admin/environment/new`,
       });
     }
 

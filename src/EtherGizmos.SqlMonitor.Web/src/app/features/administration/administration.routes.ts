@@ -4,4 +4,8 @@ export const ADMINISTRATION_ROUTES: Routes = [
   { path: '', pathMatch: 'full', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
   { path: 'system', loadChildren: () => import('./monitored-system.routes').then(m => m.MONITORED_SYSTEM_ROUTES) },
   { path: 'systems', loadChildren: () => import('./monitored-system.routes').then(m => m.MONITORED_SYSTEM_ROUTES) },
+  { path: 'resource', loadChildren: () => import('./monitored-resource.routes').then(m => m.MONITORED_RESOURCE_ROUTES) },
+  { path: 'resources', loadChildren: () => import('./monitored-resource.routes').then(m => m.MONITORED_RESOURCE_ROUTES) },
+  { path: 'environment', loadChildren: () => import('./monitored-environment.routes').then(m => m.MONITORED_ENVIRONMENT_ROUTES) },
+  { path: 'environments', loadChildren: () => import('./monitored-environment.routes').then(m => m.MONITORED_ENVIRONMENT_ROUTES) },
 ];
