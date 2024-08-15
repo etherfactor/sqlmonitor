@@ -20,6 +20,7 @@ export interface Value<TValue> {
 }
 
 export interface ODataOptions {
+  count?: Count;
   expand?: Expand[];
   filter?: Filter[];
   orderBy?: OrderBy[];
@@ -28,9 +29,12 @@ export interface ODataOptions {
   top?: Top;
 }
 
-export interface ODataResultSet<TEntity> {
+export interface ODataResult {
+  "@odata.context"?: string;
+}
+
+export interface ODataResultSet<TEntity> extends ODataResult {
   "@odata.count"?: number;
-  "@odata.context": string;
   value: TEntity[];
 }
 
@@ -90,11 +94,14 @@ export function topToString(top: Top): string {
   return useValue;
 }
 
+export type Count = true;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type IsObjectOrArray<TValue> = TValue extends object ? (TValue extends Array<any> ? (TValue[number] extends object ? TValue : never) : TValue): never;
 
 export interface EntitySet<TEntity> {
-  execute(): Observable<TEntity[]>;
+  count(): EntitySet<TEntity>;
+  execute(): Observable<ODataResultSet<TEntity>>;
   expand<TExpanded extends keyof TEntity & string>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity>;
@@ -111,6 +118,7 @@ export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
 }
 
 export interface EntityExpand<TEntity> {
+  count(): EntityExpand<TEntity>;
   expand<TExpanded extends keyof TEntity & string>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity>;

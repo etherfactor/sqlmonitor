@@ -262,7 +262,7 @@ export abstract class ListComponent<TEntity> implements OnInit {
 
     console.log(set.getParams());
     set.execute().subscribe(values => {
-      this.records = values;
+      this.records = values.value
     });
   }
 

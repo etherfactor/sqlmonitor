@@ -1,5 +1,5 @@
 import { InferArrayType } from "../../form/form.util";
-import { EntityExpand, Expand, Filter, ODataOptions, OrderBy, OrderedEntityExpand, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
+import { Count, EntityExpand, Expand, Filter, ODataOptions, OrderBy, OrderedEntityExpand, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
 import { ɵEntityAccessor } from "./entity-accessor";
 import { ɵPrefixGenerator } from "./prefix-generator";
 
@@ -7,6 +7,7 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
 
   private readonly property: string;
 
+  private readonly countValue?: Count;
   private readonly expandValue?: Expand[];
   private readonly filterValue?: Filter[];
   private readonly orderByValue?: OrderBy[];
@@ -17,12 +18,20 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
   constructor(property: string, options?: ODataOptions) {
     this.property = property;
 
+    this.countValue = options?.count;
     this.expandValue = options?.expand;
     this.filterValue = options?.filter;
     this.orderByValue = options?.orderBy;
     this.selectValue = options?.select;
     this.skipValue = options?.skip;
     this.topValue = options?.top;
+  }
+
+  count(): EntityExpand<TEntity> {
+    const options = this.getOptions();
+    options.count = true;
+
+    return new Implementation<TEntity>(this.property, options);
   }
 
   expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity> {
@@ -91,6 +100,7 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
 
   private getOptions(): ODataOptions {
     return {
+      count: this.countValue,
       expand: this.expandValue,
       filter: this.filterValue,
       orderBy: this.orderByValue,
