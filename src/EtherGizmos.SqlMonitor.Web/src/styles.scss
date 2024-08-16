@@ -95,3 +95,11 @@ ul.pagination {
   @extend .mt-3;
   height: 0.1px;
 }
+
+[data-bs-theme="dark"] {
+  .tooltip-inner,
+  .tooltip-arrow {
+    --bs-tooltip-color: var(--bs-body-color);
+    --bs-tooltip-bg: #000000;
+  }
+}

@@ -1,0 +1,7 @@
+a.nostyle {
+  &:link,
+  &:visited {
+    text-decoration: inherit;
+    color: inherit;
+  }
+}

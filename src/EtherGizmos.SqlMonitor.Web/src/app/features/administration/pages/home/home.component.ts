@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { ActivityCardComponent } from '../../../../shared/components/activity-card/activity-card.component';
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
 import { MonitoredEnvironmentService } from '../../../../shared/services/monitored-environment/monitored-environment.service';
 import { MonitoredResourceService } from '../../../../shared/services/monitored-resource/monitored-resource.service';
@@ -12,6 +13,7 @@ import { o } from '../../../../shared/utilities/odata/odata.util';
   selector: 'app-home',
   standalone: true,
   imports: [
+    ActivityCardComponent,
     CommonModule,
     RouterModule,
   ],

@@ -14,24 +14,11 @@
 
 <div class="row">
   <div class="col-md">
-    <div class="box mt-3">
-      <div class="box-title mt-2 d-flex align-items-center">
-        <span class="bi bi-person fs-3"></span>
-        <h5 class="ms-2">Users</h5>
-      </div>
+    <activity-card title="Users" icon="bi-person"
+                   [isLoading]="loadingEnvironments$$()" [statuses]="[ { label: 'Active', count: 50, color: 'success', tooltip: 'Currently active users' }, { label: 'Dormant', count: 5, color: 'warning', tooltip: 'Users who have not logged in recently' }, { label: 'Locked', count: 10, color: 'secondary', tooltip: 'Currently inactive users' } ]"
+                   link="/admin/users" class="mt-3">
       <p class="mt-3">Manage the users who can access the system.</p>
-      <div class="d-flex justify-content-between align-items-center mt-3">
-        <span class="badge text-bg-success">Active: 50</span>
-        <span class="badge text-bg-warning">Dormant: 5</span>
-        <span class="badge text-bg-secondary">Locked: 10</span>
-      </div>
-      <div class="progress mt-3" style="height: 8px;">
-        <div class="progress-bar bg-success" role="progressbar" style="width: 70%;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-        <div class="progress-bar bg-warning" role="progressbar" style="width: 10%;" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
-        <div class="progress-bar bg-secondary" role="progressbar" style="width: 20%;" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-      <a [routerLink]="'/admin/users'" class="stretched-link"></a>
-    </div>
+    </activity-card>
   </div>
   <div class="col-md">
     <div class="box mt-3">
