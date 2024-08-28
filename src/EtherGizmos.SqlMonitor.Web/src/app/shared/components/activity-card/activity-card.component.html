@@ -20,7 +20,9 @@
       </ng-container>
     </div>
     <div class="progress mt-3" style="height: 8px;">
-      <div *ngFor="let status of statuses" class="progress-bar bg-{{status.color}}" role="progressbar" [style]="{ width: (100 * status.count / totalCount) + '%' }" [attr.aria-valuenow]="100 * status.count / totalCount" aria-valuemin="0" aria-valuemax="100"></div>
+      <ng-container *ngIf="!isLoading">
+        <div *ngFor="let status of statuses" class="progress-bar bg-{{status.color}}" role="progressbar" [style]="{ width: (100 * status.count / totalCount) + '%' }" [attr.aria-valuenow]="100 * status.count / totalCount" aria-valuemin="0" aria-valuemax="100"></div>
+      </ng-container>
     </div>
     <div *ngIf="isLoading" class="w-100 h-100 position-absolute d-flex justify-content-center align-items-center" style="top: 0%; left: 0%;">
       <div class="spinner-border" role="status">
