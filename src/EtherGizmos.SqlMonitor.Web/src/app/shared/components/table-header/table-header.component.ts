@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, Optional, SimpleChanges } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, Optional } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgxMaskDirective } from 'ngx-mask';
-import { Subscription, map } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 import { SortTableService } from '../../services/sort-table/sort-table.service';
 import { generateGuid } from '../../types/guid/guid';
 import { FilterCondition, FilterPropertyOperator, FilterType, defaultOperators, displayText, filterConditionForm, showInput } from '../../utilities/filter/filter.util';
@@ -33,7 +33,7 @@ import { TableComponent } from '../table/table.component';
     //'(mouseleave)': 'onMouseLeave($event)',
   }
 })
-export class TableHeaderComponent<TData extends object> implements OnInit, OnChanges, OnDestroy {
+export class TableHeaderComponent<TData extends object> implements OnInit, OnDestroy {
 
   @Input({ alias: 'app-table-header', required: true }) name!: string;
 
@@ -53,20 +53,26 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
   filterSubscriptions: Subscription[] = [];
 
   get direction() {
-    //return this.$sortTable.getSortDirection(this.id, this.name);
     return this.table.getSortDirection(this.name);
   }
 
   set direction(value: Direction | undefined) {
-    //if (value) {
-    //  this.$sortTable.setSortDirection(this.id, { column: this.name, direction: value });
-    //} else {
-    //  this.$sortTable.setSortDirection(this.id, undefined);
-    //}
     if (value) {
       this.table.setSortDirection(this.name, { column: this.name, direction: value });
     } else {
       this.table.setSortDirection(this.name, undefined);
+    }
+  }
+
+  get filter() {
+    return this.table.getFilterCondition(this.name);
+  }
+
+  set filter(value: FilterCondition | undefined) {
+    if (value) {
+      this.table.setFilterCondition(this.name, { ...value, column: this.name, type: this.type! });
+    } else {
+      this.table.setFilterCondition(this.name, undefined);
     }
   }
 
@@ -108,20 +114,16 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
     });
 
     this.filterSubscriptions.push(operatorSub);
+
+    const valueSub = condition.valueChanges.pipe(
+      debounceTime(0),
+    ).subscribe(() => {
+      this.filter = this.getFilterCondition();
+    });
+
+    this.filterSubscriptions.push(valueSub);
   }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes["name"]) {
-      const name = changes["name"];
-      this.table.unbindFilter(name.previousValue);
-
-      const filter = this.filterForm.valueChanges.pipe(
-        map(() => this.getFilterCondition() as FilterCondition ?? { operator: undefined, value: undefined }),
-      );
-      this.table.bindFilter(name.currentValue, this.type ?? 'string', filter);
-    }
-  }
-
+  
   ngOnDestroy(): void {
     this.$sortTable.setSortDirection(this.id, undefined);
 
@@ -176,6 +178,11 @@ export class TableHeaderComponent<TData extends object> implements OnInit, OnCha
     if (!value.operator)
       return undefined;
 
-    return value;
+    return value as FilterCondition | undefined;
+  }
+
+  setFilterCondition(value: FilterCondition) {
+    const condition = this.filterForm;
+    condition.setValue(value);
   }
 }

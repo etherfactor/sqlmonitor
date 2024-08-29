@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
-import { isEqual } from 'moderndash';
-import { Observable, Subscription, combineLatest, debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
+import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, TemplateRef, ViewChildren } from '@angular/core';
+import { Subject, Subscription, combineLatest, debounceTime } from 'rxjs';
 import { IteratePipe } from '../../pipes/iterate/iterate.pipe';
 import { generateGuid } from '../../types/guid/guid';
-import { FilterColumnCondition, FilterCondition, FilterType } from '../../utilities/filter/filter.util';
+import { FilterColumnCondition, FilterCondition } from '../../utilities/filter/filter.util';
 import { Direction } from '../../utilities/odata/odata.util';
 import { SortColumn } from '../../utilities/sort/sort.util';
+import { TableHeaderComponent } from '../table-header/table-header.component';
 
 @Component({
   selector: 'app-table',
@@ -18,7 +18,7 @@ import { SortColumn } from '../../utilities/sort/sort.util';
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss'
 })
-export class TableComponent<TData extends object> {
+export class TableComponent<TData extends object> implements OnInit, OnDestroy {
 
   @Input({ required: true }) data!: TData[];
 
@@ -26,18 +26,41 @@ export class TableComponent<TData extends object> {
 
   @ContentChild('rows') rows!: TemplateRef<any>;
 
+  @ViewChildren(TableHeaderComponent) private headerChildren!: QueryList<TableHeaderComponent<TData>>;
+
   @Input() sort?: SortColumn;
   @Output() sortChange = new EventEmitter<SortColumn>();
+  private debounceSort = new Subject<SortColumn>();
 
-  private filters: { [name: string]: Observable<FilterColumnCondition> } = {};
-  private filterSubscription?: Subscription;
+  @Input() filter: FilterColumnCondition[] = [];
   @Output() filterChange = new EventEmitter<FilterColumnCondition[]>();
+  private debounceFilter = new Subject<FilterColumnCondition[]>();
+
+  private debounceAll = combineLatest([this.debounceSort, this.debounceFilter]);
+  private debounceAllSub?: Subscription;
 
   @Input() minRows: number = 1;
 
   id = generateGuid();
 
   constructor() { }
+
+  ngOnInit(): void {
+    this.debounceSort.pipe(
+      debounceTime(0),
+    ).subscribe(() => {
+      this.sortChange.emit(this.sort);
+    });
+
+    this.debounceFilter.pipe(
+      debounceTime(0),
+    ).subscribe(() => {
+      this.filterChange.emit(this.filter);
+    });
+  }
+
+  ngOnDestroy(): void {
+  }
 
   getDefaultHeaders(): string[] {
     if (this.data[0]) {
@@ -61,35 +84,29 @@ export class TableComponent<TData extends object> {
     this.sortChange.emit(this.sort);
   }
 
-  bindFilter(name: string, type: FilterType, filter: Observable<FilterCondition>) {
-    this.filters[name] = filter.pipe(
-      startWith({ column: name, type: type, operator: undefined, value: undefined }),
-      map(item => ({ column: name, type: type, ...item })),
-    );
-
-    this.regenerateFilters();
+  getFilterCondition(column: string): FilterCondition | undefined {
+    const maybeFilter = this.filter?.find(e => e.column === column);
+    if (maybeFilter) {
+      return maybeFilter;
+    } else {
+      return undefined;
+    }
   }
 
-  unbindFilter(name: string) {
-    delete this.filters[name];
-
-    this.regenerateFilters();
-  }
-
-  regenerateFilters() {
-    this.filterSubscription?.unsubscribe();
-    this.filterSubscription = undefined;
-
-    const observables = Object.keys(this.filters)
-      .map(key => this.filters[key].pipe(
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-      ));
-
-    this.filterSubscription = combineLatest(observables).pipe(
-      debounceTime(0),
-      map(filters => filters.filter(item => item.operator)),
-    ).subscribe(value => {
-      this.filterChange.emit(value);
-    });
+  setFilterCondition(column: string, filter: FilterColumnCondition | undefined) {
+    const maybeIndex = this.filter?.findIndex(e => e.column === column);
+    const maybeFilter = maybeIndex >= 0 ? this.filter[maybeIndex] : undefined;
+    
+    if (maybeIndex >= 0 && filter) {
+      this.filter[maybeIndex] = filter;
+    } else if (filter) {
+      this.filter.push(filter);
+    } else if (maybeIndex >= 0) {
+      this.filter.splice(maybeIndex, 1);
+    }
+    
+    if (maybeFilter !== filter || maybeFilter?.operator !== filter?.operator || maybeFilter?.value !== filter?.value) {
+      this.filterChange.emit([...this.filter]);
+    }
   }
 }
