@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { RecordStatus } from '../../utilities/service-store/service-store.util';
 
 @Component({
   selector: 'activity-card',
@@ -29,11 +30,4 @@ export class ActivityCardComponent {
     const count = this.statuses.reduce((count, status) => count + status.count, 0);
     return count;
   }
-}
-
-export interface RecordStatus {
-  label: string;
-  count: number;
-  color: string;
-  tooltip?: string;
 }

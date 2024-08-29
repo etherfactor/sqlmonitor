@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { signalStore } from '@ngrx/signals';
 import { Observable } from 'rxjs';
 import { MonitoredResource } from '../../models/monitored-resource';
 import { Guid } from '../../types/guid/guid';
-import { EntitySet } from '../../utilities/odata/odata.util';
+import { EntitySet, o } from '../../utilities/odata/odata.util';
+import { withStateLoading } from '../../utilities/service-store/service-store.util';
 
 @Injectable({
   providedIn: 'root',
@@ -24,3 +26,48 @@ export abstract class MonitoredResourceService {
 
   abstract delete(id: Guid): Observable<void>;
 }
+
+export const MonitoredResourceStore = signalStore(
+  { providedIn: 'root' },
+  withStateLoading(() => {
+    const $monitoredResource = inject(MonitoredResourceService);
+
+    return {
+      states: {
+        Active: {
+          meta: {
+            color: 'success',
+            tooltip: 'Actively monitored resources',
+          },
+          load: $monitoredResource.set
+            .filter(e =>
+              o.eq(
+                e.prop('isActive'),
+                o.bool(true),
+              ),
+            )
+            .top(0)
+            .count()
+            .execute(),
+        },
+        Inactive: {
+          meta: {
+            color: 'secondary',
+            tooltip: 'Not monitored resources',
+          },
+          load:
+            $monitoredResource.set
+              .filter(e =>
+                o.ne(
+                  e.prop('isActive'),
+                  o.bool(true),
+                )
+              )
+              .top(0)
+              .count()
+              .execute(),
+        },
+      },
+    };
+  }),
+);
