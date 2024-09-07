@@ -3,7 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
 import { isEqual } from 'moderndash';
-import { Subject, debounceTime, filter } from 'rxjs';
+import { Subject, catchError, debounceTime, filter, throwError } from 'rxjs';
 import { BodyContainerType, BodyService } from '../../../services/body/body.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../services/navbar-menu/navbar-menu.service';
 import { Guid } from '../../../types/guid/guid';
@@ -26,6 +26,9 @@ export abstract class ListComponent<TEntity> implements OnInit {
   private activeFilters: FilterColumnCondition[] = [];
 
   private searchSubject = new Subject<void>();
+
+  get isLoading(): boolean { return this.isLoadingStack > 0; }
+  private isLoadingStack: number = 0;
 
   protected records: TEntity[] = [];
 
@@ -65,7 +68,7 @@ export abstract class ListComponent<TEntity> implements OnInit {
       this.search();
     });
   }
-
+  
   private initialize() {
     this._activeColumns = [...this.columns];
     this.refresh();
@@ -261,8 +264,15 @@ export abstract class ListComponent<TEntity> implements OnInit {
       .skip((1 - 1) * this.perPage);
 
     console.log(set.getParams());
-    set.execute().subscribe(values => {
-      this.records = values.value
+    this.isLoadingStack++;
+    set.execute().pipe(
+      catchError(err => {
+        this.isLoadingStack--;
+        return throwError(() => err);
+      })
+    ).subscribe(values => {
+      this.records = values.value;
+      this.isLoadingStack--;
     });
   }
 

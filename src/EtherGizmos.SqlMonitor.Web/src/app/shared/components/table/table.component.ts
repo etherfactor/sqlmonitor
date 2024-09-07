@@ -28,6 +28,8 @@ export class TableComponent<TData extends object> implements OnInit, OnDestroy {
 
   @ViewChildren(TableHeaderComponent) private headerChildren!: QueryList<TableHeaderComponent<TData>>;
 
+  @Input() isLoading = false;
+
   @Input() sort?: SortColumn;
   @Output() sortChange = new EventEmitter<SortColumn>();
   private debounceSort = new Subject<SortColumn>();
@@ -35,7 +37,7 @@ export class TableComponent<TData extends object> implements OnInit, OnDestroy {
   @Input() filter: FilterColumnCondition[] = [];
   @Output() filterChange = new EventEmitter<FilterColumnCondition[]>();
   private debounceFilter = new Subject<FilterColumnCondition[]>();
-
+  
   private debounceAll = combineLatest([this.debounceSort, this.debounceFilter]);
   private debounceAllSub?: Subscription;
 

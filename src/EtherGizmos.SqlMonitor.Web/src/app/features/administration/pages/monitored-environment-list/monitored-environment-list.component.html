@@ -12,7 +12,9 @@
   </div>
 
   <div class="mt-3">
-    <app-table [data]="records" [minRows]="perPage" [sort]="activeSort" (sortChange)="onSortChange($event)" (filterChange)="onFilterChange($event)">
+    <app-table [data]="records" [minRows]="perPage" [isLoading]="isLoading"
+               [sort]="activeSort" (sortChange)="onSortChange($event)"
+               (filterChange)="onFilterChange($event)">
       <ng-template #headers>
         <th app-table-header="name" type="string" [sortable]="true" [filterable]="true">Name</th>
         <th app-table-header="isActive" type="boolean" [sortable]="true" [filterable]="true">Active?</th>
