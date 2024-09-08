@@ -38,6 +38,13 @@
       <a [routerLink]="'/admin/groups'" class="stretched-link"></a>
     </div>
   </div>
+  <div class="col-md">
+    <activity-card title="Access Control List" icon="bi-shield-shaded"
+                   [isLoading]="loadingUsers$$()" [statuses]="[{label: 'Grants', count: 150, color: 'success', tooltip: 'Currently effective grants.'}, {label: 'Denies', count: 100, color: 'danger', tooltip: 'Currently effective denies.'}]"
+                   link="/admin/acl" class="mt-3">
+      <p class="mt-3">Bulk manage user and group permissions.</p>
+    </activity-card>
+  </div>
 </div>
 
 <div class="row">
