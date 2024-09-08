@@ -7,6 +7,7 @@ import { DateTime } from 'luxon';
 import { Observable } from 'rxjs';
 import { EditableComponent } from '../../../../shared/components/_base/editable/editable.component';
 import { InputLuxonDatetimeComponent } from '../../../../shared/components/input-luxon-datetime/input-luxon-datetime.component';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 import { User, userForm } from '../../../../shared/models/user';
 import { BodyService } from '../../../../shared/services/body/body.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
@@ -22,6 +23,7 @@ import { Guid, GuidZ } from '../../../../shared/types/guid/guid';
     InputLuxonDatetimeComponent,
     NgSelectModule,
     ReactiveFormsModule,
+    TableComponent,
   ],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss'
@@ -30,6 +32,16 @@ export class UserDetailComponent extends EditableComponent<User, Guid> implement
 
   private readonly $form: FormBuilder;
   private readonly $user: UserService;
+
+  aclEntries: AclEntry[] = [
+    {
+      principalId: 'A',
+      securableId: 'A',
+      securableTypeId: 'A',
+      permissionId: 'A',
+      isGrant: true,
+    },
+  ];
 
   constructor(
     $activatedRoute: ActivatedRoute,
@@ -134,4 +146,12 @@ export class UserDetailComponent extends EditableComponent<User, Guid> implement
 
     return breadcrumbs;
   }
+}
+
+interface AclEntry {
+  principalId: string;
+  securableId: string;
+  securableTypeId: string;
+  permissionId: string;
+  isGrant: boolean;
 }
