@@ -15,7 +15,7 @@
 <div class="row">
   <div class="col-md">
     <activity-card title="Users" icon="bi-person"
-                   [isLoading]="loadingEnvironments$$()" [statuses]="[ { label: 'Active', count: 50, color: 'success', tooltip: 'Currently active users' }, { label: 'Dormant', count: 5, color: 'warning', tooltip: 'Users who have not logged in recently' }, { label: 'Locked', count: 10, color: 'secondary', tooltip: 'Currently inactive users' } ]"
+                   [isLoading]="loadingUsers$$()" [statuses]="userStatuses$$()"
                    link="/admin/users" class="mt-3">
       <p class="mt-3">Manage the users who can access the system.</p>
     </activity-card>

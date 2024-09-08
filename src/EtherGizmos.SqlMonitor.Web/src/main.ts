@@ -16,6 +16,7 @@ import { provideMetricServiceMock } from './app/shared/services/metric/metric.se
 import { provideMonitoredEnvironmentServiceMock } from './app/shared/services/monitored-environment/monitored-environment.mock';
 import { provideMonitoredResourceServiceMock } from './app/shared/services/monitored-resource/monitored-resource.service.mock';
 import { provideMonitoredSystemServiceMock } from './app/shared/services/monitored-system/monitored-system.service.mock';
+import { provideUserServiceMock } from './app/shared/services/user/user.service.mock';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -38,6 +39,7 @@ bootstrapApplication(
       provideMonitoredEnvironmentServiceMock(),
       provideMonitoredResourceServiceMock(),
       provideMonitoredSystemServiceMock(),
+      provideUserServiceMock(),
     ]
   })
   .catch(err => console.error(err));

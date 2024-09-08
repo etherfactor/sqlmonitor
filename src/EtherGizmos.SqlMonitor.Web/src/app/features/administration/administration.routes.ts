@@ -2,6 +2,8 @@ import { Routes } from "@angular/router";
 
 export const ADMINISTRATION_ROUTES: Routes = [
   { path: '', pathMatch: 'full', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
+  { path: 'user', loadChildren: () => import('./user.routes').then(m => m.USER_ROUTES) },
+  { path: 'users', loadChildren: () => import('./user.routes').then(m => m.USER_ROUTES) },
   { path: 'system', loadChildren: () => import('./monitored-system.routes').then(m => m.MONITORED_SYSTEM_ROUTES) },
   { path: 'systems', loadChildren: () => import('./monitored-system.routes').then(m => m.MONITORED_SYSTEM_ROUTES) },
   { path: 'resource', loadChildren: () => import('./monitored-resource.routes').then(m => m.MONITORED_RESOURCE_ROUTES) },
