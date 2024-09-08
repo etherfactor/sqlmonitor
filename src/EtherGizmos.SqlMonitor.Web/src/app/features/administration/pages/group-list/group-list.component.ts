@@ -1,20 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ListComponent, TableColumn } from '../../../../shared/components/_base/list/list.component';
 import { TableHeaderComponent } from '../../../../shared/components/table-header/table-header.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { User } from '../../../../shared/models/user';
+import { Group } from '../../../../shared/models/group';
 import { BodyService } from '../../../../shared/services/body/body.service';
+import { GroupService } from '../../../../shared/services/group/group.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
-import { UserService } from '../../../../shared/services/user/user.service';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
 
 @Component({
-  selector: 'user-list',
+  selector: 'group-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -22,24 +22,24 @@ import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
     TableComponent,
     TableHeaderComponent,
   ],
-  templateUrl: './user-list.component.html',
-  styleUrl: './user-list.component.scss'
+  templateUrl: './group-list.component.html',
+  styleUrl: './group-list.component.scss'
 })
-export class UserListComponent extends ListComponent<User> implements OnInit {
+export class GroupListComponent extends ListComponent<Group> {
 
-  private readonly $user: UserService;
+  private readonly $group: GroupService;
   private readonly $router: Router;
 
   constructor(
     $body: BodyService,
     $form: FormBuilder,
     $modal: NgbModal,
-    $user: UserService,
+    $group: GroupService,
     $navbarMenu: NavbarMenuService,
     $router: Router,
   ) {
     super($body, $form, $modal, $navbarMenu);
-    this.$user = $user;
+    this.$group = $group;
     this.$router = $router;
   }
 
@@ -79,8 +79,8 @@ export class UserListComponent extends ListComponent<User> implements OnInit {
         link: '/admin',
       },
       {
-        label: 'Users',
-        link: '/admin/users',
+        label: 'Groups',
+        link: '/admin/groups',
       },
     ];
 
@@ -102,11 +102,11 @@ export class UserListComponent extends ListComponent<User> implements OnInit {
     return columns;
   }
 
-  protected override getEntitySet(): EntitySet<User> {
-    return this.$user.set;
+  protected override getEntitySet(): EntitySet<Group> {
+    return this.$group.set;
   }
 
   @Bound new() {
-    this.$router.navigate(['/admin/user', 'new']);
+    this.$router.navigate(['/admin/group', 'new']);
   }
 }

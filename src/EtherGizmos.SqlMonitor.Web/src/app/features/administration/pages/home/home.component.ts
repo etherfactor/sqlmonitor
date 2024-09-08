@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ActivityCardComponent } from '../../../../shared/components/activity-card/activity-card.component';
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
+import { GroupStore } from '../../../../shared/services/group/group.service';
 import { MonitoredEnvironmentService, MonitoredEnvironmentStore } from '../../../../shared/services/monitored-environment/monitored-environment.service';
 import { MonitoredResourceService, MonitoredResourceStore } from '../../../../shared/services/monitored-resource/monitored-resource.service';
 import { MonitoredSystemService, MonitoredSystemStore } from '../../../../shared/services/monitored-system/monitored-system.service';
@@ -23,6 +24,7 @@ import { UserStore } from '../../../../shared/services/user/user.service';
 export class HomeComponent implements OnInit {
 
   private readonly $body: BodyService;
+  private readonly $groupStore = inject(GroupStore);
   private readonly $monitoredEnvironment: MonitoredEnvironmentService;
   private readonly $monitoredEnvironmentStore = inject(MonitoredEnvironmentStore);
   private readonly $monitoredResource: MonitoredResourceService;
@@ -31,6 +33,9 @@ export class HomeComponent implements OnInit {
   private readonly $monitoredSystemStore = inject(MonitoredSystemStore);
   private readonly $userStore = inject(UserStore);
   private readonly $navbarMenu: NavbarMenuService;
+
+  loadingGroups$$ = this.$groupStore.isLoading;
+  groupStatuses$$ = this.$groupStore.states;
 
   loadingEnvironments$$ = this.$monitoredEnvironmentStore.isLoading;
   environmentStatuses$$ = this.$monitoredEnvironmentStore.states;
@@ -63,6 +68,7 @@ export class HomeComponent implements OnInit {
     this.$navbarMenu.setActions(this.actions);
     this.$navbarMenu.setBreadcrumbs(this.breadcrumbs);
 
+    this.$groupStore.loadTotals();
     this.$monitoredEnvironmentStore.loadTotals();
     this.$monitoredResourceStore.loadTotals();
     this.$monitoredSystemStore.loadTotals();

@@ -10,6 +10,7 @@ import { provideQuillConfig } from 'ngx-quill';
 import { AppComponent } from './app/app.component';
 import { APP_ROUTES } from './app/app.routes';
 import { provideDashboardServiceMock } from './app/shared/services/dashboard/dashboard.service.mock';
+import { provideGroupServiceMock } from './app/shared/services/group/group.service.mock';
 import { provideInstanceServiceMock } from './app/shared/services/instance/instance.service.mock';
 import { provideMetricDataServiceMock } from './app/shared/services/metric-data/metric-data.service.mock';
 import { provideMetricServiceMock } from './app/shared/services/metric/metric.service.mock';
@@ -33,6 +34,7 @@ bootstrapApplication(
       provideSimpleConfig(CDK_DRAG_CONFIG, { zIndex: 1100 }),
       provideEnvironmentNgxMask(),
       provideDashboardServiceMock(),
+      provideGroupServiceMock(),
       provideInstanceServiceMock(),
       provideMetricServiceMock(),
       provideMetricDataServiceMock(),
