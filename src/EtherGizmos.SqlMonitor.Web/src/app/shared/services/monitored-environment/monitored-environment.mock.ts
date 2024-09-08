@@ -19,6 +19,62 @@ cache['715b1882-ad9c-4469-b627-f16e3512ac57' as Guid] = {
   isActive: true,
 };
 
+cache['eaf90ab9-d9b7-4e63-b6d2-6e5c6d9b63f8' as Guid] = {
+  id: 'eaf90ab9-d9b7-4e63-b6d2-6e5c6d9b63f8' as Guid,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: DateTime.now(),
+  modifiedByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  name: 'Production Environment',
+  description: 'Environment where live applications run.',
+  isActive: true,
+};
+
+cache['34f4d1eb-1b29-42bb-a4b6-c4e12e00757a' as Guid] = {
+  id: '34f4d1eb-1b29-42bb-a4b6-c4e12e00757a' as Guid,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: DateTime.now(),
+  modifiedByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  name: 'Staging Environment',
+  description: 'For testing before production deployment.',
+  isActive: false,
+};
+
+cache['dbd80a61-34e8-47b5-9d12-dcc3f8c9d6be' as Guid] = {
+  id: 'dbd80a61-34e8-47b5-9d12-dcc3f8c9d6be' as Guid,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: undefined,
+  modifiedByUserId: undefined,
+  name: 'Testing Environment',
+  description: 'Used for testing features and functionalities.',
+  isActive: true,
+};
+
+cache['5a1b3f8e-3cfa-4f7b-aaa4-01c3c2c9e6ff' as Guid] = {
+  id: '5a1b3f8e-3cfa-4f7b-aaa4-01c3c2c9e6ff' as Guid,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: DateTime.now(),
+  modifiedByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  name: 'Development Environment',
+  description: 'For development work and local testing.',
+  isActive: false,
+};
+
+cache['9ec63577-1c5e-493f-83f8-3e292b48e6f4' as Guid] = {
+  id: '9ec63577-1c5e-493f-83f8-3e292b48e6f4' as Guid,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: undefined,
+  modifiedByUserId: undefined,
+  name: 'QA Environment',
+  description: 'Quality assurance testing environment.',
+  isActive: true,
+};
+
+
 @Injectable({
   providedIn: 'root'
 })
