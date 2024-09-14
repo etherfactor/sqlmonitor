@@ -1,0 +1,33 @@
+<div class="row">
+  <div class="col-12 mt-3">
+    <h4>Queries Management</h4>
+    <div class="text-muted">Manage the queries gathering metrics in your environment.</div>
+  </div>
+</div>
+
+<div class="box mt-3">
+  <div class="box-title mt-2 d-flex align-items-center">
+    <span class="bi bi-filetype-sql fs-3"></span>
+    <h5 class="ms-2">Queries List</h5>
+  </div>
+
+  <div class="mt-3">
+    <app-table [data]="records" [minRows]="perPage" [isLoading]="isLoading"
+               [sort]="activeSort" (sortChange)="onSortChange($event)"
+               (filterChange)="onFilterChange($event)">
+      <ng-template #headers>
+        <th app-table-header="name" type="string" [sortable]="true" [filterable]="true">Name</th>
+        <th app-table-header="isActive" type="boolean" [sortable]="true" [filterable]="true">Active?</th>
+        <th app-table-header="createdAt" type="datetime" [sortable]="true" [filterable]="true">Created at</th>
+        <th>Actions</th>
+      </ng-template>
+
+      <ng-template #rows let-row>
+        <td>{{row.name}}</td>
+        <td>{{row.isActive ? 'Active' : 'Inactive'}}</td>
+        <td>{{row.createdAt.startOf('minute').toLocaleString({ weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}}</td>
+        <td><a [routerLink]="['/admin/query/', row.id]">Edit</a></td>
+      </ng-template>
+    </app-table>
+  </div>
+</div>

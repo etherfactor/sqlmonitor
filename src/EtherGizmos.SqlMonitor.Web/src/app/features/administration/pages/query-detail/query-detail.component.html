@@ -1,0 +1,181 @@
+<ng-container *ngIf="isLoading">
+  <div style="position: fixed; top: 0; left: 0; height: 100%; width: 100%; background-color: color-mix(in srgb, var(--bs-body-bg) 50%, transparent); z-index: 100;">
+  </div>
+  <div style="position: fixed; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%); z-index: 100;">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="form" [formGroup]="form">
+  <div class="row">
+    <div class="col-12 mt-3">
+      <h4>Edit Query</h4>
+      <div class="text-muted">Edit details of one of the queries in your environment.</div>
+    </div>
+  </div>
+
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-filetype-sql fs-3"></span>
+      <h5 class="ms-2">Query Information</h5>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mt-3">
+        <div class="row">
+          <label for="userName" class="col-sm-4 col-form-label">Name</label>
+          <div class="col-sm-8">
+            <input id="userName" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="name" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="row">
+          <label for="userIsActive" class="col-sm-4 col-form-label">Is active?</label>
+          <div class="col-sm-8">
+            <ng-select id="userIsActive"
+                       formControlName="isActive"
+                       [clearable]="false"
+                       [selectOnTab]="true"
+                       [class]="isEditing ? '' : 'plaintext'">
+              <ng-option [value]="true">Active</ng-option>
+              <ng-option [value]="false">Inactive</ng-option>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <div class="row">
+          <label for="systemDescription" class="col-sm-2 col-form-label">Description</label>
+          <div class="col-sm-10">
+            <textarea id="systemDescription" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" rows="4" formControlName="description"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-filetype-sql fs-3"></span>
+      <h5 class="ms-2">Metadata</h5>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="row mt-3">
+          <label for="userCreatedAt" class="col-sm-4 col-form-label">Created at</label>
+          <div class="col-sm-8">
+            <input-luxon-datetime id="userCreatedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="createdAt"></input-luxon-datetime>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <label for="userCreatedBy" class="col-sm-4 col-form-label">Created by</label>
+          <div class="col-sm-8">
+            <input id="userCreatedBy" type="text" readonly class="form-control-plaintext" formControlName="createdByUserId" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="row mt-3">
+          <label for="userModifiedAt" class="col-sm-4 col-form-label">Modified at</label>
+          <div class="col-sm-8">
+            <ng-container *ngIf="form.controls.modifiedAt.value; else noModifiedAt">
+              <input-luxon-datetime id="userModifiedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="modifiedAt"></input-luxon-datetime>
+            </ng-container>
+            <ng-template #noModifiedAt>
+              <input id="userModifiedAt" type="text" readonly class="form-control-plaintext" value="Never" />
+            </ng-template>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <label for="userModifiedBy" class="col-sm-4 col-form-label">Modified by</label>
+          <div class="col-sm-8">
+            <ng-container *ngIf="form.controls.modifiedByUserId.value; else noModifiedBy">
+              <input id="userModifiedBy" type="text" readonly class="form-control-plaintext" formControlName="modifiedByUserId" />
+            </ng-container>
+            <ng-template #noModifiedBy>
+              <input id="userModifiedBy" type="text" readonly class="form-control-plaintext" value="Never" />
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Variants Section -->
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-code-slash fs-3"></span>
+      <h5 class="ms-2">SQL Variants</h5>
+    </div>
+    <div class="row" *ngIf="isEditing">
+      <div class="col-md-6 mt-3">
+        <div class="row">
+          <label for="newSqlType" class="col-sm-4 col-form-label">SQL Type</label>
+          <div class="col-sm-8">
+            <ng-select id="newSqlType" [clearable]="false">
+              <ng-option value="MariaDb">MariaDB</ng-option>
+              <ng-option value="MySql">MySQL</ng-option>
+              <ng-option value="PostgreSql">PostgreSQL</ng-option>
+              <ng-option value="SqlServer">SQL Server</ng-option>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <button class="btn btn-primary">
+          <span class="bi bi-plus-square"></span>
+          Add variant
+        </button>
+      </div>
+    </div>
+    <ng-container *ngFor="let variant of form.controls.variants.controls; let i = index" [formGroup]="variant">
+      <hr *ngIf="isEditing || i > 0" style="margin-top: 9.5px; margin-bottom: -7.5px; border-color: var(--bs-border-color-translucent); opacity: 100%;" />
+      <div class="row">
+        <div class="col-md-6 mt-3">
+          <div class="row">
+            <label for="sqlType-{{i}}" class="col-sm-4 col-form-label">SQL Type</label>
+            <div class="col-sm-8">
+              <input id="sqlType-{{i}}" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" [value]="getSqlTypeLabel(variant.controls.sqlType.value!)" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center justify-content-end mt-3">
+          <button class="btn btn-danger">
+            <span class="bi bi-x-lg"></span>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mt-3">
+          <div class="row">
+            <label for="queryText-{{i}}" class="col-sm-2 col-form-label">Query Text</label>
+            <div class="col-sm-10">
+              <textarea id="queryText-{{i}}" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" rows="4" formControlName="queryText"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Metrics Section -->
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-graph-up fs-3"></span>
+      <h5 class="ms-2">Associated Metrics</h5>
+    </div>
+    <div *ngFor="let metric of form.controls.metrics.controls; let i = index" class="row mt-3" [formGroup]="metric">
+      <div class="col-md-4">
+        <label for="metricId-{{i}}" class="col-form-label">Metric ID</label>
+        <input id="metricId-{{i}}" formControlName="metricId" class="form-control" readonly />
+      </div>
+      <div class="col-md-8">
+        <label for="valueColumn-{{i}}" class="col-form-label">Value Column</label>
+        <input id="valueColumn-{{i}}" formControlName="valueColumn" class="form-control" />
+      </div>
+    </div>
+  </div>
+
+</ng-container>
