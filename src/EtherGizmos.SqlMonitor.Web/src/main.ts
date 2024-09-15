@@ -1,11 +1,12 @@
 /// <reference types="@angular/localize" />
 
 import { CDK_DRAG_CONFIG } from '@angular/cdk/drag-drop';
-import { InjectionToken, Provider, enableProdMode } from '@angular/core';
+import { InjectionToken, Provider, enableProdMode, importProvidersFrom } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { provideEnvironmentNgxMask } from 'ngx-mask';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { provideQuillConfig } from 'ngx-quill';
 import { AppComponent } from './app/app.component';
 import { APP_ROUTES } from './app/app.routes';
@@ -34,6 +35,7 @@ bootstrapApplication(
       provideCharts(withDefaultRegisterables()),
       provideSimpleConfig(CDK_DRAG_CONFIG, { zIndex: 1100 }),
       provideEnvironmentNgxMask(),
+      importProvidersFrom(MonacoEditorModule.forRoot()),
       provideDashboardServiceMock(),
       provideGroupServiceMock(),
       provideInstanceServiceMock(),

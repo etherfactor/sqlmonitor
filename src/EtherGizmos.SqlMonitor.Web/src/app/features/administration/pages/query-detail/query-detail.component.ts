@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DateTime } from 'luxon';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { Observable } from 'rxjs';
 import { EditableComponent } from '../../../../shared/components/_base/editable/editable.component';
 import { InputLuxonDatetimeComponent } from '../../../../shared/components/input-luxon-datetime/input-luxon-datetime.component';
@@ -24,6 +25,7 @@ import { Guid, GuidZ } from '../../../../shared/types/guid/guid';
     CommonModule,
     FormsModule,
     InputLuxonDatetimeComponent,
+    MonacoEditorModule,
     NgSelectModule,
     ReactiveFormsModule,
     TableComponent,
@@ -161,7 +163,7 @@ export class QueryDetailComponent extends EditableComponent<Query, Guid> impleme
   }
 
   tryAddVariant() {
-    this.newSqlTypeFormControl.markAllAsTouched();
+    this.newSqlTypeFormControl.markAsTouched();
     if (this.newSqlTypeFormControl.invalid)
       return;
 
@@ -178,6 +180,7 @@ export class QueryDetailComponent extends EditableComponent<Query, Guid> impleme
     }
     this.form.controls.variants.insert(useIndex, newForm);
 
+    this.newSqlTypeFormControl.markAsUntouched();
     this.newSqlTypeFormControl.updateValueAndValidity();
   }
 
@@ -186,6 +189,20 @@ export class QueryDetailComponent extends EditableComponent<Query, Guid> impleme
       return;
 
     this.form.controls.variants.removeAt(index);
+  }
+
+  getText(index: number) {
+    if (!this.form)
+      return '';
+
+    return this.form.controls.variants.controls[index]?.value?.queryText ?? '';
+  }
+
+  setText(index: number, value: string | undefined) {
+    if (!this.form)
+      return undefined;
+
+    return this.form.controls.variants.controls[index]?.controls?.queryText?.setValue(value);
   }
 
   getSqlTypeLabel = getSqlTypeLabel;

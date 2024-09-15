@@ -152,7 +152,7 @@
           <div class="row">
             <label for="queryText-{{i}}" class="col-sm-2 col-form-label">Query Text</label>
             <div class="col-sm-10">
-              <textarea id="queryText-{{i}}" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" rows="4" formControlName="queryText"></textarea>
+              <ngx-monaco-editor [options]="{ theme: 'vs-dark', language: 'sql', readOnly: !isEditing }" formControlName="queryText" readonly="true"></ngx-monaco-editor>
             </div>
           </div>
         </div>
