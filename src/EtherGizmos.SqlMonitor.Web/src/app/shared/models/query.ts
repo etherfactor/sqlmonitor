@@ -39,6 +39,6 @@ export const queryForm = formFactoryForModel<Query, DefaultControlTypes>(($form,
   isActive: [model.isActive],
   bucketColumn: [model.bucketColumn],
   timestampUtcColumn: [model.timestampUtcColumn],
-  variants: $form.nonNullable.array(model.variants.map(item => queryVariantForm($form, item))),
+  variants: $form.nonNullable.array(model.variants.sort((a, b) => a.sqlType.localeCompare(b.sqlType)).map(item => queryVariantForm($form, item))),
   metrics: $form.nonNullable.array(model.metrics.map(item => queryMetricForm($form, item))),
 }));

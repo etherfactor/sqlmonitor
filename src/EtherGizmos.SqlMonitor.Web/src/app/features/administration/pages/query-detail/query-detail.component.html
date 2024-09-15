@@ -110,24 +110,24 @@
       <h5 class="ms-2">SQL Variants</h5>
     </div>
     <div class="row" *ngIf="isEditing">
-      <div class="col-md-6 mt-3">
+      <div class="col-12 mt-3">
         <div class="row">
-          <label for="newSqlType" class="col-sm-4 col-form-label">SQL Type</label>
-          <div class="col-sm-8">
-            <ng-select id="newSqlType" [clearable]="false">
+          <label for="newSqlType" class="col-sm-2 col-form-label">SQL Type</label>
+          <div class="col-sm">
+            <ng-select id="newSqlType" [clearable]="false" [formControl]="newSqlTypeFormControl">
               <ng-option value="MariaDb">MariaDB</ng-option>
               <ng-option value="MySql">MySQL</ng-option>
               <ng-option value="PostgreSql">PostgreSQL</ng-option>
               <ng-option value="SqlServer">SQL Server</ng-option>
             </ng-select>
           </div>
+          <div class="col-sm-auto">
+            <button class="btn btn-primary" (click)="tryAddVariant()">
+              <span class="bi bi-plus-square"></span>
+              Add variant
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6 mt-3">
-        <button class="btn btn-primary">
-          <span class="bi bi-plus-square"></span>
-          Add variant
-        </button>
       </div>
     </div>
     <ng-container *ngFor="let variant of form.controls.variants.controls; let i = index" [formGroup]="variant">
@@ -137,12 +137,12 @@
           <div class="row">
             <label for="sqlType-{{i}}" class="col-sm-4 col-form-label">SQL Type</label>
             <div class="col-sm-8">
-              <input id="sqlType-{{i}}" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" [value]="getSqlTypeLabel(variant.controls.sqlType.value!)" />
+              <input id="sqlType-{{i}}" type="text" class="form-control-plaintext" [readonly]="true" [value]="getSqlTypeLabel(variant.controls.sqlType.value!)" />
             </div>
           </div>
         </div>
         <div class="col-md-6 d-flex align-items-center justify-content-end mt-3">
-          <button class="btn btn-danger">
+          <button class="btn btn-danger" (click)="removeVariant(i)">
             <span class="bi bi-x-lg"></span>
           </button>
         </div>

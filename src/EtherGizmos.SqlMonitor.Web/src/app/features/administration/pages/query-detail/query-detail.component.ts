@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DateTime } from 'luxon';
@@ -10,8 +10,8 @@ import { InputLuxonDatetimeComponent } from '../../../../shared/components/input
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { Query, queryForm } from '../../../../shared/models/query';
 import { QueryMetric } from '../../../../shared/models/query-metric';
-import { QueryVariant } from '../../../../shared/models/query-variant';
-import { getSqlTypeLabel } from '../../../../shared/models/sql-type';
+import { QueryVariant, queryVariantForm } from '../../../../shared/models/query-variant';
+import { SqlType, getSqlTypeLabel } from '../../../../shared/models/sql-type';
 import { BodyService } from '../../../../shared/services/body/body.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { QueryService } from '../../../../shared/services/query/query.service';
@@ -36,6 +36,13 @@ export class QueryDetailComponent extends EditableComponent<Query, Guid> impleme
   private readonly $form: FormBuilder;
   private readonly $user: QueryService;
   
+  newSqlTypeFormControl = new FormControl<SqlType | undefined>(undefined, {
+    nonNullable: true,
+    validators: [
+      control => this.isNotDuplicateType(control.value),
+    ],
+  });
+  
   constructor(
     $activatedRoute: ActivatedRoute,
     $body: BodyService,
@@ -57,7 +64,7 @@ export class QueryDetailComponent extends EditableComponent<Query, Guid> impleme
     return {
       createdAt: DateTime.now(),
       isActive: true,
-      variants: [{}] as QueryVariant[],
+      variants: [] as QueryVariant[],
       metrics: [{}] as QueryMetric[],
     } as Query;
   }
@@ -140,6 +147,45 @@ export class QueryDetailComponent extends EditableComponent<Query, Guid> impleme
     }
 
     return breadcrumbs;
+  }
+
+  private isNotDuplicateType(value: SqlType): ValidationErrors | null {
+    const currentVariants = this.form?.value?.variants ?? [];
+    const currentTypes = currentVariants.map(item => item.sqlType);
+
+    if (currentTypes.indexOf(value) >= 0) {
+      return { self: 'Duplicate SQL type' };
+    }
+
+    return null;
+  }
+
+  tryAddVariant() {
+    this.newSqlTypeFormControl.markAllAsTouched();
+    if (this.newSqlTypeFormControl.invalid)
+      return;
+
+    if (!this.form)
+      return;
+
+    const newSqlType = this.newSqlTypeFormControl.value!;
+    const newForm = queryVariantForm(this.$form, { sqlType: newSqlType } as QueryVariant);
+    newForm.controls.sqlType.markAllAsTouched();
+
+    let useIndex = 0;
+    while ((this.form.controls.variants.controls[useIndex]?.value?.sqlType?.localeCompare(newSqlType) ?? 1) < 0) {
+      useIndex++;
+    }
+    this.form.controls.variants.insert(useIndex, newForm);
+
+    this.newSqlTypeFormControl.updateValueAndValidity();
+  }
+
+  removeVariant(index: number) {
+    if (!this.form)
+      return;
+
+    this.form.controls.variants.removeAt(index);
   }
 
   getSqlTypeLabel = getSqlTypeLabel;
