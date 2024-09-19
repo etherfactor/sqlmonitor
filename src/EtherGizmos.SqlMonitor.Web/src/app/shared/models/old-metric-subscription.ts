@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
-import { MetricDataService } from "../services/metric-data/metric-data.service";
+import { MetricDataService } from "../services/old-metric-data/metric-data.service";
 import { Guid } from "../types/guid/guid";
-import { MetricData } from "./metric-data";
+import { MetricData } from "./old-metric-data";
 
 export class MetricSubscription {
 

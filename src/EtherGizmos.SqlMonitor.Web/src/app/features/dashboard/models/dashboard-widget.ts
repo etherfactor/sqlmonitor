@@ -1,7 +1,7 @@
 import { Validators } from "@angular/forms";
 import { GridStackWidget } from "gridstack";
 import { z } from "zod";
-import { AggregateType } from "../../../shared/models/aggregate-type";
+import { AggregateType } from "../../../shared/models/old-aggregate-type";
 import { GuidZ } from "../../../shared/types/guid/guid";
 import { DefaultControlTypes, formFactoryForModel } from "../../../shared/utilities/form/form.util";
 

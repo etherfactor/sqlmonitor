@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, Provider } from "@angular/core";
 import { MetricDataService } from "./metric-data.service";
-import { MetricDataCacheService } from "../metric-data-cache/metric-data-cache.service";
+import { MetricDataCacheService } from "../old-metric-data-cache/metric-data-cache.service";
 
 @Injectable({ providedIn: 'root' })
 class ConcreteMetricDataService extends MetricDataService {

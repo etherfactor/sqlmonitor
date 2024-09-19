@@ -13,7 +13,7 @@ import { Observable, Subscription, asyncScheduler, first, interval, map, observe
 import { BodyContainerType, BodyService } from '../../../../shared/services/body/body.service';
 import { DashboardService } from '../../../../shared/services/dashboard/dashboard.service';
 import { InstanceService } from '../../../../shared/services/instance/instance.service';
-import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
+import { MetricDataService } from '../../../../shared/services/old-metric-data/metric-data.service';
 import { NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Guid, generateGuid, isGuid } from '../../../../shared/types/guid/guid';
 import { RelativeTimeInterpretation, evaluateRelativeTime, getTimeRangeText, interpretRelativeTime, parseRelativeTime } from '../../../../shared/types/relative-time/relative-time';

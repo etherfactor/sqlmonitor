@@ -1,50 +1,150 @@
-import { Provider } from "@angular/core";
-import { Observable, of, throwError } from "rxjs";
+import { Injectable, Provider } from "@angular/core";
+import { DateTime } from "luxon";
+import { Observable, delay, of, throwError } from "rxjs";
 import { AggregateType } from "../../models/aggregate-type";
 import { Metric } from "../../models/metric";
-import { Guid, parseGuid } from "../../types/guid/guid";
+import { Guid, generateGuid } from "../../types/guid/guid";
+import { ɵEntitySet } from "../../utilities/odata/internal/entity-set";
+import { EntitySet } from "../../utilities/odata/odata.util";
 import { MetricService } from "./metric.service";
 
+let increment = 0;
+
+const cache: { [key: number]: Metric } = {};
+cache[++increment] = {
+  id: increment,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: undefined,
+  modifiedByUserId: undefined,
+  name: 'Example Metric',
+  description: 'I am an example metric.',
+  aggregateType: AggregateType.Average,
+  isActive: true,
+};
+
+cache[++increment] = {
+  id: increment,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: DateTime.now(),
+  modifiedByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  name: 'CPU Usage',
+  description: 'Tracks CPU usage over time.',
+  aggregateType: AggregateType.Maximum,
+  isActive: true,
+};
+
+cache[++increment] = {
+  id: increment,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: DateTime.now(),
+  modifiedByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  name: 'Memory Usage',
+  description: 'Monitors memory usage and peak usage.',
+  aggregateType: AggregateType.Maximum,
+  isActive: true,
+};
+
+cache[++increment] = {
+  id: increment,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: undefined,
+  modifiedByUserId: undefined,
+  name: 'Disk I/O',
+  description: 'Records disk input/output operations.',
+  aggregateType: AggregateType.Sum,
+  isActive: false,
+};
+
+cache[++increment] = {
+  id: increment,
+  createdAt: DateTime.now(),
+  createdByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  modifiedAt: DateTime.now(),
+  modifiedByUserId: 'df2aa7a9-16bb-4403-bb60-6bc809d6894a' as Guid,
+  name: 'Network Traffic',
+  description: 'Measures incoming and outgoing network traffic.',
+  aggregateType: AggregateType.Average,
+  isActive: true,
+};
+
+@Injectable({
+  providedIn: 'root'
+})
 class MockMetricService extends MetricService {
 
-  metrics: Metric[];
+  override get(id: number): Observable<Metric> {
+    const maybeRecord = cache[id];
 
-  constructor() {
-    super();
-
-    this.metrics = [
-      {
-        id: parseGuid('2f4ec7b4-4e81-4ac5-8030-7d7399dc2097'),
-        name: 'CPU Utilization',
-        aggregateType: AggregateType.Average,
-        severities: [],
-      },
-      {
-        id: parseGuid('8b140817-ec33-4dc7-9c4f-4bf6d8098b3c'),
-        name: 'Memory Utilization',
-        aggregateType: AggregateType.Average,
-        severities: [],
-      },
-    ];
-  }
-
-  override get(id: Guid) {
-    const index = this.metrics.findIndex(e => e.id === id);
-    if (index >= 0) {
-      return of(this.metrics[index]);
+    if (!maybeRecord) {
+      return throwError(() => new Error('Record does not exist'));
     }
 
-    return throwError(() => new Error('Metric not found.'));
+    return of({ ...maybeRecord }).pipe(
+      delay(1000)
+    );
+  }
+
+  override get set(): EntitySet<Metric> {
+    return new ɵEntitySet.MockImplementation<Metric>(() => {
+      return Object.keys(cache).map(key => cache[key as unknown as number]);
+    });
   }
 
   override search(): Observable<Metric[]> {
-    return of(this.metrics);
+    throw new Error("Method not implemented.");
+  }
+
+  override create(record: Partial<Metric>): Observable<Metric> {
+    record = { ...record };
+    record.id = ++increment;
+    record.createdAt = DateTime.now();
+    record.createdByUserId = generateGuid();
+
+    cache[record.id] = record as Metric;
+
+    return of({ ...record } as Metric).pipe(
+      delay(1000)
+    );
+  }
+
+  override update(id: number, record: Partial<Metric>): Observable<Metric> {
+    const maybeRecord = cache[id];
+
+    if (!maybeRecord) {
+      return throwError(() => new Error('Record does not exist'));
+    }
+
+    record = { ...record };
+    Object.assign(maybeRecord, record);
+    cache[id] = maybeRecord;
+
+    return of({ ...maybeRecord }).pipe(
+      delay(1000)
+    );
+  }
+
+  override delete(id: number): Observable<void> {
+    const maybeRecord = cache[id];
+
+    if (!maybeRecord) {
+      return throwError(() => new Error('Record does not exist'));
+    }
+
+    delete cache[id];
+
+    return of(void 0).pipe(
+      delay(1000)
+    );
   }
 }
 
 export function provideMetricServiceMock(): Provider {
   return {
     provide: MetricService,
-    useFactory: () => new MockMetricService(),
+    useClass: MockMetricService,
   };
 }

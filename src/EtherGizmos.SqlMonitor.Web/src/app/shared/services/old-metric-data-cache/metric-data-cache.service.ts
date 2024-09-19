@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DateTime } from 'luxon';
 import { asyncScheduler, interval, observeOn } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { MetricData } from '../../models/metric-data';
+import { MetricData } from '../../models/old-metric-data';
 import { Guid } from '../../types/guid/guid';
 
 @Injectable({

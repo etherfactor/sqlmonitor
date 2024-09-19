@@ -1,5 +1,5 @@
 import { Injectable, Provider } from "@angular/core";
-import { MetricDataCacheService } from "../metric-data-cache/metric-data-cache.service";
+import { MetricDataCacheService } from "../old-metric-data-cache/metric-data-cache.service";
 import { MetricDataService } from "./metric-data.service";
 
 @Injectable({ providedIn: 'root' })

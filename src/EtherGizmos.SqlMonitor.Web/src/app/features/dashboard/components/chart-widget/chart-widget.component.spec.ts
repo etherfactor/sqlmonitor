@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Point } from 'chart.js';
 import { DateTime } from 'luxon';
-import { AggregateType } from '../../../../shared/models/aggregate-type';
+import { AggregateType } from '../../../../shared/models/old-aggregate-type';
 import { SeverityType } from '../../../../shared/models/severity-type';
 import { provideInstanceServiceMock } from '../../../../shared/services/instance/instance.service.mock';
-import { MetricDataService } from '../../../../shared/services/metric-data/metric-data.service';
-import { provideMetricDataServiceMock } from '../../../../shared/services/metric-data/metric-data.service.mock';
-import { provideMetricServiceMock } from '../../../../shared/services/metric/metric.service.mock';
+import { MetricDataService } from '../../../../shared/services/old-metric-data/metric-data.service';
+import { provideMetricDataServiceMock } from '../../../../shared/services/old-metric-data/metric-data.service.mock';
+import { provideMetricServiceMock } from '../../../../shared/services/old-metric/metric.service.mock';
 import { generateGuid, parseGuid } from '../../../../shared/types/guid/guid';
 import { DashboardWidget, DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType, DashboardWidgetType } from '../../models/dashboard-widget';
 import { AverageMetricAggregator, ChartWidgetComponent, MaximumMetricAggregator, MinimumMetricAggregator, StandardDeviationMetricAggregator, SumMetricAggregator, VarianceMetricAggregator } from './chart-widget.component';

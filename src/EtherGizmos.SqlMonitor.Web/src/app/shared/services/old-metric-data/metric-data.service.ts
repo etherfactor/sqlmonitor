@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { DateTime } from 'luxon';
 import { Observable, filter, share, tap } from 'rxjs';
-import { MetricData } from '../../models/metric-data';
-import { MetricSubscription } from '../../models/metric-subscription';
+import { MetricData } from '../../models/old-metric-data';
+import { MetricSubscription } from '../../models/old-metric-subscription';
 import { SeverityType } from '../../models/severity-type';
 import { Guid, generateGuid, parseGuid } from '../../types/guid/guid';
-import { MetricDataCacheService } from '../metric-data-cache/metric-data-cache.service';
+import { MetricDataCacheService } from '../old-metric-data-cache/metric-data-cache.service';
 
 @Injectable({
   providedIn: 'root',

@@ -6,15 +6,15 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ListComponent, TableColumn } from '../../../../shared/components/_base/list/list.component';
 import { TableHeaderComponent } from '../../../../shared/components/table-header/table-header.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { MonitoredResource } from '../../../../shared/models/monitored-resource';
+import { Metric } from '../../../../shared/models/metric';
 import { BodyService } from '../../../../shared/services/body/body.service';
-import { MonitoredResourceService } from '../../../../shared/services/monitored-resource/monitored-resource.service';
+import { MetricService } from '../../../../shared/services/metric/metric.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
 
 @Component({
-  selector: 'app-monitored-resource-list',
+  selector: 'metric-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -22,24 +22,24 @@ import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
     TableComponent,
     TableHeaderComponent,
   ],
-  templateUrl: './monitored-resource-list.component.html',
-  styleUrl: './monitored-resource-list.component.scss'
+  templateUrl: './metric-list.component.html',
+  styleUrl: './metric-list.component.scss'
 })
-export class MonitoredResourceListComponent extends ListComponent<MonitoredResource> implements OnInit {
+export class MetricListComponent extends ListComponent<Metric> implements OnInit {
 
-  private readonly $monitoredResource: MonitoredResourceService;
+  private readonly $metric: MetricService;
   private readonly $router: Router;
 
   constructor(
     $body: BodyService,
     $form: FormBuilder,
     $modal: NgbModal,
-    $monitoredResource: MonitoredResourceService,
+    $metric: MetricService,
     $navbarMenu: NavbarMenuService,
     $router: Router,
   ) {
     super($body, $form, $modal, $navbarMenu);
-    this.$monitoredResource = $monitoredResource;
+    this.$metric = $metric;
     this.$router = $router;
   }
 
@@ -79,8 +79,8 @@ export class MonitoredResourceListComponent extends ListComponent<MonitoredResou
         link: '/admin',
       },
       {
-        label: 'Resources',
-        link: '/admin/resources',
+        label: 'Metrics',
+        link: '/admin/metrics',
       },
     ];
 
@@ -102,11 +102,11 @@ export class MonitoredResourceListComponent extends ListComponent<MonitoredResou
     return columns;
   }
 
-  protected override getEntitySet(): EntitySet<MonitoredResource> {
-    return this.$monitoredResource.set;
+  protected override getEntitySet(): EntitySet<Metric> {
+    return this.$metric.set;
   }
 
   @Bound new() {
-    this.$router.navigate(['/admin/resource', 'new']);
+    this.$router.navigate(['/admin/metric', 'new']);
   }
 }

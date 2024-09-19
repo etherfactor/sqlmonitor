@@ -5,8 +5,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { APP_ROUTES } from '../../../../app.routes';
 import { provideDashboardServiceMock } from '../../../../shared/services/dashboard/dashboard.service.mock';
 import { provideInstanceServiceMock } from '../../../../shared/services/instance/instance.service.mock';
-import { provideMetricDataServiceMock } from '../../../../shared/services/metric-data/metric-data.service.mock';
-import { provideMetricServiceMock } from '../../../../shared/services/metric/metric.service.mock';
+import { provideMetricDataServiceMock } from '../../../../shared/services/old-metric-data/metric-data.service.mock';
+import { provideMetricServiceMock } from '../../../../shared/services/old-metric/metric.service.mock';
 import { DashboardDetailComponent } from './dashboard-detail.component';
 
 describe('DashboardDetailComponent', () => {

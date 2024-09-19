@@ -6,9 +6,9 @@ import { NgbAccordionModule, NgbActiveModal, NgbDropdownModule, NgbPaginationMod
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ColorSketchModule } from 'ngx-color/sketch';
 import { InputColorPickerComponent } from '../../../../shared/components/input-color-picker/input-color-picker.component';
-import { AggregateType } from '../../../../shared/models/aggregate-type';
-import { Metric } from '../../../../shared/models/metric';
-import { MetricService } from '../../../../shared/services/metric/metric.service';
+import { AggregateType } from '../../../../shared/models/old-aggregate-type';
+import { Metric } from '../../../../shared/models/old-metric';
+import { MetricService } from '../../../../shared/services/old-metric/metric.service';
 import { Guid, generateGuid } from '../../../../shared/types/guid/guid';
 import { Bound } from '../../../../shared/utilities/bound/bound.util';
 import { DefaultControlTypes, TypedFormGroup } from '../../../../shared/utilities/form/form.util';

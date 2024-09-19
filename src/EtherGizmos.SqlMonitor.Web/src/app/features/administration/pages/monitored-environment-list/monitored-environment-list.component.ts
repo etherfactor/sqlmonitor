@@ -27,19 +27,19 @@ import { EntitySet } from '../../../../shared/utilities/odata/odata.util';
 })
 export class MonitoredEnvironmentListComponent extends ListComponent<MonitoredEnvironment> implements OnInit {
 
-  private readonly $MonitoredEnvironment: MonitoredEnvironmentService;
+  private readonly $monitoredEnvironment: MonitoredEnvironmentService;
   private readonly $router: Router;
 
   constructor(
     $body: BodyService,
     $form: FormBuilder,
     $modal: NgbModal,
-    $MonitoredEnvironment: MonitoredEnvironmentService,
+    $monitoredEnvironment: MonitoredEnvironmentService,
     $navbarMenu: NavbarMenuService,
     $router: Router,
   ) {
     super($body, $form, $modal, $navbarMenu);
-    this.$MonitoredEnvironment = $MonitoredEnvironment;
+    this.$monitoredEnvironment = $monitoredEnvironment;
     this.$router = $router;
   }
 
@@ -103,7 +103,7 @@ export class MonitoredEnvironmentListComponent extends ListComponent<MonitoredEn
   }
 
   protected override getEntitySet(): EntitySet<MonitoredEnvironment> {
-    return this.$MonitoredEnvironment.set;
+    return this.$monitoredEnvironment.set;
   }
 
   @Bound new() {

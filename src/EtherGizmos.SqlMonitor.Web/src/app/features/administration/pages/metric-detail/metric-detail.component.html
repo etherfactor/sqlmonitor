@@ -1,0 +1,122 @@
+<ng-container *ngIf="isLoading">
+  <div style="position: fixed; top: 0; left: 0; height: 100%; width: 100%; background-color: color-mix(in srgb, var(--bs-body-bg) 50%, transparent); z-index: 100;">
+  </div>
+  <div style="position: fixed; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%); z-index: 100;">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="form" [formGroup]="form">
+  <div class="row">
+    <div class="col-12 mt-3">
+      <h4>Edit Metric</h4>
+      <div class="text-muted">Edit details on one of the metrics in your environment.</div>
+    </div>
+  </div>
+
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-bar-chart fs-3"></span>
+      <h5 class="ms-2">Metric Information</h5>
+    </div>
+    <div class="row">
+      <div class="col-12 mt-3">
+        <div class="row">
+          <label for="metricName" class="col-sm-2 col-form-label">Name</label>
+          <div class="col-sm-10">
+            <input id="metricName" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="name" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="row">
+          <label for="metricAggregateType" class="col-sm-4 col-form-label">Is active?</label>
+          <div class="col-sm-8">
+            <ng-select id="metricAggregateType"
+                       formControlName="aggregateType"
+                       [clearable]="false"
+                       [selectOnTab]="true"
+                       [class]="isEditing ? '' : 'plaintext'">
+              <ng-option value="Average">Average</ng-option>
+              <ng-option value="Maximum">Maximum</ng-option>
+              <ng-option value="Minimum">Minimum</ng-option>
+              <ng-option value="Sum">Sum</ng-option>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="row">
+          <label for="metricIsActive" class="col-sm-4 col-form-label">Is active?</label>
+          <div class="col-sm-8">
+            <ng-select id="metricIsActive"
+                       formControlName="isActive"
+                       [clearable]="false"
+                       [selectOnTab]="true"
+                       [class]="isEditing ? '' : 'plaintext'">
+              <ng-option [value]="true">Active</ng-option>
+              <ng-option [value]="false">Inactive</ng-option>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <div class="row">
+          <label for="metricDescription" class="col-sm-2 col-form-label">Description</label>
+          <div class="col-sm-10">
+            <textarea id="metricDescription" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" rows="4" formControlName="description"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-bar-chart fs-3"></span>
+      <h5 class="ms-2">Metadata</h5>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="row mt-3">
+          <label for="metricCreatedAt" class="col-sm-4 col-form-label">Created at</label>
+          <div class="col-sm-8">
+            <input-luxon-datetime id="metricCreatedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="createdAt"></input-luxon-datetime>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <label for="metricCreatedBy" class="col-sm-4 col-form-label">Created by</label>
+          <div class="col-sm-8">
+            <input id="metricCreatedBy" type="text" readonly class="form-control-plaintext" formControlName="createdByUserId" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="row mt-3">
+          <label for="metricModifiedAt" class="col-sm-4 col-form-label">Modified at</label>
+          <div class="col-sm-8">
+            <ng-container *ngIf="form.controls.modifiedAt.value; else noModifiedAt">
+              <input-luxon-datetime id="metricModifiedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="modifiedAt"></input-luxon-datetime>
+            </ng-container>
+            <ng-template #noModifiedAt>
+              <input id="metricModifiedAt" type="text" readonly class="form-control-plaintext" value="Never" />
+            </ng-template>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <label for="metricModifiedBy" class="col-sm-4 col-form-label">Modified by</label>
+          <div class="col-sm-8">
+            <ng-container *ngIf="form.controls.modifiedByUserId.value; else noModifiedBy">
+              <input id="metricModifiedBy" type="text" readonly class="form-control-plaintext" formControlName="modifiedByUserId" />
+            </ng-container>
+            <ng-template #noModifiedBy>
+              <input id="metricModifiedBy" type="text" readonly class="form-control-plaintext" value="Never" />
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
