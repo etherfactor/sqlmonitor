@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Dashboard } from '../../../features/dashboard/models/dashboard';
+import { Dashboard } from '../../../features/dashboard-old/models/dashboard';
 import { Guid } from '../../types/guid/guid';
 
 @Injectable({

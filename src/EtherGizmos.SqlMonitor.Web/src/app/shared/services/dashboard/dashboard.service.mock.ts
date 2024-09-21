@@ -1,7 +1,7 @@
 import { Injectable, Provider } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { Dashboard } from '../../../features/dashboard/models/dashboard';
-import { DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../../features/dashboard/models/dashboard-widget';
+import { Dashboard } from '../../../features/dashboard-old/models/dashboard';
+import { DashboardWidgetChartMetricBucketType, DashboardWidgetChartScaleType, DashboardWidgetChartType, DashboardWidgetType } from '../../../features/dashboard-old/models/dashboard-widget';
 import { AggregateType } from '../../models/old-aggregate-type';
 import { Guid, parseGuid } from '../../types/guid/guid';
 import { parseRelativeTime } from '../../types/relative-time/relative-time';
