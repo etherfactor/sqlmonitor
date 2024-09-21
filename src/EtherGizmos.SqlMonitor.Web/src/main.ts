@@ -3,6 +3,7 @@
 import { CDK_DRAG_CONFIG } from '@angular/cdk/drag-drop';
 import { InjectionToken, Provider, enableProdMode, importProvidersFrom } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { provideEnvironmentNgxMask } from 'ngx-mask';
@@ -36,6 +37,7 @@ bootstrapApplication(
       provideCharts(withDefaultRegisterables()),
       provideSimpleConfig(CDK_DRAG_CONFIG, { zIndex: 1100 }),
       provideEnvironmentNgxMask(),
+      provideAnimationsAsync(),
       importProvidersFrom(MonacoEditorModule.forRoot()),
       provideDashboardServiceMock(),
       provideGroupServiceMock(),
