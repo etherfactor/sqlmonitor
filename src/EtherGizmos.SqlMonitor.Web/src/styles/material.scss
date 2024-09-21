@@ -1,0 +1,52 @@
+mat-stepper {
+  &.mat-stepper-vertical,
+  &.mat-stepper-horizontal {
+    background-color: transparent;
+
+    .mat-step-label.mat-step-label-active {
+      color: var(--bs-body-color);
+
+      /*&.mat-step-label-error {
+        color: var(--bs-danger);
+      }*/
+
+      .mat-step-sub-label-error {
+        color: var(--bs-danger);
+      }
+    }
+
+    .mat-step-icon {
+      .mat-step-icon-content {
+        padding-top: 2px;
+      }
+
+      /* Inactive icon */
+      & {
+        @extend .text-bg-secondary;
+        background-color: var(--bs-secondary);
+      }
+
+      /* Current icon */
+      &.mat-step-icon-selected {
+        @extend .text-bg-primary;
+        background-color: var(--bs-primary);
+      }
+
+      /* Invalid icon */
+      &.mat-step-icon-state-error {
+        @extend .text-bg-danger;
+        background-color: var(--bs-danger);
+
+        .mat-step-icon-content {
+          padding-top: 0px;
+        }
+      }
+
+      /* Completed icon */
+      &.mat-step-icon-state-edit {
+        @extend .text-bg-success;
+        background-color: var(--bs-success);
+      }
+    }
+  }
+}
