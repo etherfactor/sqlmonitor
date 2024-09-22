@@ -1,17 +1,19 @@
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
-import { Component } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Interval } from 'luxon';
 import { Guid } from '../../../../shared/types/guid/guid';
 import { RelativeTime } from '../../../../shared/types/relative-time/relative-time';
-import { DefaultControlTypes, formFactoryForModel, simpleForm } from '../../../../shared/utilities/form/form.util';
+import { DefaultControlTypes, TypedFormGroup, formFactoryForModel, simpleForm } from '../../../../shared/utilities/form/form.util';
+import { EditChartWidgetChartSelectorComponent } from '../edit-chart-widget-chart-selector/edit-chart-widget-chart-selector.component';
 
 @Component({
   selector: 'edit-chart-widget-modal',
   standalone: true,
   imports: [
+    EditChartWidgetChartSelectorComponent,
     MatStepperModule,
     ReactiveFormsModule,
   ],
@@ -24,13 +26,26 @@ import { DefaultControlTypes, formFactoryForModel, simpleForm } from '../../../.
   templateUrl: './edit-chart-widget-modal.component.html',
   styleUrl: './edit-chart-widget-modal.component.scss'
 })
-export class EditChartWidgetModalComponent {
+export class EditChartWidgetModalComponent implements OnInit {
 
   private readonly $activeModal: NgbActiveModal;
   private readonly $form: FormBuilder;
 
   firstFormGroup: FormGroup;
   secondFormGroup: FormGroup;
+
+  step1Valid_type = signal(false);
+  step1Valid = computed(() => {
+    const result = this.step1Valid_type();
+    return result;
+  });
+
+  formValid = computed(() => {
+    const result = this.step1Valid();
+    return result;
+  });
+
+  chartConfigurationForm!: TypedFormGroup<ChartConfiguration, DefaultControlTypes>;
 
   constructor(
     $activeModal: NgbActiveModal,
@@ -41,6 +56,36 @@ export class EditChartWidgetModalComponent {
 
     this.firstFormGroup = this.$form.group({ firstCtrl: ['', Validators.required] });
     this.secondFormGroup = this.$form.group({ secondCtrl: [''] });
+
+    const chartConfig: ChartConfiguration = {
+      chartType: undefined as unknown as ChartType,
+      title: undefined as unknown as string,
+      xAxis: {},
+      yAxes: [{}],
+      metrics: [],
+      timeRange: {},
+      appearance: {
+        defaultStyles: [],
+        seriesStyles: [],
+      },
+      legend: {},
+    };
+    this.initForm(chartConfig);
+  }
+
+  ngOnInit(): void {
+  }
+
+  initialize(chartConfig: ChartConfiguration) {
+    this.initForm(chartConfig);
+  }
+
+  private initForm(chartConfig: ChartConfiguration) {
+    this.chartConfigurationForm = chartConfigurationForm(this.$form, chartConfig);
+
+    this.chartConfigurationForm.controls.chartType.valueChanges.subscribe(() => {
+      this.step1Valid_type.set(!this.chartConfigurationForm.controls.chartType.invalid);
+    });
   }
 
   cancel() {
@@ -54,7 +99,7 @@ export class EditChartWidgetModalComponent {
   ChartType = ChartType;
 }
 
-enum ChartType {
+export enum ChartType {
   Line = "Line",
   Bar = "Bar",
   Pie = "Pie",

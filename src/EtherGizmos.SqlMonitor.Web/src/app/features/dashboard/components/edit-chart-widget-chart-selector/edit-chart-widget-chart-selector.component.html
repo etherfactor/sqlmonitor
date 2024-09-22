@@ -1,0 +1,79 @@
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Line Chart -->
+    <div class="col-md-6" style="height: 200px;" (click)="onChartClick(ChartType.Line)">
+      <div class="form-check">
+        <input class="form-check-input" id="chartTypeLine_{{unique}}" type="radio" name="chartType_{{unique}}" [value]="ChartType.Line" [(ngModel)]="value" />
+        <label class="form-check-label" for="chartTypeLine_{{unique}}">
+          Line Chart
+        </label>
+      </div>
+      <div style="height: 200px;">
+        <canvas baseChart
+                [datasets]="lineChartData"
+                [labels]="lineChartLabels"
+                [options]="{ responsive: true, maintainAspectRatio: false }"
+                [legend]="true"
+                type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="col-md-6" (click)="onChartClick(ChartType.Bar)">
+      <div class="form-check">
+        <input class="form-check-input" id="chartTypeBar_{{unique}}" type="radio" name="chartType_{{unique}}" [value]="ChartType.Bar" [(ngModel)]="value" />
+        <label class="form-check-label" for="chartTypeBar_{{unique}}">
+          Bar Chart
+        </label>
+      </div>
+      <div style="height: 200px;">
+        <canvas baseChart
+                [datasets]="barChartData"
+                [labels]="barChartLabels"
+                [options]="{ responsive: true, maintainAspectRatio: false }"
+                [legend]="true"
+                type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Pie Chart -->
+    <div class="col-md-6" (click)="onChartClick(ChartType.Pie)">
+      <div class="form-check">
+        <input class="form-check-input" id="chartTypePie_{{unique}}" type="radio" name="chartType_{{unique}}" [value]="ChartType.Pie" [(ngModel)]="value" />
+        <label class="form-check-label" for="chartTypePie_{{unique}}">
+          Pie Chart
+        </label>
+      </div>
+      <div style="height: 200px;">
+        <canvas baseChart
+                [datasets]="pieChartData"
+                [labels]="pieChartLabels"
+                [options]="{ responsive: true, maintainAspectRatio: false }"
+                [legend]="true"
+                type="pie">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Scatter Chart -->
+    <div class="col-md-6" (click)="onChartClick(ChartType.Scatter)">
+      <div class="form-check">
+        <input class="form-check-input" id="chartTypeScatter_{{unique}}" type="radio" name="chartType_{{unique}}" [value]="ChartType.Scatter" [(ngModel)]="value" />
+        <label class="form-check-label" for="chartTypeScatter_{{unique}}">
+          Scatter Chart
+        </label>
+      </div>
+      <div style="height: 200px;">
+        <canvas baseChart
+                [datasets]="scatterChartData"
+                [options]="{ responsive: true, maintainAspectRatio: false }"
+                [legend]="true"
+                type="scatter">
+        </canvas>
+      </div>
+    </div>
+  </div>
+</div>
