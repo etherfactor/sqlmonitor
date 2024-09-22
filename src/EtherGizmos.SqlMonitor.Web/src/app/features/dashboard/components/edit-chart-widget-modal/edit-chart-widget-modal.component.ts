@@ -1,11 +1,12 @@
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { Component } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Interval } from 'luxon';
 import { Guid } from '../../../../shared/types/guid/guid';
 import { RelativeTime } from '../../../../shared/types/relative-time/relative-time';
+import { DefaultControlTypes, formFactoryForModel, simpleForm } from '../../../../shared/utilities/form/form.util';
 
 @Component({
   selector: 'edit-chart-widget-modal',
@@ -105,29 +106,40 @@ interface ChartConfiguration {
   legend: LegendConfiguration;
 }
 
+export const chartConfigurationForm = formFactoryForModel<ChartConfiguration, DefaultControlTypes>(($form, model) => ({
+  chartType: [model.chartType, Validators.required],
+  xAxis: axisConfigurationForm($form, model.xAxis),
+  yAxes: $form.nonNullable.array(model.yAxes.map(item => axisConfigurationForm($form, item))),
+  metrics: $form.nonNullable.array(model.metrics.map(item => metricConfigurationForm($form, item))),
+  timeRange: timeRangeConfigurationForm($form, model.timeRange),
+  appearance: appearanceConfigurationForm($form, model.appearance),
+  title: [model.title],
+  legend: legendConfigurationForm($form, model.legend),
+}));
+
 interface MetricConfiguration {
   metricId: number;
   yAxisIndex?: number;
   systems: {
-    inherit: boolean;
+    inherit?: boolean;
     ids: Guid[];
   };
   resources: {
-    inherit: boolean;
+    inherit?: boolean;
     ids: Guid[];
   };
   environments: {
-    inherit: boolean;
+    inherit?: boolean;
     ids: Guid[];
   };
   tags: {
-    inherit: boolean;
+    inherit?: boolean;
     values: TagConfiguration[];
   };
   buckets: {
     displayType: BucketDisplayType;
     aggregate: {
-      type: AggregateType;
+      type?: AggregateType;
     };
     specific: {
       names: string[];
@@ -135,46 +147,117 @@ interface MetricConfiguration {
     top: {
       count: number;
       remaining: {
-        group: boolean;
-        name: string;
+        group?: boolean;
+        name?: string;
       };
     };
   };
 }
+
+export const metricConfigurationForm = formFactoryForModel<MetricConfiguration, DefaultControlTypes>(($form, model) => ({
+  metricId: [model.metricId, Validators.required],
+  yAxisIndex: [model.yAxisIndex],
+  systems: simpleForm($form, model.systems, ($form, model) => ({
+    inherit: [model.inherit],
+    ids: $form.nonNullable.array(model.ids),
+  })),
+  resources: simpleForm($form, model.systems, ($form, model) => ({
+    inherit: [model.inherit],
+    ids: $form.nonNullable.array(model.ids),
+  })),
+  environments: simpleForm($form, model.environments, ($form, model) => ({
+    inherit: [model.inherit],
+    ids: $form.nonNullable.array(model.ids),
+  })),
+  tags: simpleForm($form, model.tags, ($form, model) => ({
+    inherit: [model.inherit],
+    values: $form.nonNullable.array(model.values.map(item => tagConfigurationForm($form, item)))
+  })),
+  buckets: simpleForm($form, model.buckets, ($form, model) => ({
+    displayType: [model.displayType, Validators.required],
+    aggregate: simpleForm($form, model.aggregate, ($form, model) => ({
+      type: [model.type],
+    })),
+    specific: simpleForm($form, model.specific, ($form, model) => ({
+      names: $form.nonNullable.array(model.names),
+    })),
+    top: simpleForm($form, model.top, ($form, model) => ({
+      count: [model.count, Validators.required],
+      remaining: simpleForm($form, model.remaining, ($form, model) => ({
+        group: [model.group, Validators.required],
+        name: [model.name],
+      })),
+    })),
+  })),
+}));
 
 interface TagConfiguration {
   name: string;
   value: string;
 }
 
+const tagConfigurationForm = formFactoryForModel<TagConfiguration, DefaultControlTypes>(($form, model) => ({
+  name: [model.name, Validators.required],
+  value: [model.value, Validators.required],
+}));
+
 interface TimeRangeConfiguration {
-  inherit: boolean;
-  startAt: RelativeTime;
-  endAt: RelativeTime;
-  aggregationInterval: Interval;
+  inherit?: boolean;
+  startAt?: RelativeTime;
+  endAt?: RelativeTime;
+  aggregationInterval?: Interval;
 }
 
+const timeRangeConfigurationForm = formFactoryForModel<TimeRangeConfiguration, DefaultControlTypes>(($form, model) => ({
+  inherit: [model.inherit, Validators.required],
+  startAt: [model.startAt],
+  endAt: [model.endAt],
+  aggregationInterval: [model.aggregationInterval],
+}));
+
 interface LegendConfiguration {
-  show: boolean;
-  position: PositionType;
+  show?: boolean;
+  position?: PositionType;
 }
+
+const legendConfigurationForm = formFactoryForModel<LegendConfiguration, DefaultControlTypes>(($form, model) => ({
+  show: [model.show],
+  position: [model.position],
+}));
 
 interface AxisConfiguration {
   minimum?: number;
-  minimumEnforced: boolean;
+  minimumEnforced?: boolean;
   maximum?: number;
-  maximumEnforced: boolean;
-  logarithmic: boolean;
+  maximumEnforced?: boolean;
+  logarithmic?: boolean;
   timeFormat?: string;
   label?: string;
   color?: string;
-  stacked: boolean;
+  stacked?: boolean;
 }
+
+const axisConfigurationForm = formFactoryForModel<AxisConfiguration, DefaultControlTypes>(($form, model) => ({
+  minimum: [model.minimum],
+  minimumEnforced: [model.minimumEnforced],
+  maximum: [model.maximum],
+  maximumEnforced: [model.maximumEnforced],
+  logarithmic: [model.logarithmic],
+  timeFormat: [model.timeFormat],
+  label: [model.label],
+  color: [model.color],
+  stacked: [model.stacked],
+}));
 
 interface AppearanceConfiguration {
   defaultStyles: StyleConfiguration[];
   seriesStyles: SeriesStyleConfiguration[];
 }
+
+const appearanceConfigurationForm = formFactoryForModel<AppearanceConfiguration, DefaultControlTypes>(($form, model) => ({
+  defaultStyles: $form.nonNullable.array(model.defaultStyles.map(item => styleConfigurationForm($form, item))),
+  seriesStyles: $form.nonNullable.array(model.seriesStyles.map(item => seriesStyleConfigurationForm($form, item))),
+}));
 
 interface SeriesStyleConfiguration {
   metricId: number;
@@ -182,13 +265,30 @@ interface SeriesStyleConfiguration {
   style: StyleConfiguration;
 }
 
+const seriesStyleConfigurationForm = formFactoryForModel<SeriesStyleConfiguration, DefaultControlTypes>(($form, model) => ({
+  metricId: [model.metricId, Validators.required],
+  bucketName: [model.bucketName],
+  style: styleConfigurationForm($form, model.style),
+}));
+
 interface StyleConfiguration {
   color?: string;
   lineWidth?: number;
   lineStyle?: LineStyleType;
   markerStyle?: MarkerStyleType;
   fill: {
-    enabled: boolean;
-    opacity: number;
+    enabled?: boolean;
+    opacity?: number;
   };
 }
+
+const styleConfigurationForm = formFactoryForModel<StyleConfiguration, DefaultControlTypes>(($form, model) => ({
+  color: [model.color],
+  lineWidth: [model.lineWidth],
+  lineStyle: [model.lineStyle],
+  markerStyle: [model.markerStyle],
+  fill: simpleForm($form, model.fill, ($form, model) => ({
+    enabled: [model.enabled],
+    opacity: [model.opacity],
+  })),
+}));

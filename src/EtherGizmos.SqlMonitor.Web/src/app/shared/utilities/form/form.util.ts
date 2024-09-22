@@ -1,9 +1,9 @@
 import { ControlConfig, FormArray, FormBuilder, FormControl, FormGroup, ɵElement } from "@angular/forms";
-import { DateTime, Duration } from "luxon";
+import { DateTime, Duration, Interval } from "luxon";
 import { Guid } from "../../types/guid/guid";
 import { RelativeTime } from "../../types/relative-time/relative-time";
 
-export type DefaultControlTypes = DateTime | Duration | Guid | RelativeTime;
+export type DefaultControlTypes = DateTime | Duration | Guid | Interval | RelativeTime;
 
 export function formFactoryForModel<TModel, TControlTypes = never>(builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel, TControlTypes>) {
   const result: FormFunction<TModel, TControlTypes> = ($form: FormBuilder, model: TModel | undefined): TypedFormGroup<TModel, TControlTypes> => {
@@ -15,6 +15,14 @@ export function formFactoryForModel<TModel, TControlTypes = never>(builder: ($fo
   };
 
   return result;
+}
+
+export function simpleForm<TModel, TControlTypes = never>($form: FormBuilder, model: TModel, builder: ($form: FormBuilder, model: TModel) => ControlConfigMap<TModel, TControlTypes>): TypedFormGroup<TModel, TControlTypes> {
+  if (!$form || !model || !builder)
+    return undefined!;
+
+  const config = builder($form, model);
+  return $form.nonNullable.group(config);
 }
 
 type RequiredIsh<TType> = { [K in keyof Required<TType>]: TType[K]; };
