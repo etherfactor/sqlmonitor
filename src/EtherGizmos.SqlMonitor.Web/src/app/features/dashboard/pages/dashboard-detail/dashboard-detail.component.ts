@@ -20,6 +20,6 @@ export class DashboardDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.$modal.open(EditChartWidgetModalComponent, { centered: true, backdrop: 'static', keyboard: false });
+    this.$modal.open(EditChartWidgetModalComponent, { size: 'lg', centered: true, backdrop: 'static', keyboard: false });
   }
 }

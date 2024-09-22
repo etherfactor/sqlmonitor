@@ -5,6 +5,7 @@ mat-stepper {
 
     .mat-step-label.mat-step-label-active {
       color: var(--bs-body-color);
+      font-size: 1rem;
 
       /*&.mat-step-label-error {
         color: var(--bs-danger);
