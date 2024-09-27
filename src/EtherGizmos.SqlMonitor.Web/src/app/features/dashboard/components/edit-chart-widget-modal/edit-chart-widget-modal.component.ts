@@ -3,10 +3,15 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { Interval } from 'luxon';
+import { EntitySearchDirective } from '../../../../shared/directives/entity-search/entity-search.directive';
+import { Metric } from '../../../../shared/models/metric';
+import { MetricService } from '../../../../shared/services/metric/metric.service';
 import { Guid } from '../../../../shared/types/guid/guid';
 import { RelativeTime } from '../../../../shared/types/relative-time/relative-time';
 import { DefaultControlTypes, TypedFormGroup, formFactoryForModel, simpleForm } from '../../../../shared/utilities/form/form.util';
+import { EntitySet, o } from '../../../../shared/utilities/odata/odata.util';
 import { EditChartWidgetChartSelectorComponent } from '../edit-chart-widget-chart-selector/edit-chart-widget-chart-selector.component';
 
 @Component({
@@ -14,7 +19,9 @@ import { EditChartWidgetChartSelectorComponent } from '../edit-chart-widget-char
   standalone: true,
   imports: [
     EditChartWidgetChartSelectorComponent,
+    EntitySearchDirective,
     MatStepperModule,
+    NgSelectModule,
     ReactiveFormsModule,
   ],
   providers: [
@@ -30,6 +37,7 @@ export class EditChartWidgetModalComponent implements OnInit {
 
   private readonly $activeModal: NgbActiveModal;
   private readonly $form: FormBuilder;
+  private readonly $metric: MetricService;
 
   firstFormGroup: FormGroup;
   secondFormGroup: FormGroup;
@@ -47,12 +55,18 @@ export class EditChartWidgetModalComponent implements OnInit {
 
   chartConfigurationForm!: TypedFormGroup<ChartConfiguration, DefaultControlTypes>;
 
+  get metricSet() {
+    return this.$metric.set;
+  }
+
   constructor(
     $activeModal: NgbActiveModal,
     $form: FormBuilder,
+    $metric: MetricService,
   ) {
     this.$activeModal = $activeModal;
     this.$form = $form;
+    this.$metric = $metric;
 
     this.firstFormGroup = this.$form.group({ firstCtrl: ['', Validators.required] });
     this.secondFormGroup = this.$form.group({ secondCtrl: [''] });
@@ -93,7 +107,17 @@ export class EditChartWidgetModalComponent implements OnInit {
   }
 
   trySubmit() {
+    console.log(this.chartConfigurationForm.value);
     this.$activeModal.close();
+  }
+
+  filterMetrics(term: string, entitySet: EntitySet<Metric>) {
+    return entitySet.filter(e =>
+      o.startsWith(
+        e.prop('name'),
+        o.string(term),
+      ),
+    );
   }
 
   ChartType = ChartType;

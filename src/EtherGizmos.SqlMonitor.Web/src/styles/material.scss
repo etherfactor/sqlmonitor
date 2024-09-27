@@ -3,16 +3,23 @@ mat-stepper {
   &.mat-stepper-horizontal {
     background-color: transparent;
 
-    .mat-step-label.mat-step-label-active {
+    .mat-step-label {
       color: var(--bs-body-color);
       font-size: 1rem;
+      opacity: 50%;
 
-      /*&.mat-step-label-error {
-        color: var(--bs-danger);
-      }*/
+      &.mat-step-label-active {
+        color: var(--bs-body-color);
+        font-size: 1rem;
+        opacity: revert;
 
-      .mat-step-sub-label-error {
-        color: var(--bs-danger);
+        /*&.mat-step-label-error {
+          color: var(--bs-danger);
+        }*/
+
+        .mat-step-sub-label-error {
+          color: var(--bs-danger);
+        }
       }
     }
 

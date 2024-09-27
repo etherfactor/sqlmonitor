@@ -16,15 +16,20 @@
 
         <edit-chart-widget-chart-selector formControlName="chartType"></edit-chart-widget-chart-selector>
 
-        <div>
+        <div class="d-flex justify-content-end mt-3" style="gap: 15px;">
           <button class="btn btn-primary" matStepperNext [disabled]="!step1Valid()">Next</button>
         </div>
       </mat-step>
       <mat-step [stepControl]="secondFormGroup" errorMessage="Missing required fields">
-        <ng-template matStepLabel>Step 2</ng-template>
-        <label>Address</label>
-        <input placeholder="Ex. 1 Main St, New York, NY" required>
-        <div>
+        <ng-template matStepLabel>Configure Metrics</ng-template>
+
+        <ng-select>
+          <ng-option *entitySearch="metricSet; filter filterMetrics; let record" [value]="record.id">
+            {{record.name}}
+          </ng-option>
+        </ng-select>
+
+        <div class="d-flex justify-content-end mt-3" style="gap: 15px;">
           <button class="btn btn-secondary" matStepperPrevious>Back</button>
           <button class="btn btn-primary" matStepperNext>Next</button>
         </div>
@@ -32,9 +37,8 @@
       <mat-step state="number">
         <ng-template matStepLabel>Done</ng-template>
         <p>You are now done.</p>
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button (click)="stepper.reset()">Reset</button>
+        <div class="d-flex justify-content-end mt-3" style="gap: 15px;">
+          <button class="btn btn-secondary" matStepperPrevious>Back</button>
         </div>
       </mat-step>
     </mat-stepper>
