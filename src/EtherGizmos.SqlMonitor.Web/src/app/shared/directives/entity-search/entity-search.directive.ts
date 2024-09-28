@@ -1,6 +1,7 @@
 import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { NgSelectComponent } from '@ng-select/ng-select';
-import { Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subscription, concat, debounceTime, distinctUntilChanged, of } from 'rxjs';
+import { wrapWith } from '../../utilities/observable/observable';
 import { EntitySet } from '../../utilities/odata/odata.util';
 
 @Directive({
@@ -17,6 +18,7 @@ export class EntitySearchDirective<TEntity> implements OnInit, OnDestroy {
   @Input({ required: true }) entitySearchFilter!: (term: string, entitySet: EntitySet<TEntity>) => EntitySet<TEntity>;
 
   subscriptions: Subscription[] = [];
+  httpSubscription?: Subscription;
 
   constructor(
     templateRef: TemplateRef<any>,
@@ -29,16 +31,29 @@ export class EntitySearchDirective<TEntity> implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const searchSub = this.ngSelect.searchEvent.pipe(
+    const searchSub = concat(of({ term: '' }), this.ngSelect.searchEvent).pipe(
       debounceTime(250),
       distinctUntilChanged(),
-      switchMap(search => this.searchEntities(search.term)),
-    ).subscribe(records => {
-      this.viewContainerRef.clear();
-      for (const record of records.value) {
-        const context = { $implicit: record };
-        this.viewContainerRef.createEmbeddedView(this.templateRef, context);
-      }
+    ).subscribe(search => {
+      this.httpSubscription?.unsubscribe();
+      this.httpSubscription = this.searchEntities(search.term).pipe(
+        wrapWith(
+          () => {
+            this.ngSelect.loading = true;
+            this.ngSelect.detectChanges();
+          },
+          () => {
+            this.ngSelect.loading = false;
+            this.ngSelect.detectChanges();
+          },
+        ),
+      ).subscribe(records => {
+        this.viewContainerRef.clear();
+        for (const record of records.value) {
+          const context = { $implicit: record };
+          this.viewContainerRef.createEmbeddedView(this.templateRef, context);
+        }
+      });
     });
     this.subscriptions.push(searchSub);
   }
