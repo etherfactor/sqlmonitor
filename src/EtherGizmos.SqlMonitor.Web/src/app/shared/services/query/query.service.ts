@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { signalStore } from '@ngrx/signals';
+import { DateTime } from 'luxon';
 import { Observable } from 'rxjs';
 import { Query } from '../../models/query';
 import { Guid } from '../../types/guid/guid';
@@ -30,25 +31,25 @@ export abstract class QueryService {
 export const QueryStore = signalStore(
   { providedIn: 'root' },
   withStateLoading(() => {
-    const $monitoredSystem = inject(QueryService);
+    const $query = inject(QueryService);
 
     return {
       states: {
         Active: {
           meta: {
             color: 'danger',
-            tooltip: 'Queries that failed to execute',
+            tooltip: 'Queries that failed to execute in the past 24 hours',
           },
-          load: $monitoredSystem.set
+          load: $query.set
             .filter(e =>
               o.and(
                 o.eq(
                   e.prop('isActive'),
                   o.bool(true),
                 ),
-                o.eq(
-                  o.int(1),
-                  o.int(0),
+                o.ge(
+                  e.prop('lastFailureAt'),
+                  o.dateTime(DateTime.now().minus({ days: 1 })),
                 )
               )
             )
@@ -59,14 +60,26 @@ export const QueryStore = signalStore(
         Healthy: {
           meta: {
             color: 'success',
-            tooltip: 'Queries that executed sucessfully',
+            tooltip: 'Queries with no recent failures',
           },
           load:
-            $monitoredSystem.set
+            $query.set
               .filter(e =>
-                o.ne(
-                  e.prop('isActive'),
-                  o.bool(true),
+                o.and(
+                  o.eq(
+                    e.prop('isActive'),
+                    o.bool(true),
+                  ),
+                  o.or(
+                    o.lt(
+                      e.prop('lastFailureAt'),
+                      o.dateTime(DateTime.now().minus({ days: 1 })),
+                    ),
+                    o.eq(
+                      e.prop('lastFailureAt'),
+                      o.null()
+                    )
+                  )
                 )
               )
               .top(0)
@@ -79,9 +92,9 @@ export const QueryStore = signalStore(
             tooltip: 'Disabled queries',
           },
           load:
-            $monitoredSystem.set
+            $query.set
               .filter(e =>
-                o.ne(
+                o.eq(
                   e.prop('isActive'),
                   o.bool(false),
                 )

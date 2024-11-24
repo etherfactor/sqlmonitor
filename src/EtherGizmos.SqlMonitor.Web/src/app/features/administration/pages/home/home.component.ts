@@ -9,6 +9,7 @@ import { MonitoredResourceService, MonitoredResourceStore } from '../../../../sh
 import { MonitoredSystemService, MonitoredSystemStore } from '../../../../shared/services/monitored-system/monitored-system.service';
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { UserStore } from '../../../../shared/services/user/user.service';
+import { QueryStore } from '../../../../shared/services/query/query.service';
 
 @Component({
   selector: 'app-home',
@@ -31,6 +32,7 @@ export class HomeComponent implements OnInit {
   private readonly $monitoredResourceStore = inject(MonitoredResourceStore);
   private readonly $monitoredSystem: MonitoredSystemService;
   private readonly $monitoredSystemStore = inject(MonitoredSystemStore);
+  private readonly $queryStore = inject(QueryStore);
   private readonly $userStore = inject(UserStore);
   private readonly $navbarMenu: NavbarMenuService;
 
@@ -45,6 +47,9 @@ export class HomeComponent implements OnInit {
 
   loadingSystems$$ = this.$monitoredSystemStore.isLoading;
   systemStatuses$$ = this.$monitoredSystemStore.states;
+
+  loadingQueries$$ = this.$queryStore.isLoading;
+  queryStatuses$$ = this.$queryStore.states;
 
   loadingUsers$$ = this.$userStore.isLoading;
   userStatuses$$ = this.$userStore.states;
@@ -72,6 +77,7 @@ export class HomeComponent implements OnInit {
     this.$monitoredEnvironmentStore.loadTotals();
     this.$monitoredResourceStore.loadTotals();
     this.$monitoredSystemStore.loadTotals();
+    this.$queryStore.loadTotals();
     this.$userStore.loadTotals();
   }
 

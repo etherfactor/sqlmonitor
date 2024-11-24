@@ -34,7 +34,7 @@ class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
-    return left === right;
+    return (left ?? null) === (right ?? null);
   }
 }
 
@@ -53,7 +53,7 @@ class NotEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
-    return left !== right;
+    return (left ?? null) !== (right ?? null);
   }
 }
 
