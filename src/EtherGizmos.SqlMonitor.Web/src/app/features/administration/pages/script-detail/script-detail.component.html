@@ -11,15 +11,15 @@
 <ng-container *ngIf="form" [formGroup]="form">
   <div class="row">
     <div class="col-12 mt-3">
-      <h4>Edit Query</h4>
-      <div class="text-muted">Edit details of one of the queries in your environment.</div>
+      <h4>Edit Script</h4>
+      <div class="text-muted">Edit details of one of the scripts in your environment.</div>
     </div>
   </div>
 
   <div class="box mt-3">
     <div class="box-title mt-2 d-flex align-items-center">
-      <span class="bi bi-filetype-sql fs-3"></span>
-      <h5 class="ms-2">Query Information</h5>
+      <span class="bi bi-file-earmark-code fs-3"></span>
+      <h5 class="ms-2">Script Information</h5>
     </div>
     <div class="row">
       <div class="col-md-6 mt-3">
@@ -58,7 +58,7 @@
 
   <div class="box mt-3">
     <div class="box-title mt-2 d-flex align-items-center">
-      <span class="bi bi-filetype-sql fs-3"></span>
+      <span class="bi bi-file-earmark-code fs-3"></span>
       <h5 class="ms-2">Metadata</h5>
     </div>
     <div class="row">
@@ -114,11 +114,10 @@
         <div class="row">
           <label for="newSqlType" class="col-sm-2 col-form-label">SQL Type</label>
           <div class="col-sm">
-            <ng-select id="newSqlType" [clearable]="false" [formControl]="newSqlTypeFormControl">
-              <ng-option value="MariaDb">MariaDB</ng-option>
-              <ng-option value="MySql">MySQL</ng-option>
-              <ng-option value="PostgreSql">PostgreSQL</ng-option>
-              <ng-option value="SqlServer">SQL Server</ng-option>
+            <ng-select id="newScriptInterpreterId" [clearable]="false" [formControl]="newScriptInterpreterIdFormControl">
+              <ng-option [value]="1">PowerShell 7</ng-option>
+              <ng-option [value]="2">PowerShell 5</ng-option>
+              <ng-option [value]="3">Bash</ng-option>
             </ng-select>
           </div>
           <div class="col-sm-auto">
@@ -135,9 +134,9 @@
       <div class="row">
         <div class="col-md-6 mt-3">
           <div class="row">
-            <label for="sqlType-{{i}}" class="col-sm-4 col-form-label">SQL Type</label>
+            <label for="scriptInterpreter-{{i}}" class="col-sm-4 col-form-label">Script Interpreter</label>
             <div class="col-sm-8">
-              <input id="sqlType-{{i}}" type="text" class="form-control-plaintext" [readonly]="true" [value]="getSqlTypeLabel(variant.controls.sqlType.value!)" />
+              <input id="scriptInterpreter-{{i}}" type="text" class="form-control-plaintext" [readonly]="true" [value]="getScriptInterpreterLabel(variant.controls.scriptInterpreterId.value!)" />
             </div>
           </div>
         </div>
@@ -150,9 +149,9 @@
       <div class="row">
         <div class="col-12 mt-3">
           <div class="row">
-            <label for="queryText-{{i}}" class="col-sm-2 col-form-label">Query Text</label>
+            <label for="scriptText-{{i}}" class="col-sm-2 col-form-label">Script Text</label>
             <div class="col-sm-10">
-              <ngx-monaco-editor [options]="{ theme: 'vs-dark', language: 'sql', readOnly: !isEditing }" formControlName="queryText" readonly="true"></ngx-monaco-editor>
+              <ngx-monaco-editor [options]="{ theme: 'vs-dark', language: 'powershell', readOnly: !isEditing }" formControlName="scriptText" readonly="true"></ngx-monaco-editor>
             </div>
           </div>
         </div>
@@ -172,8 +171,8 @@
         <input id="metricId-{{i}}" formControlName="metricId" class="form-control" readonly />
       </div>
       <div class="col-md-8">
-        <label for="valueColumn-{{i}}" class="col-form-label">Value Column</label>
-        <input id="valueColumn-{{i}}" formControlName="valueColumn" class="form-control" />
+        <label for="valueKey-{{i}}" class="col-form-label">Value Column</label>
+        <input id="valueKey-{{i}}" formControlName="valueKey" class="form-control" />
       </div>
     </div>
   </div>

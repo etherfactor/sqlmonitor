@@ -21,6 +21,7 @@ import { provideMonitoredSystemServiceMock } from './app/shared/services/monitor
 import { provideMetricDataServiceMock as provideOldMetricDataServiceMock } from './app/shared/services/old-metric-data/metric-data.service.mock';
 import { provideMetricServiceMock as provideOldMetricServiceMock } from './app/shared/services/old-metric/metric.service.mock';
 import { provideQueryServiceMock } from './app/shared/services/query/query.service.mock';
+import { provideScriptServiceMock } from './app/shared/services/script/script.service.mock';
 import { provideUserServiceMock } from './app/shared/services/user/user.service.mock';
 import { environment } from './environments/environment';
 
@@ -47,6 +48,7 @@ bootstrapApplication(
       provideMonitoredResourceServiceMock(),
       provideMonitoredSystemServiceMock(),
       provideQueryServiceMock(),
+      provideScriptServiceMock(),
       provideUserServiceMock(),
       provideOldMetricServiceMock(),
       provideOldMetricDataServiceMock(),

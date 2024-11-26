@@ -10,6 +10,7 @@ import { MonitoredSystemService, MonitoredSystemStore } from '../../../../shared
 import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../../../../shared/services/navbar-menu/navbar-menu.service';
 import { UserStore } from '../../../../shared/services/user/user.service';
 import { QueryStore } from '../../../../shared/services/query/query.service';
+import { ScriptStore } from '../../../../shared/services/script/script.service';
 
 @Component({
   selector: 'app-home',
@@ -33,6 +34,7 @@ export class HomeComponent implements OnInit {
   private readonly $monitoredSystem: MonitoredSystemService;
   private readonly $monitoredSystemStore = inject(MonitoredSystemStore);
   private readonly $queryStore = inject(QueryStore);
+  private readonly $scriptStore = inject(ScriptStore);
   private readonly $userStore = inject(UserStore);
   private readonly $navbarMenu: NavbarMenuService;
 
@@ -42,14 +44,17 @@ export class HomeComponent implements OnInit {
   loadingEnvironments$$ = this.$monitoredEnvironmentStore.isLoading;
   environmentStatuses$$ = this.$monitoredEnvironmentStore.states;
 
+  loadingQueries$$ = this.$queryStore.isLoading;
+  queryStatuses$$ = this.$queryStore.states;
+
   loadingResources$$ = this.$monitoredResourceStore.isLoading;
   resourceStatuses$$ = this.$monitoredResourceStore.states;
 
+  loadingScripts$$ = this.$scriptStore.isLoading;
+  scriptStatuses$$ = this.$scriptStore.states;
+
   loadingSystems$$ = this.$monitoredSystemStore.isLoading;
   systemStatuses$$ = this.$monitoredSystemStore.states;
-
-  loadingQueries$$ = this.$queryStore.isLoading;
-  queryStatuses$$ = this.$queryStore.states;
 
   loadingUsers$$ = this.$userStore.isLoading;
   userStatuses$$ = this.$userStore.states;
@@ -78,6 +83,7 @@ export class HomeComponent implements OnInit {
     this.$monitoredResourceStore.loadTotals();
     this.$monitoredSystemStore.loadTotals();
     this.$queryStore.loadTotals();
+    this.$scriptStore.loadTotals();
     this.$userStore.loadTotals();
   }
 
