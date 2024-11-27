@@ -35,7 +35,7 @@ export const ScriptStore = signalStore(
 
     return {
       states: {
-        Active: {
+        Failed: {
           meta: {
             color: 'danger',
             tooltip: 'Queries that failed to execute in the past 24 hours',
