@@ -26,7 +26,7 @@ export abstract class MetricService {
   abstract delete(id: number): Observable<void>;
 }
 
-export const MonitoredEnvironmentStore = signalStore(
+export const MetricStore = signalStore(
   { providedIn: 'root' },
   withStateLoading(() => {
     const $metric = inject(MetricService);

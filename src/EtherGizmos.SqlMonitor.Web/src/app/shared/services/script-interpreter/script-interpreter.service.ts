@@ -26,7 +26,7 @@ export abstract class ScriptInterpreterService {
   abstract delete(id: number): Observable<void>;
 }
 
-export const ScriptStore = signalStore(
+export const ScriptInterpreterStore = signalStore(
   { providedIn: 'root' },
   withStateLoading(() => {
     const $query = inject(ScriptInterpreterService);

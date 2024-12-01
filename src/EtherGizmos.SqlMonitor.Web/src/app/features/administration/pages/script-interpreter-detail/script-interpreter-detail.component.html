@@ -1,0 +1,127 @@
+<ng-container *ngIf="isLoading">
+  <div style="position: fixed; top: 0; left: 0; height: 100%; width: 100%; background-color: color-mix(in srgb, var(--bs-body-bg) 50%, transparent); z-index: 100;">
+  </div>
+  <div style="position: fixed; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%); z-index: 100;">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="form" [formGroup]="form">
+  <div class="row">
+    <div class="col-12 mt-3">
+      <h4>Edit Script Interpreter</h4>
+      <div class="text-muted">Edit the configuration of a scripting language.</div>
+    </div>
+  </div>
+
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-bar-chart fs-3"></span>
+      <h5 class="ms-2">Script Interpreter Information</h5>
+    </div>
+    <div class="row">
+      <div class="col-12 mt-3">
+        <div class="row">
+          <label for="interpreterName" class="col-sm-2 col-form-label">Name</label>
+          <div class="col-sm-10">
+            <input id="interpreterName" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="name" />
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <div class="row">
+          <label for="interpreterDescription" class="col-sm-2 col-form-label">Description</label>
+          <div class="col-sm-10">
+            <textarea id="interpreterDescription" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" rows="4" formControlName="description"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 mt-3">
+        <div class="row">
+          <label for="interpreterCommand" class="col-sm-4 col-form-label">Command</label>
+          <div class="col-sm-8">
+            <input id="interpreterCommand" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="command" />
+          </div>
+        </div>
+      </div>
+      <div class="col-6 mt-3">
+        <div class="row">
+          <label for="interpreterArguments" class="col-sm-4 col-form-label">Arguments</label>
+          <div class="col-sm-8">
+            <input id="interpreterArguments" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="arguments" />
+          </div>
+        </div>
+      </div>
+      <div class="col-6 mt-3">
+        <div class="row">
+          <label for="interpreterExtension" class="col-sm-4 col-form-label">File extension</label>
+          <div class="col-sm-8">
+            <input id="interpreterExtension" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="extension" />
+          </div>
+        </div>
+      </div>
+      <div class="col-6 mt-3">
+        <div class="row">
+          <label for="interpreterLanguage" class="col-sm-4 col-form-label">
+            <a href="https://microsoft.github.io/monaco-editor/" target="_blank">
+              Monaco language
+              <span class="bi bi-box-arrow-up-right"></span>
+            </a>
+          </label>
+          <div class="col-sm-8">
+            <input id="interpreterLanguage" type="text" [class]="isEditing ? 'form-control' : 'form-control-plaintext'" [readonly]="!isEditing" formControlName="monacoLanguage" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box mt-3">
+    <div class="box-title mt-2 d-flex align-items-center">
+      <span class="bi bi-bar-chart fs-3"></span>
+      <h5 class="ms-2">Metadata</h5>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="row mt-3">
+          <label for="metricCreatedAt" class="col-sm-4 col-form-label">Created at</label>
+          <div class="col-sm-8">
+            <input-luxon-datetime id="metricCreatedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="createdAt"></input-luxon-datetime>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <label for="metricCreatedBy" class="col-sm-4 col-form-label">Created by</label>
+          <div class="col-sm-8">
+            <input id="metricCreatedBy" type="text" readonly class="form-control-plaintext" formControlName="createdByUserId" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="row mt-3">
+          <label for="metricModifiedAt" class="col-sm-4 col-form-label">Modified at</label>
+          <div class="col-sm-8">
+            <ng-container *ngIf="form.controls.modifiedAt.value; else noModifiedAt">
+              <input-luxon-datetime id="metricModifiedAt" class="col-sm-4 col-form-label" [readonly]="true" formControlName="modifiedAt"></input-luxon-datetime>
+            </ng-container>
+            <ng-template #noModifiedAt>
+              <input id="metricModifiedAt" type="text" readonly class="form-control-plaintext" value="Never" />
+            </ng-template>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <label for="metricModifiedBy" class="col-sm-4 col-form-label">Modified by</label>
+          <div class="col-sm-8">
+            <ng-container *ngIf="form.controls.modifiedByUserId.value; else noModifiedBy">
+              <input id="metricModifiedBy" type="text" readonly class="form-control-plaintext" formControlName="modifiedByUserId" />
+            </ng-container>
+            <ng-template #noModifiedBy>
+              <input id="metricModifiedBy" type="text" readonly class="form-control-plaintext" value="Never" />
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

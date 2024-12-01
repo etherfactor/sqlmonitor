@@ -12,6 +12,8 @@ export const ADMINISTRATION_ROUTES: Routes = [
   { path: 'queries', loadChildren: () => import('./query.routes').then(m => m.QUERY_ROUTES) },
   { path: 'script', loadChildren: () => import('./script.routes').then(m => m.SCRIPT_ROUTES) },
   { path: 'scripts', loadChildren: () => import('./script.routes').then(m => m.SCRIPT_ROUTES) },
+  { path: 'script-interpreter', loadChildren: () => import('./script-interpreter.routes').then(m => m.SCRIPT_INTERPRETER_ROUTES) },
+  { path: 'script-interpreters', loadChildren: () => import('./script-interpreter.routes').then(m => m.SCRIPT_INTERPRETER_ROUTES) },
   { path: 'system', loadChildren: () => import('./monitored-system.routes').then(m => m.MONITORED_SYSTEM_ROUTES) },
   { path: 'systems', loadChildren: () => import('./monitored-system.routes').then(m => m.MONITORED_SYSTEM_ROUTES) },
   { path: 'resource', loadChildren: () => import('./monitored-resource.routes').then(m => m.MONITORED_RESOURCE_ROUTES) },

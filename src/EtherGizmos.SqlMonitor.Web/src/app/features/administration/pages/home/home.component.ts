@@ -11,6 +11,8 @@ import { NavbarMenuAction, NavbarMenuBreadcrumb, NavbarMenuService } from '../..
 import { UserStore } from '../../../../shared/services/user/user.service';
 import { QueryStore } from '../../../../shared/services/query/query.service';
 import { ScriptStore } from '../../../../shared/services/script/script.service';
+import { MetricStore } from '../../../../shared/services/metric/metric.service';
+import { ScriptInterpreterStore } from '../../../../shared/services/script-interpreter/script-interpreter.service';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +29,7 @@ export class HomeComponent implements OnInit {
 
   private readonly $body: BodyService;
   private readonly $groupStore = inject(GroupStore);
+  private readonly $metricStore = inject(MetricStore);
   private readonly $monitoredEnvironment: MonitoredEnvironmentService;
   private readonly $monitoredEnvironmentStore = inject(MonitoredEnvironmentStore);
   private readonly $monitoredResource: MonitoredResourceService;
@@ -35,11 +38,15 @@ export class HomeComponent implements OnInit {
   private readonly $monitoredSystemStore = inject(MonitoredSystemStore);
   private readonly $queryStore = inject(QueryStore);
   private readonly $scriptStore = inject(ScriptStore);
+  private readonly $scriptInterpreterStore = inject(ScriptInterpreterStore);
   private readonly $userStore = inject(UserStore);
   private readonly $navbarMenu: NavbarMenuService;
 
   loadingGroups$$ = this.$groupStore.isLoading;
   groupStatuses$$ = this.$groupStore.states;
+
+  loadingMetrics$$ = this.$metricStore.isLoading;
+  metricStatuses$$ = this.$metricStore.states;
 
   loadingEnvironments$$ = this.$monitoredEnvironmentStore.isLoading;
   environmentStatuses$$ = this.$monitoredEnvironmentStore.states;
@@ -52,6 +59,9 @@ export class HomeComponent implements OnInit {
 
   loadingScripts$$ = this.$scriptStore.isLoading;
   scriptStatuses$$ = this.$scriptStore.states;
+
+  loadingScriptInterpreters$$ = this.$scriptInterpreterStore.isLoading;
+  scriptInterpreterStatuses$$ = this.$scriptInterpreterStore.states;
 
   loadingSystems$$ = this.$monitoredSystemStore.isLoading;
   systemStatuses$$ = this.$monitoredSystemStore.states;
@@ -79,11 +89,13 @@ export class HomeComponent implements OnInit {
     this.$navbarMenu.setBreadcrumbs(this.breadcrumbs);
 
     this.$groupStore.loadTotals();
+    this.$metricStore.loadTotals();
     this.$monitoredEnvironmentStore.loadTotals();
     this.$monitoredResourceStore.loadTotals();
     this.$monitoredSystemStore.loadTotals();
     this.$queryStore.loadTotals();
     this.$scriptStore.loadTotals();
+    this.$scriptInterpreterStore.loadTotals();
     this.$userStore.loadTotals();
   }
 
